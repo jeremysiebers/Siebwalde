@@ -55,6 +55,7 @@ namespace SiebwaldeApp.Core.Tests
 
             var regs = new ushort[TrackAmplifierRegisters.Count];
             regs[TrackAmplifierRegisters.Identity] = SimulatedTrackAmplifier.Phase1Identity;
+            regs[TrackAmplifierRegisters.FwVersionPatchProtocol] = 0x0001; // protocol 0x01
             Parse(client, TrackSlaveInfoFrame.Encode(1, 1, regs));
 
             Assert.Null(item.Phase1Failure);
@@ -71,6 +72,158 @@ namespace SiebwaldeApp.Core.Tests
             Parse(client, TrackSlaveInfoFrame.Encode(51, 1, regs));
 
             Assert.Null(variables.trackAmpItems[51].Phase1Failure);
+        }
+
+        // ---------------------------------------------------------------------
+        // Protocol version gate (HR22, secondary to HR7 identity)
+        // ---------------------------------------------------------------------
+
+        [Fact]
+        public async Task ProtocolVersion01_Compatible_AllowsConfigDownload()
+        {
+            var variables = new TrackApplicationVariables();
+            var transport = new DeterministicTrackTransport(new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1 }));
+            var client = new TrackCommClientAsync(transport, variables);
+            await client.StartAsync(false);
+
+            await client.SendAsync(new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT, Array.Empty<byte>()));
+            await WaitUntilAsync(() => variables.trackAmpItems[1].ProtocolReadbackObserved, TimeSpan.FromSeconds(2));
+
+            var item = variables.trackAmpItems[1];
+            Assert.Equal(0x01, TrackAmplifierRegisters.FwProtocolVersion(
+                item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]));
+            Assert.True(AmplifierPhase1Safety.Compatible(item));
+            Assert.Null(AmplifierPhase1Safety.IncompatibilityReason(item));
+
+            var downloader = new AmplifierConfigurationDownloader(client);
+            var ok = await downloader.DownloadAsync(item, new AmplifierConfiguration(), CancellationToken.None);
+            Assert.True(ok);
+            Assert.True(item.ConfigurationVerified);
+            Assert.Null(item.Phase1Failure);
+
+            await client.DisposeAsync();
+        }
+
+        [Fact]
+        public async Task ProtocolVersion02_Incompatible_BlocksConfigDownload()
+        {
+            var config = new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1 },
+                protocolVersionOverrides: new Dictionary<byte, ushort> { { 1, 0x02 } });
+            var variables = new TrackApplicationVariables();
+            var transport = new DeterministicTrackTransport(config);
+            var client = new TrackCommClientAsync(transport, variables);
+            await client.StartAsync(false);
+
+            await client.SendAsync(new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT, Array.Empty<byte>()));
+            await WaitUntilAsync(() => variables.trackAmpItems[1].ProtocolReadbackObserved, TimeSpan.FromSeconds(2));
+
+            var item = variables.trackAmpItems[1];
+            // HR7 identity is Phase-1 compatible, but HR22 protocol is not.
+            Assert.True(TrackAmplifierRegisters.HasCompatibleIdentityFields(
+                item.HoldingReg[TrackAmplifierRegisters.Identity]));
+            Assert.False(TrackAmplifierRegisters.HasCompatibleProtocolVersion(
+                item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]));
+            Assert.False(AmplifierPhase1Safety.Compatible(item));
+            Assert.Equal(AmplifierPhase1Safety.IncompatibleProtocolVersion,
+                AmplifierPhase1Safety.IncompatibilityReason(item));
+            Assert.Equal(AmplifierPhase1Safety.IncompatibleProtocolVersion, item.Phase1Failure);
+
+            var downloader = new AmplifierConfigurationDownloader(client);
+            var ok = await downloader.DownloadAsync(item, new AmplifierConfiguration(), CancellationToken.None);
+            Assert.False(ok);
+            Assert.False(item.ConfigurationVerified);
+            Assert.Equal(AmplifierPhase1Safety.IncompatibleProtocolVersion, item.Phase1Failure);
+
+            await client.DisposeAsync();
+        }
+
+        [Fact]
+        public async Task ProtocolVersion00_Absent_IsUnknownIncompatible_Blocked()
+        {
+            var config = new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1 },
+                protocolVersionOverrides: new Dictionary<byte, ushort> { { 1, 0x00 } });
+            var variables = new TrackApplicationVariables();
+            var transport = new DeterministicTrackTransport(config);
+            var client = new TrackCommClientAsync(transport, variables);
+            await client.StartAsync(false);
+
+            await client.SendAsync(new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT, Array.Empty<byte>()));
+            await WaitUntilAsync(() => variables.trackAmpItems[1].ProtocolReadbackObserved, TimeSpan.FromSeconds(2));
+
+            var item = variables.trackAmpItems[1];
+            Assert.True(TrackAmplifierRegisters.HasCompatibleIdentityFields(
+                item.HoldingReg[TrackAmplifierRegisters.Identity]));
+            Assert.Equal(0x00, TrackAmplifierRegisters.FwProtocolVersion(
+                item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]));
+            // An absent/exception/legacy HR22 (0x00) is UNKNOWN/INCOMPATIBLE, never "compatible by default".
+            Assert.False(TrackAmplifierRegisters.HasCompatibleProtocolVersion(
+                item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]));
+            Assert.False(AmplifierPhase1Safety.Compatible(item));
+            Assert.Equal(AmplifierPhase1Safety.IncompatibleProtocolVersion,
+                AmplifierPhase1Safety.IncompatibilityReason(item));
+            Assert.Equal(AmplifierPhase1Safety.IncompatibleProtocolVersion, item.Phase1Failure);
+
+            var downloader = new AmplifierConfigurationDownloader(client);
+            var ok = await downloader.DownloadAsync(item, new AmplifierConfiguration(), CancellationToken.None);
+            Assert.False(ok);
+            Assert.False(item.ConfigurationVerified);
+
+            await client.DisposeAsync();
+        }
+
+        [Fact]
+        public void LegacyIdentity_BlockedAsIncompatibleFirmware_EvenWhenProtocolValid()
+        {
+            var variables = new TrackApplicationVariables();
+            var client = new TrackCommClientAsync(new UnusedTransport(), variables);
+
+            // A legacy 12-register device exposes an unstable counter on HR7 (the shape check
+            // rejects it). HR22 is set to a would-be-valid protocol to prove the protocol check is
+            // strictly secondary: a legacy identity is never misreported as a protocol problem.
+            var regs = new ushort[TrackAmplifierRegisters.Count];
+            regs[TrackAmplifierRegisters.Identity] = 0x1234; // counter value, not a compatible identity
+            regs[TrackAmplifierRegisters.FwVersionPatchProtocol] = 0x0001;
+            Parse(client, TrackSlaveInfoFrame.Encode(1, 1, regs));
+
+            var item = variables.trackAmpItems[1];
+            Assert.Equal(AmplifierPhase1Safety.IncompatibleFirmware, item.Phase1Failure);
+            Assert.Equal(AmplifierPhase1Safety.IncompatibleFirmware, AmplifierPhase1Safety.IncompatibilityReason(item));
+            Assert.NotEqual(AmplifierPhase1Safety.IncompatibleProtocolVersion, item.Phase1Failure);
+            Assert.False(item.ConfigurationVerified);
+        }
+
+        [Fact]
+        public async Task ReadOnlyVersionReporting_StillAvailable_WhenControlBlocked()
+        {
+            var config = new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1 },
+                protocolVersionOverrides: new Dictionary<byte, ushort> { { 1, 0x02 } });
+            var variables = new TrackApplicationVariables();
+            var transport = new DeterministicTrackTransport(config);
+            var client = new TrackCommClientAsync(transport, variables);
+            await client.StartAsync(false);
+
+            await client.SendAsync(new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT, Array.Empty<byte>()));
+            await WaitUntilAsync(() => variables.trackAmpItems[1].ProtocolReadbackObserved, TimeSpan.FromSeconds(2));
+
+            var item = variables.trackAmpItems[1];
+            Assert.False(AmplifierPhase1Safety.Compatible(item)); // write/control authority denied
+
+            // Version/protocol reporting (HR21/HR22) remains readable.
+            Assert.Equal(1, TrackAmplifierRegisters.FwMajor(item.HoldingReg[TrackAmplifierRegisters.FwVersionMajorMinor]));
+            Assert.Equal(0, TrackAmplifierRegisters.FwMinor(item.HoldingReg[TrackAmplifierRegisters.FwVersionMajorMinor]));
+            Assert.Equal(0x02, TrackAmplifierRegisters.FwProtocolVersion(
+                item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]));
+
+            // The read-only PIC32 controller version (113) round-trip is unaffected (no gating).
+            await client.SendAsync(new SendMessage(TrackCommand.GET_CONTROLLER_VERSION, Array.Empty<byte>()));
+            await WaitUntilAsync(() => variables.trackControllerCommands.ControllerVersion != null, TimeSpan.FromSeconds(2));
+            Assert.Equal(0x01, variables.trackControllerCommands.ControllerVersion!.Value.ProtocolVersion);
+
+            await client.DisposeAsync();
         }
 
         // ---------------------------------------------------------------------
@@ -497,6 +650,7 @@ namespace SiebwaldeApp.Core.Tests
             regs[TrackAmplifierRegisters.Identity] = identity;
             regs[TrackAmplifierRegisters.AppliedPwm] = applied;
             regs[TrackAmplifierRegisters.PwmCommand] = command;
+            regs[TrackAmplifierRegisters.FwVersionPatchProtocol] = 0x0001; // protocol 0x01
             return new TrackAmplifierItem
             {
                 SlaveNumber = slave,

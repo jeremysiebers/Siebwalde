@@ -54,14 +54,16 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         public byte SlaveNumber { get; }
 
         public SimulatedTrackAmplifier(byte slaveNumber, ushort identity = Phase1Identity,
-            ushort firmwareChecksum = TrackSimulatorConfig.DefaultFirmwareChecksum)
+            ushort firmwareChecksum = TrackSimulatorConfig.DefaultFirmwareChecksum,
+            ushort protocolVersion = TrackAmplifierRegisters.Phase1ProtocolVersion)
         {
             SlaveNumber = slaveNumber;
             _registers[TrackAmplifierRegisters.Identity] = identity;
             _registers[TrackAmplifierRegisters.SwChecksum] = firmwareChecksum;
-            // Firmware semantic version (mirrors PIC18 AmpAdapter_Init): 1.0.0, protocol 0x01.
+            // Firmware semantic version (mirrors PIC18 AmpAdapter_Init): 1.0.0, protocol from the
+            // injected PROTOCOL_VERSION (HR22 = patch<<8 | protocolVersion; patch stays 0).
             _registers[TrackAmplifierRegisters.FwVersionMajorMinor] = 0x0100;
-            _registers[TrackAmplifierRegisters.FwVersionPatchProtocol] = 0x0001;
+            _registers[TrackAmplifierRegisters.FwVersionPatchProtocol] = (ushort)(protocolVersion & 0xFF);
             _state = 0; // NOT_INITIALIZED
             RefreshState(); // seeds HR8 (ID_SET) + HR12/13/14 (neutral)
         }

@@ -49,6 +49,18 @@ namespace SiebwaldeApp.Core
         /// <summary>Wire PROTOCOL_VERSION from the HR22 (patch&lt;&lt;8 | protocolVersion) register.</summary>
         public static int FwProtocolVersion(ushort fwVersionPatchProtocol) => fwVersionPatchProtocol & 0xFF;
 
+        /// <summary>Frozen Phase-1 wire PROTOCOL_VERSION. The only value a Phase-1 host accepts.</summary>
+        public const ushort Phase1ProtocolVersion = 0x01;
+
+        /// <summary>
+        /// True when HR22 reports the frozen Phase-1 PROTOCOL_VERSION. This is a SECONDARY
+        /// compatibility check, meaningful only after the HR7 identity check has passed: a legacy
+        /// 12-register device never reaches HR22 (it already fails HR7), and an absent/exception
+        /// HR22 read (0x00) is UNKNOWN/INCOMPATIBLE, never "compatible by default".
+        /// </summary>
+        public static bool HasCompatibleProtocolVersion(ushort fwVersionPatchProtocol)
+            => FwProtocolVersion(fwVersionPatchProtocol) == Phase1ProtocolVersion;
+
         /// <summary>True when the identity reports the applied-readback capability (HR7 bit 12).</summary>
         public static bool HasAppliedReadbackCapability(ushort identity)
             => (identity & AppliedReadbackCapability) != 0;
