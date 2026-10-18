@@ -14,7 +14,9 @@ namespace FlashOneAmplifier
     /// <see cref="SendNextFwDataPacket"/>.
     ///
     /// It never sends EXEC_FW_STATE_FLASH_ALL_SLAVES (122). The single amplifier address is
-    /// carried as the data byte of EXEC_FW_STATE_FLASH_ONE_SLAVE (131).
+    /// carried as the data byte of EXEC_FW_STATE_FLASH_ONE_SLAVE (131) or, with
+    /// <c>--bootloader-only</c>, EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY (132), which
+    /// recovers an amplifier already stuck in 8-bit bootloader mode (no HR11=0 entry write).
     /// </summary>
     internal static class Program
     {
@@ -26,9 +28,10 @@ namespace FlashOneAmplifier
         {
             if (!TryParseArgs(args, out var options, out var error))
             {
-                Console.Error.WriteLine($"Error: {error}");
+                if (error != "help")
+                    Console.Error.WriteLine($"Error: {error}");
                 PrintUsage();
-                return 2;
+                return error == "help" ? 0 : 2;
             }
 
             // 1. Offline validation (SHA-256 + embedded checksum) BEFORE any write is attempted.
@@ -55,10 +58,15 @@ namespace FlashOneAmplifier
             {
                 var sendNextFwDataPacket = new SendNextFwDataPacket(commClient, artifact.Helpers);
                 var command = new FlashOneAmplifierCommand(
-                    commClient, variables, artifact.Helpers, sendNextFwDataPacket);
+                    commClient, variables, artifact.Helpers, sendNextFwDataPacket,
+                    onProgress: DescribeStep);
 
-                Console.WriteLine($"Flashing amplifier {options.Amplifier} via EXEC_FW_STATE_FLASH_ONE_SLAVE (131).");
-                var result = await command.ExecuteAsync((byte)options.Amplifier).ConfigureAwait(false);
+                var mode = options.BootloaderOnly ? "bootloader-only (132)" : "standard (131)";
+                Console.WriteLine($"Flashing amplifier {options.Amplifier} via {mode}.");
+
+                var result = options.BootloaderOnly
+                    ? await command.ExecuteBootloaderOnlyAsync((byte)options.Amplifier).ConfigureAwait(false)
+                    : await command.ExecuteAsync((byte)options.Amplifier).ConfigureAwait(false);
 
                 if (result.Success)
                 {
@@ -66,6 +74,12 @@ namespace FlashOneAmplifier
                     return 0;
                 }
 
+                if (result.FailedSubStep is int step)
+                {
+                    Console.Error.WriteLine(
+                        $"Flash FAILED for amplifier {result.TargetAmplifier} at sub-step {step} " +
+                        $"({FlashSequencerSubStep.Describe(step)}).");
+                }
                 Console.Error.WriteLine($"Flash FAILED for amplifier {result.TargetAmplifier}: {result.Error}");
                 return 1;
             }
@@ -73,6 +87,13 @@ namespace FlashOneAmplifier
             {
                 await commClient.StopAsync().ConfigureAwait(false);
             }
+        }
+
+        private static void DescribeStep(ReceivedMessage m)
+        {
+            var state = m.Taskstate == TaskStates.DONE ? "DONE" :
+                        m.Taskstate == TaskStates.ERROR ? "ERROR" : $"state={m.Taskstate}";
+            Console.WriteLine($"[PIC32] step sender={m.TaskId} cmd={m.Taskcommand} {state} msg={m.Taskmessage}");
         }
 
         private static bool TryParseArgs(string[] args, out CliOptions options, out string error)
@@ -109,6 +130,10 @@ namespace FlashOneAmplifier
                             return false;
                         }
                         options.Sha256Hex = sha256;
+                        break;
+
+                    case "--bootloader-only":
+                        options.BootloaderOnly = true;
                         break;
 
                     case "--ip":
@@ -184,7 +209,7 @@ namespace FlashOneAmplifier
         {
             Console.Error.WriteLine(
                 "Usage: FlashOneAmplifier --amp <1..50> --hex <path> --sha256 <expected> " +
-                "[--ip <ip>] [--send-port <port>] [--recv-port <port>]");
+                "[--bootloader-only] [--ip <ip>] [--send-port <port>] [--recv-port <port>]");
             Console.Error.WriteLine($"Defaults: --ip {DefaultIpAddress} --send-port {DefaultSendPort} --recv-port {DefaultReceivePort}");
         }
 
@@ -193,6 +218,7 @@ namespace FlashOneAmplifier
             public int Amplifier { get; set; }
             public string HexPath { get; set; } = string.Empty;
             public string Sha256Hex { get; set; } = string.Empty;
+            public bool BootloaderOnly { get; set; }
             public string IpAddress { get; set; } = DefaultIpAddress;
             public int SendPort { get; set; } = DefaultSendPort;
             public int ReceivePort { get; set; } = DefaultReceivePort;

@@ -139,6 +139,9 @@
         public const byte EXIT_SLAVExFWxHANDLER = 130;
         // Single-target flash: FlashSequencer(data[0]) for exactly one amplifier.
         public const byte EXEC_FW_STATE_FLASH_ONE_SLAVE = 131;
+        // Bootloader-only single-target recovery: select one amplifier via the backplane
+        // and run the 8-bit bootloader sequence WITHOUT the HR11=0 entry write.
+        public const byte EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY = 132;
 
         /* FWFILEDOWNLOAD COMMANDS */
         public const byte FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY = 140;
@@ -219,6 +222,44 @@
         public const byte SWITCH_OUT_OF_BOUNDS = 106;
         public const byte SLAVE_ID_OUT_OF_BOUNDS = 107;
         public const byte MESSAGE_BUFFER_FULL = 108;
+        // On single-target flash ERROR, the PIC32 reports FLASH_SEQUENCER_SUBSTEP_BASE + the
+        // failing FlashSequencer case (2..15). See FlashSequencerSubStep.
+        public const byte FLASH_SEQUENCER_SUBSTEP_BASE = 110;
+    }
+
+    /// <summary>
+    /// Decodes the PIC32 single-target flash failure sub-step. On ERROR the firmware reports
+    /// taskmessage = FLASH_SEQUENCER_SUBSTEP_BASE + the failing FlashSequencer case number
+    /// (2..15). See TrackController5/firmware/src/slavefwhandler.c::FlashSequencer.
+    /// </summary>
+    public static class FlashSequencerSubStep
+    {
+        public const byte Base = 110;
+
+        public static bool TryDecode(ushort taskMessage, out int step)
+        {
+            step = (int)taskMessage - Base;
+            return step >= 2 && step <= 15;
+        }
+
+        public static string Describe(int step) => step switch
+        {
+            2 => "Slaves_Disable_Off (start)",
+            3 => "wait 10 ms",
+            4 => "select amplifier via backplane",
+            5 => "verify backplane select",
+            6 => "write HR11=0 (bootloader entry)",
+            7 => "verify bootloader entry",
+            8 => "deselect backplane",
+            9 => "verify backplane deselect",
+            10 => "GET_BOOTLOADER_VERSION",
+            11 => "ERASE_FLASH",
+            12 => "WRITE_FLASH",
+            13 => "WRITE_CONFIG",
+            14 => "CHECK_CHECKSUM",
+            15 => "RESET_SLAVE",
+            _ => $"unknown sub-step {step}",
+        };
     }
 
     public class EnumClientCommands

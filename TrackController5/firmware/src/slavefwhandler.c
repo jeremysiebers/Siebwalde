@@ -23,6 +23,15 @@ static uint32_t     DelayCount1     = 0;
 static uint32_t     DelayCount2     = 0;
 static uint32_t     threshold       = 0;
 
+/* Command 132 (bootloader-only recovery) skips the HR11=0 bootloader-entry write
+ * (cases 6..7) because the amplifier is ALREADY in 8-bit bootloader mode. The flag
+ * is set only around a FlashSequencer(slave) invocation from the 132 handler and is
+ * cleared as soon as that invocation returns DONE/ERROR. */
+static bool     FlashSequencerBootloaderOnly = false;
+/* Failing iFlashSequencer case (2..15) captured just before FlashSequencer returns
+ * ERROR; the 131/132 handler encodes it as FLASH_SEQUENCER_SUBSTEP_BASE + step. */
+static uint8_t  FlashSequencerFailStep       = 0;
+
 /*#--------------------------------------------------------------------------#*/
 /*  Description: UART2_Config_9bit_Modbus(void) & UART2_Config_8bit_Bootloader(void)
  *
@@ -294,11 +303,49 @@ bool SLAVExFWxHANDLER(){
                                         FWHANDLER,                              // TASK_ID
                                         EXEC_FW_STATE_FLASH_ONE_SLAVE,          // TASK_COMMAND
                                         ERROR,                                  // TASK_STATE
-                                        NONE);                                  // TASK_MESSAGE
+                                        (TASK_MESSAGES)(FLASH_SEQUENCER_SUBSTEP_BASE + FlashSequencerFailStep));
                                     LOG_Push("Fw handler\t: EXEC_FW_STATE_FLASH_ONE_SLAVE ERROR.");
                                     break;
                         case BUSY : break;
                         default   : LOG_Push("Fw handler\t: EXEC_FW_STATE_FLASH_ONE_SLAVE default case not allowed.");
+                    }
+                    break;
+                }
+                
+                case EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY:
+                {
+                    /* Bootloader-only recovery: the target amplifier is already in
+                     * 8-bit bootloader mode (application invalid/erased), so the
+                     * HR11=0 entry write of FlashSequencer is skipped. The slave id
+                     * is carried in data[0] and passed straight to FlashSequencer. */
+                    FlashSequencerBootloaderOnly = true;
+                    result = FlashSequencer(fwData.data);
+                    switch (result){
+                        case DONE:  fwData.state = FW_STATE_INIT;
+                                    fwData.SlaveBootloaderHandlingActive = false;
+                                    FlashSequencerBootloaderOnly = false;
+                                    UART2_Config_9bit_Modbus();
+                                    CREATExTASKxSTATUSxMESSAGE(
+                                        FWHANDLER,                                          // TASK_ID
+                                        EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY,      // TASK_COMMAND
+                                        DONE,                                               // TASK_STATE
+                                        NONE);                                              // TASK_MESSAGE
+                                    LOG_Push("Fw handler\t: EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY DONE.");
+                                    return_val = true;
+                                    break;
+                        case ERROR: fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                                    fwData.SlaveBootloaderHandlingActive = false;
+                                    FlashSequencerBootloaderOnly = false;
+                                    UART2_Config_9bit_Modbus();
+                                    CREATExTASKxSTATUSxMESSAGE(
+                                        FWHANDLER,                                          // TASK_ID
+                                        EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY,      // TASK_COMMAND
+                                        ERROR,                                              // TASK_STATE
+                                        (TASK_MESSAGES)(FLASH_SEQUENCER_SUBSTEP_BASE + FlashSequencerFailStep));
+                                    LOG_Push("Fw handler\t: EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY ERROR.");
+                                    break;
+                        case BUSY : break;
+                        default   : LOG_Push("Fw handler\t: EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY default case not allowed.");
                     }
                     break;
                 }
@@ -945,12 +992,16 @@ uint32_t FlashSequencer(uint8_t Slave){
         case 5:
             switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, false)){               // --> do not overwrite otherwise diagnostics are gone
                 case SLAVEOK:  
-                    GoToCase        = 6;//iFlashSequencer + 1;
+                    /* Bootloader-only recovery (132): the amplifier is already in
+                     * 8-bit bootloader mode, so jump straight to the backplane
+                     * deselect (case 8) and skip the HR11=0 entry write (6..7). */
+                    GoToCase        = (FlashSequencerBootloaderOnly ? 8 : 6);
                     iFlashSequencer = WAIT;
                     DelayCount1 = READxCORExTIMER();
                     break;                    
                 case SLAVENOK: 
                     LOG_Push("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 5.");
+                    FlashSequencerFailStep = 5;
                     iFlashSequencer = 2;
                     return_val = ERROR;
                     break;
@@ -984,6 +1035,7 @@ uint32_t FlashSequencer(uint8_t Slave){
                     break;                    
                 case SLAVENOK: 
                     LOG_Push("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 7.");
+                    FlashSequencerFailStep = 7;
                     iFlashSequencer = 2;
                     return_val = ERROR;
                     break;
@@ -1021,6 +1073,7 @@ uint32_t FlashSequencer(uint8_t Slave){
                     break;                    
                 case SLAVENOK:
                     LOG_Push("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 9.");
+                    FlashSequencerFailStep = 9;
                     return_val = ERROR;
                     iFlashSequencer = 2;
                     break;
@@ -1037,6 +1090,7 @@ uint32_t FlashSequencer(uint8_t Slave){
                             iFlashSequencer++;
                             break;
                 case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_GET_BOOTLOADER_VERSION ERROR.");
+                            FlashSequencerFailStep = 10;
                             iFlashSequencer = 0;
                             return_val      = ERROR;
                             break;
@@ -1054,6 +1108,7 @@ uint32_t FlashSequencer(uint8_t Slave){
                             iFlashSequencer++;
                             break;
                 case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_ERASE_FLASH ERROR.");
+                            FlashSequencerFailStep = 11;
                             iFlashSequencer = 0;
                             return_val      = ERROR;
                             break;
@@ -1071,6 +1126,7 @@ uint32_t FlashSequencer(uint8_t Slave){
                             iFlashSequencer++;
                             break;
                 case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_FLASH ERROR.");
+                            FlashSequencerFailStep = 12;
                             iFlashSequencer = 0;
                             return_val      = ERROR;
                             break;
@@ -1088,6 +1144,7 @@ uint32_t FlashSequencer(uint8_t Slave){
                             iFlashSequencer++;
                             break;
                 case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_CONFIG ERROR.");
+                            FlashSequencerFailStep = 13;
                             iFlashSequencer = 0;
                             return_val      = ERROR;
                             break;
@@ -1105,6 +1162,7 @@ uint32_t FlashSequencer(uint8_t Slave){
                             iFlashSequencer++;
                             break;
                 case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM ERROR.");
+                            FlashSequencerFailStep = 14;
                             iFlashSequencer = 0;
                             return_val      = ERROR;
                             break;
@@ -1126,6 +1184,7 @@ uint32_t FlashSequencer(uint8_t Slave){
                             return_val      = DONE;
                             break;
                 case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE ERROR.");
+                            FlashSequencerFailStep = 15;
                             iFlashSequencer = 2;
                             fwData.SlaveBootloaderHandlingActive = false;       // enable modbus again
                             UART2_Config_9bit_Modbus();
