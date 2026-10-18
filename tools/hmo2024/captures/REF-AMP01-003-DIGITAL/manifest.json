@@ -1,0 +1,25 @@
+{
+  "capture_id": "REF-AMP01-003-DIGITAL",
+  "scope": "HAMEG,HMO2024,014458275,04.531",
+  "time_utc": "2026-10-17T11:26:05.432212+00:00",
+  "acq_state_after": "COMP",
+  "artifacts": {
+    "ch1.header.raw": {
+      "bytes": 30,
+      "sha256": "c234109de62107ef9c5688096a280482837f9036e7fb01dd535cf6a6922b691b"
+    },
+    "ch1.raw": {
+      "bytes": 62864,
+      "sha256": "a2eabd847a1b81881a088f75f6f9a1e99940af2fc51a88fbf9437ca38893ee51"
+    },
+    "pod1.raw": {
+      "bytes": 23693,
+      "sha256": "a3e8282cac6b0077d14a551b4be16fb6c886c801e425a72ab2cd528cc4ae8b1a"
+    },
+    "screenshot.bmp": {
+      "bytes": 333878,
+      "sha256": "bf7ed8d9554b41d8fe22f591756e048bf081b792f962dd3450ba2a18c74a5ed2"
+    }
+  },
+  "note": "SINGLE capture for A0-S05: CH1 (analog) + POD1 (digital D0-D7) + screenshot. D6/D7=UART RX/TX, D2=PT2, D1=MCLR, D3=PT1."
+}

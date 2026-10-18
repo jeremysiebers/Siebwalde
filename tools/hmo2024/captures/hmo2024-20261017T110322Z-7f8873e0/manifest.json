@@ -1,0 +1,90 @@
+{
+  "acquisition": {
+    "command": "SINGle",
+    "duration_s": 1.0293,
+    "post_state": "COMP",
+    "pre_state": {
+      "acq_state": "BREAK",
+      "trigger_mode": "AUTO",
+      "trigger_source": "D2"
+    },
+    "result": "COMPLETE",
+    "started_at_monotonic": 41365.6705418
+  },
+  "artifacts": [
+    {
+      "bytes": 29,
+      "kind": "header_ascii",
+      "rel_path": "ch1.header.raw",
+      "sha256": "1ba96e2a3dc7b209ee9aee59a42cf8016a44469e917d60bc829f12bc54a88d28"
+    },
+    {
+      "bytes": 63392,
+      "kind": "waveform_ascii",
+      "rel_path": "ch1.raw",
+      "sha256": "b5a2d639f952de122ea08b6976e9f15c5ced3e8bd41e2be2b3b12db74d4af945"
+    },
+    {
+      "bytes": 58766,
+      "kind": "waveform_csv",
+      "rel_path": "ch1.csv",
+      "sha256": "6165064e828cdd403d64aa571aadc9b9b708a6ea261049b2c1f81d068a6654cb"
+    },
+    {
+      "bytes": 333878,
+      "kind": "screenshot_bmp",
+      "rel_path": "screenshot.bmp",
+      "sha256": "19f20bf1f2a57fc91f5dc02149dc5d0270c1e4ca66c3acce3074312df01dc42c"
+    }
+  ],
+  "capture_id": "hmo2024-20261017T110322Z-7f8873e0",
+  "flags": [
+    "bus_decoder_text_not_exported:unverified_commands"
+  ],
+  "hold": {
+    "acq_state": "COMP",
+    "channel": 1,
+    "export_header": {
+      "count": 6000,
+      "raw": "-1.7790E-05,4.2200E-05,6000,1",
+      "start": -1.779e-05,
+      "stop": 4.22e-05,
+      "values_per_sample": 1
+    },
+    "export_state": "COMP",
+    "header": {
+      "count": 6000,
+      "start": -1.779e-05,
+      "stop": 4.22e-05,
+      "values_per_sample": 1
+    },
+    "header_raw": "-1.7790E-05,4.2200E-05,6000,1",
+    "point_count": 6000,
+    "point_count_raw": "6000"
+  },
+  "host_time": {
+    "amsterdam": "2026-10-17T13:03:22.216484+02:00",
+    "utc": "2026-10-17T11:03:22.216484+00:00"
+  },
+  "instrument": {
+    "baud": 115200,
+    "id": "HAMEG,HMO2024,014458275,04.531",
+    "port": "COM3"
+  },
+  "restore": {
+    "note": "acquisition left in COMPlete (stopped); we deliberately do NOT resume (no RUN) after an operator or tool stop",
+    "run_state_restored": false
+  },
+  "schema": "hmo2024.record/1",
+  "scope_time": {
+    "note": "no verified SCPI clock query on HMO2024; not queried",
+    "status": "NOT_QUERIED",
+    "value": null
+  },
+  "scpi_commands": [],
+  "tool": {
+    "git_commit": "62363c288b16ce410627a25866cf4e73d07fd083",
+    "name": "hmo2024",
+    "version": "0.1.0"
+  }
+}
