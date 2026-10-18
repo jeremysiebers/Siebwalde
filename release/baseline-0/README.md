@@ -28,3 +28,11 @@
 - PIC18: standard Offset bootloader route (C# → PIC32 → RS-422 → PIC18 bootloader).
 - PIC32: MPLAB ICD3 (ipecmd at `C:\Program Files\Microchip\MPLABX\v6.20\mplab_platform\mplab_ipe\ipecmd.exe`).
 - **Note:** preserving this HEX is a necessary but not sufficient condition for a proven recovery capability — a preserved artifact and a demonstrated recovery are distinct acceptance requirements.
+
+## PIC32 runtime-identity readback (2026-10-18) — QUALIFIED
+
+- ICD3 qualified: `ipecmd -P32MZ2048EFH144 -TPICD3 -I` → target `PIC32MZ2048EFH144` found, Device ID Revision A3, DEVSN0=`ecda3e32`/DEVSN1=`5ac05410`, ICD3 firmware suite `01.56.10`, DFP `PIC32MZ-EF_DFP 1.4.168`.
+- Non-destructive flash readback (`-GF`) exported the full image (program `0x1d000000..0x1d1fffff` + boot config + configuration memory) to `PIC32-readback-pfm.hex` (SHA-256 `04AE6A69…`, 6,819,297 bytes).
+- **Comparison: 100% match** — the 267,316 bytes of `A90E44` are all present and byte-identical in the readback (0 differing). The readback additionally contains the unprogrammed (erased `0xFF`) flash and boot/config regions not represented in the `A90E44` HEX.
+- **Conclusion:** the currently-running PIC32 firmware is byte-identical (over the populated region) to `A90E44`. The archived `A90E44` HEX is a verified recovery image, and the PIC32 recovery route (ICD3 read/program) is now qualified.
+- Caveat: readback holds the target in reset; release with `-OK -OL` and allow ~15 s for Ethernet re-init.
