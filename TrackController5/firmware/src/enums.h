@@ -206,6 +206,10 @@ typedef enum
     EXEC_FW_STATE_CHECK_CHECKSUM            					= 128,
     EXEC_FW_STATE_SLAVE_RESET                                   = 129,
     EXIT_SLAVExFWxHANDLER                                       = 130,
+    /* Single-target flash: invoke FlashSequencer(slave) exactly once for the
+     * slave id carried in the message payload (data[0]). Mirrored in C#
+     * TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE. */
+    EXEC_FW_STATE_FLASH_ONE_SLAVE                               = 131,
 			
 	/* FWFILEDOWNLOAD COMMANDS */		
 	FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY					= 140,

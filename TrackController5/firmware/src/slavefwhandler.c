@@ -272,6 +272,37 @@ bool SLAVExFWxHANDLER(){
                     break;
                 }
                 
+                case EXEC_FW_STATE_FLASH_ONE_SLAVE:
+                {
+                    result = FlashSequencer(fwData.data);
+                    switch (result){
+                        case DONE:  fwData.state = FW_STATE_INIT;
+                                    fwData.SlaveBootloaderHandlingActive = false;
+                                    UART2_Config_9bit_Modbus();
+                                    CREATExTASKxSTATUSxMESSAGE(
+                                        FWHANDLER,                              // TASK_ID
+                                        EXEC_FW_STATE_FLASH_ONE_SLAVE,          // TASK_COMMAND
+                                        DONE,                                   // TASK_STATE
+                                        NONE);                                  // TASK_MESSAGE
+                                    LOG_Push("Fw handler\t: EXEC_FW_STATE_FLASH_ONE_SLAVE DONE.");
+                                    return_val = true;
+                                    break;
+                        case ERROR: fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                                    fwData.SlaveBootloaderHandlingActive = false;
+                                    UART2_Config_9bit_Modbus();
+                                    CREATExTASKxSTATUSxMESSAGE(
+                                        FWHANDLER,                              // TASK_ID
+                                        EXEC_FW_STATE_FLASH_ONE_SLAVE,          // TASK_COMMAND
+                                        ERROR,                                  // TASK_STATE
+                                        NONE);                                  // TASK_MESSAGE
+                                    LOG_Push("Fw handler\t: EXEC_FW_STATE_FLASH_ONE_SLAVE ERROR.");
+                                    break;
+                        case BUSY : break;
+                        default   : LOG_Push("Fw handler\t: EXEC_FW_STATE_FLASH_ONE_SLAVE default case not allowed.");
+                    }
+                    break;
+                }
+                
                 case EXEC_FW_STATE_GET_BOOTLOADER_VERSION:
                 {
                     fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
