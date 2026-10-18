@@ -137,6 +137,8 @@
         public const byte EXEC_FW_STATE_CHECK_CHECKSUM = 128;
         public const byte EXEC_FW_STATE_SLAVE_RESET = 129;
         public const byte EXIT_SLAVExFWxHANDLER = 130;
+        // Single-target flash: FlashSequencer(data[0]) for exactly one amplifier.
+        public const byte EXEC_FW_STATE_FLASH_ONE_SLAVE = 131;
 
         /* FWFILEDOWNLOAD COMMANDS */
         public const byte FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY = 140;
