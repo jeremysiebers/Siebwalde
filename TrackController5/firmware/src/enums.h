@@ -210,6 +210,12 @@ typedef enum
      * slave id carried in the message payload (data[0]). Mirrored in C#
      * TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE. */
     EXEC_FW_STATE_FLASH_ONE_SLAVE                               = 131,
+    /* Bootloader-only single-target recovery: select ONE amplifier via the
+     * backplane and run the 8-bit bootloader sequence WITHOUT the HR11=0 entry
+     * write (the amplifier is already in bootloader mode). Reuses
+     * FlashSequencer(slave) with a skip flag; the slave id rides in data[0].
+     * Mirrored in C# TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY. */
+    EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY               = 132,
 			
 	/* FWFILEDOWNLOAD COMMANDS */		
 	FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY					= 140,
@@ -283,6 +289,10 @@ typedef enum
     SLAVE_ID_OUT_OF_BOUNDS                                      = 107,
     MESSAGE_BUFFER_FULL                                         = 108,
     DATA_SENT_TO_SLAVE                                          = 109,
+    /* Single-target flash diagnostic: on ERROR the 131/132 handler reports
+     * taskmessage = FLASH_SEQUENCER_SUBSTEP_BASE + the failing iFlashSequencer
+     * case number (2..15). Mirrored in C# FlashSequencerSubStep. */
+    FLASH_SEQUENCER_SUBSTEP_BASE                                = 110,
 } TASK_MESSAGES;				
 				
 				

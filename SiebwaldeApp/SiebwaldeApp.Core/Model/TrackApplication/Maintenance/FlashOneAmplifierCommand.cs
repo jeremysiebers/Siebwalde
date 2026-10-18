@@ -14,16 +14,25 @@ namespace SiebwaldeApp.Core
         public string? Error { get; }
         public byte TargetAmplifier { get; }
 
-        private FlashOneAmplifierResult(bool success, string? error, byte target)
+        /// <summary>
+        /// When the PIC32 reports an ERROR, the decoded FlashSequencer sub-step (2..15)
+        /// that failed, or null when the error could not be attributed to a sub-step
+        /// (e.g. a timeout or a protocol deviation on the host side).
+        /// </summary>
+        public int? FailedSubStep { get; }
+
+        private FlashOneAmplifierResult(bool success, string? error, byte target, int? failedSubStep)
         {
             Success = success;
             Error = error;
             TargetAmplifier = target;
+            FailedSubStep = failedSubStep;
         }
 
-        public static FlashOneAmplifierResult Ok(byte target) => new(true, null, target);
+        public static FlashOneAmplifierResult Ok(byte target) => new(true, null, target, null);
 
-        public static FlashOneAmplifierResult Fail(string error, byte target) => new(false, error, target);
+        public static FlashOneAmplifierResult Fail(string error, byte target, int? failedSubStep = null)
+            => new(false, error, target, failedSubStep);
     }
 
     /// <summary>
@@ -42,9 +51,14 @@ namespace SiebwaldeApp.Core
     /// download the firmware file (120 + 141 chunks) -> download the config word (121 + 151) ->
     /// EXEC_FW_STATE_FLASH_ONE_SLAVE (131) -> wait for DONE/ERROR.
     ///
+    /// <see cref="ExecuteBootloaderOnlyAsync"/> drives the bootloader-only recovery variant
+    /// EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY (132): the PIC32 selects one amplifier
+    /// via the backplane and runs the 8-bit bootloader sequence WITHOUT the HR11=0 entry write
+    /// (the target is already in bootloader mode).
+    ///
     /// It deliberately NEVER sends EXEC_FW_STATE_FLASH_ALL_SLAVES (122) and has no fall-back to it.
-    /// The amplifier address is carried as the single data byte of command 131, which the PIC32
-    /// passes to the pre-existing <c>FlashSequencer(slave)</c>.
+    /// The amplifier address is carried as the single data byte of command 131/132, which the
+    /// PIC32 passes to the pre-existing <c>FlashSequencer(slave)</c>.
     /// </summary>
     public sealed class FlashOneAmplifierCommand
     {
@@ -54,6 +68,7 @@ namespace SiebwaldeApp.Core
         private readonly SendNextFwDataPacket _sendNextFwDataPacket;
         private readonly TimeSpan _messageTimeout;
         private readonly TimeSpan _flashTimeout;
+        private readonly Action<ReceivedMessage>? _onProgress;
 
         public FlashOneAmplifierCommand(
             ITrackCommClient commClient,
@@ -61,7 +76,8 @@ namespace SiebwaldeApp.Core
             TrackAmplifierBootloaderHelpers bootloaderHelpers,
             SendNextFwDataPacket sendNextFwDataPacket,
             TimeSpan? messageTimeout = null,
-            TimeSpan? flashTimeout = null)
+            TimeSpan? flashTimeout = null,
+            Action<ReceivedMessage>? onProgress = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             _variables = variables ?? throw new ArgumentNullException(nameof(variables));
@@ -69,9 +85,19 @@ namespace SiebwaldeApp.Core
             _sendNextFwDataPacket = sendNextFwDataPacket ?? throw new ArgumentNullException(nameof(sendNextFwDataPacket));
             _messageTimeout = messageTimeout ?? TimeSpan.FromSeconds(10);
             _flashTimeout = flashTimeout ?? TimeSpan.FromMinutes(15);
+            _onProgress = onProgress;
         }
 
-        public async Task<FlashOneAmplifierResult> ExecuteAsync(byte amplifier, CancellationToken cancellationToken = default)
+        public Task<FlashOneAmplifierResult> ExecuteAsync(
+            byte amplifier, CancellationToken cancellationToken = default)
+            => ExecuteCoreAsync(amplifier, bootloaderOnly: false, cancellationToken);
+
+        public Task<FlashOneAmplifierResult> ExecuteBootloaderOnlyAsync(
+            byte amplifier, CancellationToken cancellationToken = default)
+            => ExecuteCoreAsync(amplifier, bootloaderOnly: true, cancellationToken);
+
+        private async Task<FlashOneAmplifierResult> ExecuteCoreAsync(
+            byte amplifier, bool bootloaderOnly, CancellationToken cancellationToken)
         {
             if (!TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier))
             {
@@ -141,20 +167,33 @@ namespace SiebwaldeApp.Core
                 // 5. Download the config word.
                 await DownloadConfigWordAsync(queue.Reader, cancellationToken).ConfigureAwait(false);
 
-                // 6. Flash exactly one amplifier.
+                // 6. Flash exactly one amplifier (normal 131 or bootloader-only 132).
+                var flashCommand = bootloaderOnly
+                    ? TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY
+                    : TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE;
+
                 var flashReply = await SendAndWaitAsync(
                     queue.Reader,
-                    new SendMessage(TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE, new byte[] { amplifier }),
+                    new SendMessage(flashCommand, new byte[] { amplifier }),
                     m => m.TaskId == TaskId.FWHANDLER &&
-                         m.Taskcommand == TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE &&
+                         m.Taskcommand == flashCommand &&
                          (m.Taskstate == TaskStates.DONE || m.Taskstate == TaskStates.ERROR),
                     _flashTimeout, cancellationToken).ConfigureAwait(false);
 
                 if (flashReply.Taskstate == TaskStates.DONE)
                     return FlashOneAmplifierResult.Ok(amplifier);
 
+                // Decode the specific sub-step the PIC32 reported on failure.
+                var stepText = FlashSequencerSubStep.TryDecode(flashReply.Taskmessage, out var step)
+                    ? $"{step} ({FlashSequencerSubStep.Describe(step)})"
+                    : $"unknown (taskmessage={flashReply.Taskmessage})";
+
+                var mode = bootloaderOnly ? "bootloader-only" : "standard";
                 return FlashOneAmplifierResult.Fail(
-                    $"PIC32 reported ERROR flashing amplifier {amplifier} (taskmessage={flashReply.Taskmessage}).", amplifier);
+                    $"PIC32 reported ERROR during {mode} flash of amplifier {amplifier} " +
+                    $"at sub-step {stepText}.",
+                    amplifier,
+                    FlashSequencerSubStep.TryDecode(flashReply.Taskmessage, out var substep) ? substep : (int?)null);
             }
             catch (FlashOneAmplifierException ex)
             {
@@ -256,8 +295,9 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Waits for the first message matching <paramref name="predicate"/>; non-matching
         /// messages are consumed and discarded (the protocol is strictly request/response in order).
+        /// Every message read is surfaced through the optional progress callback (per-step DONE/ERROR).
         /// </summary>
-        private static async Task<ReceivedMessage> WaitAsync(
+        private async Task<ReceivedMessage> WaitAsync(
             ChannelReader<ReceivedMessage> reader,
             Func<ReceivedMessage, bool> predicate,
             TimeSpan timeout,
@@ -271,6 +311,7 @@ namespace SiebwaldeApp.Core
                 {
                     while (reader.TryRead(out var message))
                     {
+                        _onProgress?.Invoke(message);
                         if (predicate(message))
                             return message;
                     }

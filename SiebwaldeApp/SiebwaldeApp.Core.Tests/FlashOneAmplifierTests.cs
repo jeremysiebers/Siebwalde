@@ -51,6 +51,154 @@ public class FlashOneAmplifierTests
     }
 
     // -------------------------------------------------------------------------
+    // (a) bootloader-only single-target sequence (skip HR11=0, run bootloader primitives)
+    // -------------------------------------------------------------------------
+
+    [Fact]
+    public async Task ExecuteBootloaderOnlyAsync_Sends132WithSlaveId_AndNeverSends122()
+    {
+        var hexPath = WritePic18HexFile(seed: 11);
+        try
+        {
+            var validation = FirmwareArtifactVerifier.Validate(hexPath, expectedSha256Hex: null);
+            Assert.True(validation.Success, validation.Error);
+            var artifact = validation.Artifact!;
+
+            var transport = new ScriptedPIC32Transport { Responder = BuildBootloaderOnlyResponder(failAtEraseStep: false) };
+            var variables = new TrackApplicationVariables();
+            await using var comm = new TrackCommClientAsync(transport, variables);
+            await comm.StartAsync(realHardwareMode: false);
+
+            var sendNext = new SendNextFwDataPacket(comm, artifact.Helpers);
+            var command = new FlashOneAmplifierCommand(
+                comm, variables, artifact.Helpers, sendNext,
+                messageTimeout: TimeSpan.FromSeconds(10), flashTimeout: TimeSpan.FromSeconds(10));
+
+            var result = await command.ExecuteBootloaderOnlyAsync(6);
+
+            Assert.True(result.Success, result.Error);
+            Assert.Equal(6, result.TargetAmplifier);
+
+            var commands = transport.SentFrames.Select(f => f[1]).ToArray();
+            Assert.Contains((byte)TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY, commands);
+            Assert.DoesNotContain((byte)TrackCommand.EXEC_FW_STATE_FLASH_ALL_SLAVES, commands);
+            Assert.DoesNotContain((byte)TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE, commands);
+
+            // The bootloader-only command must carry exactly the selected slave id in data[0].
+            var flashFrame = Assert.Single(transport.SentFrames.Where(
+                f => f[1] == TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY));
+            Assert.Equal(6, flashFrame[2]);
+        }
+        finally
+        {
+            TryDelete(hexPath);
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteBootloaderOnlyAsync_RunsBootloaderPrimitivesInOrder()
+    {
+        var hexPath = WritePic18HexFile(seed: 12);
+        try
+        {
+            var validation = FirmwareArtifactVerifier.Validate(hexPath, expectedSha256Hex: null);
+            var artifact = validation.Artifact!;
+
+            var transport = new ScriptedPIC32Transport { Responder = BuildBootloaderOnlyResponder(failAtEraseStep: false) };
+            var variables = new TrackApplicationVariables();
+            await using var comm = new TrackCommClientAsync(transport, variables);
+            await comm.StartAsync(realHardwareMode: false);
+
+            var observed = new List<ushort>();
+            var sendNext = new SendNextFwDataPacket(comm, artifact.Helpers);
+            var command = new FlashOneAmplifierCommand(
+                comm, variables, artifact.Helpers, sendNext,
+                messageTimeout: TimeSpan.FromSeconds(10), flashTimeout: TimeSpan.FromSeconds(10),
+                onProgress: m => observed.Add(m.Taskcommand));
+
+            var result = await command.ExecuteBootloaderOnlyAsync(6);
+            Assert.True(result.Success, result.Error);
+
+            // The 8-bit bootloader sequence must run version -> erase -> write -> config -> checksum -> reset.
+            var expected = new[]
+            {
+                TrackCommand.GET_BOOTLOADER_VERSION_OK,
+                TrackCommand.ERASE_FLASH_RETURNED_OK,
+                TrackCommand.WRITE_FLASH_RETURNED_OK,
+                TrackCommand.WRITE_CONFIG_RETURNED_OK,
+                TrackCommand.CHECK_CHECKSUM_CONFIG_RETURNED_OK,
+                TrackCommand.RESET_SLAVE_OK,
+            };
+            foreach (var step in expected)
+                Assert.Contains(step, observed);
+
+            // Order must be preserved: strictly increasing first-occurrence indices.
+            var indices = expected.Select(e => observed.IndexOf(e)).ToArray();
+            Assert.Equal(indices.OrderBy(x => x), indices);
+        }
+        finally
+        {
+            TryDelete(hexPath);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // (b) specific sub-step on failure
+    // -------------------------------------------------------------------------
+
+    [Fact]
+    public async Task ExecuteBootloaderOnlyAsync_Failure_ReportsSpecificSubStep()
+    {
+        var hexPath = WritePic18HexFile(seed: 13);
+        try
+        {
+            var validation = FirmwareArtifactVerifier.Validate(hexPath, expectedSha256Hex: null);
+            var artifact = validation.Artifact!;
+
+            // Emulate the PIC32 failing at ERASE_FLASH (sub-step 11 -> taskmessage 110+11).
+            var transport = new ScriptedPIC32Transport { Responder = BuildBootloaderOnlyResponder(failAtEraseStep: true) };
+            var variables = new TrackApplicationVariables();
+            await using var comm = new TrackCommClientAsync(transport, variables);
+            await comm.StartAsync(realHardwareMode: false);
+
+            var sendNext = new SendNextFwDataPacket(comm, artifact.Helpers);
+            var command = new FlashOneAmplifierCommand(
+                comm, variables, artifact.Helpers, sendNext,
+                messageTimeout: TimeSpan.FromSeconds(10), flashTimeout: TimeSpan.FromSeconds(10));
+
+            var result = await command.ExecuteBootloaderOnlyAsync(6);
+
+            Assert.False(result.Success);
+            Assert.NotNull(result.Error);
+            Assert.Equal(11, result.FailedSubStep); // ERASE_FLASH
+            Assert.Contains("ERASE_FLASH", result.Error);
+        }
+        finally
+        {
+            TryDelete(hexPath);
+        }
+    }
+
+    [Fact]
+    public void Verifier_Sha256Mismatch_NoArtifact_SoNoWriteCanOccur()
+    {
+        var hexPath = WritePic18HexFile(seed: 14);
+        try
+        {
+            var result = FirmwareArtifactVerifier.Validate(
+                hexPath, expectedSha256Hex: "0000000000000000000000000000000000000000000000000000000000000000");
+            Assert.False(result.Success);
+            Assert.Contains("SHA-256 mismatch", result.Error);
+            // No parsed artifact means no command can be constructed and no write can occur.
+            Assert.Null(result.Artifact);
+        }
+        finally
+        {
+            TryDelete(hexPath);
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // (b) wrong target / wrong artifact -> no write
     // -------------------------------------------------------------------------
 
@@ -312,8 +460,24 @@ public class FlashOneAmplifierTests
     /// FLASH_ONE_SLAVE). It never emits 122.
     /// </summary>
     private static Func<byte[], IEnumerable<byte[]>> BuildFlashSequenceResponder()
+        => BuildResponder(bootloaderOnly: false, failAtEraseStep: false);
+
+    private static Func<byte[], IEnumerable<byte[]>> BuildBootloaderOnlyResponder(bool failAtEraseStep)
+        => BuildResponder(bootloaderOnly: true, failAtEraseStep);
+
+    /// <summary>
+    /// Returns a responder that mimics the PIC32 reply sequence for the single-target flash
+    /// command path (CONNECT -> version -> FW-handler init -> file download -> config word ->
+    /// FLASH_ONE_SLAVE / FLASH_ONE_SLAVE_BOOTLOADER_ONLY). It never emits 122. In
+    /// bootloader-only mode it also emits the 8-bit bootloader primitive replies
+    /// (version -> erase -> write -> config -> checksum -> reset) ahead of the final DONE.
+    /// </summary>
+    private static Func<byte[], IEnumerable<byte[]>> BuildResponder(bool bootloaderOnly, bool failAtEraseStep)
     {
         int chunkCount = 0;
+        byte flashCommand = bootloaderOnly
+            ? TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY
+            : TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE;
         return frame =>
         {
             byte command = frame.Length > 1 ? frame[1] : (byte)0;
@@ -342,11 +506,34 @@ public class FlashOneAmplifierTests
                     return new[] { Ctrl(TrackCommand.FWCONFIGWORDDOWNLOAD, TrackCommand.CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY, TaskStates.DONE, TaskMessages.NONE) };
                 case TrackCommand.CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_RECEIVE: // 151
                     return new[] { Ctrl(TrackCommand.FWCONFIGWORDDOWNLOAD, TrackCommand.CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE, TaskStates.DONE, TaskMessages.NONE) };
-                case TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE: // 131
-                    return new[] { Ctrl(TaskId.FWHANDLER, TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE, TaskStates.DONE, TaskMessages.NONE) };
-                default:
-                    return Array.Empty<byte[]>();
             }
+
+            if (command == flashCommand)
+            {
+                if (bootloaderOnly)
+                {
+                    var steps = new List<byte[]>
+                    {
+                        Ctrl(TrackCommand.GET_BOOTLOADER_VERSION, TrackCommand.GET_BOOTLOADER_VERSION_OK, TaskStates.DONE, TaskMessages.NONE),
+                    };
+                    if (failAtEraseStep)
+                    {
+                        // ERASE_FLASH is sub-step 11; encode 110 + 11 in the status message field.
+                        steps.Add(Ctrl(TaskId.FWHANDLER, flashCommand, TaskStates.ERROR, (byte)(FlashSequencerSubStep.Base + 11)));
+                        return steps;
+                    }
+                    steps.Add(Ctrl(TrackCommand.ERASE_FLASH, TrackCommand.ERASE_FLASH_RETURNED_OK, TaskStates.DONE, TaskMessages.NONE));
+                    steps.Add(Ctrl(TrackCommand.WRITE_FLASH, TrackCommand.WRITE_FLASH_RETURNED_OK, TaskStates.DONE, TaskMessages.NONE));
+                    steps.Add(Ctrl(TrackCommand.WRITE_CONFIG, TrackCommand.WRITE_CONFIG_RETURNED_OK, TaskStates.DONE, TaskMessages.NONE));
+                    steps.Add(Ctrl(TrackCommand.CHECK_CHECKSUM_CONFIG, TrackCommand.CHECK_CHECKSUM_CONFIG_RETURNED_OK, TaskStates.DONE, TaskMessages.NONE));
+                    steps.Add(Ctrl(TrackCommand.RESET_SLAVE, TrackCommand.RESET_SLAVE_OK, TaskStates.DONE, TaskMessages.NONE));
+                    steps.Add(Ctrl(TaskId.FWHANDLER, flashCommand, TaskStates.DONE, TaskMessages.NONE));
+                    return steps;
+                }
+                return new[] { Ctrl(TaskId.FWHANDLER, flashCommand, TaskStates.DONE, TaskMessages.NONE) };
+            }
+
+            return Array.Empty<byte[]>();
         };
     }
 
