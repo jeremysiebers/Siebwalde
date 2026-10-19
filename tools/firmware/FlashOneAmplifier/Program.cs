@@ -27,12 +27,6 @@ namespace FlashOneAmplifier
         /// <summary>Known physical track-amplifier inventory to inspect (see docs/handoff.md).</summary>
         private static readonly byte[] ReadTargetAmplifiers = { 1, 3, 4, 6 };
 
-        /// <summary>SW checksum (HR11) of the legacy Baseline-0 amplifier firmware.</summary>
-        private const ushort Baseline0Checksum = 0x251F;
-
-        /// <summary>SW checksum (HR11) of the flashed 1.0.0 amplifier firmware (identity/version registers present).</summary>
-        private const ushort Firmware100Checksum = 0xE906;
-
         /// <summary>Re-issue interval for the evidence-based register read wait.</summary>
         private static readonly TimeSpan ReadRetryInterval = TimeSpan.FromMilliseconds(500);
 
@@ -164,7 +158,7 @@ namespace FlashOneAmplifier
                 var hr0Pending = await SendReadsAndWaitForFreshFramesAsync(
                     commClient, variables, ReadTargetAmplifiers,
                     new byte[] { (byte)TrackAmplifierRegisters.PwmCommand },
-                    TimeSpan.FromSeconds(15), requireIdentityVersion: false).ConfigureAwait(false);
+                    TimeSpan.FromSeconds(15), requireVerification: false).ConfigureAwait(false);
 
                 if (hr0Pending.Length > 0)
                 {
@@ -213,7 +207,7 @@ namespace FlashOneAmplifier
 
                 var pending = await SendReadsAndWaitForFreshFramesAsync(
                     commClient, variables, ReadTargetAmplifiers, registerTable,
-                    TimeSpan.FromSeconds(15), requireIdentityVersion: true).ConfigureAwait(false);
+                    TimeSpan.FromSeconds(15), requireVerification: true).ConfigureAwait(false);
 
                 foreach (byte amp in ReadTargetAmplifiers)
                 {
@@ -322,10 +316,9 @@ namespace FlashOneAmplifier
         /// evidence-based completion condition. An amplifier is complete when a fresh SLAVEINFO
         /// readback arrived (<see cref="TrackAmplifierItem.ProtocolReadbackSequence"/> advanced past
         /// the value captured before the reads were issued) AND, when
-        /// <paramref name="requireIdentityVersion"/> is set, a 1.0.0 amplifier (HR11 == 0xE906) has
-        /// its identity/version registers HR7/HR21/HR22 populated (non-zero). Baseline-0 amplifiers
-        /// (HR11 == 0x251F) legitimately leave those registers at 0, so they are treated as "not
-        /// applicable" and are never required to be non-zero.
+        /// <paramref name="requireVerification"/> is set, it passes the fail-closed
+        /// <see cref="FirmwareContract.IsVerified"/> check (detected, known HR11 checksum, and exact
+        /// HR7/HR21/HR22 for 1.0.0 firmware).
         ///
         /// Reads are re-issued every <see cref="ReadRetryInterval"/> for amplifiers that have not
         /// yet completed (retrying any read whose Modbus transaction previously failed or was still
@@ -338,7 +331,7 @@ namespace FlashOneAmplifier
             byte[] amplifiers,
             byte[] registers,
             TimeSpan timeout,
-            bool requireIdentityVersion)
+            bool requireVerification)
         {
             var before = new Dictionary<byte, long>();
             foreach (byte a in amplifiers)
@@ -353,7 +346,7 @@ namespace FlashOneAmplifier
                 // transaction previously failed or was still in flight.
                 foreach (byte a in amplifiers)
                 {
-                    if (IsReadComplete(variables.trackAmpItems[a], before[a], requireIdentityVersion))
+                    if (IsReadComplete(variables.trackAmpItems[a], before[a], requireVerification))
                         continue;
                     foreach (byte r in registers)
                         await commClient.SendAsync(
@@ -361,7 +354,7 @@ namespace FlashOneAmplifier
                             .ConfigureAwait(false);
                 }
 
-                if (amplifiers.All(a => IsReadComplete(variables.trackAmpItems[a], before[a], requireIdentityVersion)))
+                if (amplifiers.All(a => IsReadComplete(variables.trackAmpItems[a], before[a], requireVerification)))
                     return Array.Empty<byte>();
 
                 if (DateTime.UtcNow >= deadline)
@@ -371,38 +364,24 @@ namespace FlashOneAmplifier
             }
 
             return amplifiers
-                .Where(a => !IsReadComplete(variables.trackAmpItems[a], before[a], requireIdentityVersion))
+                .Where(a => !IsReadComplete(variables.trackAmpItems[a], before[a], requireVerification))
                 .ToArray();
         }
 
         /// <summary>
         /// True when <paramref name="item"/> satisfies the evidence-based completion condition: a
         /// fresh SLAVEINFO frame has arrived since <paramref name="beforeSequence"/>, and, when
-        /// <paramref name="requireIdentityVersion"/> is set and the amplifier is 1.0.0 firmware
-        /// (HR11 == <see cref="Firmware100Checksum"/>), its HR7/HR21/HR22 are populated (non-zero).
-        /// Baseline-0 (or unknown) amplifiers are never required to have non-zero identity/version.
+        /// <paramref name="requireVerification"/> is set, <see cref="FirmwareContract.IsVerified"/>
+        /// holds (detected, known HR11 checksum, and exact HR7/HR21/HR22 for 1.0.0 firmware).
         /// </summary>
-        private static bool IsReadComplete(TrackAmplifierItem item, long beforeSequence, bool requireIdentityVersion)
+        private static bool IsReadComplete(TrackAmplifierItem item, long beforeSequence, bool requireVerification)
         {
             // A fresh frame must have arrived since we captured the baseline sequence.
             if (item.ProtocolReadbackSequence <= beforeSequence)
                 return false;
 
-            if (!requireIdentityVersion)
-                return true;
-
-            // Only 1.0.0 firmware exposes the identity/version registers; Baseline-0 leaves them 0.
-            if (!RequiresPopulatedIdentityVersion(item.HoldingReg[TrackAmplifierRegisters.SwChecksum]))
-                return true;
-
-            return item.HoldingReg[TrackAmplifierRegisters.Identity] != 0 &&
-                   item.HoldingReg[TrackAmplifierRegisters.FwVersionMajorMinor] != 0 &&
-                   item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol] != 0;
+            return !requireVerification || FirmwareContract.IsVerified(item);
         }
-
-        /// <summary>True when a 1.0.0 amplifier (HR11 == 0xE906) must report non-zero identity/version registers.</summary>
-        private static bool RequiresPopulatedIdentityVersion(ushort hr11)
-            => hr11 == Firmware100Checksum;
 
         /// <summary>Human-readable decode of the HR0 command word.</summary>
         private static string DescribeHr0(ushort hr0)
