@@ -79,7 +79,7 @@ static struct { unsigned ModbusReceiveTimeoutHandle; } mbusData;
 static uint32_t now, reports, last_command, last_message;
 static udpTrans_t last_frame;
 static unsigned wire_count;
-static uint8_t GoToCase, StartupMachine, EnableMachine, EnableSlave;
+static uint8_t GoToCase, StartupMachine, EnableMachine, EnableSlave, AddressWriteRetries;
 static uint32_t DelayCount1, DelayCount2, threshold;
 void DRV_TMR_Start(unsigned h) { (void)h; }
 void DRV_TMR_Stop(unsigned h) { (void)h; }

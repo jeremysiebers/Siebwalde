@@ -76,6 +76,7 @@ static uint16_t     WaitCounter     = 0;
 static uint32_t     DelayCount1     = 0;
 static uint32_t     DelayCount2     = 0;
 static uint32_t     threshold       = 0;
+static uint8_t      AddressWriteRetries = 0;
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExSTARTUP(SLAVE_INFO *location)
@@ -488,6 +489,7 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
     switch(StartupMachine){
         case 0:
             AmplifierCompatible[TrackAmplifierId] = false;
+            AddressWriteRetries = 0;
             if (MASTER_SLAVE_DATA[BackplaneId].SlaveDetected == true && 
                 MASTER_SLAVE_DATA[TrackAmplifierId].SlaveDetected == true){
                 StartupMachine++;
@@ -563,23 +565,38 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
             
         /* Verify communication was OK with slave */
         case 4:
+        {
+            /* Capture the raw result before CHECKxMODBUSxCOMMxSTATUS's OverWrite
+             * reset erases it: a transient response timeout is retryable, but a
+             * genuine rejection (exception/NOK) is a hard failure. */
+            uint8_t writeResult = DUMP_SLAVE_DATA[0].MbCommError;
             switch(CHECKxMODBUSxCOMMxSTATUS(SLAVE_INITIAL_ADDR, true)){
                 case SLAVEOK:  
+                    AddressWriteRetries = 0;
                     StartupMachine++;
                     //DRV_USART0_WriteByte('4');
                     break;                    
-                case SLAVENOK: 
-                    AmplifierCompatible[TrackAmplifierId] = false;
-                    MASTER_SLAVE_DATA[TrackAmplifierId].HoldingReg[HR_IDENTITY] = 0;
-                    CREATExTASKxSTATUSxMESSAGE(MBUS, EXEC_MBUS_STATE_SLAVE_INIT,
-                        ERROR, TrackAmplifierId);
-                    StartupMachine++;
+                case SLAVENOK:
+                    if (writeResult == SLAVE_DATA_TIMEOUT &&
+                        AddressWriteRetries < 3u) {
+                        /* Transient non-ACK: re-issue the HR2 write (bounded). */
+                        ++AddressWriteRetries;
+                        StartupMachine = 3;
+                    } else {
+                        AddressWriteRetries = 0;
+                        AmplifierCompatible[TrackAmplifierId] = false;
+                        MASTER_SLAVE_DATA[TrackAmplifierId].HoldingReg[HR_IDENTITY] = 0;
+                        CREATExTASKxSTATUSxMESSAGE(MBUS, EXEC_MBUS_STATE_SLAVE_INIT,
+                            ERROR, TrackAmplifierId);
+                        StartupMachine++;
+                    }
                     //DRV_USART0_WriteByte('4');
                     break;
                 case SLAVEBUSY: break;
                 default : break;
             }
             break;
+        }
             
         /* Command backplane slave to select no amplifier slave */
         case 5:

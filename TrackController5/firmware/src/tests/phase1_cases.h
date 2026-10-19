@@ -180,6 +180,68 @@ static void test_address_write_busy_guard(void) {
 
     puts("PASS: HR2 address write guarded by PetitModbusIsReady; busy defers, genuine NOK still errors\n");
 }
+static void test_address_write_retry(void) {
+    unsigned before;
+    /* Drive the FSM to case 3 (HR2 address write) and issue the first write. */
+    reset(); slaves[51].SlaveDetected=slaves[1].SlaveDetected=true;
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(!ConfigureSlave(51,1,1,0) && Data.SlaveAddress==51); ack();
+    assert(!ConfigureSlave(51,1,1,0)); now+=16u*MILISECONDS;
+    assert(!ConfigureSlave(51,1,1,0) && StartupMachine==10);
+    assert(!ConfigureSlave(51,1,1,0) && Data.Direction==READ && Data.StartRegister==7);
+    reply(0x1101);
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(!ConfigureSlave(51,1,1,0) && Data.Direction==READ);
+    reply(0x1101);
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(StartupMachine==3);
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(Data.SlaveAddress==0xaa && Data.Direction==WRITE && Data.StartRegister==2);
+    assert(StartupMachine==4);
+
+    /* Transient response timeout: re-issue the write (return to case 3),
+     * never clearing AmplifierCompatible for a non-ACK. */
+    dump[0].MbCommError=SLAVE_DATA_TIMEOUT; Petit_Tx_State=PETIT_RXTX_IDLE;
+    before=reports;
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(StartupMachine==3);           /* retried: back to the HR2 write */
+    assert(ISxAMPLIFIERxCOMPATIBLE(1));  /* not cleared on a transient timeout */
+    assert(reports==before);             /* no ERROR notification */
+
+    /* Retry write succeeds. */
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(Data.SlaveAddress==0xaa && Data.Direction==WRITE && Data.StartRegister==2);
+    assert(StartupMachine==4);
+    dump[0].MbCommError=SLAVE_DATA_OK; Petit_Tx_State=PETIT_RXTX_IDLE;
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(StartupMachine==5);           /* advanced to deselect on success */
+    assert(ISxAMPLIFIERxCOMPATIBLE(1));
+
+    /* Genuine rejection (exception): no retry, immediate hard failure. */
+    reset(); slaves[51].SlaveDetected=slaves[1].SlaveDetected=true;
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(!ConfigureSlave(51,1,1,0) && Data.SlaveAddress==51); ack();
+    assert(!ConfigureSlave(51,1,1,0)); now+=16u*MILISECONDS;
+    assert(!ConfigureSlave(51,1,1,0) && StartupMachine==10);
+    assert(!ConfigureSlave(51,1,1,0) && Data.Direction==READ && Data.StartRegister==7);
+    reply(0x1101);
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(!ConfigureSlave(51,1,1,0) && Data.Direction==READ);
+    reply(0x1101);
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(StartupMachine==3);
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(Data.SlaveAddress==0xaa && Data.Direction==WRITE && Data.StartRegister==2);
+    assert(StartupMachine==4);
+    dump[0].MbCommError=SLAVE_DATA_EXCEPTION; Petit_Tx_State=PETIT_RXTX_IDLE;
+    before=reports;
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(!ISxAMPLIFIERxCOMPATIBLE(1)); /* immediate failure, no retry */
+    assert(reports==before+1);           /* ERROR notification emitted */
+    assert(StartupMachine==5);           /* advanced to deselect (not retried) */
+
+    puts("PASS: HR2 address-write timeout is retried (bounded); exception is an immediate hard failure\n");
+}
 static void test_stop_confirmation(void) {
     reset(); slaves[1].SlaveDetected=true; AmplifierCompatible[1]=true;
     slaves[1].HoldingReg[HR_IDENTITY]=0xf101;
@@ -336,6 +398,7 @@ static void test_heartbeat_and_mailbox(void) {
 }
 int main(void) {
     test_identity(); test_initialization_path(); test_address_write_busy_guard();
+    test_address_write_retry();
     test_poll_and_lease(); test_stop_confirmation();
     test_retries_and_failures(); test_heartbeat_and_mailbox();
     test_transport_busy();
