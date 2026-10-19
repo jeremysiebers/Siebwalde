@@ -51,6 +51,151 @@ public class FlashOneAmplifierTests
     }
 
     // -------------------------------------------------------------------------
+    // (a2) standard (131) flow: global reset before the flash + MBUS re-init after
+    // -------------------------------------------------------------------------
+
+    [Fact]
+    public async Task ExecuteAsync_ResetsSlaves_BeforeFlash_AndReinitializesAfter()
+    {
+        var hexPath = WritePic18HexFile(seed: 21);
+        try
+        {
+            var validation = FirmwareArtifactVerifier.Validate(hexPath, expectedSha256Hex: null);
+            Assert.True(validation.Success, validation.Error);
+            var artifact = validation.Artifact!;
+
+            var transport = new ScriptedPIC32Transport { Responder = BuildFlashSequenceResponder() };
+            var variables = new TrackApplicationVariables();
+            await using var comm = new TrackCommClientAsync(transport, variables);
+            await comm.StartAsync(realHardwareMode: false);
+
+            var sendNext = new SendNextFwDataPacket(comm, artifact.Helpers);
+            var command = new FlashOneAmplifierCommand(
+                comm, variables, artifact.Helpers, sendNext,
+                messageTimeout: TimeSpan.FromSeconds(10), flashTimeout: TimeSpan.FromSeconds(10));
+
+            var result = await command.ExecuteAsync(6);
+            Assert.True(result.Success, result.Error);
+
+            var commands = transport.SentFrames.Select(f => f[1]).ToArray();
+
+            int resetIdx    = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_RESET);
+            int slavesOnIdx = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_SLAVES_ON);
+            int flashIdx    = Array.IndexOf(commands, (byte)TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE);
+            int detectIdx   = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT);
+            int initIdx     = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_INIT);
+            int enableIdx   = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_ENABLE);
+            int uploadIdx   = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_START_DATA_UPLOAD);
+
+            // Reset -> slaves-on -> flash, strictly in order (the HR11=0 write needs a freshly
+            // reset amp at 0xAA).
+            Assert.True(resetIdx >= 0, "missing RESET(107)");
+            Assert.True(slavesOnIdx > resetIdx, "SLAVES_ON(100) must follow RESET(107)");
+            Assert.True(flashIdx > slavesOnIdx, "FLASH_ONE_SLAVE(131) must follow SLAVES_ON(100)");
+
+            // Re-init must follow a successful 131, mirroring the production DataUpload ->
+            // DetectSlaves -> InitTrackamplifiers -> EnableTrackamplifiers order: START_DATA_UPLOAD
+            // before DETECT (so the MBUS comm-cycle timer starts) and ENABLE last (so the MBUS is
+            // left in MBUS_STATE_SERVICE_TASKS where the cyclic poll reads HR7/HR21/HR22).
+            Assert.True(uploadIdx > flashIdx, "START_DATA_UPLOAD(106) must follow FLASH_ONE_SLAVE(131)");
+            Assert.True(detectIdx > uploadIdx, "DETECT(101) must follow START_DATA_UPLOAD(106)");
+            Assert.True(initIdx > detectIdx, "INIT(104) must follow DETECT(101)");
+            Assert.True(enableIdx > initIdx, "ENABLE(105) must follow INIT(104)");
+
+            // Still never a flash-all.
+            Assert.DoesNotContain((byte)TrackCommand.EXEC_FW_STATE_FLASH_ALL_SLAVES, commands);
+        }
+        finally
+        {
+            TryDelete(hexPath);
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReinitOrder_StartDataUploadBeforeDetect_EnableLast()
+    {
+        var hexPath = WritePic18HexFile(seed: 24);
+        try
+        {
+            var validation = FirmwareArtifactVerifier.Validate(hexPath, expectedSha256Hex: null);
+            Assert.True(validation.Success, validation.Error);
+            var artifact = validation.Artifact!;
+
+            var transport = new ScriptedPIC32Transport { Responder = BuildFlashSequenceResponder() };
+            var variables = new TrackApplicationVariables();
+            await using var comm = new TrackCommClientAsync(transport, variables);
+            await comm.StartAsync(realHardwareMode: false);
+
+            var sendNext = new SendNextFwDataPacket(comm, artifact.Helpers);
+            var command = new FlashOneAmplifierCommand(
+                comm, variables, artifact.Helpers, sendNext,
+                messageTimeout: TimeSpan.FromSeconds(10), flashTimeout: TimeSpan.FromSeconds(10));
+
+            var result = await command.ExecuteAsync(6);
+            Assert.True(result.Success, result.Error);
+
+            var commands = transport.SentFrames.Select(f => f[1]).ToArray();
+            int flashIdx  = Array.IndexOf(commands, (byte)TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE);
+            int uploadIdx = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_START_DATA_UPLOAD);
+            int detectIdx = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT);
+            int initIdx   = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_INIT);
+            int enableIdx = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_ENABLE);
+
+            // Post-131 bring-up must mirror production (DataUpload -> DetectSlaves ->
+            // InitTrackamplifiers -> EnableTrackamplifiers): START_DATA_UPLOAD(106) before DETECT so
+            // the MBUS comm-cycle timer starts, and ENABLE(105) last so the MBUS ends in
+            // MBUS_STATE_SERVICE_TASKS where the cyclic poll reads HR7/HR21/HR22 (SIP2/SIP9/SIP10).
+            Assert.True(flashIdx >= 0, "missing FLASH_ONE_SLAVE(131)");
+            Assert.True(uploadIdx > flashIdx, "START_DATA_UPLOAD(106) must follow FLASH_ONE_SLAVE(131)");
+            Assert.True(detectIdx > uploadIdx, "DETECT(101) must follow START_DATA_UPLOAD(106)");
+            Assert.True(initIdx > detectIdx, "INIT(104) must follow DETECT(101)");
+            Assert.True(enableIdx > initIdx, "ENABLE(105) must follow INIT(104)");
+        }
+        finally
+        {
+            TryDelete(hexPath);
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteBootloaderOnlyAsync_DoesNotResetOrReinitialize()
+    {
+        var hexPath = WritePic18HexFile(seed: 22);
+        try
+        {
+            var validation = FirmwareArtifactVerifier.Validate(hexPath, expectedSha256Hex: null);
+            var artifact = validation.Artifact!;
+
+            var transport = new ScriptedPIC32Transport { Responder = BuildBootloaderOnlyResponder(failAtEraseStep: false) };
+            var variables = new TrackApplicationVariables();
+            await using var comm = new TrackCommClientAsync(transport, variables);
+            await comm.StartAsync(realHardwareMode: false);
+
+            var sendNext = new SendNextFwDataPacket(comm, artifact.Helpers);
+            var command = new FlashOneAmplifierCommand(
+                comm, variables, artifact.Helpers, sendNext,
+                messageTimeout: TimeSpan.FromSeconds(10), flashTimeout: TimeSpan.FromSeconds(10));
+
+            var result = await command.ExecuteBootloaderOnlyAsync(6);
+            Assert.True(result.Success, result.Error);
+
+            var commands = transport.SentFrames.Select(f => f[1]).ToArray();
+
+            // Bootloader-only (132) must stay unchanged: no global reset and no re-init.
+            Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_RESET, commands);
+            Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_SLAVES_ON, commands);
+            Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT, commands);
+            Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_INIT, commands);
+            Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_ENABLE, commands);
+            Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_START_DATA_UPLOAD, commands);
+        }
+        finally
+        {
+            TryDelete(hexPath);
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // (a) bootloader-only single-target sequence (skip HR11=0, run bootloader primitives)
     // -------------------------------------------------------------------------
 
@@ -487,6 +632,19 @@ public class FlashOneAmplifierTests
                     return new[] { Ctrl(TaskId.CONTROLLER, TaskStates.CONNECTED, TaskStates.DONE, TaskMessages.NONE) };
                 case TrackCommand.GET_CONTROLLER_VERSION: // 113
                     return new[] { new byte[] { Enums.HEADER, TaskId.CONTROLLER, TrackCommand.GET_CONTROLLER_VERSION, 1, 0, 0, 0x01, 0 } };
+                // Standard (131) flow global reset + post-flash re-init acks (MBUS task acks).
+                case TrackCommand.EXEC_MBUS_STATE_RESET: // 107
+                    return new[] { Ctrl(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_RESET, TaskStates.DONE, TaskMessages.NONE) };
+                case TrackCommand.EXEC_MBUS_STATE_SLAVES_ON: // 100
+                    return new[] { Ctrl(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVES_ON, TaskStates.DONE, TaskMessages.NONE) };
+                case TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT: // 101
+                    return new[] { Ctrl(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVE_DETECT, TaskStates.DONE, TaskMessages.NONE) };
+                case TrackCommand.EXEC_MBUS_STATE_SLAVE_INIT: // 104
+                    return new[] { Ctrl(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVE_INIT, TaskStates.DONE, TaskMessages.NONE) };
+                case TrackCommand.EXEC_MBUS_STATE_SLAVE_ENABLE: // 105
+                    return new[] { Ctrl(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVE_ENABLE, TaskStates.DONE, TaskMessages.NONE) };
+                case TrackCommand.EXEC_MBUS_STATE_START_DATA_UPLOAD: // 106
+                    return new[] { Ctrl(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_START_DATA_UPLOAD, TaskStates.DONE, TaskMessages.NONE) };
                 case TrackCommand.EXEC_MBUS_STATE_SLAVE_FW_FLASH: // 103
                     return new[] { Ctrl(TaskId.FWHANDLER, TrackCommand.FWHANDLERINIT, TaskStates.CONNECTED, TaskMessages.NONE) };
                 case TrackCommand.EXEC_FW_STATE_RECEIVE_FW_FILE: // 120

@@ -47,14 +47,21 @@ namespace SiebwaldeApp.Core
 
     /// <summary>
     /// Drives the existing PIC32 firmware-flash wire path for exactly ONE amplifier:
-    /// CONNECT (250) -> GET_CONTROLLER_VERSION (113) -> enter the FW handler (103) ->
+    /// CONNECT (250) -> GET_CONTROLLER_VERSION (113) -> [standard only: global reset
+    /// RESET (107) + SLAVES_ON (100)] -> enter the FW handler (103) ->
     /// download the firmware file (120 + 141 chunks) -> download the config word (121 + 151) ->
-    /// EXEC_FW_STATE_FLASH_ONE_SLAVE (131) -> wait for DONE/ERROR.
+    /// EXEC_FW_STATE_FLASH_ONE_SLAVE (131) -> wait for DONE/ERROR -> [standard only: MBUS
+    /// bring-up DETECT (101) + INIT (104) + ENABLE (105) + START_DATA_UPLOAD (106)].
+    ///
+    /// The standard (131) flow power-cycles the whole bus before the flash so the target boots at
+    /// SLAVE_INITIAL_ADDR (0xAA) in CONFIG mode (the HR11=0 bootloader-entry write is dropped by
+    /// a running amplifier's RX filter otherwise), and then re-initialises the MBUS afterward so
+    /// every other amplifier returns to neutral.
     ///
     /// <see cref="ExecuteBootloaderOnlyAsync"/> drives the bootloader-only recovery variant
     /// EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY (132): the PIC32 selects one amplifier
     /// via the backplane and runs the 8-bit bootloader sequence WITHOUT the HR11=0 entry write
-    /// (the target is already in bootloader mode).
+    /// (the target is already in bootloader mode). No reset or re-init is performed.
     ///
     /// It deliberately NEVER sends EXEC_FW_STATE_FLASH_ALL_SLAVES (122) and has no fall-back to it.
     /// The amplifier address is carried as the single data byte of command 131/132, which the
@@ -152,7 +159,16 @@ namespace SiebwaldeApp.Core
                         $"Controller version not acceptable: {observed}.", amplifier);
                 }
 
-                // 3. Enter the FW handler (the master re-announces FWHANDLERINIT/CONNECTED).
+                // 3. (Standard flow only) Global reset: power-cycle every amplifier so the
+                // target boots at SLAVE_INITIAL_ADDR (0xAA) in CONFIG mode, where the HR11=0
+                // bootloader-entry write inside FlashSequencer is honoured. Mirror the production
+                // ResetAllSlavesStep: EXEC_MBUS_STATE_RESET (107) then EXEC_MBUS_STATE_SLAVES_ON (100).
+                if (!bootloaderOnly)
+                {
+                    await ResetSlavesAsync(queue.Reader, cancellationToken).ConfigureAwait(false);
+                }
+
+                // 4. Enter the FW handler (the master re-announces FWHANDLERINIT/CONNECTED).
                 await SendAndWaitAsync(
                     queue.Reader,
                     new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVE_FW_FLASH, new byte[80]),
@@ -181,7 +197,17 @@ namespace SiebwaldeApp.Core
                     _flashTimeout, cancellationToken).ConfigureAwait(false);
 
                 if (flashReply.Taskstate == TaskStates.DONE)
+                {
+                    // (Standard flow only) Re-initialize the MBUS so the other amplifiers
+                    // (e.g. 3/4/6) are re-detected, re-addressed, enabled and back to neutral
+                    // after the global reset. DETECT -> INIT -> ENABLE -> START_DATA_UPLOAD.
+                    if (!bootloaderOnly)
+                    {
+                        await ReinitializeMbusAsync(queue.Reader, cancellationToken).ConfigureAwait(false);
+                    }
+
                     return FlashOneAmplifierResult.Ok(amplifier);
+                }
 
                 // Decode the specific sub-step the PIC32 reported on failure.
                 var stepText = FlashSequencerSubStep.TryDecode(flashReply.Taskmessage, out var step)
@@ -275,6 +301,82 @@ namespace SiebwaldeApp.Core
                      m.Taskcommand == TrackCommand.CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE &&
                      m.Taskstate == TaskStates.DONE,
                 _messageTimeout, ct).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Global reset (standard flash flow only): EXEC_MBUS_STATE_RESET (107) then
+        /// EXEC_MBUS_STATE_SLAVES_ON (100). This power-cycles every amplifier (RD1) so the target
+        /// boots at SLAVE_INITIAL_ADDR (0xAA) in CONFIG mode, where the HR11=0 bootloader-entry
+        /// write inside <c>FlashSequencer</c> is honoured. Mirrors the production
+        /// ResetAllSlavesStep command/ack sequence.
+        /// </summary>
+        private async Task ResetSlavesAsync(ChannelReader<ReceivedMessage> reader, CancellationToken ct)
+        {
+            await SendAndWaitAsync(
+                reader,
+                new SendMessage(TrackCommand.EXEC_MBUS_STATE_RESET, new byte[80]),
+                m => m.TaskId == TaskId.MBUS &&
+                     m.Taskcommand == EnumMbusStatus.MBUS_STATE_RESET &&
+                     m.Taskstate == TaskStates.DONE,
+                _messageTimeout, ct).ConfigureAwait(false);
+
+            await SendAndWaitAsync(
+                reader,
+                new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVES_ON, new byte[80]),
+                m => m.TaskId == TaskId.MBUS &&
+                     m.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVES_ON &&
+                     m.Taskstate == TaskStates.DONE,
+                _messageTimeout, ct).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Post-flash MBUS bring-up (standard flash flow only): START_DATA_UPLOAD (106) -> DETECT
+        /// (101) -> INIT (104) -> ENABLE (105). Re-detects, re-addresses and re-enables every
+        /// amplifier so the fleet (3/4/6 included) returns to its neutral, running state. Mirrors
+        /// the production DataUpload/DetectSlaves/InitTrackamplifiers/EnableTrackamplifiers step
+        /// order (same commands/acks, minus the flash/recovery steps). START_DATA_UPLOAD is sent
+        /// first to start the MBUS comm-cycle timer, and ENABLE is sent last because
+        /// MBUS_STATE_SLAVE_ENABLE leaves the MBUS in MBUS_STATE_SERVICE_TASKS (mbus.c:347), where
+        /// the cyclic poll reads HR7/HR21/HR22 (SIP2/SIP9/SIP10).
+        /// </summary>
+        private async Task ReinitializeMbusAsync(ChannelReader<ReceivedMessage> reader, CancellationToken ct)
+        {
+            // INIT configures up to 50 amplifiers and ENABLE waits ~1 s per enabled amplifier, so
+            // use a generous timeout for the bring-up steps (the reset/version acks stay at
+            // _messageTimeout).
+            var initTimeout = TimeSpan.FromMinutes(2);
+
+            await SendAndWaitAsync(
+                reader,
+                new SendMessage(TrackCommand.EXEC_MBUS_STATE_START_DATA_UPLOAD, new byte[80]),
+                m => m.TaskId == TaskId.MBUS &&
+                     m.Taskcommand == EnumMbusStatus.MBUS_STATE_START_DATA_UPLOAD &&
+                     m.Taskstate == TaskStates.DONE,
+                initTimeout, ct).ConfigureAwait(false);
+
+            await SendAndWaitAsync(
+                reader,
+                new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT, new byte[80]),
+                m => m.TaskId == TaskId.MBUS &&
+                     m.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVE_DETECT &&
+                     m.Taskstate == TaskStates.DONE,
+                initTimeout, ct).ConfigureAwait(false);
+
+            await SendAndWaitAsync(
+                reader,
+                new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVE_INIT, new byte[80]),
+                m => m.TaskId == TaskId.MBUS &&
+                     m.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVE_INIT &&
+                     m.Taskstate == TaskStates.DONE,
+                initTimeout, ct).ConfigureAwait(false);
+
+            await SendAndWaitAsync(
+                reader,
+                new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVE_ENABLE, new byte[80]),
+                m => m.TaskId == TaskId.MBUS &&
+                     m.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVE_ENABLE &&
+                     m.Taskstate == TaskStates.DONE,
+                initTimeout, ct).ConfigureAwait(false);
         }
 
         /// <summary>
