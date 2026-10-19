@@ -154,10 +154,14 @@ namespace SiebwaldeApp.Core
             // 1) Amplifier data frame: HEADER + SLAVEINFO
             if (header == HEADER && sender == SLAVEINFO)
             {
-                // Never interpret a legacy/truncated map as a Phase-1 observation.
-                if (buffer.Length != TrackSlaveInfoFrame.Length || buffer[2] != HEADER || buffer[^1] != FOOTER)
+                // The firmware wraps SLAVEINFO in its fixed 82-byte udpTrans_t envelope, and its
+                // SLAVE_INFO struct (PetitModbus.h) has 2 bytes of compiler alignment padding
+                // before the 4-byte SLAVE_DATA MbCommError enum, so the firmware trailer is 2
+                // bytes longer than the packed TrackSlaveInfoFrame layout used by the simulator.
+                // Accept both layouts and skip the padding only for the longer firmware frame.
+                bool firmwareLayout = buffer.Length >= TrackSlaveInfoFrame.Length + 2;
+                if (buffer.Length < TrackSlaveInfoFrame.Length || buffer[2] != HEADER)
                     return;
-                // EXACT dezelfde volgorde als in TrackIOHandle.HandleNewData :contentReference[oaicite:6]{index=6}
 
                 ushort mbHeader = reader.ReadByte();
                 ushort slaveNumber = reader.ReadByte();
@@ -173,11 +177,17 @@ namespace SiebwaldeApp.Core
                 ushort mbReceiveCounter = reader.ReadUInt16();
                 ushort mbSentCounter = reader.ReadUInt16();
 
+                if (firmwareLayout)
+                    reader.ReadUInt16(); // 2-byte alignment padding before MbCommError (firmware layout)
+
                 uint mbCommError = reader.ReadUInt32();
 
                 ushort mbExceptionCode = reader.ReadByte();
                 ushort spiCommErrorCounter = reader.ReadByte();
                 ushort mbFooter = reader.ReadByte();
+
+                if (mbFooter != FOOTER)
+                    return;
 
                 int index = slaveNumber; // net als in TrackIOHandle: trackAmpItems[SlaveNumber]
 
