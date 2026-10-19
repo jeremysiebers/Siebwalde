@@ -140,20 +140,60 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
-        public async Task RecoverSlaves_WithMatchingVerifiedArtifact_ProceedsToFlash()
+        public async Task RecoverSlaves_WithRequest_DelegatesToSingleTargetFlasher_WithCorrectTarget()
         {
             var hexPath = WritePic18HexFile(seed: 2);
             try
             {
                 var artifact = FirmwareArtifactVerifier.Validate(hexPath, null).Artifact!;
                 var comm = new RecordingCommClient();
-                var request = new FirmwareRecoveryRequest(1, artifact, FirmwareOperationType.EmergencyRecovery);
-                var step = NewRecoverStep(comm, artifact, request);
+                var flasher = new FakeSingleTargetFlasher { Result = FlashOneAmplifierResult.Ok(7) };
+                var request = new FirmwareRecoveryRequest(7, artifact, FirmwareOperationType.EmergencyRecovery);
+                var sendNext = new SendNextFwDataPacket(comm, artifact.Helpers);
+                var step = new RecoverSlavesStep(comm, new TrackApplicationVariables(), sendNext, artifact.Helpers,
+                    recoveryRequest: request, singleTargetFlasher: flasher);
 
                 var result = await step.ExecuteAsync(null, CancellationToken.None);
 
-                Assert.Equal(InitStepResultKind.Continue, result.Kind);
-                Assert.Equal(new[] { (byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_FW_FLASH }, comm.Sent.ToArray());
+                Assert.Equal(InitStepResultKind.NextStep, result.Kind);
+                Assert.Equal("DetectSlaves", result.NextStepName);
+                // The explicit single target is honoured: the flasher is called exactly once, with
+                // the request's target, never a probed "whatever slave is in bootloader".
+                Assert.Equal(new byte[] { 7 }, flasher.Targets.ToArray());
+                Assert.Equal(1, flasher.Calls);
+                // The step itself issues NO raw bootloader write (103/124/125/120/141/121/151/...) and
+                // never EXEC_FW_STATE_FLASH_ALL_SLAVES (122).
+                Assert.Empty(comm.Sent);
+                Assert.DoesNotContain((byte)TrackCommand.EXEC_FW_STATE_FLASH_ALL_SLAVES, comm.Sent);
+            }
+            finally
+            {
+                TryDelete(hexPath);
+            }
+        }
+
+        [Fact]
+        public async Task RecoverSlaves_WithRequest_FlasherFailure_ReturnsError()
+        {
+            var hexPath = WritePic18HexFile(seed: 8);
+            try
+            {
+                var artifact = FirmwareArtifactVerifier.Validate(hexPath, null).Artifact!;
+                var comm = new RecordingCommClient();
+                var flasher = new FakeSingleTargetFlasher
+                {
+                    Result = FlashOneAmplifierResult.Fail("PIC32 ERROR at sub-step 2 (erase)", 7, 2),
+                };
+                var request = new FirmwareRecoveryRequest(7, artifact, FirmwareOperationType.EmergencyRecovery);
+                var sendNext = new SendNextFwDataPacket(comm, artifact.Helpers);
+                var step = new RecoverSlavesStep(comm, new TrackApplicationVariables(), sendNext, artifact.Helpers,
+                    recoveryRequest: request, singleTargetFlasher: flasher);
+
+                var result = await step.ExecuteAsync(null, CancellationToken.None);
+
+                Assert.Equal(InitStepResultKind.Error, result.Kind);
+                Assert.Contains("erase", result.ErrorMessage);
+                Assert.Empty(comm.Sent); // no flash write occurred
             }
             finally
             {
@@ -268,6 +308,21 @@ namespace SiebwaldeApp.Core.Tests
             }
 
             public ValueTask DisposeAsync() => default;
+        }
+
+        private sealed class FakeSingleTargetFlasher : ISingleTargetRecoveryFlasher
+        {
+            public readonly List<byte> Targets = new();
+            public int Calls;
+            public FlashOneAmplifierResult Result;
+
+            public Task<FlashOneAmplifierResult> ExecuteBootloaderOnlyAsync(
+                byte targetAmplifier, CancellationToken cancellationToken = default)
+            {
+                Calls++;
+                Targets.Add(targetAmplifier);
+                return Task.FromResult(Result);
+            }
         }
 
         private static void TryDelete(string path)
