@@ -138,6 +138,48 @@ static void test_initialization_path(void) {
     assert(slaves[2].MbSentCounter==0 && slaves[0].MbSentCounter==0);
     puts("PASS: production ConfigureSlave reads identity before address write; incompatible slot skipped; enable unicast only\n");
 }
+static void test_address_write_busy_guard(void) {
+    unsigned before;
+    /* Reach case 3 (HR2 address write) through the production ConfigureSlave FSM. */
+    reset(); slaves[51].SlaveDetected=slaves[1].SlaveDetected=true;
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(!ConfigureSlave(51,1,1,0) && Data.SlaveAddress==51); ack();
+    assert(!ConfigureSlave(51,1,1,0)); now+=16u*MILISECONDS;
+    assert(!ConfigureSlave(51,1,1,0) && StartupMachine==10);
+    assert(!ConfigureSlave(51,1,1,0) && Data.Direction==READ && Data.StartRegister==7);
+    reply(0x1101);
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(!ConfigureSlave(51,1,1,0) && Data.Direction==READ);
+    reply(0x1101);
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(StartupMachine==3);
+
+    /* Transmitter busy: the HR2 write must be deferred, never silently dropped.
+     * A dropped write would leave MbCommError IDLE and case 4 would misread it
+     * as SLAVENOK, clearing AmplifierCompatible for a write never transmitted. */
+    Petit_Tx_State=PETIT_RXTX_WAIT_ANSWER;
+    before=reports;
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(StartupMachine==3);           /* stayed pending, not advanced to case 4 */
+    assert(ISxAMPLIFIERxCOMPATIBLE(1));  /* no premature incompatible */
+    assert(reports==before);             /* no ERROR (SLAVENOK) notification */
+
+    /* Transmitter free: the write is issued and the FSM advances to case 4. */
+    Petit_Tx_State=PETIT_RXTX_IDLE;
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(Data.SlaveAddress==0xaa && Data.Direction==WRITE && Data.StartRegister==2);
+    assert(StartupMachine==4);
+
+    /* A genuine write failure (NOK response) still surfaces as an error. */
+    dump[0].MbCommError=SLAVE_DATA_NOK; Petit_Tx_State=PETIT_RXTX_IDLE;
+    before=reports;
+    assert(!ConfigureSlave(51,1,1,0));
+    assert(!ISxAMPLIFIERxCOMPATIBLE(1));
+    assert(reports==before+1);           /* ERROR notification emitted */
+    assert(StartupMachine==5);           /* advanced to deselect */
+
+    puts("PASS: HR2 address write guarded by PetitModbusIsReady; busy defers, genuine NOK still errors\n");
+}
 static void test_stop_confirmation(void) {
     reset(); slaves[1].SlaveDetected=true; AmplifierCompatible[1]=true;
     slaves[1].HoldingReg[HR_IDENTITY]=0xf101;
@@ -293,7 +335,8 @@ static void test_heartbeat_and_mailbox(void) {
     puts("PASS: heartbeat/late expiry/wrap/re-arm; identity write gate; purge; full-mailbox lease priority; frame completeness\n");
 }
 int main(void) {
-    test_identity(); test_initialization_path(); test_poll_and_lease(); test_stop_confirmation();
+    test_identity(); test_initialization_path(); test_address_write_busy_guard();
+    test_poll_and_lease(); test_stop_confirmation();
     test_retries_and_failures(); test_heartbeat_and_mailbox();
     test_transport_busy();
     test_a2_encoding_and_bootloader();

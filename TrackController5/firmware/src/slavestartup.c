@@ -540,6 +540,13 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
 
         /* Program new SlaveId only after compatibility was established. */
         case 3:
+            /* Never issue the HR2 address write while the transmitter is still
+             * busy with the identity read: SENDxPETITxMODBUS silently drops a
+             * request when Petit_Tx_State != PETIT_RXTX_IDLE, leaving MbCommError
+             * IDLE, which case 4 would misread as SLAVENOK. Stay pending until
+             * the transmitter is free; the Modbus receive timeout bounds this
+             * wait, so this is not an unbounded stall. */
+            if (!PetitModbusIsReady()) break;
             Data.SlaveAddress  = SLAVE_INITIAL_ADDR;
             Data.Direction     = WRITE;
             Data.NoOfRegisters = 1;

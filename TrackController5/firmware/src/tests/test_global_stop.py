@@ -59,6 +59,7 @@ void *memset(void *p, int value, unsigned long long size) {
     return p;
 }
 #include "enums.h"
+#include "version.h"
 '''
 prefix += re.sub(r"^#include.*$", "", (SRC / "modbus/PetitModbus.h").read_text(), flags=re.M)
 prefix += petit[petit.index("typedef enum"):petit.index("/****************End of Slave Transmit")]
