@@ -17,6 +17,7 @@ namespace SiebwaldeApp.Core
         private readonly SendNextFwDataPacket _sendNextFwDataPacket;
         private readonly TrackAmplifierBootloaderHelpers _bootloaderHelpers;
         private readonly string _loggerInstance;
+        private readonly FirmwareRecoveryRequest? _recoveryRequest;
 
         // Legacy fields 1:1
         private int _subState;
@@ -32,13 +33,15 @@ namespace SiebwaldeApp.Core
             SendNextFwDataPacket sendNextFwDataPacket,
             TrackAmplifierBootloaderHelpers bootloaderHelpers,
             string loggerInstance = "Track",
-            uint attemptMax = 3)
+            uint attemptMax = 3,
+            FirmwareRecoveryRequest? recoveryRequest = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             _variables = variables ?? throw new ArgumentNullException(nameof(variables));
             _sendNextFwDataPacket = sendNextFwDataPacket ?? throw new ArgumentNullException(nameof(sendNextFwDataPacket));
             _bootloaderHelpers = bootloaderHelpers ?? throw new ArgumentNullException(nameof(bootloaderHelpers));
             _loggerInstance = loggerInstance ?? "Track";
+            _recoveryRequest = recoveryRequest;
 
             _subState = 0;
             _loopCounter = 1;
@@ -137,6 +140,36 @@ namespace SiebwaldeApp.Core
 
         private async Task<InitStepResult> State0_SendExecMbusStateSlaveFwFlashAsync(CancellationToken cancellationToken)
         {
+            // Fail-closed recovery gate: without an explicit, operator-authorized recovery request
+            // carrying a verified artifact, recovery must never write firmware. Recovery eligibility
+            // is independent of how many amplifiers were detected; an absent/unverified recovery
+            // request simply skips recovery (no flash) and proceeds to the normal path.
+            if (_recoveryRequest is null)
+            {
+                IoC.Logger.Log(
+                    "State.DetectSlaveRecovery => no authorized recovery request; skipping recovery (no flash).",
+                    _loggerInstance);
+                return InitStepResult.Next("FlashFwTrackamplifiers");
+            }
+
+            // Defense-in-depth: the flash data must match the verified artifact's embedded checksum.
+            // A mismatch means the recovery flash data is not the artifact that was independently
+            // verified, so recovery aborts before any write.
+            if (_bootloaderHelpers.GetFileCheckSum == 0 ||
+                _bootloaderHelpers.GetFileCheckSum != _recoveryRequest.Artifact.EmbeddedChecksum)
+            {
+                IoC.Logger.Log(
+                    "State.DetectSlaveRecovery => flash data checksum does not match the verified artifact; aborting recovery (no flash).",
+                    _loggerInstance);
+                return InitStepResult.Error("Recovery artifact checksum mismatch; refusing to flash.");
+            }
+
+            IoC.Logger.Log(
+                $"State.DetectSlaveRecovery => authorized {_recoveryRequest.OperationType} recovery of " +
+                $"amplifier #{_recoveryRequest.TargetAmplifierAddress} (verified artifact SHA-256 " +
+                $"{_recoveryRequest.Artifact.Sha256Hex}).",
+                _loggerInstance);
+
             var msg = _sendMessageTemplate;
             msg.Command = TrackCommand.EXEC_MBUS_STATE_SLAVE_FW_FLASH;
 

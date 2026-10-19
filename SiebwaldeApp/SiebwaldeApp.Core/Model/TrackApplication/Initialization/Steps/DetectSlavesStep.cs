@@ -23,9 +23,10 @@
         private uint _loopCounter;
         private readonly uint _attemptMax;
 
-        // Threshold for "enough slaves detected".
-        // In the legacy code this was effectively > 2.
-        private readonly uint _minRequiredSlaves = 3;
+        // Explicit, operator-authorized recovery request. Recovery eligibility is driven by this
+        // request alone, NOT by the number of detected amplifiers (count-independent). Without a
+        // request, detection always proceeds to the normal deployment path.
+        private readonly FirmwareRecoveryRequest? _recoveryRequest;
 
         public string Name => "DetectSlaves";
 
@@ -33,7 +34,8 @@
             ITrackCommClient commClient,
             TrackApplicationVariables variables,
             string loggerInstance = "Track",
-            uint attemptMax = 3)
+            uint attemptMax = 3,
+            FirmwareRecoveryRequest? recoveryRequest = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             _variables = variables ?? throw new ArgumentNullException(nameof(variables));
@@ -42,6 +44,7 @@
             _subState = 0;
             _loopCounter = 1;
             _attemptMax = attemptMax;
+            _recoveryRequest = recoveryRequest;
 
             // Create dummy data container (like legacy constructor).
             var dummyData = new byte[80];
@@ -136,22 +139,42 @@
                 $"State.DetectSlaves => {slaveCount} slaves in total detected.",
                 _loggerInstance);
 
-            if (slaveCount >= _minRequiredSlaves)
+            // Count-independent recovery eligibility: the number of detected amplifiers no longer
+            // gates recovery. Recovery is attempted only under an explicit, operator-authorized
+            // recovery request; otherwise detection always proceeds to the normal deployment path
+            // (normal-operation readiness, which legitimately requires every mapped amplifier, is a
+            // separate concern handled later, not by a detection-count threshold here).
+            if (_recoveryRequest is null)
             {
-                // We have enough slaves; in the legacy code this resulted in:
-                //  - Finished + "Remove:RecoverSlaves"
-                // Here we directly jump to the next logical step: FlashFwTrackamplifiers.
                 _subState = 0;
                 _loopCounter = 1;
 
                 IoC.Logger.Log(
-                    "State.DetectSlaves => enough slaves detected, proceed to FlashFwTrackamplifiers.",
+                    "State.DetectSlaves => no explicit recovery request; proceed to FlashFwTrackamplifiers.",
                     _loggerInstance);
 
                 return InitStepResult.Next("FlashFwTrackamplifiers");
             }
 
-            // Not enough slaves detected: either we exceeded attempts or we should try recovery.
+            // Recovery requested: recovery success is recognized by the EXPLICIT target being
+            // detected again, not by the fleet-wide detected count (count-independent). When the
+            // target is back, recovery is complete and detection proceeds to the normal path.
+            bool targetDetected =
+                _variables.trackAmpItems[_recoveryRequest.TargetAmplifierAddress].SlaveDetected == 1;
+            if (targetDetected)
+            {
+                _subState = 0;
+                _loopCounter = 1;
+
+                IoC.Logger.Log(
+                    $"State.DetectSlaves => recovery target #{_recoveryRequest.TargetAmplifierAddress} detected; " +
+                    "recovery complete, proceed to FlashFwTrackamplifiers.",
+                    _loggerInstance);
+
+                return InitStepResult.Next("FlashFwTrackamplifiers");
+            }
+
+            // Target still missing: bounded recovery attempts before giving up.
             if (_loopCounter > _attemptMax)
             {
                 IoC.Logger.Log(
@@ -164,8 +187,8 @@
             }
 
             IoC.Logger.Log(
-                $"State.DetectSlaves => not enough slaves, checking for one slave stuck in bootloader mode. " +
-                $"Attempt {_loopCounter} of {_attemptMax}.",
+                $"State.DetectSlaves => explicit recovery request (target #{_recoveryRequest.TargetAmplifierAddress} still not detected), " +
+                $"checking for one slave stuck in bootloader mode. Attempt {_loopCounter} of {_attemptMax}.",
                 _loggerInstance);
 
             _subState = 0;
