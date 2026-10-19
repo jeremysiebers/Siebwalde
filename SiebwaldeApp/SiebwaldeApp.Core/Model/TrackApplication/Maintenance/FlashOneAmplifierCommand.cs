@@ -67,7 +67,7 @@ namespace SiebwaldeApp.Core
     /// The amplifier address is carried as the single data byte of command 131/132, which the
     /// PIC32 passes to the pre-existing <c>FlashSequencer(slave)</c>.
     /// </summary>
-    public sealed class FlashOneAmplifierCommand
+    public sealed class FlashOneAmplifierCommand : ISingleTargetRecoveryFlasher
     {
         private readonly ITrackCommClient _commClient;
         private readonly TrackApplicationVariables _variables;

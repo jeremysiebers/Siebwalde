@@ -3,12 +3,18 @@
 namespace SiebwaldeApp.Core
 { 
     /// <summary>
-    /// Initialization step that tries to recover a single slave that is stuck
-    /// in bootloader mode and re-flashes its firmware.
+    /// Initialization step that recovers a single, explicitly identified amplifier stuck in
+    /// bootloader mode and re-flashes its firmware.
+    ///
+    /// Recovery is fail-closed and count-independent. Without an explicit
+    /// <see cref="FirmwareRecoveryRequest"/> (single 1..50 target + verified artifact), recovery
+    /// never writes firmware. With a request, recovery is routed through the proven single-target
+    /// bootloader-only primitive (command 132) so the explicit target is honoured; it never falls
+    /// back to a fleet-wide write or to the legacy un-targeted FSM. The legacy 15-state FSM below
+    /// (states 1..15) is preserved only as the legacy/fallback reference and is never reached for
+    /// explicit recovery.
     ///
     /// Legacy equivalent: RecoverSlaves (IAmplifierInitializersBaseClass).
-    /// The SubMethodState values and transitions are kept identical to the
-    /// original implementation.
     /// </summary>
     public sealed class RecoverSlavesStep : IInitializationStep
     {
@@ -17,6 +23,8 @@ namespace SiebwaldeApp.Core
         private readonly SendNextFwDataPacket _sendNextFwDataPacket;
         private readonly TrackAmplifierBootloaderHelpers _bootloaderHelpers;
         private readonly string _loggerInstance;
+        private readonly FirmwareRecoveryRequest? _recoveryRequest;
+        private readonly ISingleTargetRecoveryFlasher? _singleTargetFlasher;
 
         // Legacy fields 1:1
         private int _subState;
@@ -32,13 +40,17 @@ namespace SiebwaldeApp.Core
             SendNextFwDataPacket sendNextFwDataPacket,
             TrackAmplifierBootloaderHelpers bootloaderHelpers,
             string loggerInstance = "Track",
-            uint attemptMax = 3)
+            uint attemptMax = 3,
+            FirmwareRecoveryRequest? recoveryRequest = null,
+            ISingleTargetRecoveryFlasher? singleTargetFlasher = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             _variables = variables ?? throw new ArgumentNullException(nameof(variables));
             _sendNextFwDataPacket = sendNextFwDataPacket ?? throw new ArgumentNullException(nameof(sendNextFwDataPacket));
             _bootloaderHelpers = bootloaderHelpers ?? throw new ArgumentNullException(nameof(bootloaderHelpers));
             _loggerInstance = loggerInstance ?? "Track";
+            _recoveryRequest = recoveryRequest;
+            _singleTargetFlasher = singleTargetFlasher;
 
             _subState = 0;
             _loopCounter = 1;
@@ -137,18 +149,60 @@ namespace SiebwaldeApp.Core
 
         private async Task<InitStepResult> State0_SendExecMbusStateSlaveFwFlashAsync(CancellationToken cancellationToken)
         {
-            var msg = _sendMessageTemplate;
-            msg.Command = TrackCommand.EXEC_MBUS_STATE_SLAVE_FW_FLASH;
+            // Fail-closed recovery gate: without an explicit, operator-authorized recovery request
+            // carrying a verified artifact, recovery must never write firmware. Recovery eligibility
+            // is independent of how many amplifiers were detected; an absent/unverified recovery
+            // request simply skips recovery (no flash) and proceeds to the normal path.
+            if (_recoveryRequest is null)
+            {
+                IoC.Logger.Log(
+                    "State.DetectSlaveRecovery => no authorized recovery request; skipping recovery (no flash).",
+                    _loggerInstance);
+                return InitStepResult.Next("FlashFwTrackamplifiers");
+            }
 
-            await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
-
-            _subState = 1;
+            // Defense-in-depth: the flash data must match the verified artifact's embedded checksum.
+            // A mismatch means the recovery flash data is not the artifact that was independently
+            // verified, so recovery aborts before any write.
+            if (_bootloaderHelpers.GetFileCheckSum == 0 ||
+                _bootloaderHelpers.GetFileCheckSum != _recoveryRequest.Artifact.EmbeddedChecksum)
+            {
+                IoC.Logger.Log(
+                    "State.DetectSlaveRecovery => flash data checksum does not match the verified artifact; aborting recovery (no flash).",
+                    _loggerInstance);
+                return InitStepResult.Error("Recovery artifact checksum mismatch; refusing to flash.");
+            }
 
             IoC.Logger.Log(
-                "State.DetectSlaveRecovery => EXEC_MBUS_STATE_SLAVE_FW_FLASH.",
+                $"State.DetectSlaveRecovery => authorized {_recoveryRequest.OperationType} recovery of " +
+                $"amplifier #{_recoveryRequest.TargetAmplifierAddress} (verified artifact SHA-256 " +
+                $"{_recoveryRequest.Artifact.Sha256Hex}); routing through the single-target " +
+                "bootloader-only primitive (command 132).",
                 _loggerInstance);
 
-            return InitStepResult.Continue();
+            // Route the explicit recovery through the proven single-target primitive (command 132),
+            // NOT the legacy un-targeted FSM below. This honours the explicit target amplifier, so a
+            // multi-bootloader ambiguity can never flash the wrong amplifier, and it never falls
+            // back to EXEC_FW_STATE_FLASH_ALL_SLAVES (122).
+            var flasher = _singleTargetFlasher ?? new FlashOneAmplifierCommand(
+                _commClient, _variables, _bootloaderHelpers, _sendNextFwDataPacket);
+            var result = await flasher.ExecuteBootloaderOnlyAsync(
+                _recoveryRequest.TargetAmplifierAddress, cancellationToken).ConfigureAwait(false);
+
+            if (result.Success)
+            {
+                IoC.Logger.Log(
+                    $"State.DetectSlaveRecovery => recovery of amplifier #{_recoveryRequest.TargetAmplifierAddress} " +
+                    "succeeded (single-target 132 DONE); returning to DetectSlaves.",
+                    _loggerInstance);
+                return InitStepResult.Next("DetectSlaves");
+            }
+
+            IoC.Logger.Log(
+                $"State.DetectSlaveRecovery => recovery of amplifier #{_recoveryRequest.TargetAmplifierAddress} " +
+                $"failed: {result.Error}",
+                _loggerInstance);
+            return InitStepResult.Error(result.Error ?? "Single-target recovery failed.");
         }
 
         private async Task<InitStepResult> State1_WaitForFwHandlerConnectedAsync(
