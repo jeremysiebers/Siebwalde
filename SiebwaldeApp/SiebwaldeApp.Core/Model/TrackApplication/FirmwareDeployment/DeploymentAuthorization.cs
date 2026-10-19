@@ -37,7 +37,7 @@ namespace SiebwaldeApp.Core
 
         /// <summary>
         /// Decides whether <paramref name="target"/> may be flashed. The artifact must already have
-        /// been verified by <see cref="FirmwareArtifactVerifier"/>; <paramref name="artifactVerified"/>
+        /// been verified by <see cref="FirmwareDeploymentArtifactVerifier"/>; <paramref name="artifactVerified"/>
         /// carries that result. This decision performs no file or hardware I/O.
         /// </summary>
         public static DeploymentAuthorization Authorize(

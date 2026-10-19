@@ -194,7 +194,7 @@ namespace SiebwaldeApp.Core
             string? artifactSha256 = null;
             if (_deploymentSession is not null)
             {
-                var verification = FirmwareArtifactVerifier.Verify(_deploymentSession.Artifact);
+                var verification = FirmwareDeploymentArtifactVerifier.Verify(_deploymentSession.Artifact);
                 artifactSha256 = verification.ComputedSha256Hex;
                 artifactVerified = verification.IsVerified;
 

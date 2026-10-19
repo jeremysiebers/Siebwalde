@@ -95,7 +95,7 @@ public class FirmwareArtifactVerificationTests
     }
 
     [Fact]
-    public void FirmwareArtifactVerifier_ValidArtifact_Verified()
+    public void FirmwareDeploymentArtifactVerifier_ValidArtifact_Verified()
     {
         const ushort checksum = 0xE906;
         var content = FirmwareHexTestFactory.Emit(FirmwareHexTestFactory.BuildImage(checksum));
@@ -103,7 +103,7 @@ public class FirmwareArtifactVerificationTests
         try
         {
             var identity = new FirmwareArtifactIdentity(path, Sha256Hex(path), checksum);
-            var result = FirmwareArtifactVerifier.Verify(identity);
+            var result = FirmwareDeploymentArtifactVerifier.Verify(identity);
             Assert.True(result.IsVerified, result.Reason);
             Assert.Equal(checksum, result.EmbeddedChecksum);
         }
@@ -114,7 +114,7 @@ public class FirmwareArtifactVerificationTests
     }
 
     [Fact]
-    public void FirmwareArtifactVerifier_WrongSha256_Fails()
+    public void FirmwareDeploymentArtifactVerifier_WrongSha256_Fails()
     {
         const ushort checksum = 0xE906;
         var content = FirmwareHexTestFactory.Emit(FirmwareHexTestFactory.BuildImage(checksum));
@@ -122,7 +122,7 @@ public class FirmwareArtifactVerificationTests
         try
         {
             var identity = new FirmwareArtifactIdentity(path, new string('0', 64), checksum);
-            var result = FirmwareArtifactVerifier.Verify(identity);
+            var result = FirmwareDeploymentArtifactVerifier.Verify(identity);
             Assert.False(result.IsVerified);
             Assert.Contains("SHA-256 mismatch", result.Reason);
         }
@@ -133,7 +133,7 @@ public class FirmwareArtifactVerificationTests
     }
 
     [Fact]
-    public void FirmwareArtifactVerifier_WrongExpectedChecksum_Fails()
+    public void FirmwareDeploymentArtifactVerifier_WrongExpectedChecksum_Fails()
     {
         const ushort checksum = 0xE906;
         var content = FirmwareHexTestFactory.Emit(FirmwareHexTestFactory.BuildImage(checksum));
@@ -141,7 +141,7 @@ public class FirmwareArtifactVerificationTests
         try
         {
             var identity = new FirmwareArtifactIdentity(path, Sha256Hex(path), 0xAAAA);
-            var result = FirmwareArtifactVerifier.Verify(identity);
+            var result = FirmwareDeploymentArtifactVerifier.Verify(identity);
             Assert.False(result.IsVerified);
             Assert.Contains("checksum", result.Reason);
         }
@@ -152,13 +152,13 @@ public class FirmwareArtifactVerificationTests
     }
 
     [Fact]
-    public void FirmwareArtifactVerifier_MissingFile_Fails()
+    public void FirmwareDeploymentArtifactVerifier_MissingFile_Fails()
     {
         var identity = new FirmwareArtifactIdentity(
             Path.Combine(Path.GetTempPath(), $"does-not-exist-{Guid.NewGuid():N}.hex"),
             new string('0', 64),
             0xE906);
-        var result = FirmwareArtifactVerifier.Verify(identity);
+        var result = FirmwareDeploymentArtifactVerifier.Verify(identity);
         Assert.False(result.IsVerified);
         Assert.Contains("not found", result.Reason);
     }

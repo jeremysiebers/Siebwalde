@@ -36,7 +36,7 @@ namespace SiebwaldeApp.Core
     /// Intel HEX structural integrity, the embedded PIC18 bootloader checksum word, and the
     /// expected embedded checksum. All checks must pass before an artifact may be authorized.
     /// </summary>
-    public static class FirmwareArtifactVerifier
+    public static class FirmwareDeploymentArtifactVerifier
     {
         public static ArtifactVerificationResult Verify(FirmwareArtifactIdentity identity)
         {
