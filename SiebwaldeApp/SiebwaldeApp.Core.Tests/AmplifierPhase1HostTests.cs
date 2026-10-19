@@ -106,6 +106,30 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
+        public async Task ConfigDownload_SucceedsWhenLeaseRenewalOverwritesWriteResult()
+        {
+            // The PIC32 issues a broadcast HR1 (Control) lease renewal every
+            // MOTION_LEASE_RENEWAL_MS (100 ms). Each such write re-arms the amp's
+            // single HR15 write-result to (address=1,result=0)=0x0001, so "HR15 ==
+            // address" is never stably observable for HR3..HR6. The downloader must
+            // verify config writes by VALUE readback (HR3..HR6) and the APPLY by
+            // HR8 state, not by HR15, or it deadlocks until its timeout.
+            var item = Amplifier(1, SimulatedTrackAmplifier.Phase1Identity, 0, 0);
+            var client = new LeaseRenewalCommClient(item);
+            var downloader = new AmplifierConfigurationDownloader(client)
+            { Timeout = TimeSpan.FromSeconds(2) };
+
+            var ok = await downloader.DownloadAsync(item, new AmplifierConfiguration(), CancellationToken.None);
+
+            Assert.True(ok);
+            Assert.True(item.ConfigurationVerified);
+            Assert.Null(item.Phase1Failure);
+            // The simulated lease renewal keeps HR15 at 0x0001 the whole time,
+            // proving the download no longer depends on the write-result register.
+            Assert.Equal(0x0001, item.HoldingReg[TrackAmplifierRegisters.WriteResult]);
+        }
+
+        [Fact]
         public async Task ProtocolVersion02_Incompatible_BlocksConfigDownload()
         {
             var config = new TrackSimulatorConfig(
@@ -172,6 +196,41 @@ namespace SiebwaldeApp.Core.Tests
             Assert.False(item.ConfigurationVerified);
 
             await client.DisposeAsync();
+        }
+
+        [Fact]
+        public void HasCompatibleProtocolVersion_DistinguishesZeroFromPhase1()
+        {
+            Assert.False(TrackAmplifierRegisters.HasCompatibleProtocolVersion(0x0000));
+            Assert.True(TrackAmplifierRegisters.HasCompatibleProtocolVersion(0x0001));
+            Assert.False(TrackAmplifierRegisters.HasCompatibleProtocolVersion(0x0002));
+            Assert.Equal(0x01, TrackAmplifierRegisters.FwProtocolVersion(0x0001));
+        }
+
+        [Fact]
+        public void HandleNewData_TransientProtocolZero_DoesNotMaskSkippedDownload()
+        {
+            var variables = new TrackApplicationVariables();
+            var client = new TrackCommClientAsync(new UnusedTransport(), variables);
+            var item = variables.trackAmpItems[1];
+            item.SlaveDetected = 1;
+
+            // First readback: HR7 Phase-1 compatible but HR22 transiently 0 (SIP10 not yet read).
+            var regs = new ushort[TrackAmplifierRegisters.Count];
+            regs[TrackAmplifierRegisters.Identity] = SimulatedTrackAmplifier.Phase1Identity;
+            regs[TrackAmplifierRegisters.FwVersionPatchProtocol] = 0x0000;
+            Parse(client, TrackSlaveInfoFrame.Encode(1, 1, regs));
+            Assert.Equal(AmplifierPhase1Safety.IncompatibleProtocolVersion, item.Phase1Failure);
+            Assert.False(item.ConfigurationVerified);
+
+            // Second readback: HR22 now 0x0001, but the config download was skipped (not verified).
+            regs[TrackAmplifierRegisters.FwVersionPatchProtocol] = 0x0001;
+            Parse(client, TrackSlaveInfoFrame.Encode(1, 1, regs));
+
+            // The protocol failure must NOT be cleared while ConfigurationVerified is false, so a
+            // skipped download is never silently masked as "no failure".
+            Assert.Equal(AmplifierPhase1Safety.IncompatibleProtocolVersion, item.Phase1Failure);
+            Assert.False(item.ConfigurationVerified);
         }
 
         [Fact]
@@ -708,6 +767,48 @@ namespace SiebwaldeApp.Core.Tests
                 return Task.CompletedTask;
             }
             public ValueTask DisposeAsync() => default;
+        }
+
+        /// <summary>Comm client that applies writes to the item's HoldingReg readback
+        /// while forcing HR15 (write-result) to 0x0001, modelling the PIC32's
+        /// 100 ms broadcast HR1 lease renewal overwriting the amp's write-result.</summary>
+        private sealed class LeaseRenewalCommClient : ITrackCommClient
+        {
+            private readonly TrackAmplifierItem _item;
+            public event EventHandler<AmplifierDataEventArgs>? AmplifierDataReceived;
+            public event EventHandler<ControlMessageEventArgs>? ControlMessageReceived;
+
+            public LeaseRenewalCommClient(TrackAmplifierItem item) => _item = item;
+
+            public Task StartAsync(bool realHardwareMode, CancellationToken cancellationToken = default)
+                => Task.CompletedTask;
+            public Task StopAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+            public ValueTask DisposeAsync() => default;
+
+            public Task SendAsync(SendMessage message, CancellationToken cancellationToken = default)
+            {
+                var d = message.Data;
+                if (d[1] == 0xAA) // WRITE (0xAA) vs READ (0x55)
+                {
+                    byte reg = d[3];
+                    ushort value = (ushort)(d[4] | (d[5] << 8));
+                    if (reg == TrackAmplifierRegisters.Control &&
+                        value == TrackAmplifierRegisters.ApplyConfigBit)
+                    {
+                        // APPLY edge: mark the config applied (InitDone|ConfigOk on HR8).
+                        _item.HoldingReg[TrackAmplifierRegisters.State] |=
+                            (ushort)(TrackAmplifierRegisters.InitDoneBit | TrackAmplifierRegisters.ConfigOkBit);
+                    }
+                    else if (reg < TrackAmplifierRegisters.Count)
+                    {
+                        _item.HoldingReg[reg] = value;
+                    }
+                    // Lease-renewal broadcast: HR15 always reads 0x0001.
+                    _item.HoldingReg[TrackAmplifierRegisters.WriteResult] = 0x0001;
+                }
+                _item.ProtocolReadbackSequence++;
+                return Task.CompletedTask;
+            }
         }
     }
 }

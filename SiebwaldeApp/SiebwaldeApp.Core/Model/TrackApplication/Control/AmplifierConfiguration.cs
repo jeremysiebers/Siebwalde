@@ -12,7 +12,7 @@ namespace SiebwaldeApp.Core
     public sealed class AmplifierConfigurationDownloader
     {
         private readonly ITrackCommClient _comm;
-        public TimeSpan Timeout { get; init; } = TimeSpan.FromSeconds(2);
+        public TimeSpan Timeout { get; init; } = TimeSpan.FromSeconds(20);
         public AmplifierConfigurationDownloader(ITrackCommClient comm) => _comm = comm;
 
         public static SendMessage Exchange(ushort slave, byte register, ushort value, bool read = false)
@@ -51,7 +51,7 @@ namespace SiebwaldeApp.Core
                 await _comm.SendAsync(Exchange(item.SlaveNumber, 1, TrackAmplifierRegisters.ApplyConfigBit), deadline.Token).ConfigureAwait(false);
                 await _comm.SendAsync(Exchange(item.SlaveNumber, 8, 0, true), deadline.Token).ConfigureAwait(false);
                 await _comm.SendAsync(Exchange(item.SlaveNumber, 15, 0, true), deadline.Token).ConfigureAwait(false);
-                await WaitAsync(() => item.ProtocolReadbackSequence > sequence && item.HoldingReg[15] == 1 &&
+                await WaitAsync(() => item.ProtocolReadbackSequence > sequence &&
                     (item.HoldingReg[8] & 0x0600) == 0x0600 && values.SequenceEqual(item.HoldingReg.Skip(3).Take(4)), deadline.Token).ConfigureAwait(false);
                 if (!AmplifierPhase1Safety.Compatible(item)) throw new InvalidOperationException("compatibility changed during configuration");
                 item.ConfigurationVerified = true;
@@ -70,7 +70,14 @@ namespace SiebwaldeApp.Core
             await _comm.SendAsync(Exchange(item.SlaveNumber, address, value), ct).ConfigureAwait(false);
             await _comm.SendAsync(Exchange(item.SlaveNumber, address, 0, true), ct).ConfigureAwait(false);
             await _comm.SendAsync(Exchange(item.SlaveNumber, 15, 0, true), ct).ConfigureAwait(false);
-            await WaitAsync(() => item.ProtocolReadbackSequence > sequence && item.HoldingReg[15] == address &&
+            // Verify the write by READBACK of the written value, not by the HR15
+            // write-result. The PIC32 issues a broadcast HR1 (Control) lease
+            // renewal every MOTION_LEASE_RENEWAL_MS (100 ms); every such write
+            // re-arms the amp's single HR15 write-result to (address=1,result=0),
+            // so "HR15 == address" is never stably observable for addresses 3..6.
+            // HR1 (Control) is edge-triggered and is verified by the APPLY state
+            // (HR8 0x0600) in DownloadAsync, so it needs no value readback here.
+            await WaitAsync(() => item.ProtocolReadbackSequence > sequence &&
                 (address == 1 || item.HoldingReg[address] == value), ct).ConfigureAwait(false);
         }
 
