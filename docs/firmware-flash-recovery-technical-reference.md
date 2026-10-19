@@ -74,8 +74,8 @@ Do **not** use the different old `default`-configuration PIC32 image (SHA prefix
 
 | Target | New artifact SHA-256 | Version / contract | Evidence |
 |---|---|---|---|
-| PIC32 Production | `6CEC61D4C28F514D34C22B4537D9D11A2F4ADEA9A7BDB5C2957E3E2674152101` | `1.0.0`, controller-version command 113, protocol 0x01 | Reproducible 803,291-byte HEX; real ICD3 flash/rollback/reflash reported PASS; version command 113 still PENDING |
-| PIC18 Offset | `4F9ED4ECD6B925066D67A9F465022FA5F8DF3716F040F209B58190FE1F305A2A` | `1.0.0`, application checksum `0xE906`, map/protocol 0x01, HR21/HR22 | Offline built and verified; real PIC18 flash PENDING |
+| PIC32 Production | `6CEC61D4C28F514D34C22B4537D9D11A2F4ADEA9A7BDB5C2957E3E2674152101` | `1.0.0`, controller-version command 113, protocol 0x01 | Reproducible 803,291-byte HEX; real ICD3 flash/rollback/reflash reported PASS; version command 113 CONFIRMED (1.0.0, protocol 0x01, build 2026-10-17) |
+| PIC18 Offset | `4F9ED4ECD6B925066D67A9F465022FA5F8DF3716F040F209B58190FE1F305A2A` | `1.0.0`, application checksum `0xE906`, map/protocol 0x01, HR21/HR22 | Offline built and verified; real PIC18 flash/rollback/reflash DONE on amp 1; runtime `HR11=0xE906`, `HR7=0xF101`, `HR21=0x0100`, `HR22=0x0001` |
 
 The deployed old PIC18 legacy Offset image remains present in some project `dist/Offset` directories even though current source `version.h` may advertise 1.0.0. **A file path, build header or version.h is not firmware identity.** For every flash verify exact HEX bytes/SHA, PIC18 embedded checksum, target/hardware/protocol match, and runtime readback.
 
@@ -85,13 +85,39 @@ For PIC32 Production 1.0.0, source changed `__DATE__/__TIME__` to deterministic 
 
 **HARDWARE-REPORTED COMPLETE:** PO-powered-up, ICD3 target rev A3, `DEVSN0 ecda3e32` / `DEVSN1 5ac05410`, firmware suite `01.56.10`; image Baseline 0→PIC32 1.0.0→Baseline 0→PIC32 1.0.0 with `Programming/Verify complete`, target released and ping recovered after each. This PROVES the ICD3 programming/verification/rollback/reflash route on real hardware. PIC32 last programmed image = 1.0.0.
 
-**PENDING:** GET_CONTROLLER_VERSION=113 response using a valid C# CONNECT handshake; PIC32 slave-inventory/legacy-amp communication after new firmware; physically observed safe/neutral output; complete Phase-1 hardware acceptance. Ping and IPECMD “Program Succeeded” alone do **not** prove full runtime behavior.
+**DONE:** GET_CONTROLLER_VERSION=113 confirmed via a valid C# CONNECT handshake (version 1.0.0, protocol 0x01, build 2026-10-17). **PENDING:** PIC32 slave-inventory/legacy-amp communication after new firmware; physically observed safe/neutral output; complete Phase-1 hardware acceptance. Ping and IPECMD “Program Succeeded” alone do **not** prove full runtime behavior.
 
 Original ICD3 power error (`could not detect target voltage VDD`) had a **PO-confirmed mundane cause**: target power intentionally off while the operator was away; power later restored. Not a DFP or ICD3 hardware defect. Do not reopen this as unresolved after the subsequent successful flash cycle.
 
 ### 2.4 Validated baseline model
 
 Keep permanently: immutable **Baseline 0**, plus a **current validated full-stack baseline** with PIC32, PIC18, C# host, protocol versions, mapping/topology, exact artifact hashes, toolchain, tests, recovery procedure and independent Integrator evidence. Successful flash and component tests do not automatically promote Baseline 1. Candidate build identity (version+source commit+SHA) is distinct from hardware acceptance status. After the system meets full stack gates, freeze/publish the new accepted baseline without deleting Baseline 0.
+
+## 2.5 PIC18 amp-1 flash/rollback/reflash round-trip (HARDWARE-REPORTED, 2026-10-19)
+
+**COMPLETE on real hardware:** amp 1 `0x251F → 0xE906 → 0x251F → 0xE906`, via command 131 (`EXEC_FW_STATE_FLASH_ONE_SLAVE`), plus a bootloader-only command 132 (`EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY`) recovery after an early 131 flash left amp 1 in bootloader mode.
+
+**Final amp-1 runtime readback (via the `--read-hr` CLI):**
+- `HR11 = 0xE906` (1.0.0 application checksum)
+- `HR21 = 0x0100` (MAJOR=1, MINOR=0)
+- `HR22 = 0x0001` (PATCH=0, PROTOCOL=0x01)
+- `HR7 = 0xF101` (identity = capability `0xF` | device-class `1` | map `0x01`)
+- `HR0 = 0x018F` (399 = neutral setpoint; does **not** by itself prove H-bridge output or all Phase-1 safety functions)
+- `SlaveDetected = 1`
+
+Amplifiers 3/4/6 remain on legacy `0x251F` (their HR7/HR21/HR22 read 0 — expected, since the identity/version registers are 1.0.0-only).
+
+**Command 131 requires a global reset first.** A running amp answers on its ASSIGNED address (1), not the boot address `0xAA`, so the `HR11=0` bootloader-entry write (`FlashSequencer` case 6 → `SLAVE_INITIAL_ADDR 0xAA`) is dropped by the amp RX filter and the flash fails at sub-step 7 "verify bootloader entry". The only firmware reset is the GLOBAL RD1 line (`Slaves_Disable_On/Off`). PO-authorized: command 131 now sends `EXEC_MBUS_STATE_RESET` (107) → `EXEC_MBUS_STATE_SLAVES_ON` (100) before the flash (all amps power-cycle; 3/4/6 are re-initialized to neutral afterward). The legacy `FlashAllSlavesAuto` (122) worked because it ran after `ResetAllSlaves` in the full init sequence.
+
+**Bring-up ordering (readback correctness).** The `--read-hr` CLI and the post-131 re-init must send `START_DATA_UPLOAD` (106) BEFORE `DETECT`(101)/`INIT`(104)/`ENABLE`(105) and end with ENABLE, so the MBUS ends in `MBUS_STATE_SERVICE_TASKS`, where the cyclic poll (`SendNextMessage` SIP2/SIP9/SIP10) reads HR7/HR21/HR22. Ending with START_DATA_UPLOAD leaves the MBUS in WAIT and starves those reads.
+
+**Incomplete SLAVEINFO cycle (read-0) — corrected with evidence-based retry.** The old `--read-hr` returned after the first "fresh" `ProtocolReadbackSequence` advance, before SIP2/SIP10 had populated HR7/HR22, so those read 0 with `MbCommError=BUSY`. Corrected (no arbitrary fixed sleep): bounded retry — 500 ms interval, 15 s max — accepting completion only when a fresh frame arrived AND (for `HR11==0xE906` amps) HR7/HR21/HR22 are populated. Known legacy (`0x251F`) amps are excluded from the identity/version requirement.
+
+**Earlier download failure (RESOLVED).** The first bootloader-only recovery download failed with `RECEIVED_CHECKSUM_NOK`; root cause was STALE PIC32 mailbox/static state from a firewall-interrupted first attempt, not a checksum/host defect (the host emits the byte-exact 30720-byte image, word-sum `0x251F`). A PIC32 ICD3 reset + fresh-process retry recovered amp 1.
+
+**Proven vs inferred.** The flash/rollback/reflash round-trip, the command-131 global-reset requirement, the bring-up ordering, the incomplete-cycle read-0 cause, and the stale-mailbox download cause are SOURCE-VERIFIED + HARDWARE-REPORTED. The exact internal mechanism of the stale mailbox state is INFERRED (not captured). The `0xE906` HEX was rebuilt bit-identically from committed source (`f9ae0ed`/`52d3fe2`) — it is NOT a stale build and contains the HR7/HR21/HR22 population.
+
+**Not a Baseline 1 promotion.** Only amp 1 is migrated to 1.0.0; amps 3/4/6 remain `0x251F`, and full Phase-1 physical safety acceptance (V4 H-bridge output, all protection functions) is still open.
 
 ## 3. PIC32 master programming and diagnosis
 
