@@ -662,7 +662,12 @@ void ProcessPetitModbus(void)
 
     if (Petit_RxDataAvailable())                                                // If data is ready enter this!
     {
-        if ((Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS) || (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)) // Is Data for us?
+        /* The backplane has no legitimate broadcast use case: a broadcast (address 0)
+         * FC06/FC16 would otherwise write holding registers (e.g. HR0, which drives the
+         * AMP_IDx_SET bootloader-selection outputs) with no response. Reject broadcasts
+         * here, before dispatch, so no register write or AMP_ID side effect occurs and
+         * no response is generated. A subsequent unicast is unaffected. */
+        if (Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS) // Is Data for us?
         {
             PetitDiagnosticRegisters[(NUMBER_OF_DIAGNOSTIC_PETITREGISTERS - 2)].ActValue += 1;// Count the amount of received messages
             
