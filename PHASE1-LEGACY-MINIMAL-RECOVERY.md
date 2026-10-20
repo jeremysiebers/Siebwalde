@@ -37,14 +37,14 @@ Confirmed present only in the dirty worktrees / non-Git `bootrec` tree, NOT in t
 
 ## 5. PIC32 UART/ISR comparison
 
-- Legacy/committed UART: 9-bit RX (`PDSEL=3`), 8-bit TX, 2 Mbaud, `PetitModbusIsReady()` readiness.
+- Legacy/committed PIC32 UART2: **9-bit (`PDSEL=3`) for BOTH master transmission (address-marked request, D8=1 on the address byte) and receive**, 2 Mbaud. The PIC18 amplifier's reply is 8-bit TX (`TX9=0`, `TX9D=0`) — the historical asymmetry (master 9-bit RX vs amplifier 8-bit TX), present in L and NOT a new Phase-1 defect. `PetitModbusIsReady()` readiness.
 - Experimental B added: fault-ISR `U2RXREG` sampling + formatted `DIAG-*` logging, and the 63 MHz clock.
 - **Stabilization candidate: no ISR diagnostics, no `U2RXREG` consumption in the fault path, 84 MHz.** The guard fix `346d962` (`if (!PetitModbusIsReady()) break;` before the HR2 address write) is the only UART-path change retained.
 
 ## 6. PIC18 interrupt and UART comparison
 
 - `interrupt_manager.c` is **identical** legacy→current. IPEN=0; RX/TMR3/TMR4 use software dispatch order (no distinct hardware priority levels). No evidence Phase-1 removed a high-priority UART interrupt.
-- **No interrupt-priority change in the candidate.** The experimental 9-bit TX (`TX9=1`) is REVERTED — the legacy 8-bit TX (`TX9=0`) is the baseline policy.
+- **No interrupt-priority change in the candidate.** The experimental amplifier 9-bit reply TX (`TX9=1`, `0xCD1B`) is REVERTED — the legacy amplifier 8-bit reply TX (`TX9=0`) is the baseline policy. The PIC32 master transmission remains 9-bit address-marked in the candidate (unchanged from legacy).
 
 ## 7. PIC18 safety delta and ServiceTick analysis
 
