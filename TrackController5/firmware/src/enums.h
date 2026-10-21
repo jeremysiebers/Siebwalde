@@ -153,6 +153,7 @@ typedef enum
 	EXEC_MBUS_STATE_START_DATA_UPLOAD           				= 106,
 	EXEC_MBUS_STATE_RESET                       				= 107,
     EXEC_MBUS_SLAVE_DATA_EXCH                                   = 108,
+    GET_CONTROLLER_VERSION                                      = 113,
 						
 	/* FWHANDLER COMMANDS */						
     EXEC_FW_STATE_RECEIVE_FW_FILE         						= 120,

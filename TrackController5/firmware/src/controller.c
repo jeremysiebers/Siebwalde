@@ -58,6 +58,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "mbus.h"
 #include "slavehandler.h"
 #include "enums.h"
+#include "version.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -102,6 +103,28 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 /* TODO:  Add any necessary local functions.
 */
+
+/* Reply header=HEADER, command=CONTROLLER, data[0]=echo 113, data[1..3]=MAJOR/MINOR/PATCH,
+ * data[4]=PROTOCOL_VERSION, data[5]=0, data[6..N]=CTRL_RELEASE_TIMESTAMP (null-terminated). */
+static void REPLYxCONTROLLERxVERSION(void)
+{
+    udpTrans_t frame = {0};
+    const char *build = CTRL_RELEASE_TIMESTAMP;
+    unsigned i = 0;
+    frame.header = HEADER;
+    frame.command = CONTROLLER;
+    frame.data[0] = GET_CONTROLLER_VERSION;
+    frame.data[1] = CTRL_FW_MAJOR;
+    frame.data[2] = CTRL_FW_MINOR;
+    frame.data[3] = CTRL_FW_PATCH;
+    frame.data[4] = CTRL_PROTOCOL_VERSION;
+    frame.data[5] = 0u;
+    while (build[i] && i < (sizeof(frame.data) - 6u)) {
+        frame.data[6u + i] = (uint8_t)build[i];
+        ++i;
+    }
+    PUTxDATAxINxSENDxMAILxBOX(&frame);
+}
 
 
 // *****************************************************************************
@@ -198,6 +221,11 @@ void CONTROLLER_Tasks ( void )
                 {
                     CREATExTASKxSTATUSxMESSAGE(task_id, CONNECTED, DONE, NONE); // assume same client is connecting again
                     LOG_Push("Controller\t: Client re-connected, controller going to Idle state.");
+                    break;
+                }
+                case GET_CONTROLLER_VERSION:
+                {
+                    REPLYxCONTROLLERxVERSION();
                     break;
                 }                
                 case EXEC_MBUS_STATE_SLAVES_ON:
