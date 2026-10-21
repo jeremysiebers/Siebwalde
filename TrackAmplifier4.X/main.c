@@ -36,6 +36,11 @@ void main(void) {
     /* Store firmware checksum to HoldingReg11 (HR_SW_CHECKSUM) for flash checking */
     PetitHoldingRegisters[HR_SW_CHECKSUM].ActValue = ReadFlashChecksum();
 
+    /* Store firmware identity/version to HoldingReg3/9/10 (read-only, set once at init) */
+    PetitHoldingRegisters[HR_IDENTITY].ActValue                = AMP_IDENTITY;
+    PetitHoldingRegisters[HR_FW_VERSION].ActValue             = AMP_FW_VERSION;
+    PetitHoldingRegisters[HR_FW_VERSION_PATCH_PROTO].ActValue = AMP_FW_VERSION_PATCH_PROTO;
+
     /* Enable the Global Interrupts */
     INTERRUPT_GlobalInterruptEnable();
 

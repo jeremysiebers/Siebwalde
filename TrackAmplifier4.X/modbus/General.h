@@ -32,8 +32,8 @@ extern volatile unsigned int Timer1_Tick_Counter;
 /* HoldingReg2: Status / feedback */
 #define HR_STATUS                       2u  /* HoldingReg2: Back-EMF feedback and status bits */
 
-/* HoldingReg3: Amplifier status */
-#define HR_AMP_STATUS                   3u  /* HoldingReg3: Amplifier status word */
+/* HoldingReg3: Firmware identity (device class + legacy map revision) */
+#define HR_IDENTITY                     3u  /* HoldingReg3: Track Amplifier identity (0xF100) */
 
 /* HoldingReg4..6: Measured values */
 #define HR_FUSE_VOLTAGE                 4u  /* HoldingReg4: H-bridge fuse voltage */
@@ -46,14 +46,40 @@ extern volatile unsigned int Timer1_Tick_Counter;
 
 /* ----------------------------- CONFIG PARAMETERS --------------------------- */
 
-/* HoldingReg9: Amplifier configuration */
-#define HR_CONFIG_ID_PWM                9u  /* HoldingReg9: Amplifier ID, PWM mode, reset */
+/* HoldingReg9: Firmware semantic version (major.minor) */
+#define HR_FW_VERSION                   9u  /* HoldingReg9: firmware version 0.1 */
 
-/* HoldingReg10: Accel / Decel parameters */
-#define HR_ACCEL_PARAMS                10u  /* HoldingReg10: Acceleration / deceleration parameters */
+/* HoldingReg10: Firmware patch + protocol revision */
+#define HR_FW_VERSION_PATCH_PROTO      10u  /* HoldingReg10: patch 0, protocol 0x00 */
 
 /* HoldingReg11: Firmware checksum */
 #define HR_SW_CHECKSUM                 11u  /* HoldingReg11: Firmware checksum / flash check value */
+
+/* ----------------------------- IDENTITY / VERSION -------------------------- */
+/*
+ * Read-only, immutable firmware identity/version words (PO-authorized L2).
+ * Assigned to the holding registers exactly once at init (main.c) and never
+ * mutated at runtime. They imply NO Phase-1 capability: the protocol revision
+ * is 0x00 (legacy/unknown) and the map revision is 0x00 (legacy 12-register
+ * map), deliberately distinct from Phase-1's 0x01 map revision.
+ */
+
+/* HR_IDENTITY (HoldingReg3) = 0xF100: high byte 0xF1 = Track Amplifier device
+ * class, low byte 0x00 = legacy map revision (NOT Phase-1 0x01). */
+#define AMP_DEVICE_CLASS                0xF1u
+#define AMP_MAP_VERSION                 0x00u
+#define AMP_IDENTITY                    ((AMP_DEVICE_CLASS << 8) | AMP_MAP_VERSION)
+
+/* HR_FW_VERSION (HoldingReg9) = 0x0001: high byte major 0, low byte minor 1 -> 0.1. */
+#define AMP_FW_MAJOR                    0u
+#define AMP_FW_MINOR                    1u
+#define AMP_FW_VERSION                  ((AMP_FW_MAJOR << 8) | AMP_FW_MINOR)
+
+/* HR_FW_VERSION_PATCH_PROTO (HoldingReg10) = 0x0000: high byte patch 0,
+ * low byte protocol revision 0x00 (legacy/unknown; NOT Phase-1 0x01). */
+#define AMP_FW_PATCH                    0u
+#define AMP_PROTOCOL_VERSION            0x00u
+#define AMP_FW_VERSION_PATCH_PROTO      ((AMP_FW_PATCH << 8) | AMP_PROTOCOL_VERSION)
 
 /* -------------------------------------------------------------------------- */
 /* HR_PWM_COMMAND (HoldingReg0) bit layout                                    */
