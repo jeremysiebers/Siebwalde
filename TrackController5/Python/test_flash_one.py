@@ -177,6 +177,33 @@ def make_driver(transport, image, slave_id=7, **kw):
     return FlashOneDriver(transport, image, slave_id, **opts)
 
 
+class FakeClock(object):
+    """Mutable monotonic clock for deterministic timeout tests."""
+
+    def __init__(self):
+        self.now = 0.0
+
+    def __call__(self):
+        return self.now
+
+    def advance(self, dt):
+        self.now += dt
+
+
+class ClockAdvancingTransport(MockTransport):
+    """Acks like the firmware but advances a fake clock on every poll, simulating
+    a slow-but-progressing target (for the overall FW-transfer-timeout test)."""
+
+    def __init__(self, row_packet_count, clock, per_poll=0.01):
+        super(ClockAdvancingTransport, self).__init__(row_packet_count)
+        self._clock = clock
+        self._per_poll = per_poll
+
+    def poll(self):
+        self._clock.advance(self._per_poll)
+        return super(ClockAdvancingTransport, self).poll()
+
+
 class TestHexImageParsing(unittest.TestCase):
     """(c) the HEX checksum + config word are correctly parsed."""
 
@@ -433,6 +460,27 @@ class TestStaleFrameDrain(unittest.TestCase):
                         "stale frame must be drained before 120")
         # Driver still completes with the correct sequence.
         self.assertEqual(commands_of(transport)[0], CONNECT)
+
+
+class TestFwTransferTimeout(unittest.TestCase):
+    """F5(c): overall FW-download budget aborts a slow-but-progressing transfer."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.image = HexImage(HEX_PATH)
+        cls.n = cls.image.row_packet_count
+
+    def test_overall_fw_transfer_timeout_aborts(self):
+        clock = FakeClock()
+        transport = ClockAdvancingTransport(self.n, clock, per_poll=0.01)
+        driver = make_driver(transport, self.image, slave_id=7,
+                             clock=clock, fw_transfer_timeout=1.0)
+        with self.assertRaises(FlashAbort) as ctx:
+            driver.run()
+        self.assertIn("FW transfer", str(ctx.exception))
+        # Aborted mid-download: never reached SELECT_SLAVE/ERASE (no destruction).
+        self.assertNotIn(SELECT_SLAVE, commands_of(transport))
+        self.assertNotIn(ERASE, commands_of(transport))
 
 
 if __name__ == "__main__":

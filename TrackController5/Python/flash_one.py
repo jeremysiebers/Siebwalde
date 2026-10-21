@@ -59,6 +59,48 @@ collects the streamed SLAVEINFO frames (header 0xAA, command 0xFF, layout in
 (patch/proto) and HR11 (firmware checksum) for the amplifiers in REPORT_SLAVES.
 Offline, the commands are still emitted; SLAVEINFO collection is a no-op so
 `--dry-run` prints the planned readback commands without opening a socket.
+
+F4 -- single-target sequence and the irreversible point
+--------------------------------------------------------
+SelectSlave (123) itself performs, in order (slavefwhandler.c:1177-1324):
+Slaves_Disable_Off (case 0) -> 9-bit-modbus UART switch + backplane slot select
+HOLDINGREG0 = SLOT1<<ShiftSlot1 (case 2) -> HOLDINGREG11 = 0 to force the
+selected slave to reset INTO bootloader (case 4) -> release slot HOLDINGREG0 = 0
+(case 6).  It does NOT switch to 8-bit: each bootloader command 125-129 performs
+its own UART2_Config_8bit_Bootloader() at entry and UART2_Config_9bit_Modbus()
+at exit (e.g. slavefwhandler.c:305-306/313-314), exactly as the full 122
+FlashSequencer does (slavefwhandler.c:844-1127).  The driver therefore does NOT
+need to (and does not) drive Slaves_Disable_Off or UART mode itself.
+
+The first IRREVERSIBLE operation is EXEC_FW_STATE_ERASE_FLASH (125) ->
+ERASExFLASH() -> CMD_ERASE_FLASH to the selected slave's bootloader (the old
+firmware is destroyed).  Before 125 the driver has already validated, non-
+destructively: slave id in 1..50, the HEX checksum parsed, and the entire
+download acked OK (120 standby, every 141, FW_CHECKSUM=RECEIVED_CHECKSUM_OK,
+FWHANDLER/120 DONE, 121 standby, 151, FWHANDLER/121 DONE).  SELECT_SLAVE (123)
+emits no ack, so it is followed by a bounded delay before 125.
+
+F5 -- timeout budget (no auto-reset, no auto-repeat)
+----------------------------------------------------
+(a) per-command ack timeout  : ACK_TIMEOUT (10 s) for CONNECT/103/120/121/MBUS.
+(b) per-block (141) ack      : each 141 ack uses ACK_TIMEOUT (10 s).
+(c) overall FW transfer      : FW_TRANSFER_TIMEOUT (120 s) bounds the whole
+                               120->141xN->checksum->DONE phase.
+(d) bootloader erase/write/checksum ack : BOOTLOADER_ACK_TIMEOUT (60 s) for
+                               125-129 (source-supported: each bootloader op has
+                               a 1 s internal timeout, slavebootloaderroutines.c:
+                               114/226/355/467; WRITExFLASH streams 0x7800 bytes
+                               in 64-byte blocks, so the 60 s budget is generous).
+Every timeout raises FlashAbort and TERMINATES the attempt.  The driver never
+auto-resets the target, never re-sends a failed command, and has no retry loop.
+
+Feedback handling
+-----------------
+The driver correlates task_id + task_command + task_state + task_message in
+every ack predicate; discards (clears) stale/non-matching frames; aborts
+immediately on task_state == ERROR and names RECEIVED_WRONG_COMMAND explicitly;
+targets only 192.168.1.193 (Comm.DataAquisition default, overridable via
+--ip); never emits 122/131/132; and has no uncontrolled retry loop.
 """
 
 from __future__ import print_function
@@ -105,6 +147,11 @@ ACK_TIMEOUT = 10.0
 # (slavebootloaderroutines.c:271-377), so this needs a much larger budget than
 # the fast FW-handler acks.
 BOOTLOADER_ACK_TIMEOUT = 60.0
+
+# Overall FW-download budget (F5): the whole 120 -> 141xN -> checksum -> DONE
+# phase must complete within this wall-clock time.  Per-packet acks are bounded
+# by ACK_TIMEOUT; this is the outer bound for a slow-but-progressing transfer.
+FW_TRANSFER_TIMEOUT = 120.0
 
 # SLAVEINFO upload frames are tagged with the 0xFF command byte (enums.h
 # `#define SLAVEINFO 0xFF`; the legacy Comm.py names it EnumCommand.MODBUS).
@@ -282,13 +329,16 @@ class FlashOneDriver(object):
     def __init__(self, transport, hex_image, slave_id,
                  sleep=time.sleep, delays=None, ack_timeout=ACK_TIMEOUT,
                  bootloader_ack_timeout=BOOTLOADER_ACK_TIMEOUT,
-                 report_slaves=REPORT_SLAVES, log=None):
+                 fw_transfer_timeout=FW_TRANSFER_TIMEOUT,
+                 report_slaves=REPORT_SLAVES, log=None, clock=time.monotonic):
         self.transport = transport
         self.hex_image = hex_image
         self.slave_id = int(slave_id)
         self._sleep = sleep
+        self._clock = clock
         self.ack_timeout = ack_timeout
         self.bootloader_ack_timeout = bootloader_ack_timeout
+        self.fw_transfer_timeout = fw_transfer_timeout
         self.report_slaves = tuple(report_slaves)
         self._log = log if log is not None else _default_log
 
@@ -332,8 +382,8 @@ class FlashOneDriver(object):
         Non-matching (non-ERROR) feedback is cleared and discarded.
         """
         timeout = self.ack_timeout if timeout is None else timeout
-        deadline = time.monotonic() + timeout
-        while time.monotonic() < deadline:
+        deadline = self._clock() + timeout
+        while self._clock() < deadline:
             fb = self.transport.poll()
             if fb is not None:
                 self.transport.clear()
@@ -358,7 +408,7 @@ class FlashOneDriver(object):
         inside the PIC32's receive mailbox (which the host cannot clear).
         """
         window = self.delays["drain"] if window is None else window
-        deadline = time.monotonic() + window
+        deadline = self._clock() + window
         drained = 0
         while True:
             fb = self.transport.poll()
@@ -367,7 +417,7 @@ class FlashOneDriver(object):
             self.transport.clear()
             drained += 1
             self._log("Drain(%s): discarded %s" % (what, _decode_feedback(fb)))
-            if time.monotonic() >= deadline:
+            if self._clock() >= deadline:
                 break
             self._sleep(0.005)
         if drained:
@@ -410,6 +460,16 @@ class FlashOneDriver(object):
         # Bounded idle read after CONNECT/103 and before 120: clear any stale
         # status frames so they cannot be misread as FW-download acks.
         self._drain_feedback("pre-download")
+
+        # Overall FW-transfer budget (F5c): the whole download phase is bounded
+        # so a slow-but-progressing transfer still terminates.
+        transfer_deadline = self._clock() + self.fw_transfer_timeout
+
+        def _check_transfer_deadline():
+            if self._clock() > transfer_deadline:
+                raise FlashAbort("overall FW transfer timed out (%.1fs)"
+                                 % self.fw_transfer_timeout)
+
         # 120 -> FW handler enters FwFileDownload(), acks STANDBY.
         self._send_simple(EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE)  # 120
         self._wait_feedback(
@@ -421,6 +481,7 @@ class FlashOneDriver(object):
         # 141 x N -- 4 rows (64 bytes) per packet, ack between packets.
         rows = self.rows_list
         for i in range(0, len(rows), ROWS_PER_PACKET):
+            _check_transfer_deadline()
             chunk = rows[i:i + ROWS_PER_PACKET]
             payload = b"".join(bytes(r[1]) for r in chunk)
             self._send_payload(
@@ -433,6 +494,7 @@ class FlashOneDriver(object):
                 "RECEIVE_FW_FILE data ack")
 
         # Firmware self-checksums the received image and acks CHECKSUM_OK.
+        _check_transfer_deadline()
         self._wait_feedback(
             lambda f: (f[0] == EnumCommand.FWFILEDOWNLOAD
                        and f[1] == EnumCommand.FILEDOWNLOAD_STATE_FW_CHECKSUM
@@ -441,6 +503,7 @@ class FlashOneDriver(object):
             "RECEIVE_FW_FILE checksum OK")
 
         # FW handler final "done" ack for 120.
+        _check_transfer_deadline()
         self._wait_feedback(
             lambda f: (f[0] == EnumTaskId.FWHANDLER
                        and f[1] == EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE
@@ -520,7 +583,23 @@ class FlashOneDriver(object):
     # Post-flash readback verification (Fix 2, hardware only)
     # ------------------------------------------------------------------ #
     def _verify_readback(self):
-        # 100 -> SLAVES_ON (MBUS acks MBUS_STATE_SLAVES_ON DONE)
+        # F6 -- READ-ONLY verification.  This step is deliberately read-only and
+        # MUST NOT enable any output/motion:
+        #   100 SLAVES_ON        -> Slaves_Disable_Off() = clear the active-high
+        #                           disable pin (system_config.h:516), i.e. power
+        #                           the rail to a NEUTRAL, non-output-enabled state
+        #                           (amplifiers idle; NOT driving the track).
+        #   106 START_DATA_UPLOAD-> start the periodic modbus poll + SLAVEINFO
+        #                           upload (read-only).
+        #   101 SLAVE_DETECT     -> SLAVExDETECT() polls each slave's HRs
+        #                           (slavestartup.c:72) -- read-only.
+        # 100 is technically redundant after a successful flash (SelectSlave
+        # already called Slaves_Disable_Off at slavefwhandler.c:1180) but it is
+        # harmless (re-asserts neutral power) and matches the standard legacy
+        # detect flow (TrackController.py: 100 -> 106 -> 101).  EXEC_MBUS_STATE_
+        # SLAVE_ENABLE (105) / ENABLExAMPLIFIER (slavestartup.c:584) writes
+        # HOLDINGREG1=0x8000 and actually ENABLES the outputs -- the driver
+        # MUST NOT (and does not) send 105 or any motion/output command.
         self._send_simple(EnumCommand.EXEC_MBUS_STATE_SLAVES_ON)  # 100
         self._wait_feedback(
             lambda f: (f[0] == EnumTaskId.MBUS
@@ -557,8 +636,8 @@ class FlashOneDriver(object):
             return
 
         collected = {}
-        deadline = time.monotonic() + self.delays["collect"]
-        while time.monotonic() < deadline:
+        deadline = self._clock() + self.delays["collect"]
+        while self._clock() < deadline:
             records = poll_slaveinfo()
             if records:
                 for rec in records:
@@ -808,7 +887,12 @@ def main(argv=None):
         dac.sock_trans.connect((dac.IPAddr, dac.UDP_PORT_TRANS))
 
     driver = FlashOneDriver(DataAquisitionTransport(dac), image, args.slave_id)
-    driver.run()
+    try:
+        driver.run()
+    except FlashAbort as exc:
+        # F5: terminate cleanly -- NO auto-reset, NO auto-repeat.
+        print("FLASH ABORTED: %s" % exc, flush=True)
+        return 1
     print("Flash-one sequence emitted for slave %d." % args.slave_id, flush=True)
     return 0
 
