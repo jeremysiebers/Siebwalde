@@ -39,12 +39,11 @@ class Bootloader:
 
 class DataAquisition:
     def __init__(self, AmountOfAmplifiers):
-        try:
-            self.IPAddr = socket.gethostbyname('TRACKCONTROL') 
-            print("Ip address of TRACKCONTROL found: " + str(self.IPAddr))
-        except:
-            print('Ip address not found, assuming 192.168.1.100...')
-            self.IPAddr = '192.168.1.100'
+        # LEGACY RESTORATION (2026-10-20): PIC32 master is at 192.168.1.193 (DHCP).
+        # Hardcode TX target to avoid the stale 'TRACKCONTROL' DNS / .100 fallback
+        # ambiguity -- a DIFFERENT device answers at 192.168.1.100 (TTL=64 vs PIC32 TTL=128).
+        self.IPAddr = '192.168.1.193'
+        print("Ip address of TRACKCONTROL (PIC32) set to: " + str(self.IPAddr))
         
         self.UDP_IP_RECV = ''
         self.UDP_PORT_RECV = 10001 
@@ -119,16 +118,27 @@ class DataAquisition:
         try:
             self.line, addr = self.sock_recv.recvfrom(200)            
         except:
-            pass
+            # Nothing available (non-blocking socket): reset and bail out.
+            self.line = 0
+            return
+        
+        if not self.line:
+            return
         
         try:
-            while (len(self.line) > 0):
+            # Bounded parse loop.  A stray/malformed datagram without the 0xAA
+            # header previously looped forever on `self.line = self.line[-1:]`
+            # (header_index == -1).  Guard and bound it.
+            loop_count = 0
+            while (len(self.line) > 0) and (loop_count < 8):
+                loop_count += 1
             
                 self.header_index = self.line.find(self.header)
+                if(self.header_index < 0):
+                    return  # no 0xAA header present: drop this datagram
                             
                 if(self.header_index != 0):
                     self.line = self.line[self.header_index:]
-                    print ("header found at " + str(self.header_index))            
                 
                 try:
                     self.data = struct.unpack ("<5B", self.line[:5])
