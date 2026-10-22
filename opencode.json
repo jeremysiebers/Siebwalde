@@ -2,6 +2,22 @@
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "project-lead",
   "subagent_depth": 1,
+  "mcp": {
+    "picoscope": {
+      "type": "local",
+      "command": [
+        "C:\\Localdata\\Siebwalde\\tools\\picoscope\\.venv\\Scripts\\python.exe",
+        "-m",
+        "tools.picoscope.mcp"
+      ],
+      "cwd": "C:\\Localdata\\Siebwalde",
+      "enabled": true,
+      "environment": {
+        "PICOSCOPE_EVIDENCE_DIR": "C:\\Localdata\\Siebwalde\\tools\\picoscope\\evidence\\mcp"
+      },
+      "timeout": 15000
+    }
+  },
   "permission": {
     "edit": "allow",
     "webfetch": "allow",
