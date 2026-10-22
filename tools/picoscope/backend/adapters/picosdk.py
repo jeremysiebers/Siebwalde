@@ -12,6 +12,11 @@ lazily and a missing ``ps3000a.dll`` raises :class:`BackendUnavailableError`.
     against a real 3406D MSO**. It is the starting point for the PICO-2 physical
     preflight (``PICO-2-PREFLIGHT.md``).
 
+    The ctypes prototypes/constants were verified in PICO-2 against the installed
+    ``picosdk`` 1.1 wrapper (``picosdk.ps3000a`` / ``picosdk.constants``), and
+    genuine parameter-type / pointer / return-status defects were corrected. The
+    adapter remains NOT runtime-validated against hardware.
+
     A real-device request that cannot be satisfied raises — it **never** silently
     falls back to the simulator.
 """
@@ -37,6 +42,12 @@ from ... import version as _version
 
 BACKEND_NAME = "ps3000a"
 
+#: PicoScope 7 install folder containing the vendor ``ps3000a.dll`` (and its
+#: ``picoipp.dll`` dependency). The DLL is NOT on the default ctypes search path
+#: (it is not in System32/SysWOW64), so this folder is registered as a DLL search
+#: directory before ctypes loads the driver.
+_PICO7_DLL_DIR = r"C:\Program Files\Pico Technology\PicoScope 7 T&M Stable"
+
 # --------------------------------------------------------------------------- #
 # Constants transcribed from the official picosdk.ps3000a wrapper (source-backed).
 # --------------------------------------------------------------------------- #
@@ -57,6 +68,7 @@ PS3000A_DIGITAL_PORT1 = 0x81
 # Trigger threshold directions.
 PS3000A_RISING = 2
 PS3000A_FALLING = 3
+PS3000A_RISING_OR_FALLING = 4
 
 # Analog ranges (enum value -> full-scale volts).
 PS3000A_RANGES = {
@@ -64,24 +76,63 @@ PS3000A_RANGES = {
     6: 1.0, 7: 2.0, 8: 5.0, 9: 10.0, 10: 20.0, 11: 50.0,
 }
 
-# Unit-info selectors.
-PS3000A_INFO_DRIVER_VERSION = 1
-PS3000A_INFO_USB_VERSION = 2
-PS3000A_INFO_HARDWARE_VERSION = 3
-PS3000A_INFO_VARIANT_INFO = 4
-PS3000A_INFO_BATCH_AND_SERIAL = 5
+# Unit-info selectors (PICO_INFO enum values, verified against picosdk 1.1).
+PS3000A_INFO_DRIVER_VERSION = 0x00000000
+PS3000A_INFO_USB_VERSION = 0x00000001
+PS3000A_INFO_HARDWARE_VERSION = 0x00000002
+PS3000A_INFO_VARIANT_INFO = 0x00000003
+PS3000A_INFO_BATCH_AND_SERIAL = 0x00000004
 
-# PICO_STATUS subset.
+# PICO_STATUS subset (verified against picosdk 1.1 picosdk.constants.PICO_STATUS).
 _PICO_OK = 0x00000000
-_PICO_NOT_FOUND = 0x0C  # PICO_NOT_FOUND (unit not found)
+_PICO_NOT_FOUND = 0x03  # PICO_NOT_FOUND (unit not found)
+# "Success-with-warning" open statuses: the unit opened, but must be switched to
+# an appropriate power source via ps3000aChangePowerSource before use.
+_PICO_POWER_SUPPLY_NOT_CONNECTED = 0x0000011A  # 282
+_PICO_USB3_0_DEVICE_NON_USB3_0_PORT = 0x0000011E  # 286
+
+#: ADC full-scale count for volts<->ADC conversions (matches _adc_to_volts).
+#: The official wrapper's maximum_value() reports 32767; the exact max-ADC value
+#: is a hardware-calibration detail re-confirmed on-device in PICO-2.
+_ADC_MAX = 32512.0
+
+#: Digital port input full-scale (volts) for logic-level threshold conversion.
+#: The exact digital threshold unit semantics are re-confirmed in PICO-2
+#: (see PICO-2-PREFLIGHT.md "Known risks / uncertainties").
+_DIGITAL_FULL_SCALE_V = 5.0
+
+#: External trigger input full-scale (volts). Hardware-dependent; re-confirmed
+#: on-device in PICO-2.
+_EXTERNAL_TRIGGER_FULL_SCALE_V = 20.0
 
 # The 3406D MSO is a ps3000a device (4 analog + 16 digital, 2 ports of 8).
 DIGITAL_PORT_ENUM = {0: PS3000A_DIGITAL_PORT0, 1: PS3000A_DIGITAL_PORT1}
-EDGE_DIRECTION = {"rising": PS3000A_RISING, "falling": PS3000A_FALLING, "either": PS3000A_RISING}
+EDGE_DIRECTION = {"rising": PS3000A_RISING, "falling": PS3000A_FALLING, "either": PS3000A_RISING_OR_FALLING}
 
 
 def _library_name() -> str:
     return "ps3000a.dll" if sys.platform == "win32" else "libps3000a.so"
+
+
+# DLL-search-directory handles registered by _register_dll_directory, held for
+# the process lifetime so the driver and its dependencies stay resolvable.
+_dll_directory_handles = []
+
+
+def _register_dll_directory():
+    """Register the PicoScope 7 folder as a DLL search directory (if present).
+
+    ``ps3000a.dll`` (and its ``picoipp.dll`` dependency) live in the PicoScope 7
+    install folder, which is NOT on the default ctypes search path. Uses
+    :func:`os.add_dll_directory` guarded by a directory-exists check.
+    """
+    add_dll_directory = getattr(os, "add_dll_directory", None)
+    if add_dll_directory is None or not os.path.isdir(_PICO7_DLL_DIR):
+        return
+    try:
+        _dll_directory_handles.append(add_dll_directory(_PICO7_DLL_DIR))
+    except OSError:  # pragma: no cover - platform/environment dependent
+        pass
 
 
 def _load_library():
@@ -91,6 +142,7 @@ def _load_library():
     fallback to the simulator ever happens here.
     """
     name = _library_name()
+    _register_dll_directory()
     last_error = None
     for loader in (getattr(ctypes, "WinDLL", None), ctypes.CDLL):
         if loader is None:
@@ -171,14 +223,17 @@ class Ps3000aDevice:
 
     def configure_digital_port(self, port, enabled, threshold_mv):
         cfg = self._config.add_digital_port(port, enabled, threshold_mv)
-        # ps3000aSetDigitalPort(handle, port, enabled, logic_level_mv)
+        # ps3000aSetDigitalPort(handle, port, enabled, logicLevel)
+        #   logicLevel is an int16 ADC count (NOT a float voltage); the digital
+        #   input full-scale is ~±5 V. Exact unit semantics re-confirmed in PICO-2.
         func = self._lib.ps3000aSetDigitalPort
         func.restype = ctypes.c_int32
+        logic_level = self._volts_to_adc_count(threshold_mv / 1000.0, _DIGITAL_FULL_SCALE_V)
         status = func(
             self._handle,
             ctypes.c_int32(DIGITAL_PORT_ENUM[port]),
             ctypes.c_int16(1 if enabled else 0),
-            ctypes.c_float(threshold_mv),
+            ctypes.c_int16(logic_level),
         )
         self._check_status(status, "ps3000aSetDigitalPort")
         return cfg
@@ -187,21 +242,30 @@ class Ps3000aDevice:
         trig = self._config.set_trigger(source, threshold, edge, pre_samples, post_samples)
         if source == "EXTERNAL":
             src_enum = PS3000A_CHANNEL_EXTERNAL
+            range_v = _EXTERNAL_TRIGGER_FULL_SCALE_V
         elif source in ("A", "B", "C", "D"):
             src_enum = {"A": PS3000A_CHANNEL_A, "B": PS3000A_CHANNEL_B,
                         "C": PS3000A_CHANNEL_C, "D": PS3000A_CHANNEL_D}[source]
+            range_v = next(
+                (c.range_v for c in self._config.analog_channels if c.channel == source),
+                _EXTERNAL_TRIGGER_FULL_SCALE_V,
+            )
         else:
             # Digital-source trigger: PICO-2 will implement ps3000a digital
             # trigger setup; PICO-1 records the request without emulating it.
             src_enum = PS3000A_CHANNEL_EXTERNAL
+            range_v = _EXTERNAL_TRIGGER_FULL_SCALE_V
         # ps3000aSetSimpleTrigger(handle, enabled, source, threshold, direction, delay, auto_trigger_ms)
+        #   threshold is an int16 ADC count (NOT a float voltage), converted from
+        #   the source channel's configured range.
         func = self._lib.ps3000aSetSimpleTrigger
         func.restype = ctypes.c_int32
+        threshold_adc = self._volts_to_adc_count(threshold, range_v)
         status = func(
             self._handle,
             ctypes.c_int16(1),
             ctypes.c_int32(src_enum),
-            ctypes.c_float(threshold),
+            ctypes.c_int16(threshold_adc),
             ctypes.c_int32(EDGE_DIRECTION[edge]),
             ctypes.c_int32(0),
             ctypes.c_int16(0),
@@ -236,7 +300,7 @@ class Ps3000aDevice:
             ctypes.c_int32(tb),
             ctypes.c_int32(pre + post),
             ctypes.byref(interval_ns),
-            ctypes.c_int16(0),
+            ctypes.c_int16(1),
             ctypes.byref(max_samples),
             ctypes.c_int32(0),
         )
@@ -248,23 +312,29 @@ class Ps3000aDevice:
         for ch in working.enabled_analog_channels():
             ch_enum = {"A": PS3000A_CHANNEL_A, "B": PS3000A_CHANNEL_B,
                        "C": PS3000A_CHANNEL_C, "D": PS3000A_CHANNEL_D}[ch.channel]
+            # A NULL bufferMin makes the driver return *unsigned* ADC data, which
+            # would break the signed _adc_to_volts interpretation; allocate and
+            # keep a min buffer alive (stored beside the max buffer) through GetValues.
             buf = (ctypes.c_int16 * sample_count)()
+            buf_min = (ctypes.c_int16 * sample_count)()
             setbuf = self._lib.ps3000aSetDataBuffers
             setbuf.restype = ctypes.c_int32
             status = setbuf(
                 self._handle,
                 ctypes.c_int32(ch_enum),
                 ctypes.byref(buf),
-                ctypes.POINTER(ctypes.c_int16)(),
+                ctypes.byref(buf_min),
                 ctypes.c_int32(sample_count),
                 ctypes.c_int32(0),
                 ctypes.c_int32(0),
             )
             self._check_status(status, "ps3000aSetDataBuffers")
-            analog_samples[ch.channel] = buf
+            analog_samples[ch.channel] = (buf, buf_min)
 
         digital_bufs = {}
         for port in working.enabled_digital_ports():
+            # Digital data is 16-bit bit-packed and unsigned; a NULL bufferMin is
+            # valid (the driver writes the raw word to bufferMax only).
             buf = (ctypes.c_int16 * sample_count)()
             setbuf = self._lib.ps3000aSetDataBuffers
             setbuf.restype = ctypes.c_int32
@@ -280,7 +350,8 @@ class Ps3000aDevice:
             self._check_status(status, "ps3000aSetDataBuffers (digital)")
             digital_bufs[port.port] = buf
 
-        # ps3000aRunBlock(handle, preSamples, postSamples, timebase, timeIndisposedMs, segmentIndex, callback, lpParameter)
+        # ps3000aRunBlock(handle, preSamples, postSamples, timebase, oversample,
+        #                 timeIndisposedMs, segmentIndex, callback, pParameter)
         run = self._lib.ps3000aRunBlock
         run.restype = ctypes.c_int32
         status = run(
@@ -288,7 +359,8 @@ class Ps3000aDevice:
             ctypes.c_int32(pre),
             ctypes.c_int32(post),
             ctypes.c_int32(tb),
-            ctypes.c_int32(0),
+            ctypes.c_int16(1),
+            None,
             ctypes.c_int32(0),
             None,
             None,
@@ -302,10 +374,11 @@ class Ps3000aDevice:
         get_values = self._lib.ps3000aGetValues
         get_values.restype = ctypes.c_int32
         overflow = ctypes.c_int16()
+        no_samples = ctypes.c_int32(sample_count)
         status = get_values(
             self._handle,
             ctypes.c_int32(0),
-            ctypes.c_int32(sample_count),
+            ctypes.byref(no_samples),
             ctypes.c_int32(1),
             ctypes.c_int32(0),
             ctypes.c_int32(0),
@@ -314,7 +387,7 @@ class Ps3000aDevice:
         self._check_status(status, "ps3000aGetValues")
 
         analog_out = {}
-        for ch, buf in analog_samples.items():
+        for ch, (buf, _buf_min) in analog_samples.items():
             analog_out[ch] = self._adc_to_volts(np.frombuffer(buf, dtype=np.int16).astype(np.float64), ch)
 
         digital_out = {}
@@ -367,10 +440,16 @@ class Ps3000aDevice:
         best = min(PS3000A_RANGES.items(), key=lambda kv: abs(kv[1] - range_v))
         return best[0]
 
+    @staticmethod
+    def _volts_to_adc_count(volts: float, full_scale_v: float) -> int:
+        """Convert a voltage to a ps3000a int16 ADC count (bipolar, ±full scale)."""
+        value = int(round(volts / full_scale_v * _ADC_MAX))
+        return max(-32768, min(32767, value))
+
     def _adc_to_volts(self, adc: np.ndarray, channel: str) -> np.ndarray:
         # Convert raw ADC counts to volts using the channel's configured range.
         range_v = next((c.range_v for c in self._config.analog_channels if c.channel == channel), 1.0)
-        return adc.astype(np.float64) / 32512.0 * range_v
+        return adc.astype(np.float64) / _ADC_MAX * range_v
 
     def _check_status(self, status: int, operation: str):
         if status != _PICO_OK:
@@ -402,6 +481,25 @@ class Ps3000aAdapter:
             self._lib = _load_library()
         return self._lib
 
+    @staticmethod
+    def _resolve_open_status(lib, handle, status) -> int:
+        """Handle power-source warning statuses returned by ``ps3000aOpenUnit``.
+
+        ``ps3000aOpenUnit`` may return 282 (PICO_POWER_SUPPLY_NOT_CONNECTED) or
+        286 (PICO_USB3_0_DEVICE_NON_USB3_0_PORT) as a *success-with-warning*: the
+        unit is open, but must be switched to an appropriate power source before
+        use. This resolves that via ``ps3000aChangePowerSource`` and returns
+        ``PICO_OK`` on success.
+        """
+        if status not in (_PICO_POWER_SUPPLY_NOT_CONNECTED, _PICO_USB3_0_DEVICE_NON_USB3_0_PORT):
+            return status
+        change = lib.ps3000aChangePowerSource
+        change.restype = ctypes.c_int32
+        change_status = change(ctypes.c_int16(handle.value), ctypes.c_uint32(status))
+        if change_status != _PICO_OK:
+            return change_status
+        return _PICO_OK
+
     def discover(self) -> list:
         lib = self._ensure_library()  # raises BackendUnavailableError if absent
         devices = []
@@ -411,6 +509,7 @@ class Ps3000aAdapter:
             open_unit = lib.ps3000aOpenUnit
             open_unit.restype = ctypes.c_int32
             status = open_unit(ctypes.byref(handle), None)
+            status = self._resolve_open_status(lib, handle, status)
             if status == _PICO_NOT_FOUND:
                 break
             if status != _PICO_OK:
@@ -443,6 +542,7 @@ class Ps3000aAdapter:
         open_unit.restype = ctypes.c_int32
         serial_bytes = None if device_id is None else device_id.encode("utf-8")
         status = open_unit(ctypes.byref(handle), serial_bytes)
+        status = self._resolve_open_status(lib, handle, status)
         if status == _PICO_NOT_FOUND:
             raise DeviceNotFoundError(f"ps3000a device {device_id!r} not found")
         if status != _PICO_OK:

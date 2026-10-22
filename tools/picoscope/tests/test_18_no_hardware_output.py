@@ -85,6 +85,7 @@ def test_ps3000a_adapter_only_binds_measurement_functions():
         "ps3000aIsReady",
         "ps3000aGetValues",
         "ps3000aStop",
+        "ps3000aChangePowerSource",
     }
     with open(_picosdk.__file__, "r", encoding="utf-8") as fh:
         tree = ast.parse(fh.read())

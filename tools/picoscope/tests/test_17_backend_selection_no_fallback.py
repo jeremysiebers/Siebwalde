@@ -1,4 +1,10 @@
-"""Category 17: simulator vs real backend selection (no silent fallback)."""
+"""Category 17: simulator vs real backend selection (no silent fallback).
+
+The real ``ps3000a`` backend must never silently fall back to the simulator. The
+decisive invariant is exercised here with a *simulated* absent driver (so the
+tests never load the real DLL and never attempt to open a device): a real-device
+request that cannot be satisfied raises ``BackendUnavailableError``.
+"""
 
 import importlib
 
@@ -19,18 +25,38 @@ def test_picosdk_module_imports_without_driver():
     assert mod.BACKEND_NAME == "ps3000a"
 
 
-def test_real_discover_raises_without_driver():
+@pytest.fixture
+def absent_driver(monkeypatch):
+    """Simulate an environment where the ps3000a native driver cannot be loaded.
+
+    Patches ``_load_library`` to raise and resets the default adapter's memoized
+    library so the mock takes effect. This keeps the no-fallback tests offline and
+    device-free (they never call ``ps3000aOpenUnit``).
+    """
+    import tools.picoscope.backend.adapters.picosdk as picosdk
+
+    def _unavailable():
+        raise BackendUnavailableError(
+            "ps3000a native driver not available (simulated absence)"
+        )
+
+    monkeypatch.setattr(picosdk, "_load_library", _unavailable)
+    picosdk.default_adapter._lib = None
+    return picosdk
+
+
+def test_real_discover_raises_without_driver(absent_driver):
     with pytest.raises(BackendUnavailableError):
         discover_devices(backend="ps3000a")
 
 
-def test_real_open_raises_without_driver():
+def test_real_open_raises_without_driver(absent_driver):
     with pytest.raises(BackendUnavailableError):
         open_device("ANY-SERIAL", backend="ps3000a")
 
 
 @pytest.mark.parametrize("alias", ["picosdk", "real"])
-def test_real_backend_aliases_map_to_ps3000a(alias):
+def test_real_backend_aliases_map_to_ps3000a(absent_driver, alias):
     with pytest.raises(BackendUnavailableError):
         discover_devices(backend=alias)
 
@@ -40,23 +66,15 @@ def test_unknown_backend_raises():
         discover_devices(backend="not-a-backend")
 
 
-def test_real_backend_never_silently_falls_back_to_simulator():
-    """The decisive invariant: the real backend must never return simulated
-    devices, and any failure must be loud (raise), never a quiet simulator
-    result."""
+def test_real_backend_never_silently_falls_back_to_simulator(absent_driver):
+    """The decisive invariant: with an absent driver the real backend must fail
+    loudly (never return simulated devices)."""
     sim_serials = {d["serial"] for d in discover_devices(backend="simulator")}
-    try:
-        real = discover_devices(backend="ps3000a")
-    except BackendUnavailableError:
-        # Offline (no driver): a loud failure is the required behavior.
-        return
-    # If a driver were present, the result must be real devices only.
-    assert isinstance(real, list)
-    real_serials = {d["serial"] for d in real}
-    assert not (real_serials & sim_serials)
+    with pytest.raises(BackendUnavailableError):
+        discover_devices(backend="ps3000a")
 
 
-def test_real_open_failure_is_loud_not_fallback():
+def test_real_open_failure_is_loud_not_fallback(absent_driver):
     try:
         scope = open_device("DEFINITELY-NOT-A-REAL-SERIAL", backend="ps3000a")
     except BackendUnavailableError:
