@@ -10,3 +10,7 @@ __pycache__/
 # is decided explicitly before PICO-2, see PICO-2-PREFLIGHT.md)
 captures/
 tmp/
+
+# Transient Layer C (MCP) runtime evidence. Durable hardware evidence lives in
+# evidence/pico-2/ and is committed separately.
+evidence/mcp/

@@ -1,0 +1,9 @@
+# Layer C (MCP adapter) dependencies — pinned for reproducibility.
+# Installed project-locally into tools/picoscope/.venv (see README + docs).
+#
+# FastMCP 4.1.3 is the high-level stdio framework; it depends on the official
+# `mcp` SDK 2.3.0 (the v2 API). Both are pinned so the v1/v2 SDK surface is
+# never mixed. The base `requirements.txt` (numpy) remains the only dependency
+# for the offline simulator.
+fastmcp==4.1.3
+mcp==2.3.0

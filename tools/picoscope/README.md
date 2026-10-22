@@ -20,10 +20,12 @@ tools/picoscope/
     ownership.py    in-process ownership guard
     errors.py       exception taxonomy
     adapters/
-      picosdk.py    vendor ps3000a ctypes adapter (PICO-2, NOT validated)
+      picosdk.py    vendor ps3000a ctypes adapter (PICO-2, hardware-validated)
       simulator.py  deterministic simulated adapter
+  mcp/              Layer C — FastMCP stdio adapter (PICO-3, measurement-only)
   simulator/        synthetic signal fixtures (sine/PWM/DC, square/edges/UART)
-  tests/            offline pytest suite (18 categories)
+  tests/            offline pytest suite (PICO-1/PICO-2, 123 tests)
+  tests_mcp/        offline MCP integration tests (PICO-3, 20 categories)
   demo.py           standalone simulated capture + save/reload round-trip
   README.md         this file
   SAFETY.md         measurement-only safety contract
@@ -163,12 +165,31 @@ serialization, reload equality, timeout, device error, cleanup-after-exception,
 invalid-config rejection, backend selection without fallback, absence of any
 hardware-output surface).
 
+## MCP adapter (Layer C)
+
+A thin, measurement-only FastMCP stdio server lives in `mcp/` (PICO-3). It
+exposes exactly four tools — `scope_info`, `scope_capture_block`,
+`scope_get_capture_metadata`, `scope_export_capture` — over the same backend and
+simulator. Raw sample arrays are never returned in an MCP response (only capture
+ids and artifact paths). See `docs/PICOSCOPE-PICO-3-MCP-INTEGRATION.md` for the
+tool schemas, limits, ownership handling and OpenCode registration.
+
+```powershell
+# Install the MCP dependencies (project-local, pinned):
+tools/picoscope/.venv/Scripts/python.exe -m pip install -r tools/picoscope/requirements-mcp.txt
+# Run the server (stdio):
+tools/picoscope/.venv/Scripts/python.exe -m tools.picoscope.mcp
+# Offline MCP tests (20 categories):
+tools/picoscope/.venv/Scripts/python.exe -m pytest tools/picoscope/tests_mcp -q
+```
+
 ## Known limitations
 
-* The real `ps3000a` adapter is **source-backed but not hardware-validated** —
-  it has never run against a physical 3406D MSO. Its call flow is transcribed
-  from the official `ps3000aBlockMSOExample.py` and `picosdk.ps3000a` enums.
+* The real `ps3000a` adapter is hardware-validated in PICO-2 (analog + digital
+  capture, thresholds, port separation, sampling, ownership/failure) against a
+  real 3406D MSO (driver 2.2.160.7569).
 * Exact digital threshold range/grouping, the D8–D15 port enable, and the
-  analog+digital simultaneous sampling-rate table must be re-confirmed on-device
+  analog+digital simultaneous sampling-rate table were re-confirmed on-device
   in PICO-2 (the simulator validates `0 < threshold_mv <= 5000` only).
-* Cross-process device ownership (vs PicoScope 7) is not handled in PICO-1.
+* Cross-process device ownership (vs PicoScope 7) is handled by the MCP layer's
+  cross-process lock (`mcp/lock.py`), not by the backend.
