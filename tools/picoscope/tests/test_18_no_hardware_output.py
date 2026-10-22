@@ -76,6 +76,7 @@ def test_ps3000a_adapter_only_binds_measurement_functions():
         "ps3000aOpenUnit",
         "ps3000aCloseUnit",
         "ps3000aGetUnitInfo",
+        "ps3000aEnumerateUnits",
         "ps3000aSetChannel",
         "ps3000aSetDigitalPort",
         "ps3000aSetSimpleTrigger",

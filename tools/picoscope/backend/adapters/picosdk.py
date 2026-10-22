@@ -502,38 +502,50 @@ class Ps3000aAdapter:
 
     def discover(self) -> list:
         lib = self._ensure_library()  # raises BackendUnavailableError if absent
-        devices = []
-        # Enumerate a bounded number of units by opening/closing each in turn.
-        for _ in range(8):
-            handle = ctypes.c_int16()
-            open_unit = lib.ps3000aOpenUnit
-            open_unit.restype = ctypes.c_int32
-            status = open_unit(ctypes.byref(handle), None)
-            status = self._resolve_open_status(lib, handle, status)
-            if status == _PICO_NOT_FOUND:
-                break
-            if status != _PICO_OK:
-                raise DeviceError(f"ps3000aOpenUnit failed with PICO_STATUS {status:#x}")
-            serial = self._unit_info(lib, handle.value, PS3000A_INFO_BATCH_AND_SERIAL, 256)
-            devices.append({
-                "serial": serial or f"ps3000a-{len(devices)}",
-                "model": "3406D MSO",
-                "variant": self._unit_info(lib, handle.value, PS3000A_INFO_VARIANT_INFO, 64),
-                "driver_version": self._unit_info(lib, handle.value, PS3000A_INFO_DRIVER_VERSION, 64),
-            })
-            lib.ps3000aCloseUnit(ctypes.c_int16(handle.value))
-        return devices
+        # Canonical non-owning enumeration. ``ps3000aOpenUnit`` always opens the
+        # FIRST unit, so the previous open/close loop returned the same serial up
+        # to 8 times. ``ps3000aEnumerateUnits`` reports each connected unit's
+        # serial exactly once WITHOUT opening (or briefly owning) any handle.
+        # Two passes:
+        #   1) count=0 / serials=NULL -> the driver writes the unit count;
+        #   2) with a buffer sized for that count -> the driver writes a
+        #      comma-separated list of serial numbers.
+        enumerate_units = lib.ps3000aEnumerateUnits
+        enumerate_units.restype = ctypes.c_int32
 
-    @staticmethod
-    def _unit_info(lib, handle, info_enum, length) -> str:
-        func = lib.ps3000aGetUnitInfo
-        func.restype = ctypes.c_int32
-        buffer = ctypes.create_string_buffer(length)
-        required = ctypes.c_int16()
-        status = func(ctypes.c_int16(handle), buffer, ctypes.c_int16(length), ctypes.byref(required), ctypes.c_int32(info_enum))
+        count = ctypes.c_int16(0)
+        serial_length = ctypes.c_int16(0)
+        status = enumerate_units(ctypes.byref(count), None, ctypes.byref(serial_length))
         if status != _PICO_OK:
-            return ""
-        return buffer.value.decode("utf-8", errors="replace")
+            raise DeviceError(f"ps3000aEnumerateUnits failed with PICO_STATUS {status:#x}")
+
+        unit_count = count.value
+        if unit_count <= 0:
+            return []
+
+        # A serial is ~10-12 chars; size generously (per-unit + commas + null).
+        buffer_len = unit_count * 16 + 1
+        serials = ctypes.create_string_buffer(buffer_len)
+        serial_length.value = buffer_len
+        status = enumerate_units(ctypes.byref(count), serials, ctypes.byref(serial_length))
+        if status != _PICO_OK:
+            raise DeviceError(f"ps3000aEnumerateUnits failed with PICO_STATUS {status:#x}")
+
+        serial_list = serials.value.decode("utf-8", errors="replace")
+        devices = []
+        for serial in (s.strip() for s in serial_list.split(",")):
+            if not serial:
+                continue
+            devices.append({
+                "serial": serial,
+                "model": "3406D MSO",
+                # variant/driver_version require an open handle (ps3000aGetUnitInfo),
+                # which is owning; discovery is deliberately non-owning, so these
+                # stay empty here and are populated by open()/get_device_info().
+                "variant": "",
+                "driver_version": "",
+            })
+        return devices
 
     def open(self, device_id) -> Ps3000aDevice:
         lib = self._ensure_library()  # raises BackendUnavailableError if absent
