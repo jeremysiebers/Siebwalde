@@ -66,7 +66,7 @@ line **fails** an 8-bit decode (21/24 frames in error) and the 8-bit reply line
 **Triggerless rationale:** the `ps3000a` digital-line trigger is NOT implemented
 in the adapter (`picosdk.py` maps a digital trigger source to EXTERNAL, which
 would never fire). A bounded triggerless window was used instead. The master
-cyclic polling is ~1.12 ms/transaction (comm-cycle timer divider 832,
+cyclic polling is ~1.20 ms/transaction (comm-cycle timer rate 832 Hz -> 1/832 s,
 `mbus.c:245`), so a ~4 ms window reliably contains several transactions.
 
 ## 5. Capture evidence
@@ -139,7 +139,7 @@ Consistent ~172 µs response delay across the three transactions.
 | PIC18 reply TX9=0 (8-bit, no ninth bit) | **PROVEN BY CAPTURE** |
 | Baud 2.016 Mbaud (~496 ns/bit) | PROVEN BY CAPTURE (within quantization) |
 | Modbus RTU FC03 read transactions + bit-reversed CRC | **PROVEN BY CAPTURE** |
-| Master cyclic poll period ~1.12 ms (comm-cycle divider 832) | INFERRED (firmware) + PROVEN BY CAPTURE (transaction spacing) |
+| Master cyclic poll period ~1.20 ms (comm-cycle rate 832 Hz -> 1/832 s) | INFERRED (firmware) + PROVEN BY CAPTURE (transaction spacing 1.11–1.20 ms) |
 | Response delay ~172 µs | PROVEN BY CAPTURE |
 | Absolute physical bit position (which wire = D0) | NOT VERIFIED (no known pattern) |
 
@@ -183,7 +183,14 @@ Consistent ~172 µs response delay across the three transactions.
 
 ## 12. Independent Integrator verdict
 
-To be completed by the Integrator role.
+**PASS (9/9).** The Integrator independently re-loaded the raw capture and
+re-decoded D0/D1, re-computed the Siebwalde bit-reversed CRC for all 6
+transactions, verified the SHA-256 of the raw evidence, and confirmed the
+commit scope (5 files, no firmware/C#/.opencode) and the safety boundary
+(triggerless, no AWG/flash/reset/motion, gate process-scoped). Direction
+resolution, ninth-bit address marking, 16 ns sample interval, ~172 µs response
+delay and the ~1.20 ms transaction spacing (1/832 s) were all independently
+confirmed. One documentation-only nit (the comm-cycle figure) was corrected.
 
 ## 13. GO/NO-GO
 
