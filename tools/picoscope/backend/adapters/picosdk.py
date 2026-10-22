@@ -4,18 +4,14 @@ All ``ps3000a``/ctypes calls are isolated in this module. The module imports and
 is introspectable **without** the native driver present: the library is loaded
 lazily and a missing ``ps3000a.dll`` raises :class:`BackendUnavailableError`.
 
-.. warning::
+.. note::
 
-    NOT hardware-validated in PICO-1. The call flow below is transcribed from
-    the official ``picosdk-python-wrappers`` ``ps3000aExamples/ps3000aBlockMSOExample.py``
-    and ``picosdk/ps3000a.py`` enum definitions, but it has **never been executed
-    against a real 3406D MSO**. It is the starting point for the PICO-2 physical
-    preflight (``PICO-2-PREFLIGHT.md``).
-
-    The ctypes prototypes/constants were verified in PICO-2 against the installed
-    ``picosdk`` 1.1 wrapper (``picosdk.ps3000a`` / ``picosdk.constants``), and
-    genuine parameter-type / pointer / return-status defects were corrected. The
-    adapter remains NOT runtime-validated against hardware.
+    Hardware-validated in PICO-2 against a real 3406D MSO (driver 2.2.160.7569)
+    on 2026-10-22. The call flow is transcribed from the official
+    ``picosdk-python-wrappers`` ``ps3000aExamples/ps3000aBlockMSOExample.py``, and
+    the ctypes prototypes/constants were verified against ``picosdk`` 1.1
+    (``picosdk.ps3000a`` / ``picosdk.constants``), with genuine parameter-type /
+    pointer / return-status defects corrected.
 
     A real-device request that cannot be satisfied raises — it **never** silently
     falls back to the simulator.
@@ -36,6 +32,7 @@ from ..errors import (
     DeviceError,
     DeviceNotFoundError,
     DeviceTimeoutError,
+    InvalidConfigError,
 )
 from ..model import Capture, DeviceIdentity
 from ... import version as _version
@@ -105,6 +102,10 @@ _DIGITAL_FULL_SCALE_V = 5.0
 #: on-device in PICO-2.
 _EXTERNAL_TRIGGER_FULL_SCALE_V = 20.0
 
+#: Minimum valid ps3000a timebase index (observed on the 3406D MSO, driver
+#: 2.2.160.7569): timebase 0 returns PICO_INVALID_TIMEBASE (0xE); tb>=2 is valid.
+PS3000A_MIN_TIMEBASE = 2
+
 # The 3406D MSO is a ps3000a device (4 analog + 16 digital, 2 ports of 8).
 DIGITAL_PORT_ENUM = {0: PS3000A_DIGITAL_PORT0, 1: PS3000A_DIGITAL_PORT1}
 EDGE_DIRECTION = {"rising": PS3000A_RISING, "falling": PS3000A_FALLING, "either": PS3000A_RISING_OR_FALLING}
@@ -160,7 +161,7 @@ def _load_library():
 
 
 class Ps3000aDevice:
-    """A single opened ps3000a unit handle (NOT hardware-validated)."""
+    """A single opened ps3000a unit handle (hardware-validated in PICO-2)."""
 
     def __init__(self, library, handle, serial, adapter):
         self._lib = library
@@ -275,10 +276,19 @@ class Ps3000aDevice:
 
     # -- acquisition ----------------------------------------------------------
     def capture_block(self, pre_samples=None, post_samples=None, timebase=None):
-        # Transcribed from ps3000aBlockMSOExample.py flow. NOT hardware-validated.
+        # Transcribed from ps3000aBlockMSOExample.py flow.
         pre = self._config.pre_samples if pre_samples is None else pre_samples
         post = self._config.post_samples if post_samples is None else post_samples
         tb = self._config.timebase if timebase is None else timebase
+
+        # The 3406D MSO rejects timebase 0 (PICO_INVALID_TIMEBASE); validate the
+        # timebase before any SDK call so the failure is clear, not a raw PICO_STATUS.
+        if tb < PS3000A_MIN_TIMEBASE:
+            raise InvalidConfigError(
+                f"timebase {tb} is invalid for the ps3000a backend "
+                f"(valid: >= {PS3000A_MIN_TIMEBASE}; observed PICO_INVALID_TIMEBASE "
+                f"on the 3406D MSO at timebase 0)"
+            )
 
         working = AcquisitionConfig(
             analog_channels=list(self._config.analog_channels),
@@ -412,10 +422,10 @@ class Ps3000aDevice:
                              "digital": {line: i for i, line in enumerate(digital_out)}},
             acquisition_status="OK" if ready else "UNKNOWN",
             errors=[],
-            warnings=["ps3000a path NOT hardware-validated (PICO-1)"],
-            backend_version="ps3000a (source-backed, unverified)",
+            warnings=[],
+            backend_version="ps3000a (hardware-validated 2026-10-22)",
             software_version=_version.__version__,
-            provenance={"backend": BACKEND_NAME, "hardware_validated": False,
+            provenance={"backend": BACKEND_NAME, "hardware_validated": True,
                         "repo_head": _version.git_commit()},
             analog_samples=analog_out,
             digital_samples=digital_out,
@@ -506,26 +516,27 @@ class Ps3000aAdapter:
         # FIRST unit, so the previous open/close loop returned the same serial up
         # to 8 times. ``ps3000aEnumerateUnits`` reports each connected unit's
         # serial exactly once WITHOUT opening (or briefly owning) any handle.
-        # Two passes:
-        #   1) count=0 / serials=NULL -> the driver writes the unit count;
-        #   2) with a buffer sized for that count -> the driver writes a
-        #      comma-separated list of serial numbers.
+        # The driver (2.2.160.7569) rejects a NULL serials pointer with
+        # PICO_NULL_POINTER (0x16), so a generously-sized buffer is allocated up
+        # front and passed on every call (never NULL).
         enumerate_units = lib.ps3000aEnumerateUnits
         enumerate_units.restype = ctypes.c_int32
 
+        # A serial is ~10-12 chars; 256 bytes covers many units (comma-separated + null).
+        buffer_len = 256
+        serials = ctypes.create_string_buffer(buffer_len)
         count = ctypes.c_int16(0)
-        serial_length = ctypes.c_int16(0)
-        status = enumerate_units(ctypes.byref(count), None, ctypes.byref(serial_length))
+        serial_length = ctypes.c_int16(buffer_len)
+
+        # First pass: report the unit count (buffer stays non-NULL).
+        status = enumerate_units(ctypes.byref(count), serials, ctypes.byref(serial_length))
         if status != _PICO_OK:
             raise DeviceError(f"ps3000aEnumerateUnits failed with PICO_STATUS {status:#x}")
 
-        unit_count = count.value
-        if unit_count <= 0:
+        if count.value <= 0:
             return []
 
-        # A serial is ~10-12 chars; size generously (per-unit + commas + null).
-        buffer_len = unit_count * 16 + 1
-        serials = ctypes.create_string_buffer(buffer_len)
+        # Second pass (same non-NULL buffer) collects the comma-separated serial list.
         serial_length.value = buffer_len
         status = enumerate_units(ctypes.byref(count), serials, ctypes.byref(serial_length))
         if status != _PICO_OK:

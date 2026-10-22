@@ -24,8 +24,11 @@ class AcquisitionConfig:
 
     ``pre_samples`` and ``post_samples`` are integer sample counts; together with
     ``sample_interval_ns`` they define the capture window. ``timebase`` is the
-    backend timebase index (0 = fastest); ``sample_interval_ns`` is its resolved
-    value in integer nanoseconds when known.
+    backend timebase index; ``sample_interval_ns`` is its resolved value in
+    integer nanoseconds when known.
+
+    The default timebase (10) is valid for the ps3000a backend, which rejects
+    timebases below 2 on the 3406D MSO (observed PICO_INVALID_TIMEBASE at tb0).
     """
 
     analog_channels: list = field(default_factory=list)
@@ -33,7 +36,8 @@ class AcquisitionConfig:
     trigger: Optional[TriggerConfig] = None
     pre_samples: int = 0
     post_samples: int = 1000
-    timebase: int = 0
+    #: Default must be ps3000a-valid: the 3406D MSO rejects tb<2 (see docstring).
+    timebase: int = 10
     sample_interval_ns: Optional[int] = None
 
     def validate(self) -> None:

@@ -51,7 +51,9 @@ DEFAULT_DEVICES = (
 
 #: Deterministic timebase index -> sample interval (integer nanoseconds).
 #: timebase 0 = 2 ns mirrors the 3406D MSO fastest real-time rate (500 MS/s).
-DEFAULT_TIMEBASE_NS = {0: 2, 1: 4, 2: 8, 3: 16, 4: 32, 5: 64, 6: 128, 7: 256}
+#: timebase 10 is the shared default (a ps3000a-valid timebase).
+DEFAULT_TIMEBASE_NS = {0: 2, 1: 4, 2: 8, 3: 16, 4: 32, 5: 64, 6: 128, 7: 256,
+                       8: 512, 9: 1024, 10: 2048}
 
 #: Deterministic default signal spec per analog channel (sine, frequency varies
 #: by channel index so multichannel captures are visibly distinct yet aligned).

@@ -6,7 +6,9 @@ unit, so a single device produced 8 duplicate entries for the same serial. The
 fix uses the canonical non-owning ``ps3000aEnumerateUnits``.
 
 These tests mock the native library and never touch hardware: ``ps3000aOpenUnit``
-is instrumented to prove discovery never opens (and therefore never owns) a unit.
+is instrumented to prove discovery never opens (and therefore never owns) a unit,
+and ``ps3000aEnumerateUnits`` mirrors the real driver's NULL rejection so the
+tests fail if discovery ever passes a NULL serials pointer (PICO_NULL_POINTER).
 """
 
 import ctypes
@@ -17,13 +19,15 @@ from tools.picoscope.backend import ownership
 from tools.picoscope.backend.adapters.picosdk import Ps3000aAdapter
 from tools.picoscope.backend.errors import DeviceError
 
+_PICO_NULL_POINTER = 0x16  # the status the real driver returns for a NULL serials
+
 
 class _FakeEnumerateUnits:
     """ctypes-shaped stand-in for ``lib.ps3000aEnumerateUnits``.
 
-    Supports ``.restype`` assignment and the two-pass call sequence used by
-    ``discover()``: pass 1 (serials=None) reports the unit count; pass 2 writes the
-    comma-separated serial list into the provided ctypes string buffer.
+    Mirrors the real driver (2.2.160.7569): a NULL ``serials`` pointer returns
+    PICO_NULL_POINTER (0x16). With a non-NULL buffer it writes the comma-separated
+    serial list and the unit count into the provided ctypes output parameters.
     """
 
     def __init__(self, serials):
@@ -31,12 +35,10 @@ class _FakeEnumerateUnits:
         self.restype = None
 
     def __call__(self, count_ptr, serials, serial_length_ptr):
+        if serials is None:
+            return _PICO_NULL_POINTER  # discovery must never trigger this
         count = count_ptr._obj            # the c_int16 passed via ctypes.byref
         serial_length = serial_length_ptr._obj
-        if serials is None:
-            count.value = len(self._serials)
-            serial_length.value = 0
-            return 0  # PICO_OK
         data = ",".join(self._serials).encode("utf-8")
         ctypes.memmove(serials, data, len(data))
         count.value = len(self._serials)
@@ -79,6 +81,14 @@ def test_discover_single_unit_returns_exactly_once_and_non_owning():
     # Discovery is non-owning: never opened a unit, never acquired ownership.
     assert adapter._lib.open_unit_calls == 0
     assert ownership.owned_device_ids() == frozenset()
+
+
+def test_discover_uses_non_null_buffer_no_null_pointer():
+    # The mock returns PICO_NULL_POINTER for a NULL serials pointer; a successful
+    # discover() therefore proves a non-NULL buffer was passed on every call.
+    adapter = _adapter_with(["JY908/0278"])
+    devices = adapter.discover()
+    assert [d["serial"] for d in devices] == ["JY908/0278"]
 
 
 def test_discover_multiple_units_returns_each_exactly_once():
