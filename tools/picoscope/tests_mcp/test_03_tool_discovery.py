@@ -1,4 +1,4 @@
-"""Category 3: tool discovery — exactly the four allowlisted tools."""
+"""Category 3: tool discovery — exactly the five allowlisted tools."""
 
 from tools.picoscope.tests_mcp.mcp_client import run
 
@@ -7,10 +7,11 @@ EXPECTED = {
     "scope_capture_block",
     "scope_get_capture_metadata",
     "scope_export_capture",
+    "scope_analyze_capture",
 }
 
 
-def test_exactly_four_allowlisted_tools(env_factory):
+def test_exactly_five_allowlisted_tools(env_factory):
     env = env_factory()
 
     async def body(session):

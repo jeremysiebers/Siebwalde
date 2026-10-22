@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from fastmcp import FastMCP
 
-from .schema import AcquisitionProfile, BackendName
+from .schema import AcquisitionProfile, AnalysisRequest, BackendName
 from .service import ScopeService
 
 #: Server name (the MCP tool prefix used by OpenCode, e.g. ``picoscope_scope_info``).
@@ -59,6 +59,17 @@ def scope_get_capture_metadata(capture_id: str) -> dict:
 def scope_export_capture(capture_id: str) -> dict:
     """Return validated artifact references (npz + json) and metadata for a capture."""
     return _service.export_capture(capture_id)
+
+
+@mcp.tool()
+def scope_analyze_capture(request: AnalysisRequest) -> dict:
+    """Run one allowlisted analyzer over an existing capture (read-only).
+
+    ``analyzer`` is ``"uart"`` or ``"pwm_timing"``; ``settings`` is validated
+    per analyzer. Saves detailed analysis evidence and returns a compact summary.
+    No device, hardware, arbitrary path, script, or SDK function is exposed.
+    """
+    return _service.analyze_capture(request)
 
 
 def main() -> None:

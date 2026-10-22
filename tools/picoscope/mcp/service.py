@@ -16,6 +16,7 @@ static test (``tests_mcp/test_19_no_unsafe_output_op.py``).
 from __future__ import annotations
 
 import os
+import re
 import threading
 
 from tools.picoscope.backend import api as _backend_api
@@ -29,7 +30,13 @@ from tools.picoscope.backend.model import Capture
 from .config import ServerConfig
 from .evidence import EvidenceError, EvidenceStore
 from .lock import CrossProcessLock
-from .schema import AcquisitionProfile
+from .schema import AcquisitionProfile, AnalysisRequest
+
+#: Validate a digital line name (D0..D15) for analyzer settings.
+_DIGITAL_LINE_RE = re.compile(r"^D([0-9]|1[0-5])$")
+
+#: Validate an analog channel name (A..D) for analyzer settings.
+_ANALOG_CHANNEL_RE = re.compile(r"^[A-D]$")
 
 #: Canonical backend name for each accepted alias (mirrors backend/api.py).
 _BACKEND_ALIASES = {
@@ -138,7 +145,14 @@ class ScopeService:
                 "(PICOSCOPE_MCP_ALLOW_REAL=1). No simulator fallback."
             )
 
-        sample_count = profile.pre_samples + profile.post_samples
+        # Normalize the EFFECTIVE acquisition config first. When a trigger is
+        # supplied, the capture uses the trigger's pre/post split (see
+        # ``_configure_and_capture``), not the top-level pre/post. The
+        # interval-independent budget (sample count / memory / file size) must
+        # therefore be computed from the effective split, so an out-of-budget
+        # trigger split is rejected before any SDK call.
+        pre, post = self._effective_pre_post(profile)
+        sample_count = pre + post
         self._validate_interval_independent(profile, sample_count)
         self._pre_validate_domain(profile)
 
@@ -221,8 +235,146 @@ class ScopeService:
         return result
 
     # ------------------------------------------------------------------ #
+    # scope_analyze_capture (read-only offline analysis)
+    # ------------------------------------------------------------------ #
+    def analyze_capture(self, request: AnalysisRequest) -> dict:
+        """Run one allowlisted analyzer over an existing capture (read-only).
+
+        Loads the capture's ``.npz`` + sidecar JSON from the evidence dir, runs
+        the allowlisted analyzer with validated settings, saves the detailed
+        analysis as ``<capture_id>.analysis.<analyzer>.json`` inside the evidence
+        dir, and returns a compact summary. No device, no hardware, no arbitrary
+        path/script/SDK call.
+        """
+        base = self.evidence.base_path(request.capture_id)  # validates id + containment
+
+        from tools.picoscope.analysis import io as _analysis_io
+
+        capture = _backend_api.load_capture(base)
+
+        if request.analyzer == "uart":
+            result = self._analyze_uart(capture, request.settings or {})
+            summary = result.get("summary", {})
+        elif request.analyzer == "pwm_timing":
+            result = self._analyze_pwm(capture, request.settings or {})
+            summary = result.get("summary", {})
+        else:  # pragma: no cover - guarded by the schema Literal
+            raise ServiceError(f"Unknown analyzer {request.analyzer!r}")
+
+        out_path = base + f".analysis.{request.analyzer}.json"
+        _analysis_io.export_analysis_json(result, out_path)
+
+        payload = {
+            "capture_id": request.capture_id,
+            "analyzer": request.analyzer,
+            "summary": summary,
+            "analysis_path": out_path,
+            "result": "ok",
+            "simulated": capture.provenance.get("simulated", False),
+            "backend": capture.device_identity.backend,
+        }
+        self._bound_response(payload)
+        return payload
+
+    # -- analyzer settings validation ------------------------------------- #
+    @staticmethod
+    def _require_settings_keys(settings: dict, allowed: set, analyzer: str) -> dict:
+        unknown = set(settings) - allowed
+        if unknown:
+            raise InvalidConfigError(
+                f"Unknown {analyzer} setting(s): {sorted(unknown)}; allowed: {sorted(allowed)}"
+            )
+        return dict(settings)
+
+    def _analyze_uart(self, capture, settings: dict) -> dict:
+        from tools.picoscope.analysis import uart as _uart
+        from tools.picoscope.analysis.io import extract_digital_line
+
+        allowed = {"line", "mode", "baud", "polarity", "stop_bits", "mode_source", "idle_gap_bits"}
+        s = self._require_settings_keys(settings, allowed, "uart")
+        line = s.get("line")
+        mode = s.get("mode")
+        baud = s.get("baud")
+        if not isinstance(line, str) or not _DIGITAL_LINE_RE.match(line):
+            raise InvalidConfigError("uart setting 'line' must be a digital line D0..D15")
+        if mode not in ("8bit", "9bit"):
+            raise InvalidConfigError("uart setting 'mode' must be '8bit' or '9bit'")
+        if not isinstance(baud, int) or baud <= 0:
+            raise InvalidConfigError("uart setting 'baud' must be a positive int")
+
+        samples = extract_digital_line(capture, line)
+        cfg = _uart.UartConfig(
+            mode=mode,
+            baud=baud,
+            sample_interval_ns=capture.sample_interval_ns,
+            polarity=s.get("polarity", "idle_high"),
+            stop_bits=s.get("stop_bits", 1),
+            mode_source=s.get("mode_source", "explicit"),
+            idle_gap_bits=s.get("idle_gap_bits"),
+        )
+        return _uart.decode_uart(samples, cfg)
+
+    def _analyze_pwm(self, capture, settings: dict) -> dict:
+        from tools.picoscope.analysis import timing as _timing
+        from tools.picoscope.analysis.io import extract_analog_channel, extract_digital_line
+
+        allowed = {"source", "domain", "threshold"}
+        s = self._require_settings_keys(settings, allowed, "pwm_timing")
+        source = s.get("source")
+        if not isinstance(source, str):
+            raise InvalidConfigError("pwm_timing setting 'source' is required")
+        if _ANALOG_CHANNEL_RE.match(source):
+            domain = "analog"
+            samples = extract_analog_channel(capture, source)
+        elif _DIGITAL_LINE_RE.match(source):
+            domain = "digital"
+            samples = extract_digital_line(capture, source)
+        else:
+            raise InvalidConfigError("pwm_timing setting 'source' must be A..D or D0..D15")
+
+        domain_override = s.get("domain")
+        if domain_override is not None and domain_override != domain:
+            raise InvalidConfigError(
+                f"pwm_timing 'domain' {domain_override!r} is inconsistent with source {source!r}"
+            )
+        threshold = s.get("threshold")
+        if threshold is not None and domain != "analog":
+            raise InvalidConfigError("pwm_timing 'threshold' is only valid for analog sources")
+
+        m = _timing.analyze_pwm(
+            samples,
+            capture.sample_interval_ns,
+            domain=domain,
+            threshold=threshold,
+        )
+        d = m.to_dict()
+        d["summary"] = {
+            "frequency_hz": d["frequency_hz"],
+            "period_ns": d["period_ns"],
+            "duty": d["duty"],
+            "complete_cycles": d["complete_cycles"],
+            "rising_edge_count": len(d["rising_edges_ns"]),
+            "falling_edge_count": len(d["falling_edges_ns"]),
+            "domain": d["domain"],
+        }
+        return d
+
+    # ------------------------------------------------------------------ #
     # validation
     # ------------------------------------------------------------------ #
+    @staticmethod
+    def _effective_pre_post(profile: AcquisitionProfile) -> tuple[int, int]:
+        """Return the (pre, post) split the capture will actually use.
+
+        A supplied trigger carries its own pre/post split and wins over the
+        top-level ``pre_samples``/``post_samples`` (see
+        :meth:`_configure_and_capture`). This is the single normalization point
+        for interval-independent budgeting.
+        """
+        if profile.trigger is not None:
+            return profile.trigger.pre_samples, profile.trigger.post_samples
+        return profile.pre_samples, profile.post_samples
+
     def _validate_interval_independent(self, profile: AcquisitionProfile, sample_count: int) -> None:
         cfg = self.config
         if sample_count > cfg.max_sample_count:

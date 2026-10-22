@@ -23,9 +23,12 @@ tools/picoscope/
       picosdk.py    vendor ps3000a ctypes adapter (PICO-2, hardware-validated)
       simulator.py  deterministic simulated adapter
   mcp/              Layer C — FastMCP stdio adapter (PICO-3, measurement-only)
+  analysis/         Layer B — offline UART + PWM/timing analysis (PICO-4)
+  profiles/         reusable Siebwalde capture profiles (PICO-4, config only)
   simulator/        synthetic signal fixtures (sine/PWM/DC, square/edges/UART)
   tests/            offline pytest suite (PICO-1/PICO-2, 123 tests)
-  tests_mcp/        offline MCP integration tests (PICO-3, 20 categories)
+  tests_mcp/        offline MCP integration tests (PICO-3/PICO-4)
+  tests_analysis/   offline Layer B analysis tests (PICO-4)
   demo.py           standalone simulated capture + save/reload round-trip
   README.md         this file
   SAFETY.md         measurement-only safety contract
@@ -168,11 +171,13 @@ hardware-output surface).
 ## MCP adapter (Layer C)
 
 A thin, measurement-only FastMCP stdio server lives in `mcp/` (PICO-3). It
-exposes exactly four tools — `scope_info`, `scope_capture_block`,
-`scope_get_capture_metadata`, `scope_export_capture` — over the same backend and
-simulator. Raw sample arrays are never returned in an MCP response (only capture
-ids and artifact paths). See `docs/PICOSCOPE-PICO-3-MCP-INTEGRATION.md` for the
-tool schemas, limits, ownership handling and OpenCode registration.
+exposes five tools — `scope_info`, `scope_capture_block`,
+`scope_get_capture_metadata`, `scope_export_capture`, and (PICO-4) the read-only
+`scope_analyze_capture` — over the same backend and simulator. Raw sample arrays
+are never returned in an MCP response (only capture ids, artifact paths, and
+compact analysis summaries). See `docs/PICOSCOPE-PICO-3-MCP-INTEGRATION.md` for
+the original four-tool schemas/limits/ownership and
+`docs/PICOSCOPE-PICO-4-SIGNAL-ANALYSIS.md` for the analysis tool and Layer B.
 
 ```powershell
 # Install the MCP dependencies (project-local, pinned):
@@ -182,6 +187,21 @@ tools/picoscope/.venv/Scripts/python.exe -m tools.picoscope.mcp
 # Offline MCP tests (20 categories):
 tools/picoscope/.venv/Scripts/python.exe -m pytest tools/picoscope/tests_mcp -q
 ```
+
+## Analysis library (Layer B, PICO-4)
+
+`tools/picoscope/analysis/` is a standalone, NumPy-only signal-analysis library
+(no MCP, no hardware). It consumes raw sample arrays + `sample_interval_ns`:
+
+- `uart` — 8-bit/9-bit UART frame decoder (explicit mode, ninth-bit flag, stop-bit
+  validation, frame-error/truncation reporting, idle-gap grouping, TX/RX timing).
+- `timing` — PWM frequency/period/duty, edge timestamps, cross-channel deltas
+  (digital vs analog distinguished).
+- `io` — capture line/channel extraction + deterministic JSON export.
+- `fixtures` — deterministic synthetic UART/PWM fixtures.
+
+See `docs/PICOSCOPE-PICO-4-SIGNAL-ANALYSIS.md`. Run the Layer B tests with
+`python -m pytest tools/picoscope/tests_analysis -q`.
 
 ## Known limitations
 

@@ -31,6 +31,7 @@ ALLOWED_BACKEND_CALLS = {
     "configure_trigger",
     "capture_block",
     "save_capture",
+    "load_capture",
     "close_device",
 }
 
@@ -87,10 +88,16 @@ def test_only_allowlisted_backend_calls():
                 )
 
 
-def test_exactly_four_tools_via_client(env_factory):
-    """The exposed tool surface is exactly the four measurement tools."""
+def test_exactly_five_tools_via_client(env_factory):
+    """The exposed tool surface is exactly the five measurement/analysis tools."""
     env = env_factory()
-    expected = {"scope_info", "scope_capture_block", "scope_get_capture_metadata", "scope_export_capture"}
+    expected = {
+        "scope_info",
+        "scope_capture_block",
+        "scope_get_capture_metadata",
+        "scope_export_capture",
+        "scope_analyze_capture",
+    }
 
     async def body(session):
         names = {t.name for t in (await session.list_tools()).tools}

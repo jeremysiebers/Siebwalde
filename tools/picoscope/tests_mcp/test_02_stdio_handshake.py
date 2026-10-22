@@ -21,6 +21,6 @@ def test_server_identity_is_picoscope(env_factory):
 
     async def body(session):
         tools = await session.list_tools()
-        assert len(tools.tools) == 4
+        assert len(tools.tools) == 5
 
     run(env, body)

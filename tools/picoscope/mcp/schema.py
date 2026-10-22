@@ -76,3 +76,17 @@ class AcquisitionProfile(BaseModel):
     timebase: int = Field(10, ge=0)
     trigger_wait_ms: int = Field(5000, ge=0)
     notes: Optional[str] = Field(None, max_length=2048)
+
+
+class AnalysisRequest(BaseModel):
+    """A read-only offline analysis request over an existing capture.
+
+    ``analyzer`` is a strict allowlist; ``settings`` is validated per analyzer
+    inside the service (no arbitrary keys, no client-supplied paths, no shell).
+    """
+
+    capture_id: str = Field(description="32-char hex capture id")
+    analyzer: Literal["uart", "pwm_timing"] = Field(
+        description="Allowlisted analyzer: 'uart' or 'pwm_timing'"
+    )
+    settings: dict = Field(default_factory=dict, description="Analyzer settings (validated)")
