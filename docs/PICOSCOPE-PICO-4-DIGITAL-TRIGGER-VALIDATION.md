@@ -67,7 +67,7 @@ Digital trigger sequence (per official ps3000a MSO block example):
 
 ## 5. Offline test results
 
-Full suite: **278 passed** (157 SDK + 53 analysis + 68 MCP), 0 failed, 0 skipped.
+Full suite: **278 passed** (161 SDK + 53 analysis + 64 MCP), 0 failed, 0 skipped.
 - 21 new SDK digital-trigger tests (mocked SDK: no EXTERNAL fallback, edge mapping,
   disabled-port rejection, error propagation, timeout/triggered/unused states, trigger index).
 - 13 new simulator edge-emulation tests.
@@ -128,15 +128,15 @@ and covered by 4 regression tests.
 The first D1 falling edge is at **sample 62500** (delta 0 vs `pre`), and the signal
 transitions idle→start (1→0) exactly there. The first decoded 9-bit frame (address
 `0x04`, ninth=1) begins at 1 000 000 ns = 62500 × 16 ns. The 1 ms of pre-trigger data
-contains the tail of the previous transaction (a truncated 8-bit reply, correctly
-reported with `stop_ok=False`).
+contains the tail of the previous transaction (a reply tail cut by the trigger boundary,
+correctly reported with `stop_ok=False` — a stop-bit error, not the `truncated` flag).
 
 Decoded traffic (all CRC-valid, Siebwalde bit-reversed convention):
 
 | Direction | Frames | Content |
 |---|---|---|
 | TX (D1, 9-bit) | 24 | `04 03 00 08 00 02 39 A2` · `06 03 00 08 00 02 7E 22` · `01 03 00 00 00 02 D0 23` |
-| RX (D0, 8-bit) | 33 (32 good + 1 truncated) | `04 03 04 80 D6 00 00 D0 E6` · `06 03 04 80 E3 00 00 A3 2A` · `01 03 04 01 8F 80 00 27 D5` |
+| RX (D0, 8-bit) | 33 (32 good + 1 stop-bit error from the pre-trigger reply tail) | `04 03 04 80 D6 00 00 D0 E6` · `06 03 04 80 E3 00 00 A3 2A` · `01 03 04 01 8F 80 00 27 D5` |
 
 Ninth-bit address marking proven: `[1,0,0,0,0,0,0,0]` per transaction (ninth=1 on the
 address byte, ninth=0 on data). The first transaction is the known-good HMO2024 frame
