@@ -49,8 +49,8 @@ erased, modified or restored.
 
 ## 4. Distinguishing log evidence (23-10-2026 TrackAppLog)
 
-`Logging/23-10-2026_TrackAppLog.txt` records **two** full initializations
-(09:00:33 and 13:59:25). Both contain:
+`Logging/23-10-2026_TrackAppLog.txt` records **three** full initializations
+(09:00:33, 13:59:25 and 15:37:09). Each contains:
 
 ```
 State.DetectSlaves => Slave 1 detected ... Slave 3 / 4 / 6 / 51 detected

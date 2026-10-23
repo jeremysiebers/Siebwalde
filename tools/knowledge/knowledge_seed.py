@@ -614,7 +614,7 @@ NODES: list[tuple[str, dict]] = [
     }),
     ("Observation", {
         "id": "obs:csharp-init-log-no-flash", "label": "C# init log: 0 slaves require flashing (2026-10-23)",
-        "what": "Logging/23-10-2026_TrackAppLog.txt (both 09:00 and 13:59 sessions): File checksum = 0x251F; 0 slaves require flashing; no EXEC_FW_STATE_FLASH_ALL_SLAVES (122) emitted.",
+        "what": "Logging/23-10-2026_TrackAppLog.txt (three sessions 09:00, 13:59, 15:37): File checksum = 0x251F; 0 slaves require flashing; no EXEC_FW_STATE_FLASH_ALL_SLAVES (122) emitted.",
         "date": "2026-10-23", "method": "runtime log analysis (read-only)",
         "status": "PROVEN_HARDWARE",
         "summary": "The auto-flash step ran and reported 0 slaves requiring flash with file checksum 0x251F, i.e. every detected amp's HR11 matched 0x251F. Consistent with ERASE never executing; inconsistent with an erased (0xFFFF) amplifier.",
