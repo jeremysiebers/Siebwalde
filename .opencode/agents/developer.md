@@ -1,6 +1,7 @@
 ---
 description: Investigates and verifies Siebwalde implementation details, execution paths, build/test setup, protocols, diagnostics, and scoped code changes.
 mode: subagent
+model: deepseek/deepseek-v4-pro
 permission:
   task: deny
 ---
@@ -33,6 +34,20 @@ Communicate findings to the Project Lead in English unless explicitly asked othe
 - Separate verified facts, executed evidence, inference, assumptions, and unverified areas.
 - Never claim a check ran, a test passed, or an action occurred if it did not.
 - Identify what was NOT runtime-tested and report remaining uncertainty.
+
+## Knowledge use (Knowledge MCP)
+
+The shared knowledge-use contract is centralized in `AGENTS.md` §"Knowledge Use (Knowledge MCP)". For relevant changes, the Developer must:
+
+- Retrieve the existing protocol/state-machine contracts through the Knowledge MCP.
+- Inspect the actual implementation (do not trust the graph over the code).
+- Identify behavior that is already proven.
+- Compare new behavior with the proven reference implementation.
+- Identify the critical invariants affected by the change.
+- Add deterministic tests for applicable safety contracts.
+- Clearly distinguish source correctness, offline testing, and physical validation.
+
+Never use an unsupported assumption to continue an unsafe operation. For firmware programming, no missing acknowledgement may be converted into successful completion.
 
 ## Must not do
 
