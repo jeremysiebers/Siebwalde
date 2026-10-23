@@ -136,7 +136,7 @@ def test_q3_pico5b_incident():
     assert len(rs) == 1
     assert rs[0]["i.id"] == "incident:pico-5b"
     assert "ERASE" in rs[0]["i.summary"]
-    assert rs[0]["i.source_path"] == "docs/PICO-5B-PHYSICAL-SESSION-PREFLIGHT.md"
+    assert rs[0]["i.source_path"] == "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md"
 
 
 def test_q4_erase_timeout_not_sufficient():
@@ -153,6 +153,15 @@ def test_q5_amp3_firmware_state_unknown():
     amp3 = [r for r in rs if r["d.id"] == "device:amp-3"]
     assert len(amp3) == 1
     assert amp3[0]["d.status"] == "UNKNOWN"
+
+
+def test_amp1_roundtrip_final_0xE906():
+    """Amplifier 1 ended the 2026-10-19 round-trip on 0xE906 (1.0.0), not 0x251F."""
+    rs = server.knowledge_firmware_state()["results"]
+    amp1 = [r for r in rs if r["d.id"] == "device:amp-1"]
+    assert len(amp1) == 1
+    assert amp1[0]["f.id"] == "firmware:pic18-0xE906"
+    assert amp1[0]["d.status"] == "UNKNOWN"  # not re-verified after PICO-5B
 
 
 def test_q6_backplane_mapping():

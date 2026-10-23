@@ -15,3 +15,6 @@ mcp==2.3.0
 
 # Pretty-printing of query results in the CLI query tool.
 tabulate==0.10.0
+
+# Test-only dependency (offline acceptance + boundary tests).
+pytest==9.1.1

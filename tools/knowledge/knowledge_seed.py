@@ -42,7 +42,7 @@ NODES: list[tuple[str, dict]] = [
         "id": "device:amp-1", "label": "Amplifier 1", "kind": "PIC18",
         "address": "1", "role": "traction slave",
         "status": "UNKNOWN",
-        "summary": "Prototype amplifier address 1. Last VERIFIED legacy firmware 0x251F; after the 1.0.0 round-trip (2026-10-19) it was returned to 0x251F. Its exact current state is not re-verified after PICO-5B.",
+        "summary": "Prototype amplifier address 1. Ended the 2026-10-19 round-trip on 0xE906 (1.0.0); HR11=0xE906 runtime readback. Its exact current state is UNKNOWN (not re-verified after PICO-5B).",
         "source_path": "docs/firmware-flash-recovery-technical-reference.md",
         "source_location": "2.5", "source_revision": "1f89c0b", "evidence_status": "UNVERIFIED",
     }),
@@ -60,7 +60,7 @@ NODES: list[tuple[str, dict]] = [
         "status": "PROVEN_HARDWARE",
         "summary": "Prototype amplifier address 4; legacy firmware 0x251F.",
         "source_path": "docs/firmware-flash-recovery-technical-reference.md",
-        "source_location": "2.5", "source_revision": "1f89c0b", "evidence_status": "SOURCE_REF",
+        "source_location": "2.5", "source_revision": "1f89c0b", "evidence_status": "OBSERVED",
     }),
     ("HardwareDevice", {
         "id": "device:amp-6", "label": "Amplifier 6", "kind": "PIC18",
@@ -68,7 +68,7 @@ NODES: list[tuple[str, dict]] = [
         "status": "PROVEN_HARDWARE",
         "summary": "Prototype amplifier address 6; legacy firmware 0x251F.",
         "source_path": "docs/firmware-flash-recovery-technical-reference.md",
-        "source_location": "2.5", "source_revision": "1f89c0b", "evidence_status": "SOURCE_REF",
+        "source_location": "2.5", "source_revision": "1f89c0b", "evidence_status": "OBSERVED",
     }),
     ("HardwareDevice", {
         "id": "device:backplane-proto", "label": "Prototype backplane", "kind": "backplane",
@@ -265,7 +265,7 @@ NODES: list[tuple[str, dict]] = [
         "id": "command:123", "command": 123, "command_name": "SELECT_SLAVE",
         "direction": "HOST_TO_PIC32", "destructive": False,
         "status": "PROVEN_SOURCE",
-        "summary": "Select a slave and force it into bootloader (writes HR11=0 to boot address 0xAA). No host ack. Non-destructive (no erase), but requires the target to be freshly reset to listen at 0xAA.",
+        "summary": "Select a slave and force it into bootloader by writing HR11=0 to the boot-init address 0xAA. No host ack. Non-destructive (no erase), but a running amp answers on its assigned address so the write is dropped unless the target is at the boot address (freshly reset / power-cycled).",
         "source_path": "docs/firmware-flash-recovery-technical-reference.md",
         "source_location": "2.5", "source_revision": "1f89c0b", "evidence_status": "SOURCE_REF",
     }),
@@ -520,8 +520,8 @@ NODES: list[tuple[str, dict]] = [
         "date": "2026-10-23", "environment": "live",
         "status": "PROVEN_HARDWARE",
         "summary": "Host->PIC32 firmware upload completed (~1.3s), RECEIVED_CHECKSUM_OK, reached 123 SELECT_SLAVE.",
-        "source_path": "tools/picoscope/evidence/pico-5b", "source_location": "live log",
-        "source_revision": "1f89c0b", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
+        "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md", "source_location": "1",
+        "source_revision": "a6e9dde", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
     }),
     ("TestExecution", {
         "id": "test:pico-5b-erase-attempt", "label": "PICO-5B ERASE/WRITE attempt",
@@ -529,8 +529,8 @@ NODES: list[tuple[str, dict]] = [
         "date": "2026-10-23", "environment": "live",
         "status": "PROVEN_HARDWARE",
         "summary": "ERASE (125) and WRITE (126) timed out (201/211); no bootloader ack received; WRITE_CONFIG (127) aborted on a 211/221 mismatch.",
-        "source_path": "tools/picoscope/evidence/pico-5b", "source_location": "live log",
-        "source_revision": "1f89c0b", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
+        "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md", "source_location": "1",
+        "source_revision": "a6e9dde", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
     }),
 
     # ==================================================================
@@ -562,8 +562,8 @@ NODES: list[tuple[str, dict]] = [
         "date": "2026-10-23", "method": "flash_one.py live log",
         "status": "PROVEN_HARDWARE",
         "summary": "ERASE received no bootloader response; timeout 201.",
-        "source_path": "tools/picoscope/evidence/pico-5b", "source_location": "flash live log",
-        "source_revision": "1f89c0b", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
+        "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md", "source_location": "1",
+        "source_revision": "a6e9dde", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
     }),
     ("Observation", {
         "id": "obs:write-timeout", "label": "WRITE timed out",
@@ -571,8 +571,8 @@ NODES: list[tuple[str, dict]] = [
         "date": "2026-10-23", "method": "flash_one.py live log",
         "status": "PROVEN_HARDWARE",
         "summary": "WRITE received no bootloader response; timeout 211.",
-        "source_path": "tools/picoscope/evidence/pico-5b", "source_location": "flash live log",
-        "source_revision": "1f89c0b", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
+        "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md", "source_location": "1",
+        "source_revision": "a6e9dde", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
     }),
     ("Observation", {
         "id": "obs:write-config-timeout-mismatch", "label": "WRITE_CONFIG timeout-code mismatch",
@@ -580,8 +580,8 @@ NODES: list[tuple[str, dict]] = [
         "date": "2026-10-23", "method": "flash_one.py live log",
         "status": "PROVEN_HARDWARE",
         "summary": "The PIC32 reported WRITE_FLASH's timeout code (211) for WRITE_CONFIG; the driver aborted because it expected 221.",
-        "source_path": "tools/picoscope/evidence/pico-5b", "source_location": "flash live log",
-        "source_revision": "1f89c0b", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
+        "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md", "source_location": "1",
+        "source_revision": "a6e9dde", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
     }),
     ("Observation", {
         "id": "obs:po-normal-start", "label": "PO verified normal start",
@@ -601,8 +601,8 @@ NODES: list[tuple[str, dict]] = [
         "incident_date": "2026-10-23", "severity": "HIGH", "target": "single amplifier (3 per directive; session referred to amp 1)",
         "status": "PROVEN_HARDWARE",
         "summary": "A supervised single-target bootloader flash sent 250->103->120->141x480->121->151->123 then ERASE(125)/WRITE(126)/WRITE_CONFIG(127); all destructive commands timed out without bootloader acks. The driver's ASSUME-OK (--proceed-on-timeout) continued past unconfirmed ERASE/WRITE. Target application state is UNKNOWN.",
-        "source_path": "docs/PICO-5B-PHYSICAL-SESSION-PREFLIGHT.md",
-        "source_location": "summary", "source_revision": "1f89c0b", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
+        "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md",
+        "source_location": "5", "source_revision": "a6e9dde", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
     }),
 
     # ==================================================================
@@ -682,6 +682,14 @@ NODES: list[tuple[str, dict]] = [
     # ==================================================================
     # EvidenceSource
     # ==================================================================
+    ("EvidenceSource", {
+        "id": "evidence:pico-5b-validation-doc", "label": "PICO-5B physical flash validation (live outcome)",
+        "kind": "doc", "path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md", "format": "markdown",
+        "status": "PROVEN_HARDWARE",
+        "summary": "Committed record of the PICO-5B live outcome (ERASE/WRITE timeouts, ASSUME-OK unsafe, target UNKNOWN).",
+        "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md",
+        "source_location": "header", "source_revision": "a6e9dde", "evidence_status": "OBSERVED",
+    }),
     ("EvidenceSource", {
         "id": "evidence:techref-doc", "label": "Firmware flash/recovery technical reference",
         "kind": "doc", "path": "docs/firmware-flash-recovery-technical-reference.md", "format": "markdown",
@@ -765,7 +773,7 @@ NODES: list[tuple[str, dict]] = [
 # ---------------------------------------------------------------------------
 RELS: list[tuple[str, str, str, dict]] = [
     # RUNS_FIRMWARE
-    ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": False}),
+    ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0xE906", {"since": "2026-10-19 round-trip", "superseded": False}),
     ("RUNS_FIRMWARE", "device:amp-3", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": False}),
     ("RUNS_FIRMWARE", "device:amp-4", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": False}),
     ("RUNS_FIRMWARE", "device:amp-6", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": False}),
