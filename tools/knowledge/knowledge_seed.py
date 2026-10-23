@@ -521,7 +521,7 @@ NODES: list[tuple[str, dict]] = [
         "status": "PROVEN_HARDWARE",
         "summary": "Host->PIC32 firmware upload completed (~1.3s), RECEIVED_CHECKSUM_OK, reached 123 SELECT_SLAVE.",
         "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md", "source_location": "1",
-        "source_revision": "a6e9dde", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
+        "source_revision": "9ff8e39", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
     }),
     ("TestExecution", {
         "id": "test:pico-5b-erase-attempt", "label": "PICO-5B ERASE/WRITE attempt",
@@ -530,7 +530,7 @@ NODES: list[tuple[str, dict]] = [
         "status": "PROVEN_HARDWARE",
         "summary": "ERASE (125) and WRITE (126) timed out (201/211); no bootloader ack received; WRITE_CONFIG (127) aborted on a 211/221 mismatch.",
         "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md", "source_location": "1",
-        "source_revision": "a6e9dde", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
+        "source_revision": "9ff8e39", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
     }),
 
     # ==================================================================
@@ -563,7 +563,7 @@ NODES: list[tuple[str, dict]] = [
         "status": "PROVEN_HARDWARE",
         "summary": "ERASE received no bootloader response; timeout 201.",
         "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md", "source_location": "1",
-        "source_revision": "a6e9dde", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
+        "source_revision": "9ff8e39", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
     }),
     ("Observation", {
         "id": "obs:write-timeout", "label": "WRITE timed out",
@@ -572,7 +572,7 @@ NODES: list[tuple[str, dict]] = [
         "status": "PROVEN_HARDWARE",
         "summary": "WRITE received no bootloader response; timeout 211.",
         "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md", "source_location": "1",
-        "source_revision": "a6e9dde", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
+        "source_revision": "9ff8e39", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
     }),
     ("Observation", {
         "id": "obs:write-config-timeout-mismatch", "label": "WRITE_CONFIG timeout-code mismatch",
@@ -581,7 +581,7 @@ NODES: list[tuple[str, dict]] = [
         "status": "PROVEN_HARDWARE",
         "summary": "The PIC32 reported WRITE_FLASH's timeout code (211) for WRITE_CONFIG; the driver aborted because it expected 221.",
         "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md", "source_location": "1",
-        "source_revision": "a6e9dde", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
+        "source_revision": "9ff8e39", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
     }),
     ("Observation", {
         "id": "obs:po-normal-start", "label": "PO verified normal start",
@@ -602,7 +602,7 @@ NODES: list[tuple[str, dict]] = [
         "status": "PROVEN_HARDWARE",
         "summary": "A supervised single-target bootloader flash sent 250->103->120->141x480->121->151->123 then ERASE(125)/WRITE(126)/WRITE_CONFIG(127); all destructive commands timed out without bootloader acks. The driver's ASSUME-OK (--proceed-on-timeout) continued past unconfirmed ERASE/WRITE. Target application state is UNKNOWN.",
         "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md",
-        "source_location": "5", "source_revision": "a6e9dde", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
+        "source_location": "5", "source_revision": "9ff8e39", "evidence_status": "OBSERVED", "observed_date": "2026-10-23",
     }),
 
     # ==================================================================
@@ -688,7 +688,7 @@ NODES: list[tuple[str, dict]] = [
         "status": "PROVEN_HARDWARE",
         "summary": "Committed record of the PICO-5B live outcome (ERASE/WRITE timeouts, ASSUME-OK unsafe, target UNKNOWN).",
         "source_path": "docs/PICO-5B-PHYSICAL-FLASH-VALIDATION.md",
-        "source_location": "header", "source_revision": "a6e9dde", "evidence_status": "OBSERVED",
+        "source_location": "header", "source_revision": "9ff8e39", "evidence_status": "OBSERVED",
     }),
     ("EvidenceSource", {
         "id": "evidence:techref-doc", "label": "Firmware flash/recovery technical reference",
