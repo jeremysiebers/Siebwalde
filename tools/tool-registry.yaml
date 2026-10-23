@@ -1,0 +1,197 @@
+# Siebwalde Engineering Tool Registry
+#
+# Durable, human- and machine-readable inventory of the project's engineering
+# tooling. Technical properties (path, language, entry points, capabilities)
+# are factual; `preservation_policy` and `po_decision` record Product Owner
+# policy (see docs/SIEBWALDE-ENGINEERING-TOOL-REGISTRY.md).
+#
+# Lifecycle status: ACTIVE | PROTECTED | HISTORICAL | MAINTENANCE_ONLY | EXPERIMENTAL
+# Preservation policy: KEEP | KEEP_ACTIVE_MCP | KEEP_PROTECTED | KEEP_HISTORICAL | PRESERVE_PENDING_REVIEW
+#
+# Never invent a validation status. "physically_proven", "offline_tested",
+# "source_supported" reflect the evidence actually recorded for that tool.
+
+format_version: 1
+tools:
+  - id: picoscope-mcp
+    name: PicoScope 3406D MSO instrument tooling + MCP
+    path: tools/picoscope/
+    purpose: Oscilloscope acquisition, digital edge trigger, UART decode, PWM/timing analysis, evidence capture, OpenCode MCP.
+    lifecycle: ACTIVE
+    preservation_policy: KEEP_ACTIVE_MCP
+    po_decision: "K4 §5.1 KEEP — ACTIVE / ACCEPTED MCP"
+    language: Python
+    runtime: project venv (tools/picoscope/.venv)
+    entry_points: [tools.picoscope.mcp (python -m tools.picoscope.mcp), tools/picoscope/demo.py]
+    hardware: PicoScope 3406D MSO (USB)
+    side_effect: MEASUREMENT_ONLY (read-only acquisition; no AWG/signal generation, no flash/reset)
+    capabilities:
+      - native_ps3000a_backend
+      - digital_acquisition
+      - digital_edge_trigger
+      - uart_decode_9bit_8bit
+      - pwm_timing_analysis
+      - npz_json_evidence
+      - opencode_mcp
+    offline_tested: true       # 278 PICO-4T tests
+    physically_proven: true    # PICO-4T/PICO-5B captures
+    source_revision: 1f89c0b
+    mcp_service: picoscope
+    migration_candidate: false
+    related: [diagnostics-mcp]
+
+  - id: knowledge-foundation
+    name: LadybugDB Knowledge Foundation + Knowledge MCP
+    path: tools/knowledge/
+    purpose: Evidence-backed engineering knowledge graph (LadybugDB) + read-only Knowledge MCP.
+    lifecycle: ACTIVE
+    preservation_policy: KEEP_ACTIVE_MCP
+    po_decision: "K4 §5.2 KEEP — ACTIVE / ACCEPTED MCP"
+    language: Python
+    runtime: project venv (tools/knowledge/.venv) + native lbug/OpenSSL DLLs
+    entry_points: [tools.knowledge.mcp_server (python -m tools.knowledge.mcp_server), tools.knowledge.ingest.build_graph]
+    hardware: none
+    side_effect: NONE (read-only graph + deterministic offline ingestion)
+    capabilities:
+      - ladybugdb_graph
+      - deterministic_ingestion
+      - provenance_evidence
+      - read_only_knowledge_mcp
+      - opencode_agent_integration
+    offline_tested: true       # 18 knowledge tests
+    physically_proven: false   # offline only
+    source_revision: 8fa3a6e
+    mcp_service: knowledge
+    migration_candidate: false
+
+  - id: firmware-tooling
+    name: Firmware build + checksum utilities
+    path: tools/firmware/
+    purpose: Reproducible PIC18/PIC32 out-of-tree build and HEX checksum verification.
+    lifecycle: PROTECTED
+    preservation_policy: KEEP_PROTECTED
+    po_decision: "K4 §5.3 KEEP — PROTECTED, FUTURE MIGRATION CANDIDATE"
+    language: PowerShell
+    runtime: Microchip MPLAB X / XC compilers (pinned toolchains)
+    entry_points: [tools/firmware/build-firmware.ps1, tools/firmware/checksum-verify.ps1]
+    hardware: none (build/verify only; no flashing)
+    side_effect: NONE (offline build + verify; no hardware)
+    capabilities:
+      - firmware_build
+      - hex_generation
+      - checksum_handling
+      - firmware_image_verification
+    offline_tested: true       # checksum_verify_tests.ps1
+    physically_proven: false
+    source_revision: 8fa3a6e
+    mcp_service: null
+    migration_candidate: true  # candidates for future Diagnostics Core (checksum verify)
+    related: [flash-one-driver]
+
+  - id: hmo2024-tooling
+    name: Hameg HMO2024 SCPI oscilloscope tooling
+    path: tools/hmo2024/
+    purpose: Historical HMO2024 measurement: discovery/inventory, SCPI capture/export, waveform + digital/UART decode.
+    lifecycle: HISTORICAL
+    preservation_policy: KEEP_HISTORICAL
+    po_decision: "K4 §5.4 KEEP — HISTORICAL / MAINTENANCE-ONLY"
+    language: Python
+    runtime: system Python
+    entry_points: [tools/hmo2024/cli.py, tools/hmo2024/uart/cli.py]
+    hardware: Hameg HMO2024 (COM/SCPI)
+    side_effect: MEASUREMENT_ONLY (read-only SCPI; no flash/reset)
+    capabilities:
+      - scpi_discovery_inventory
+      - capture_export
+      - waveform_interpretation
+      - uart_decode (9-bit/8-bit, project CRC)
+    offline_tested: true       # hmo2024 tests
+    physically_proven: true    # REF-AMP01 hardware measurements
+    source_revision: 8fa3a6e
+    mcp_service: null
+    migration_candidate: false  # maintenance-only, not migrating
+
+  - id: flash-one-driver
+    name: Single-target PIC18 flash diagnostic driver (K3 fail-closed)
+    path: TrackController5/Python/flash_one.py
+    purpose: Offline-safe single-target firmware-download driver; fail-closed FlashState machine (K3).
+    lifecycle: PROTECTED
+    preservation_policy: KEEP_PROTECTED
+    po_decision: "K3 corrected; K4 §5.3 reuse for future Diagnostics Core"
+    language: Python
+    runtime: system Python
+    entry_points: [TrackController5/Python/flash_one.py, TrackController5/Python/test_flash_one.py]
+    hardware: PIC32 master (UDP) — live path NOT used offline
+    side_effect: STATE_CHANGING (live path); OFFLINE dry-run is side-effect-free
+    capabilities:
+      - single_target_flash_sequence
+      - fail_closed_flashstate_machine
+      - protocol_ack_classification
+      - host_transaction_logging
+    offline_tested: true       # 43 tests
+    physically_proven: false   # experimental; not hardware-validated
+    source_revision: b6ee814
+    mcp_service: null
+    migration_candidate: true  # FlashState + protocol matrix -> future Diagnostics Core
+    related: [firmware-tooling]
+
+  - id: legacy-python-cli
+    name: Legacy PIC32 Python command-line tooling
+    path: TrackController5/Python/
+    purpose: Legacy Python CLI (bootload, Comm UDP transport, Enum/StateMachines) reused by flash_one.py.
+    lifecycle: PROTECTED
+    preservation_policy: KEEP_PROTECTED
+    po_decision: "Reuse (not duplicate) per K4 §12"
+    language: Python
+    runtime: system Python
+    entry_points: [TrackController5/Python/TrackController.py, TrackController5/Python/bootload.py]
+    hardware: PIC32 master (UDP)
+    side_effect: STATE_CHANGING (live); read-only parsing offline
+    capabilities:
+      - udp_transport
+      - hex_parsing
+      - checksum_parsing
+      - enum_mirror
+    offline_tested: true
+    physically_proven: false
+    source_revision: acb31f4
+    mcp_service: null
+    migration_candidate: true
+
+  - id: faller-car-bootload
+    name: Faller Car uController bootloader Python helper
+    path: Faller_Car_uControllerBootLoader.X/Python/bootload.py
+    purpose: Bootloader helper for the Faller Car uController firmware.
+    lifecycle: HISTORICAL
+    preservation_policy: PRESERVE_PENDING_REVIEW
+    po_decision: "not yet classified"
+    language: Python
+    runtime: system Python
+    entry_points: [Faller_Car_uControllerBootLoader.X/Python/bootload.py]
+    hardware: Faller Car uController
+    side_effect: STATE_CHANGING (live path)
+    capabilities: [faller_car_bootloader]
+    offline_tested: false
+    physically_proven: false
+    source_revision: 8fa3a6e
+    mcp_service: null
+    migration_candidate: false
+
+  - id: integrator-checksum-helper
+    name: Integrator checksum helper (tmp)
+    path: tmp/integrator_checksum.py
+    purpose: Ad-hoc checksum helper used during firmware review.
+    lifecycle: HISTORICAL
+    preservation_policy: PRESERVE_PENDING_REVIEW
+    po_decision: "not yet classified (tmp)"
+    language: Python
+    runtime: system Python
+    entry_points: [tmp/integrator_checksum.py]
+    hardware: none
+    side_effect: NONE
+    capabilities: [checksum_comparison]
+    offline_tested: false
+    physically_proven: false
+    source_revision: 8fa3a6e
+    mcp_service: null
+    migration_candidate: false

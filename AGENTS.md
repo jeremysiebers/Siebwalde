@@ -94,3 +94,7 @@ Rules:
 - If knowledge is unavailable or stale, **fall back to authoritative repository sources and explicitly report the limitation**. Do not let unavailable knowledge silently authorize a risky action.
 - The Knowledge MCP is **read-only and advisory**; it is not a substitute for deterministic protocol and safety enforcement, and it grants no hardware authority.
 - An agent must report **UNKNOWN** when the data does not support a conclusion; do not invent knowledge to fill a gap.
+
+## Tool registry (reuse before re-creating)
+
+Before creating new engineering tooling or replacing established tooling, search the tool registry `tools/tool-registry.yaml` (and the Knowledge MCP `knowledge_tools`) for an existing reusable component. Accepted Siebwalde MCP capabilities (`picoscope`, `knowledge`) and protected/historical tools are preserved by Product Owner policy: deletion, retirement or destructive replacement requires an explicit PO decision, and migration does not imply deletion. Reuse the existing implementation rather than duplicating firmware state machines, protocol parsers or instrument drivers.
