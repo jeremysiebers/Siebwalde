@@ -37,12 +37,27 @@ class Bootloader:
         self.rx_data         = [] 
 
 
+def _resolve_ip_address(ip_address=None):
+    """Resolve the controller TX address.
+
+    An explicit `ip_address` (e.g. flash_one.py --ip) selects the diagnostic
+    target directly; otherwise the historical DNS 'TRACKCONTROL' + .100 fallback
+    is preserved so the shared transport is not hard-wired to one controller.
+    """
+    if ip_address:
+        return ip_address
+    try:
+        return socket.gethostbyname('TRACKCONTROL')
+    except Exception:
+        return '192.168.1.100'
+
+
 class DataAquisition:
-    def __init__(self, AmountOfAmplifiers):
-        # LEGACY RESTORATION (2026-10-20): PIC32 master is at 192.168.1.193 (DHCP).
-        # Hardcode TX target to avoid the stale 'TRACKCONTROL' DNS / .100 fallback
-        # ambiguity -- a DIFFERENT device answers at 192.168.1.100 (TTL=64 vs PIC32 TTL=128).
-        self.IPAddr = '192.168.1.193'
+    def __init__(self, AmountOfAmplifiers, ip_address=None):
+        # Configurable controller addressing (I2 correction). An explicit
+        # `ip_address` selects the diagnostic target directly; otherwise the
+        # historical DNS 'TRACKCONTROL' + .100 fallback is preserved.
+        self.IPAddr = _resolve_ip_address(ip_address)
         print("Ip address of TRACKCONTROL (PIC32) set to: " + str(self.IPAddr))
         
         self.UDP_IP_RECV = ''

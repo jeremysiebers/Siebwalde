@@ -1073,10 +1073,7 @@ def main(argv=None):
 
     from Comm import DataAquisition  # deferred import: binds UDP sockets
 
-    dac = DataAquisition(56)
-    if args.ip:
-        dac.IPAddr = args.ip
-        dac.sock_trans.connect((dac.IPAddr, dac.UDP_PORT_TRANS))
+    dac = DataAquisition(56, ip_address=args.ip)
 
     driver = FlashOneDriver(DataAquisitionTransport(dac), image, args.slave_id,
                             pause_before_erase=args.pause_before_erase)
