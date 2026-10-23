@@ -23,6 +23,8 @@ Sources read to produce this seed (branch ``feature/pico-5b-plan`` @
 
 from __future__ import annotations
 
+import re
+
 # ---------------------------------------------------------------------------
 # Nodes: (node_type, properties).  ``id`` is the stable primary key.
 # ---------------------------------------------------------------------------
@@ -838,3 +840,349 @@ RELS: list[tuple[str, str, str, dict]] = [
     # SUPERSEDES (artifact supersedes artifact)
     ("SUPERSEDES", "firmware:pic18-0xE906", "firmware:pic18-0x251F", {"note": "1.0.0 supersedes legacy on amp 1 (round-trip only; fleet not migrated)"}),
 ]
+
+
+# ===========================================================================
+# Engineering tool registry (K4-A) — deterministic mirror of tools/tool-registry.yaml
+# ===========================================================================
+# The registry file (tools/tool-registry.yaml) remains the authoritative
+# source; this mirror keeps the graph rebuild self-contained and offline.
+# Every node here carries ``source_path = tools/tool-registry.yaml``.
+#
+# ``K4_SOURCE_REVISION`` is a PLACEHOLDER for the K4 commit: set it to the real
+# K4 commit SHA once this increment is committed. Until then it is deliberately
+# a non-commit token so nothing can be mistaken for a git-resolved revision.
+#
+# Status mapping (per PO directive — never invent a validation status):
+#   PROVEN_HARDWARE     only tools with recorded hardware evidence (picoscope, hmo2024)
+#   PROVEN_OFFLINE_TEST offline-tested tools (knowledge, firmware-tooling, flash_one, legacy CLI)
+#   UNKNOWN             not validated (the two PRESERVE_PENDING_REVIEW tools)
+# The structural facts (Capability / MCPService / HardwareInterface / Dependency
+# / Decision) are registry-sourced, hence PROVEN_SOURCE.
+#
+# Populated relationships follow the K4-A "Map:" exactly: PROVIDES_CAPABILITY,
+# EXPOSED_VIA_MCP, CONNECTS_TO, PRESERVED_BY_POLICY, plus DEPENDS_ON (runtime
+# dependency). REUSES, VALIDATED_BY, MIGRATION_CANDIDATE_FOR and their node
+# tables (TestEvidence, MigrationDecision) are declared in the schema but are
+# intentionally left empty: the registry does not record unambiguous per-tool
+# data for them yet.
+
+K4_SOURCE_REVISION = "b5709f3"
+_TOOL_REGISTRY_SOURCE = "tools/tool-registry.yaml"
+
+# registry tool id -> the capability that exposes it over MCP (EXPOSED_VIA_MCP).
+_MCP_CAPABILITY = {
+    "picoscope-mcp": "opencode_mcp",
+    "knowledge-foundation": "read_only_knowledge_mcp",
+}
+
+_TOOLS = [
+    {
+        "id": "picoscope-mcp",
+        "name": "PicoScope 3406D MSO instrument tooling + MCP",
+        "path": "tools/picoscope/",
+        "purpose": "Oscilloscope acquisition, digital edge trigger, UART decode, PWM/timing analysis, evidence capture, OpenCode MCP.",
+        "lifecycle": "ACTIVE",
+        "preservation_policy": "KEEP_ACTIVE_MCP",
+        "po_decision": "K4 §5.1 KEEP — ACTIVE / ACCEPTED MCP",
+        "language": "Python",
+        "entry_points": ["tools.picoscope.mcp (python -m tools.picoscope.mcp)", "tools/picoscope/demo.py"],
+        "hardware": "PicoScope 3406D MSO (USB)",
+        "side_effect": "MEASUREMENT_ONLY (read-only acquisition; no AWG/signal generation, no flash/reset)",
+        "capabilities": ["native_ps3000a_backend", "digital_acquisition", "digital_edge_trigger", "uart_decode_9bit_8bit", "pwm_timing_analysis", "npz_json_evidence", "opencode_mcp"],
+        "runtime": "project venv (tools/picoscope/.venv)",
+        "offline_tested": True,
+        "physically_proven": True,
+        "mcp_service": "picoscope",
+        "migration_candidate": False,
+    },
+    {
+        "id": "knowledge-foundation",
+        "name": "LadybugDB Knowledge Foundation + Knowledge MCP",
+        "path": "tools/knowledge/",
+        "purpose": "Evidence-backed engineering knowledge graph (LadybugDB) + read-only Knowledge MCP.",
+        "lifecycle": "ACTIVE",
+        "preservation_policy": "KEEP_ACTIVE_MCP",
+        "po_decision": "K4 §5.2 KEEP — ACTIVE / ACCEPTED MCP",
+        "language": "Python",
+        "entry_points": ["tools.knowledge.mcp_server (python -m tools.knowledge.mcp_server)", "tools.knowledge.ingest.build_graph"],
+        "hardware": "none",
+        "side_effect": "NONE (read-only graph + deterministic offline ingestion)",
+        "capabilities": ["ladybugdb_graph", "deterministic_ingestion", "provenance_evidence", "read_only_knowledge_mcp", "opencode_agent_integration"],
+        "runtime": "project venv (tools/knowledge/.venv) + native lbug/OpenSSL DLLs",
+        "offline_tested": True,
+        "physically_proven": False,
+        "mcp_service": "knowledge",
+        "migration_candidate": False,
+    },
+    {
+        "id": "firmware-tooling",
+        "name": "Firmware build + checksum utilities",
+        "path": "tools/firmware/",
+        "purpose": "Reproducible PIC18/PIC32 out-of-tree build and HEX checksum verification.",
+        "lifecycle": "PROTECTED",
+        "preservation_policy": "KEEP_PROTECTED",
+        "po_decision": "K4 §5.3 KEEP — PROTECTED, FUTURE MIGRATION CANDIDATE",
+        "language": "PowerShell",
+        "entry_points": ["tools/firmware/build-firmware.ps1", "tools/firmware/checksum-verify.ps1"],
+        "hardware": "none (build/verify only; no flashing)",
+        "side_effect": "NONE (offline build + verify; no hardware)",
+        "capabilities": ["firmware_build", "hex_generation", "checksum_handling", "firmware_image_verification"],
+        "runtime": "Microchip MPLAB X / XC compilers (pinned toolchains)",
+        "offline_tested": True,
+        "physically_proven": False,
+        "mcp_service": None,
+        "migration_candidate": True,
+    },
+    {
+        "id": "hmo2024-tooling",
+        "name": "Hameg HMO2024 SCPI oscilloscope tooling",
+        "path": "tools/hmo2024/",
+        "purpose": "Historical HMO2024 measurement: discovery/inventory, SCPI capture/export, waveform + digital/UART decode.",
+        "lifecycle": "HISTORICAL",
+        "preservation_policy": "KEEP_HISTORICAL",
+        "po_decision": "K4 §5.4 KEEP — HISTORICAL / MAINTENANCE-ONLY",
+        "language": "Python",
+        "entry_points": ["tools/hmo2024/cli.py", "tools/hmo2024/uart/cli.py"],
+        "hardware": "Hameg HMO2024 (COM/SCPI)",
+        "side_effect": "MEASUREMENT_ONLY (read-only SCPI; no flash/reset)",
+        "capabilities": ["scpi_discovery_inventory", "capture_export", "waveform_interpretation", "uart_decode (9-bit/8-bit, project CRC)"],
+        "runtime": "system Python",
+        "offline_tested": True,
+        "physically_proven": True,
+        "mcp_service": None,
+        "migration_candidate": False,
+    },
+    {
+        "id": "flash-one-driver",
+        "name": "Single-target PIC18 flash diagnostic driver (K3 fail-closed)",
+        "path": "TrackController5/Python/flash_one.py",
+        "purpose": "Offline-safe single-target firmware-download driver; fail-closed FlashState machine (K3).",
+        "lifecycle": "PROTECTED",
+        "preservation_policy": "KEEP_PROTECTED",
+        "po_decision": "K3 corrected; K4 §5.3 reuse for future Diagnostics Core",
+        "language": "Python",
+        "entry_points": ["TrackController5/Python/flash_one.py", "TrackController5/Python/test_flash_one.py"],
+        "hardware": "PIC32 master (UDP) — live path NOT used offline",
+        "side_effect": "STATE_CHANGING (live path); OFFLINE dry-run is side-effect-free",
+        "capabilities": ["single_target_flash_sequence", "fail_closed_flashstate_machine", "protocol_ack_classification", "host_transaction_logging"],
+        "runtime": "system Python",
+        "offline_tested": True,
+        "physically_proven": False,
+        "mcp_service": None,
+        "migration_candidate": True,
+    },
+    {
+        "id": "legacy-python-cli",
+        "name": "Legacy PIC32 Python command-line tooling",
+        "path": "TrackController5/Python/",
+        "purpose": "Legacy Python CLI (bootload, Comm UDP transport, Enum/StateMachines) reused by flash_one.py.",
+        "lifecycle": "PROTECTED",
+        "preservation_policy": "KEEP_PROTECTED",
+        "po_decision": "Reuse (not duplicate) per K4 §12",
+        "language": "Python",
+        "entry_points": ["TrackController5/Python/TrackController.py", "TrackController5/Python/bootload.py"],
+        "hardware": "PIC32 master (UDP)",
+        "side_effect": "STATE_CHANGING (live); read-only parsing offline",
+        "capabilities": ["udp_transport", "hex_parsing", "checksum_parsing", "enum_mirror"],
+        "runtime": "system Python",
+        "offline_tested": True,
+        "physically_proven": False,
+        "mcp_service": None,
+        "migration_candidate": True,
+    },
+    {
+        "id": "faller-car-bootload",
+        "name": "Faller Car uController bootloader Python helper",
+        "path": "Faller_Car_uControllerBootLoader.X/Python/bootload.py",
+        "purpose": "Bootloader helper for the Faller Car uController firmware.",
+        "lifecycle": "HISTORICAL",
+        "preservation_policy": "PRESERVE_PENDING_REVIEW",
+        "po_decision": "not yet classified",
+        "language": "Python",
+        "entry_points": ["Faller_Car_uControllerBootLoader.X/Python/bootload.py"],
+        "hardware": "Faller Car uController",
+        "side_effect": "STATE_CHANGING (live path)",
+        "capabilities": ["faller_car_bootloader"],
+        "runtime": "system Python",
+        "offline_tested": False,
+        "physically_proven": False,
+        "mcp_service": None,
+        "migration_candidate": False,
+    },
+    {
+        "id": "integrator-checksum-helper",
+        "name": "Integrator checksum helper (tmp)",
+        "path": "tmp/integrator_checksum.py",
+        "purpose": "Ad-hoc checksum helper used during firmware review.",
+        "lifecycle": "HISTORICAL",
+        "preservation_policy": "PRESERVE_PENDING_REVIEW",
+        "po_decision": "not yet classified (tmp)",
+        "language": "Python",
+        "entry_points": ["tmp/integrator_checksum.py"],
+        "hardware": "none",
+        "side_effect": "NONE",
+        "capabilities": ["checksum_comparison"],
+        "runtime": "system Python",
+        "offline_tested": False,
+        "physically_proven": False,
+        "mcp_service": None,
+        "migration_candidate": False,
+    },
+]
+
+
+def _slug(value: str) -> str:
+    """Deterministic, ASCII-safe slug for stable node ids."""
+    value = re.sub(r"[^A-Za-z0-9]+", "-", value).strip("-").lower()
+    return value or "x"
+
+
+def _tool_status(tool: dict) -> str:
+    if tool.get("physically_proven"):
+        return "PROVEN_HARDWARE"
+    if tool.get("offline_tested"):
+        return "PROVEN_OFFLINE_TEST"
+    return "UNKNOWN"
+
+
+def _prov(tool_id: str, summary: str, status: str) -> dict:
+    """Shared provenance block for tool-registry-derived nodes."""
+    return {
+        "status": status,
+        "summary": summary,
+        "source_path": _TOOL_REGISTRY_SOURCE,
+        "source_location": f"tools.{tool_id}",
+        "source_revision": K4_SOURCE_REVISION,
+        "evidence_status": "SOURCE_REF",
+    }
+
+
+def _hardware_kind(name: str) -> str:
+    if "USB" in name:
+        return "USB"
+    if "SCPI" in name:
+        return "SCPI"
+    if "UDP" in name:
+        return "UDP"
+    return "MCU"
+
+
+def _normalize_hardware(hw: str) -> str:
+    """Strip a trailing safety note (em-dash suffix) to keep the interface identity."""
+    hw = hw.split("\u2014")[0].split(" - ")[0].strip()
+    return hw
+
+
+def _tool_knowledge() -> tuple[list, list]:
+    """Generate (nodes, rels) for the tool-registry mirror. Deterministic."""
+    nodes: list = []
+    rels: list = []
+
+    capabilities: dict[str, str] = {}   # capability name -> node id
+    mcp_services: dict[str, str] = {}   # mcp name -> node id
+    hardware: dict[str, str] = {}       # normalized name -> node id
+    dependencies: dict[str, str] = {}   # runtime string -> node id
+
+    for tool in _TOOLS:
+        tid = tool["id"]
+        tool_id = f"tool:{tid}"
+        status = _tool_status(tool)
+
+        nodes.append(("Tool", {
+            "id": tool_id,
+            "label": tool["name"],
+            "path": tool["path"],
+            "purpose": tool["purpose"],
+            "lifecycle": tool["lifecycle"],
+            "preservation_policy": tool["preservation_policy"],
+            "language": tool["language"],
+            "entry_points": ", ".join(tool["entry_points"]),
+            "hardware": tool["hardware"],
+            "side_effect": tool["side_effect"],
+            "offline_tested": tool["offline_tested"],
+            "physically_proven": tool["physically_proven"],
+            "mcp_service": tool.get("mcp_service"),
+            "migration_candidate": tool["migration_candidate"],
+            "po_decision": tool["po_decision"],
+            **_prov(tid, tool["purpose"], status),
+        }))
+
+        # capabilities + PROVIDES_CAPABILITY
+        for cap in tool["capabilities"]:
+            if cap not in capabilities:
+                cid = f"capability:{cap}"
+                capabilities[cap] = cid
+                nodes.append(("Capability", {
+                    "id": cid,
+                    "label": cap,
+                    "name": cap,
+                    "description": f"Capability provided by tool '{tool['name']}' (per tool registry).",
+                    **_prov(tid, f"Capability '{cap}' of tool '{tid}' (per tool registry).", "PROVEN_SOURCE"),
+                }))
+            rels.append(("PROVIDES_CAPABILITY", tool_id, capabilities[cap], {}))
+
+        # MCP service + EXPOSED_VIA_MCP (Capability -> MCPService)
+        mcp = tool.get("mcp_service")
+        if mcp:
+            if mcp not in mcp_services:
+                mid = f"mcp:{mcp}"
+                mcp_services[mcp] = mid
+                nodes.append(("MCPService", {
+                    "id": mid,
+                    "label": mcp,
+                    "name": mcp,
+                    **_prov(tid, f"MCP service '{mcp}' (per tool registry).", "PROVEN_SOURCE"),
+                }))
+            cap_for_mcp = _MCP_CAPABILITY.get(tid)
+            if cap_for_mcp and cap_for_mcp in capabilities:
+                rels.append(("EXPOSED_VIA_MCP", capabilities[cap_for_mcp], mcp_services[mcp], {}))
+
+        # hardware + CONNECTS_TO
+        hw_raw = tool.get("hardware") or ""
+        if hw_raw and not hw_raw.lower().startswith("none"):
+            hw_name = _normalize_hardware(hw_raw)
+            if hw_name not in hardware:
+                hid = f"hardware:{_slug(hw_name)}"
+                hardware[hw_name] = hid
+                nodes.append(("HardwareInterface", {
+                    "id": hid,
+                    "label": hw_name,
+                    "name": hw_name,
+                    "kind": _hardware_kind(hw_name),
+                    **_prov(tid, f"Hardware interface '{hw_name}' (per tool registry).", "PROVEN_SOURCE"),
+                }))
+            rels.append(("CONNECTS_TO", tool_id, hardware[hw_name], {}))
+
+        # runtime dependency + DEPENDS_ON
+        runtime = tool.get("runtime")
+        if runtime:
+            if runtime not in dependencies:
+                did = f"dependency:{_slug(runtime)}"
+                dependencies[runtime] = did
+                nodes.append(("Dependency", {
+                    "id": did,
+                    "label": runtime,
+                    "name": runtime,
+                    **_prov(tid, f"Runtime dependency '{runtime}' (per tool registry).", "PROVEN_SOURCE"),
+                }))
+            rels.append(("DEPENDS_ON", tool_id, dependencies[runtime], {}))
+
+        # PO preservation decision + PRESERVED_BY_POLICY (Tool -> Decision)
+        decision_id = f"decision:k4-tool-preservation-{tid}"
+        nodes.append(("Decision", {
+            "id": decision_id,
+            "label": f"K4 preservation decision for {tid}",
+            "decision": tool["po_decision"],
+            "decided_by": "Product Owner",
+            "date": "2026-10-23",
+            **_prov(tid, f"PO preservation decision for tool '{tid}': {tool['po_decision']}", "PROVEN_SOURCE"),
+        }))
+        rels.append(("PRESERVED_BY_POLICY", tool_id, decision_id, {}))
+
+    return nodes, rels
+
+
+_tool_nodes, _tool_rels = _tool_knowledge()
+NODES.extend(_tool_nodes)
+RELS.extend(_tool_rels)

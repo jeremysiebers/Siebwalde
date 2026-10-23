@@ -17,11 +17,12 @@ tools/knowledge/
   requirements.txt      pinned Python dependencies
   setup_lbug.ps1        stage + verify the native lbug/OpenSSL runtime DLLs
   lib/                  (git-ignored) native runtime: lbug_shared.dll + OpenSSL 3
-  schema.py             single-source schema (12 node tables + 9 relationship tables)
+  schema.py             single-source schema (19 node tables + 17 relationship tables)
   knowledge_seed.py     curated initial knowledge (nodes + relationships, with provenance)
   ingest/build_graph.py deterministic ingestion -> db/siebwalde-knowledge.lbdb
   mcp_server/server.py  read-only Knowledge MCP (FastMCP; narrow tools, no raw Cypher)
-  tests/test_knowledge.py  acceptance + boundary tests (17 tests)
+  tests/test_knowledge.py  acceptance + boundary tests
+  tests/test_preservation_guard.py  tool-registry preservation guard tests
   db/                   (git-ignored) the persistent local graph database
 ```
 
@@ -68,6 +69,8 @@ as `knowledge` in `opencode.json`). Its tools are:
 - `knowledge_unresolved()` — UNKNOWN / HYPOTHESIS / CONTRADICTED / INFERRED assertions.
 - `knowledge_conflicts()` — CONTRADICTED_BY findings.
 - `knowledge_schema()` — the graph schema + status vocabularies.
+- `knowledge_tools(query="")` — engineering tools from the tool registry (K4-A),
+  with lifecycle / preservation_policy / capabilities (PROVIDES_CAPABILITY).
 
 Read-only is enforced twice: the database is opened with `read_only=True`
 (the engine rejects writes), and the tools are fixed `MATCH`/`RETURN` templates

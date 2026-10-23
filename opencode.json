@@ -31,6 +31,17 @@
         "LBUG_C_API_LIB_PATH": "C:\\Localdata\\Siebwalde\\tools\\knowledge\\lib\\lbug_shared.dll"
       },
       "timeout": 15000
+    },
+    "diagnostics": {
+      "type": "local",
+      "command": [
+        "C:\\Localdata\\Siebwalde\\tools\\knowledge\\.venv\\Scripts\\python.exe",
+        "-m",
+        "tools.diagnostics.mcp_server"
+      ],
+      "cwd": "C:\\Localdata\\Siebwalde",
+      "enabled": true,
+      "timeout": 15000
     }
   },
   "permission": {

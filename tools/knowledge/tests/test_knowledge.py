@@ -64,10 +64,14 @@ def test_schema_complete():
         "HardwareDevice", "FirmwareArtifact", "SourceRevision", "ProtocolCommand",
         "ProtocolState", "SafetyInvariant", "TestExecution", "Observation",
         "Incident", "Hypothesis", "Decision", "EvidenceSource",
+        "Tool", "Capability", "Dependency", "TestEvidence", "HardwareInterface",
+        "MCPService", "MigrationDecision",
     }
     assert set(schema.REL_TABLES) == {
         "RUNS_FIRMWARE", "IMPLEMENTED_BY", "REQUIRES_STATE", "EXPECTS_RESPONSE",
         "GUARDED_BY", "OBSERVED_IN", "PROVEN_BY", "CONTRADICTED_BY", "SUPERSEDES",
+        "PROVIDES_CAPABILITY", "DEPENDS_ON", "CONNECTS_TO", "VALIDATED_BY",
+        "EXPOSED_VIA_MCP", "REUSES", "MIGRATION_CANDIDATE_FOR", "PRESERVED_BY_POLICY",
     }
 
 
@@ -236,6 +240,32 @@ def test_mcp_exposes_only_readonly_tools():
         "knowledge_safety_invariants", "knowledge_firmware_state",
         "knowledge_flashing_paths", "knowledge_incidents",
         "knowledge_unresolved", "knowledge_conflicts", "knowledge_schema",
+        "knowledge_tools",
     }
     assert names, "no tools listed"
     assert "query" not in names  # no generic Cypher endpoint
+
+
+def test_knowledge_tools_lists_protected():
+    """knowledge_tools() lists the 8 registry tools; picoscope/knowledge are KEEP_ACTIVE_MCP."""
+    res = server.knowledge_tools()["results"]
+    assert len(res) == 8
+    by_id = {r["id"]: r for r in res}
+    assert set(by_id) == {
+        "tool:picoscope-mcp", "tool:knowledge-foundation", "tool:firmware-tooling",
+        "tool:hmo2024-tooling", "tool:flash-one-driver", "tool:legacy-python-cli",
+        "tool:faller-car-bootload", "tool:integrator-checksum-helper",
+    }
+    assert by_id["tool:picoscope-mcp"]["preservation_policy"] == "KEEP_ACTIVE_MCP"
+    assert by_id["tool:knowledge-foundation"]["preservation_policy"] == "KEEP_ACTIVE_MCP"
+    # physically_proven only for tools with recorded hardware evidence
+    assert by_id["tool:picoscope-mcp"]["physically_proven"] is True
+    assert by_id["tool:hmo2024-tooling"]["physically_proven"] is True
+    assert by_id["tool:knowledge-foundation"]["physically_proven"] is False
+    assert by_id["tool:faller-car-bootload"]["physically_proven"] is False
+    # capabilities are populated (PROVIDES_CAPABILITY)
+    assert len(by_id["tool:picoscope-mcp"]["capabilities"]) == 7
+    assert len(by_id["tool:knowledge-foundation"]["capabilities"]) == 5
+    # the filter narrows to a substring of name/purpose
+    filtered = server.knowledge_tools("PicoScope")["results"]
+    assert {r["id"] for r in filtered} == {"tool:picoscope-mcp"}

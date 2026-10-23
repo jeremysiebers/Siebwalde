@@ -376,6 +376,55 @@ def knowledge_schema() -> dict:
     }
 
 
+@mcp.tool()
+def knowledge_tools(query: str = "") -> dict:
+    """List engineering tools from the tool-registry knowledge graph, optionally
+    filtered by a substring of their name or purpose.
+
+    Returns per tool: id, name, path, lifecycle, preservation_policy,
+    migration_candidate, physically_proven, offline_tested, po_decision, and the
+    capabilities it provides (PROVIDES_CAPABILITY). Read-only: fixed
+    MATCH/RETURN templates over a read-only connection, no raw Cypher.
+    """
+    db, conn = _connect()
+    try:
+        extra = ""
+        if query and query.strip():
+            q = query.strip().replace("\\", "\\\\").replace("'", "\\'")
+            extra = f" WHERE n.label CONTAINS '{q}' OR n.purpose CONTAINS '{q}'"
+        cols, rows = _rows(
+            conn,
+            f"MATCH (n:Tool){extra} "
+            f"RETURN n.id, n.label, n.path, n.lifecycle, n.preservation_policy, "
+            f"n.migration_candidate, n.physically_proven, n.offline_tested, n.po_decision",
+        )
+        recs = _to_records(cols, rows)
+        tools = []
+        for r in recs:
+            tid = r["n.id"]
+            _, caps = _rows(
+                conn,
+                f"MATCH (t:Tool)-[:PROVIDES_CAPABILITY]->(c:Capability) "
+                f"WHERE t.id = '{tid}' RETURN c.id, c.name",
+            )
+            tools.append({
+                "id": tid,
+                "name": r["n.label"],
+                "path": r["n.path"],
+                "lifecycle": r["n.lifecycle"],
+                "preservation_policy": r["n.preservation_policy"],
+                "migration_candidate": r["n.migration_candidate"],
+                "physically_proven": r["n.physically_proven"],
+                "offline_tested": r["n.offline_tested"],
+                "po_decision": r["n.po_decision"],
+                "capabilities": _to_records(["id", "name"], caps),
+            })
+        return {"count": len(tools), "results": tools}
+    finally:
+        conn.close()
+        db.close()
+
+
 def main() -> None:
     mcp.run(transport="stdio")
 

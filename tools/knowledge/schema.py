@@ -131,6 +131,48 @@ NODE_TABLES = {
         "hash STRING",
         "format STRING",
     ],
+    # --- Engineering tool registry (K4-A): additive, mirrors tools/tool-registry.yaml ---
+    "Tool": [
+        "path STRING",               # repo-relative path to the tool root/entry
+        "purpose STRING",
+        "lifecycle STRING",          # ACTIVE | PROTECTED | HISTORICAL | MAINTENANCE_ONLY | EXPERIMENTAL
+        "preservation_policy STRING",  # KEEP | KEEP_ACTIVE_MCP | KEEP_PROTECTED | KEEP_HISTORICAL | PRESERVE_PENDING_REVIEW
+        "language STRING",
+        "entry_points STRING",       # joined entry-point list
+        "hardware STRING",           # free-text hardware description ("none" when absent)
+        "side_effect STRING",        # NONE | MEASUREMENT_ONLY | STATE_CHANGING
+        "offline_tested BOOL",
+        "physically_proven BOOL",
+        "mcp_service STRING",        # accepted MCP service name, or NULL
+        "migration_candidate BOOL",
+        "po_decision STRING",        # Product Owner preservation decision text
+    ],
+    "Capability": [
+        "name STRING",
+        "description STRING",
+    ],
+    "Dependency": [
+        "name STRING",
+        "path STRING",
+    ],
+    "TestEvidence": [
+        "test_name STRING",
+        "result STRING",             # PASS | FAIL | BLOCKED
+        "date STRING",
+    ],
+    "HardwareInterface": [
+        "name STRING",
+        "kind STRING",               # USB | SCPI | UDP | MCU
+    ],
+    "MCPService": [
+        "name STRING",
+    ],
+    "MigrationDecision": [
+        "decision STRING",
+        "target STRING",
+        "decided_by STRING",
+        "date STRING",
+    ],
 }
 
 # relationship table name -> (from_node, to_node, [property columns]).
@@ -165,6 +207,15 @@ REL_TABLES = {
     "SUPERSEDES": ("FirmwareArtifact", "FirmwareArtifact", [
         "note STRING",
     ]),
+    # --- Engineering tool registry (K4-A): additive relationship tables ---
+    "PROVIDES_CAPABILITY": ("Tool", "Capability", []),
+    "DEPENDS_ON": ("Tool", "Dependency", []),
+    "CONNECTS_TO": ("Tool", "HardwareInterface", []),
+    "VALIDATED_BY": ("Capability", "TestEvidence", []),
+    "EXPOSED_VIA_MCP": ("Capability", "MCPService", []),
+    "REUSES": ("Tool", "Tool", []),
+    "MIGRATION_CANDIDATE_FOR": ("Tool", "Capability", []),
+    "PRESERVED_BY_POLICY": ("Tool", "Decision", []),
 }
 
 
