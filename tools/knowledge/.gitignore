@@ -1,0 +1,17 @@
+# Runtime-only, git-ignored artifacts for the Knowledge Foundation.
+
+# Project-local virtualenv
+.venv/
+
+# Native LadybugDB runtime (large binaries, reproducible via setup_lbug.ps1)
+lib/lbug_shared.dll
+lib/libssl-3-x64.dll
+lib/libcrypto-3-x64.dll
+
+# Persistent local knowledge graph (rebuilt deterministically by ingest/build_graph.py)
+db/
+*.lbdb
+
+# Local scratch
+__pycache__/
+.pytest_cache/
