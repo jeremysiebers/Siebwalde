@@ -849,9 +849,8 @@ RELS: list[tuple[str, str, str, dict]] = [
 # source; this mirror keeps the graph rebuild self-contained and offline.
 # Every node here carries ``source_path = tools/tool-registry.yaml``.
 #
-# ``K4_SOURCE_REVISION`` is a PLACEHOLDER for the K4 commit: set it to the real
-# K4 commit SHA once this increment is committed. Until then it is deliberately
-# a non-commit token so nothing can be mistaken for a git-resolved revision.
+# ``K4_SOURCE_REVISION`` is the K4 commit (b5709f3) at which tools/tool-registry.yaml
+# was committed; tool nodes carry it as their source_revision.
 #
 # Status mapping (per PO directive — never invent a validation status):
 #   PROVEN_HARDWARE     only tools with recorded hardware evidence (picoscope, hmo2024)
