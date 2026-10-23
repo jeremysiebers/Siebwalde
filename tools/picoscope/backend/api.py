@@ -124,13 +124,20 @@ class PicoScope:
         pre_samples: Optional[int] = None,
         post_samples: Optional[int] = None,
         timebase: Optional[int] = None,
+        trigger_wait_ms: Optional[int] = None,
     ) -> Capture:
-        """Run one block capture and return a :class:`Capture`."""
+        """Run one block capture and return a :class:`Capture`.
+
+        ``trigger_wait_ms`` bounds the readiness poll for a trigger; it threads
+        through to the backend (the real ps3000a path uses it as the ``IsReady``
+        poll deadline, replacing the former hard-coded 5.0 s).
+        """
         self._check_open()
         cap = self._raw.capture_block(
             pre_samples=pre_samples,
             post_samples=post_samples,
             timebase=timebase,
+            trigger_wait_ms=trigger_wait_ms,
         )
         self._last_capture = cap
         return cap

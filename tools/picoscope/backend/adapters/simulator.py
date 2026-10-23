@@ -70,6 +70,15 @@ _DEFAULT_DIGITAL_SPEC = {
     for i, line in enumerate(digital_lines(0) + digital_lines(1))
 }
 
+#: Digital line names D0..D15 (used to distinguish digital trigger sources from
+#: the analog channel ``"D"``).
+_DIGITAL_LINES = set(digital_lines(0) + digital_lines(1))
+
+#: Horizon multiplier for digital edge-trigger emulation: the simulator searches
+#: ``4 * sample_count`` samples for the first matching edge so the capture window
+#: can be centred on the pre-trigger position while keeping every channel aligned.
+_DIGITAL_SEARCH_MULTIPLIER = 4
+
 
 class SimulatedDevice:
     """A single opened simulated scope handle."""
@@ -130,7 +139,7 @@ class SimulatedDevice:
         self._inject_error = message
 
     # -- acquisition ----------------------------------------------------------
-    def capture_block(self, pre_samples=None, post_samples=None, timebase=None):
+    def capture_block(self, pre_samples=None, post_samples=None, timebase=None, trigger_wait_ms=None):
         self._check_open()
 
         if self._inject_error is not None:
@@ -159,23 +168,34 @@ class SimulatedDevice:
 
         interval_ns = self._adapter.resolve_timebase(tb)
         sample_count = pre + post
+        trigger = working.trigger
+
+        # Resolve the trigger state and the capture horizon. For a digital edge
+        # trigger the horizon is widened so the first matching edge can be centred
+        # on the pre-trigger position; every channel shares that same horizon and
+        # start offset so they stay aligned.
+        trigger_status, trigger_position, trigger_index, horizon_n, start = (
+            self._resolve_trigger(trigger, pre, post, sample_count, interval_ns)
+        )
 
         analog_samples = {}
         for ch in working.enabled_analog_channels():
             spec = self._signal_map.get(ch.channel) or self._default_analog_spec(ch)
-            analog_samples[ch.channel] = build_signal(spec, interval_ns, sample_count)
+            signal = build_signal(spec, interval_ns, horizon_n)
+            analog_samples[ch.channel] = signal[start:start + sample_count]
 
         digital_samples = {}
         for line in working.enabled_digital_lines():
             spec = self._signal_map.get(line) or _DEFAULT_DIGITAL_SPEC[line]
-            digital_samples[line] = build_signal(spec, interval_ns, sample_count)
-
-        trigger_position = pre if working.trigger is not None else None
+            signal = build_signal(spec, interval_ns, horizon_n)
+            digital_samples[line] = signal[start:start + sample_count]
 
         channel_mapping = {
             "analog": {ch.channel: i for i, ch in enumerate(working.analog_channels)},
             "digital": {line: i for i, line in enumerate(digital_lines(0) + digital_lines(1))},
         }
+
+        acquisition_status = "TIMEOUT" if trigger_status == "timeout" else "OK"
 
         now = datetime.now(timezone.utc)
         return Capture(
@@ -186,10 +206,12 @@ class SimulatedDevice:
             digital_ports=list(working.digital_ports),
             sample_interval_ns=interval_ns,
             sample_count=sample_count,
-            trigger=working.trigger,
+            trigger=trigger,
             trigger_position=trigger_position,
+            trigger_status=trigger_status,
+            trigger_index=trigger_index,
             channel_mapping=channel_mapping,
-            acquisition_status="OK",
+            acquisition_status=acquisition_status,
             errors=[],
             warnings=[],
             backend_version=DRIVER_VERSION,
@@ -203,6 +225,49 @@ class SimulatedDevice:
             analog_samples=analog_samples,
             digital_samples=digital_samples,
         )
+
+    def _resolve_trigger(self, trigger, pre, post, sample_count, interval_ns):
+        """Return ``(trigger_status, trigger_position, trigger_index, horizon_n, start)``.
+
+        Digital edge triggers (D0..D15) are emulated deterministically: the first
+        matching edge in a widened horizon becomes the trigger point and the
+        capture window is positioned so that edge lands exactly at the pre-sample
+        index. Analog / EXTERNAL triggers keep the original nominal behaviour
+        (trigger at the pre-sample position, always "triggered").
+        """
+        if trigger is None:
+            return "unused", None, None, sample_count, 0
+
+        if trigger.source in _DIGITAL_LINES:
+            horizon_n = sample_count * _DIGITAL_SEARCH_MULTIPLIER
+            edge = self._find_digital_edge(trigger, interval_ns, horizon_n, pre, post)
+            if edge is None:
+                # No matching edge within the horizon: emulate a trigger timeout.
+                return "timeout", None, None, sample_count, 0
+            return "triggered", pre, pre, horizon_n, edge - pre
+
+        # Analog (A..D) or EXTERNAL: nominal trigger at the pre-sample position.
+        return "triggered", pre, pre, sample_count, 0
+
+    def _find_digital_edge(self, trigger, interval_ns, horizon_n, pre, post):
+        """First edge sample index of ``trigger.edge`` within ``[pre, horizon_n - post)``.
+
+        Returns ``None`` when no matching edge can be found (trigger timeout).
+        """
+        spec = self._signal_map.get(trigger.source) or _DEFAULT_DIGITAL_SPEC[trigger.source]
+        signal = build_signal(spec, interval_ns, horizon_n)
+        diffs = np.diff(signal.astype(np.int8))
+        if trigger.edge == "rising":
+            candidates = np.nonzero(diffs > 0)[0] + 1
+        elif trigger.edge == "falling":
+            candidates = np.nonzero(diffs < 0)[0] + 1
+        else:  # "either"
+            candidates = np.nonzero(diffs != 0)[0] + 1
+        for edge in candidates:
+            edge = int(edge)
+            if edge >= pre and (edge + post) <= horizon_n:
+                return edge
+        return None
 
     # -- teardown --------------------------------------------------------------
     def close(self):

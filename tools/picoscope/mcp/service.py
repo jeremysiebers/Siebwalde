@@ -197,7 +197,12 @@ class ScopeService:
 
         self._inject_test_fault(scope, canonical)
 
-        capture = scope.capture_block(pre_samples=pre, post_samples=post, timebase=profile.timebase)
+        capture = scope.capture_block(
+            pre_samples=pre,
+            post_samples=post,
+            timebase=profile.timebase,
+            trigger_wait_ms=profile.trigger_wait_ms,
+        )
 
         # Post-capture duration check for backends whose interval is only known
         # after acquisition (the real ps3000a path resolves it via GetTimebase2).
@@ -516,17 +521,22 @@ class ScopeService:
         return capture
 
     def _capture_result(self, capture: Capture, capture_id: str, canonical: str) -> dict:
-        if capture.trigger is None:
-            trigger_status = "unused"
-        elif capture.acquisition_status == "OK":
-            trigger_status = "triggered"
-        else:
-            trigger_status = "unknown"
+        trigger_status = capture.trigger_status
+        if trigger_status is None:
+            # Backward-compatible inference for captures without trigger_status.
+            if capture.trigger is None:
+                trigger_status = "unused"
+            elif capture.acquisition_status == "OK":
+                trigger_status = "triggered"
+            else:
+                trigger_status = "unknown"
         result = {
             "capture_id": capture_id,
             "sample_interval_ns": capture.sample_interval_ns,
             "sample_count": capture.sample_count,
             "trigger_status": trigger_status,
+            "trigger_position": capture.trigger_position,
+            "trigger_index": capture.trigger_index,
             "channel_mapping": capture.channel_mapping,
             "artifact_paths": self.evidence.artifact_paths(capture_id),
             "warnings": list(capture.warnings),
@@ -570,6 +580,8 @@ class ScopeService:
             "digital_ports": meta.get("digital_ports", []),
             "trigger": meta.get("trigger"),
             "trigger_position": meta.get("trigger_position"),
+            "trigger_status": meta.get("trigger_status"),
+            "trigger_index": meta.get("trigger_index"),
             "channel_mapping": meta.get("channel_mapping"),
             "acquisition_status": meta.get("acquisition_status"),
             "errors": meta.get("errors", []),

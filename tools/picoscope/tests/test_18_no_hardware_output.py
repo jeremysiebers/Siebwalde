@@ -80,6 +80,8 @@ def test_ps3000a_adapter_only_binds_measurement_functions():
         "ps3000aSetChannel",
         "ps3000aSetDigitalPort",
         "ps3000aSetSimpleTrigger",
+        "ps3000aSetTriggerDigitalPortProperties",
+        "ps3000aSetTriggerChannelConditionsV2",
         "ps3000aGetTimebase2",
         "ps3000aSetDataBuffers",
         "ps3000aRunBlock",

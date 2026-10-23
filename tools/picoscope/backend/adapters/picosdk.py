@@ -31,7 +31,6 @@ from ..errors import (
     BackendUnavailableError,
     DeviceError,
     DeviceNotFoundError,
-    DeviceTimeoutError,
     InvalidConfigError,
 )
 from ..model import Capture, DeviceIdentity
@@ -109,6 +108,67 @@ PS3000A_MIN_TIMEBASE = 2
 # The 3406D MSO is a ps3000a device (4 analog + 16 digital, 2 ports of 8).
 DIGITAL_PORT_ENUM = {0: PS3000A_DIGITAL_PORT0, 1: PS3000A_DIGITAL_PORT1}
 EDGE_DIRECTION = {"rising": PS3000A_RISING, "falling": PS3000A_FALLING, "either": PS3000A_RISING_OR_FALLING}
+
+# --------------------------------------------------------------------------- #
+# Digital (MSO) trigger enums + structures (verified against picosdk 1.1).
+# --------------------------------------------------------------------------- #
+#: Digital channel enum: ``PS3000A_DIGITAL_CHANNEL_N`` == N (D0 == 0 ... D15 == 15).
+#: The digital line ``"Dn"`` therefore maps directly to channel ``n``.
+
+#: ``PICO_DIGITAL_DIRECTION`` / ``PS3000A_DIGITAL_DIRECTION`` enum values.
+PS3000A_DIGITAL_DONT_CARE = 0
+PS3000A_DIGITAL_LOW = 1
+PS3000A_DIGITAL_HIGH = 2
+PS3000A_DIGITAL_RISING = 3
+PS3000A_DIGITAL_FALLING = 4
+PS3000A_DIGITAL_RISING_OR_FALLING = 5
+
+#: Digital edge -> digital trigger direction enum (NOT the analog threshold
+#: direction used by ``ps3000aSetSimpleTrigger``; the digital values differ).
+DIGITAL_EDGE_DIRECTION = {
+    "rising": PS3000A_DIGITAL_RISING,
+    "falling": PS3000A_DIGITAL_FALLING,
+    "either": PS3000A_DIGITAL_RISING_OR_FALLING,
+}
+
+#: ``PS3000A_TRIGGER_STATE`` (trigger condition) enum values.
+PS3000A_CONDITION_DONT_CARE = 0
+PS3000A_CONDITION_TRUE = 1
+PS3000A_CONDITION_FALSE = 2
+
+#: ``PS3000A_TIME_UNITS`` -> seconds-per-unit, used to convert the hardware
+#: trigger time offset returned by ``ps3000aGetTriggerTimeOffset64``.
+PS3000A_TIME_UNITS_S = {
+    0: 1e-15,  # FS
+    1: 1e-12,  # PS
+    2: 1e-9,   # NS
+    3: 1e-6,   # US
+    4: 1e-3,   # MS
+    5: 1.0,    # S
+}
+
+
+class PS3000A_DIGITAL_CHANNEL_DIRECTIONS(ctypes.Structure):
+    """``PS3000A_DIGITAL_CHANNEL_DIRECTIONS`` (``_pack_ = 1``)."""
+
+    _pack_ = 1
+    _fields_ = [("channel", ctypes.c_int32), ("direction", ctypes.c_int32)]
+
+
+class PS3000A_TRIGGER_CONDITIONS_V2(ctypes.Structure):
+    """``PS3000A_TRIGGER_CONDITIONS_V2`` (``_pack_ = 1``)."""
+
+    _pack_ = 1
+    _fields_ = [
+        ("channelA", ctypes.c_uint32),
+        ("channelB", ctypes.c_uint32),
+        ("channelC", ctypes.c_uint32),
+        ("channelD", ctypes.c_uint32),
+        ("external", ctypes.c_uint32),
+        ("aux", ctypes.c_uint32),
+        ("pulseWidthQualifier", ctypes.c_uint32),
+        ("digital", ctypes.c_uint32),
+    ]
 
 
 def _library_name() -> str:
@@ -242,8 +302,8 @@ class Ps3000aDevice:
     def configure_trigger(self, source, threshold, edge, pre_samples, post_samples):
         trig = self._config.set_trigger(source, threshold, edge, pre_samples, post_samples)
         if source == "EXTERNAL":
-            src_enum = PS3000A_CHANNEL_EXTERNAL
-            range_v = _EXTERNAL_TRIGGER_FULL_SCALE_V
+            self._set_simple_trigger(PS3000A_CHANNEL_EXTERNAL, threshold, edge,
+                                     _EXTERNAL_TRIGGER_FULL_SCALE_V)
         elif source in ("A", "B", "C", "D"):
             src_enum = {"A": PS3000A_CHANNEL_A, "B": PS3000A_CHANNEL_B,
                         "C": PS3000A_CHANNEL_C, "D": PS3000A_CHANNEL_D}[source]
@@ -251,11 +311,16 @@ class Ps3000aDevice:
                 (c.range_v for c in self._config.analog_channels if c.channel == source),
                 _EXTERNAL_TRIGGER_FULL_SCALE_V,
             )
+            self._set_simple_trigger(src_enum, threshold, edge, range_v)
         else:
-            # Digital-source trigger: PICO-2 will implement ps3000a digital
-            # trigger setup; PICO-1 records the request without emulating it.
-            src_enum = PS3000A_CHANNEL_EXTERNAL
-            range_v = _EXTERNAL_TRIGGER_FULL_SCALE_V
+            # Digital-source trigger (D0..D15): use the two digital-trigger SDK
+            # calls. There is deliberately NO fallback to EXTERNAL/analog — an
+            # unsupported digital trigger (e.g. its port is not enabled) raises.
+            self._set_digital_trigger(source, edge)
+        return trig
+
+    def _set_simple_trigger(self, src_enum: int, threshold: float, edge: str, range_v: float):
+        """Analog / EXTERNAL trigger via ``ps3000aSetSimpleTrigger`` (unchanged)."""
         # ps3000aSetSimpleTrigger(handle, enabled, source, threshold, direction, delay, auto_trigger_ms)
         #   threshold is an int16 ADC count (NOT a float voltage), converted from
         #   the source channel's configured range.
@@ -272,14 +337,58 @@ class Ps3000aDevice:
             ctypes.c_int16(0),
         )
         self._check_status(status, "ps3000aSetSimpleTrigger")
-        return trig
+
+    def _set_digital_trigger(self, source: str, edge: str):
+        """Digital edge trigger (D0..D15) via the digital-trigger SDK calls.
+
+        Official ps3000a MSO block sequence:
+
+        1. the digital port is already enabled via ``ps3000aSetDigitalPort``;
+        2. ``ps3000aSetTriggerDigitalPortProperties(handle, [DIRECTIONS{channel=Dn,
+           direction=RISING|FALLING|RISING_OR_FALLING}], 1)``;
+        3. ``ps3000aSetTriggerChannelConditionsV2(handle, [CONDITIONS_V2{all
+           DONT_CARE, digital=CONDITION_TRUE}], 1)``.
+
+        There is no ``ps3000aSetDigitalTrigger`` entry point. If the target digital
+        port is not enabled this raises :class:`InvalidConfigError` — it never falls
+        back to EXTERNAL or an analog channel.
+        """
+        line_index = int(source[1:])  # "D0".."D15" -> 0..15
+        port = line_index // 8
+        direction = DIGITAL_EDGE_DIRECTION[edge]
+
+        port_cfg = next((p for p in self._config.digital_ports if p.port == port), None)
+        if port_cfg is None or not port_cfg.enabled:
+            raise InvalidConfigError(
+                f"Digital trigger source {source!r} requires digital port {port} "
+                "to be enabled; refusing to fall back to EXTERNAL/analog"
+            )
+
+        # ps3000aSetTriggerDigitalPortProperties(handle, directions*, int16 nDirections)
+        directions = (PS3000A_DIGITAL_CHANNEL_DIRECTIONS * 1)()
+        directions[0].channel = line_index
+        directions[0].direction = direction
+        set_props = self._lib.ps3000aSetTriggerDigitalPortProperties
+        set_props.restype = ctypes.c_int32
+        status = set_props(self._handle, ctypes.byref(directions), ctypes.c_int16(1))
+        self._check_status(status, "ps3000aSetTriggerDigitalPortProperties")
+
+        # ps3000aSetTriggerChannelConditionsV2(handle, conditions*, int16 nConditions)
+        conditions = (PS3000A_TRIGGER_CONDITIONS_V2 * 1)()
+        conditions[0].digital = PS3000A_CONDITION_TRUE
+        # All other sources stay DONT_CARE (the default zero value).
+        set_conditions = self._lib.ps3000aSetTriggerChannelConditionsV2
+        set_conditions.restype = ctypes.c_int32
+        status = set_conditions(self._handle, ctypes.byref(conditions), ctypes.c_int16(1))
+        self._check_status(status, "ps3000aSetTriggerChannelConditionsV2")
 
     # -- acquisition ----------------------------------------------------------
-    def capture_block(self, pre_samples=None, post_samples=None, timebase=None):
+    def capture_block(self, pre_samples=None, post_samples=None, timebase=None, trigger_wait_ms=None):
         # Transcribed from ps3000aBlockMSOExample.py flow.
         pre = self._config.pre_samples if pre_samples is None else pre_samples
         post = self._config.post_samples if post_samples is None else post_samples
         tb = self._config.timebase if timebase is None else timebase
+        wait_s = (5000 if trigger_wait_ms is None else trigger_wait_ms) / 1000.0
 
         # The 3406D MSO rejects timebase 0 (PICO_INVALID_TIMEBASE); validate the
         # timebase before any SDK call so the failure is clear, not a raw PICO_STATUS.
@@ -377,8 +486,10 @@ class Ps3000aDevice:
         )
         self._check_status(status, "ps3000aRunBlock")
 
-        # Bounded readiness poll (ps3000aIsReady).
-        ready = self._wait_ready(timeout_s=5.0)
+        # Bounded readiness poll (ps3000aIsReady). Returns False (rather than
+        # raising) when no trigger arrives within the bounded wait, so the actual
+        # trigger state can be recorded in the returned Capture metadata.
+        ready = self._wait_ready(timeout_s=wait_s)
 
         # ps3000aGetValues(handle, startIndex, noOfSamples, downSampleRatio, mode, segmentIndex, overflow)
         get_values = self._lib.ps3000aGetValues
@@ -408,6 +519,23 @@ class Ps3000aDevice:
                 line_name = f"D{port * 8 + line_index}"
                 digital_out[line_name] = ((words >> line_index) & 1).astype(np.uint8)
 
+        # Record the ACTUAL trigger state and position.
+        if working.trigger is None:
+            trigger_status = "unused"
+            acquisition_status = "OK"
+            trigger_position = None
+            trigger_index = None
+        elif ready:
+            trigger_status = "triggered"
+            acquisition_status = "OK"
+            trigger_position = pre
+            trigger_index = self._trigger_sample_index(pre, interval_ns_int)
+        else:
+            trigger_status = "timeout"
+            acquisition_status = "TIMEOUT"
+            trigger_position = None
+            trigger_index = None
+
         return Capture(
             capture_id=os.urandom(16).hex(),
             timestamp=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -417,10 +545,12 @@ class Ps3000aDevice:
             sample_interval_ns=interval_ns_int,
             sample_count=sample_count,
             trigger=working.trigger,
-            trigger_position=pre if working.trigger is not None else None,
+            trigger_position=trigger_position,
+            trigger_status=trigger_status,
+            trigger_index=trigger_index,
             channel_mapping={"analog": {ch: i for i, ch in enumerate(analog_out)},
                              "digital": {line: i for i, line in enumerate(digital_out)}},
-            acquisition_status="OK" if ready else "UNKNOWN",
+            acquisition_status=acquisition_status,
             errors=[],
             warnings=[],
             backend_version="ps3000a (hardware-validated 2026-10-22)",
@@ -443,8 +573,32 @@ class Ps3000aDevice:
             if ready.value:
                 return True
             if time.monotonic() >= deadline:
-                raise DeviceTimeoutError("ps3000aIsReady timed out")
+                # No trigger within the bounded wait: report False (timeout) rather
+                # than raising, so capture_block can record trigger_status="timeout".
+                return False
             time.sleep(0.001)
+
+    def _trigger_sample_index(self, pre: int, interval_ns: int) -> int:
+        """Actual trigger sample index, refined from the hardware offset if possible.
+
+        ``ps3000aGetTriggerTimeOffset64`` reports the trigger point relative to the
+        start of the capture; converted to samples this is the actual trigger index.
+        On failure (or absent entry point) the nominal ``pre`` is returned.
+        """
+        func = getattr(self._lib, "ps3000aGetTriggerTimeOffset64", None)
+        if func is None or interval_ns <= 0:
+            return pre
+        func.restype = ctypes.c_int32
+        time_value = ctypes.c_int64()
+        time_units = ctypes.c_int32()
+        status = func(self._handle, ctypes.byref(time_value), ctypes.byref(time_units), ctypes.c_uint32(0))
+        if status != _PICO_OK:
+            return pre
+        sec_per_unit = PS3000A_TIME_UNITS_S.get(time_units.value)
+        if sec_per_unit is None:
+            return pre
+        offset_ns = time_value.value * sec_per_unit * 1e9
+        return int(round(offset_ns / interval_ns))
 
     def _nearest_range(self, range_v: float) -> int:
         best = min(PS3000A_RANGES.items(), key=lambda kv: abs(kv[1] - range_v))

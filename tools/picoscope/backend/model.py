@@ -161,6 +161,17 @@ class Capture:
     digital_samples: dict
     trigger: Optional[TriggerConfig] = None
     trigger_position: Optional[int] = None
+    #: Actual trigger state observed for this capture. One of ``"triggered"``
+    #: (the trigger fired and the capture completed), ``"timeout"`` (a trigger was
+    #: armed but no edge arrived within the bounded wait) or ``"unused"`` (no
+    #: trigger was configured). ``None`` is reserved for captures produced before
+    #: trigger-state tracking was introduced.
+    trigger_status: Optional[str] = None
+    #: Actual trigger sample index within the returned buffers. For a triggered
+    #: capture this is normally the nominal ``trigger_position`` (the pre-sample
+    #: count); on the ps3000a path it may be refined from the hardware trigger
+    #: time offset. ``None`` when unused or timed out.
+    trigger_index: Optional[int] = None
     errors: list = field(default_factory=list)
     warnings: list = field(default_factory=list)
     provenance: dict = field(default_factory=dict)
@@ -182,6 +193,8 @@ class Capture:
             and self.software_version == other.software_version
             and self.trigger == other.trigger
             and self.trigger_position == other.trigger_position
+            and self.trigger_status == other.trigger_status
+            and self.trigger_index == other.trigger_index
             and self.errors == other.errors
             and self.warnings == other.warnings
             and self.provenance == other.provenance
@@ -251,6 +264,8 @@ class Capture:
                 "edge": self.trigger.edge,
             },
             "trigger_position": self.trigger_position,
+            "trigger_status": self.trigger_status,
+            "trigger_index": self.trigger_index,
             "acquisition_status": self.acquisition_status,
             "errors": list(self.errors),
             "warnings": list(self.warnings),
