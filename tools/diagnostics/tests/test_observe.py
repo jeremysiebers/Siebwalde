@@ -1,10 +1,10 @@
 """Deterministic offline tests for the Siebwalde OBSERVE adapter (K5-A).
 
-Covers typed snapshot parsing (controller + amplifier), evidence-level
-fail-closed behaviour, inventory comparison, init-discrepancy reporting,
-capability classification, and the stdlib-only / no-transport enforcement of
-``tools.diagnostics.observe``. No sockets, serial ports, or hardware are ever
-opened.
+Covers typed snapshot parsing (controller + amplifier), the semantic-field /
+register-map model, evidence-level fail-closed behaviour, inventory comparison,
+init-discrepancy reporting, capability classification, and the stdlib-only /
+no-transport enforcement of ``tools.diagnostics.observe``. No sockets, serial
+ports, or hardware are ever opened.
 
 Run with:
     tools/knowledge/.venv/Scripts/python.exe -m pytest tools/diagnostics/tests -q
@@ -25,13 +25,14 @@ from tools.diagnostics.observe import (  # noqa: E402
     DESTRUCTIVE,
     OFFLINE_ONLY,
     UNKNOWN_EFFECT,
+    HR_CHECKSUM,
+    REGISTER_ADDRESS_TABLES,
+    REGISTER_MAP_LEGACY_12,
+    REGISTER_MAP_PHASE1_23,
+    REGISTER_MAP_UNKNOWN,
     AmplifierInventory,
     AmplifierSnapshot,
     ControllerSnapshot,
-    HR_CHECKSUM,
-    HR_IDENTITY,
-    HR_PATCH_PROTO,
-    HR_VERSION,
     capabilities,
     classify_operation,
     compare_amplifier_inventory,
@@ -111,20 +112,24 @@ def test_parse_controller_version_rejects_bad_frame():
 
 
 # --------------------------------------------------------------------------- #
-# Amplifier snapshot parsing
+# Amplifier snapshot parsing — semantic fields + register map
 # --------------------------------------------------------------------------- #
 
-def test_parse_amplifier_snapshot_valid():
+def test_parse_amplifier_snapshot_semantic_fields():
+    # Phase-1-style semantic names, no map hint -> register_map UNKNOWN.
     snap = parse_amplifier_snapshot(
         "slave 3 detected=1 identity=0xF101 version=0x0100 patch=0x0001 checksum=0x251F"
     )
     assert isinstance(snap, AmplifierSnapshot)
     assert snap.slave_number == 3
     assert snap.detected is True
-    assert snap.holding_registers[HR_IDENTITY] == 0xF101
-    assert snap.holding_registers[HR_VERSION] == 0x0100
-    assert snap.holding_registers[HR_PATCH_PROTO] == 0x0001
-    assert snap.holding_registers[HR_CHECKSUM] == 0x251F
+    assert snap.identity == 0xF101
+    assert snap.fw_version == 0x0100
+    assert snap.patch_proto == 0x0001
+    assert snap.checksum == 0x251F
+    assert snap.register_map == REGISTER_MAP_UNKNOWN
+    # No HR numbers are invented for an UNKNOWN map.
+    assert snap.holding_registers() == {}
     assert snap.evidence_level == core.ACKNOWLEDGED
 
 
@@ -132,11 +137,12 @@ def test_parse_amplifier_snapshot_missing_fields_unknown_not_fabricated():
     snap = parse_amplifier_snapshot("slave 3 detected=1 identity=0xF101")
     assert snap.slave_number == 3
     assert snap.detected is True
-    # Missing version/patch/checksum are NOT fabricated: they stay None and the
-    # evidence level degrades to UNKNOWN (fail-closed).
-    assert snap.holding_registers[HR_VERSION] is None
-    assert snap.holding_registers[HR_PATCH_PROTO] is None
-    assert snap.holding_registers[HR_CHECKSUM] is None
+    assert snap.identity == 0xF101
+    # Missing fw_version/patch_proto/checksum are NOT fabricated: they stay None
+    # and the evidence level degrades to UNKNOWN (fail-closed).
+    assert snap.fw_version is None
+    assert snap.patch_proto is None
+    assert snap.checksum is None
     assert snap.evidence_level == core.UNKNOWN
 
 
@@ -155,6 +161,61 @@ def test_parse_amplifier_snapshot_rejects_malformed():
             raise AssertionError("expected ValueError for %r" % (bad,))
         except ValueError:
             pass
+
+
+def test_parse_amplifier_snapshot_phase1_map_hint():
+    snap = parse_amplifier_snapshot(
+        "slave 3 detected=1 identity=0xF101 version=0x0100 patch=0x0001 "
+        "checksum=0x251F map=PHASE1_23"
+    )
+    assert snap.register_map == REGISTER_MAP_PHASE1_23
+    assert snap.holding_registers() == {
+        "HR7": 0xF101,
+        "HR21": 0x0100,
+        "HR22": 0x0001,
+        "HR11": 0x251F,
+    }
+    assert snap.evidence_level == core.ACKNOWLEDGED
+
+
+def test_parse_amplifier_snapshot_legacy_map_hint():
+    snap = parse_amplifier_snapshot(
+        "slave 3 detected=1 checksum=0x251F map=LEGACY_12"
+    )
+    assert snap.register_map == REGISTER_MAP_LEGACY_12
+    # Legacy has no identity/version/patch registers.
+    assert snap.identity is None
+    assert snap.fw_version is None
+    assert snap.patch_proto is None
+    assert snap.checksum == 0x251F
+    assert snap.holding_registers() == {"HR11": 0x251F}
+    assert snap.evidence_level == core.ACKNOWLEDGED
+
+
+def test_register_address_tables_checksum_is_hr11_in_both_maps():
+    # HR11 (checksum) is the single stable anchor in BOTH maps.
+    assert REGISTER_ADDRESS_TABLES[REGISTER_MAP_LEGACY_12]["checksum"] == 11
+    assert REGISTER_ADDRESS_TABLES[REGISTER_MAP_PHASE1_23]["checksum"] == 11
+    assert HR_CHECKSUM == 11
+
+
+def test_register_address_tables_map_layouts():
+    legacy = REGISTER_ADDRESS_TABLES[REGISTER_MAP_LEGACY_12]
+    phase1 = REGISTER_ADDRESS_TABLES[REGISTER_MAP_PHASE1_23]
+
+    # LEGACY_12 has NO identity/version/patch addresses.
+    for name in ("identity", "version", "patch_proto"):
+        assert name not in legacy
+    assert legacy["status"] == 3
+    assert legacy["config_id_pwm"] == 9
+    assert legacy["accel_params"] == 10
+    assert legacy["checksum"] == 11
+
+    # PHASE1_23 maps identity->HR7, version->HR21, patch_proto->HR22, checksum->HR11.
+    assert phase1["identity"] == 7
+    assert phase1["version"] == 21
+    assert phase1["patch_proto"] == 22
+    assert phase1["checksum"] == 11
 
 
 def test_amplifier_inventory_detected_set():
@@ -303,12 +364,19 @@ def test_capabilities_offline_flags_and_classification_set():
     assert OFFLINE_ONLY in caps["capability_classifications"]
     assert DESTRUCTIVE in caps["capability_classifications"]
     assert UNKNOWN_EFFECT in caps["capability_classifications"]
-    assert set(caps["holding_register_keys"]) == {
-        HR_IDENTITY,
-        HR_VERSION,
-        HR_PATCH_PROTO,
-        HR_CHECKSUM,
+    # Register-map view: no mislabelled HR3/HR9/HR10 identity/version/patch keys.
+    assert set(caps["register_maps"]) == {
+        REGISTER_MAP_LEGACY_12,
+        REGISTER_MAP_PHASE1_23,
+        REGISTER_MAP_UNKNOWN,
     }
+    assert caps["checksum_register"] == "HR11"
+    tables = caps["register_address_tables"]
+    assert tables[REGISTER_MAP_PHASE1_23]["identity"] == "HR7"
+    assert tables[REGISTER_MAP_PHASE1_23]["version"] == "HR21"
+    assert tables[REGISTER_MAP_PHASE1_23]["patch_proto"] == "HR22"
+    assert tables[REGISTER_MAP_LEGACY_12]["checksum"] == "HR11"
+    assert "identity" not in tables[REGISTER_MAP_LEGACY_12]
 
 
 # --------------------------------------------------------------------------- #

@@ -91,7 +91,9 @@ def diagnostics_capabilities() -> dict:
     caps["capability_classifications"] = obs["capability_classifications"]
     caps["operation_classifications"] = obs["operation_classifications"]
     caps["models"] = obs["models"]
-    caps["holding_register_keys"] = obs["holding_register_keys"]
+    caps["register_maps"] = obs["register_maps"]
+    caps["register_address_tables"] = obs["register_address_tables"]
+    caps["checksum_register"] = obs["checksum_register"]
     return caps
 
 

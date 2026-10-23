@@ -126,12 +126,18 @@ def test_parse_amplifier_snapshot_through_mcp():
     )
     assert res["slave_number"] == 3
     assert res["detected"] is True
-    assert res["holding_registers"]["HR11"] == 0x251F
+    assert res["identity"] == 0xF101
+    assert res["fw_version"] == 0x0100
+    assert res["patch_proto"] == 0x0001
+    assert res["checksum"] == 0x251F
+    assert res["register_map"] == "UNKNOWN"
 
 
 def test_parse_amplifier_snapshot_missing_field_unknown_through_mcp():
     res = server.diagnostics_parse_amplifier_snapshot("slave 3 detected=1 identity=0xF101")
-    assert res["holding_registers"]["HR11"] is None
+    assert res["identity"] == 0xF101
+    assert res["fw_version"] is None
+    assert res["checksum"] is None
     assert res["evidence_level"] == "UNKNOWN"
 
 

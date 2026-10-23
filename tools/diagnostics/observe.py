@@ -17,15 +17,28 @@ The wire formats are mirrored (read-only) from source:
   ``data[5]=0``, ``data[6..N]=CTRL_RELEASE_TIMESTAMP`` (null-terminated).
   Values: ``version.h`` (``CTRL_FW_MAJOR/MINOR/PATCH``, ``CTRL_PROTOCOL_VERSION``,
   ``CTRL_RELEASE_TIMESTAMP``).
-* the SLAVEINFO amplifier snapshot registers (``HR3`` identity, ``HR9`` version,
-  ``HR10`` patch/proto, ``HR11`` firmware checksum), presented here as a textual
-  ``slave N detected=.. identity=.. version=.. patch=.. checksum=..`` line.
+
+Amplifier snapshot fields are modelled as **map-independent semantic fields**,
+not as raw HR addresses. There are two source-verified register maps:
+
+* ``LEGACY_12`` (pre-Phase-1, firmware ``0x251F``;
+  ``TrackAmplifier4.X/modbus/General.h`` @ ``928ea7c``): 12 registers, NO
+  identity/version/patch registers. HR3 = amp status, HR9 = config-ID/PWM,
+  HR10 = accel params, HR11 = SW checksum.
+* ``PHASE1_23`` (HEAD; ``TrackController5/firmware/src/enums.h:97,108-109``,
+  C# ``TrackAmplifierRegisters.cs``): 23 registers. HR7 = identity,
+  HR21 = firmware version (major<<8 | minor), HR22 = firmware patch/proto
+  (patch<<8 | protocol), HR11 = SW checksum.
+
+``HR11`` (checksum) is the single stable anchor present in BOTH maps. Register
+addresses are a *derived per-map view* (``REGISTER_ADDRESS_TABLES``), never the
+primary key of a snapshot.
 
 Evidence levels are reused from ``tools.diagnostics.core``. A complete parsed
 recorded response is classified ``ACKNOWLEDGED`` (the device *reported* the data
 in a recorded response); it is NEVER ``PHYSICALLY_OBSERVED`` or ``VERIFIED``,
-because offline parsing cannot prove physical truth. Any missing field degrades
-the evidence level to ``UNKNOWN`` (fail-closed) and is never fabricated.
+because offline parsing cannot prove physical truth. Missing fields degrade the
+evidence level to ``UNKNOWN`` (fail-closed) and are never fabricated.
 """
 
 from __future__ import annotations
@@ -66,26 +79,40 @@ FRESHNESS_STALE = "stale"
 FRESHNESS_UNKNOWN = "unknown"
 
 # --------------------------------------------------------------------------- #
-# Amplifier snapshot register keys (SLAVEINFO textual view)
+# Amplifier register maps (source-verified, read-only mirrors)
 # --------------------------------------------------------------------------- #
-# Stable keys for the holding_registers mapping. These are the SLAVEINFO
-# registers of interest for the K5-A snapshot model (identity / version /
-# patch+protocol / firmware checksum).
-HR_IDENTITY = "HR3"
-HR_VERSION = "HR9"
-HR_PATCH_PROTO = "HR10"
-HR_CHECKSUM = "HR11"
+# Register-map discriminators.
+REGISTER_MAP_LEGACY_12 = "LEGACY_12"
+REGISTER_MAP_PHASE1_23 = "PHASE1_23"
+REGISTER_MAP_UNKNOWN = "UNKNOWN"
 
-HR_REGISTER_KEYS = (HR_IDENTITY, HR_VERSION, HR_PATCH_PROTO, HR_CHECKSUM)
+REGISTER_MAPS = (REGISTER_MAP_LEGACY_12, REGISTER_MAP_PHASE1_23, REGISTER_MAP_UNKNOWN)
+
+# The single stable anchor — HR11 is the SW checksum in BOTH maps.
+HR_CHECKSUM = 11
+
+# Per-map semantic-name -> holding-register address tables. These are derived
+# views only; a snapshot stores semantic fields and records which map it came
+# from. LEGACY_12 has NO identity/version/patch registers.
+REGISTER_ADDRESS_TABLES = {
+    REGISTER_MAP_LEGACY_12: {
+        "status": 3,
+        "config_id_pwm": 9,
+        "accel_params": 10,
+        "checksum": HR_CHECKSUM,
+    },
+    REGISTER_MAP_PHASE1_23: {
+        "identity": 7,
+        "version": 21,
+        "patch_proto": 22,
+        "checksum": HR_CHECKSUM,
+    },
+}
 
 # Wire constants mirrored from TrackController5/firmware/src/enums.h + controller.c.
 _HEADER = 0xAA
 _TASK_ID_CONTROLLER = 10
 _CMD_GET_CONTROLLER_VERSION = 113
-
-
-def _empty_holding_registers() -> Dict[str, Optional[int]]:
-    return {key: None for key in HR_REGISTER_KEYS}
 
 
 # --------------------------------------------------------------------------- #
@@ -135,22 +162,59 @@ class ControllerSnapshot:
 
 @dataclass(frozen=True)
 class AmplifierSnapshot:
-    """A recorded amplifier observation (SLAVEINFO registers, textual view)."""
+    """A recorded amplifier observation.
+
+    Semantic fields are first-class and map-independent; ``register_map``
+    records which register map the values came from. ``checksum`` (HR11) is the
+    single stable anchor present in every map. Register addresses are only ever
+    derived via :meth:`holding_registers`, never stored as the primary key.
+    """
 
     slave_number: Optional[int] = None
     detected: Optional[bool] = None
-    holding_registers: Dict[str, Optional[int]] = field(
-        default_factory=_empty_holding_registers
-    )
+    # Semantic, map-independent fields.
+    identity: Optional[int] = None
+    fw_version: Optional[int] = None      # major<<8 | minor (e.g. 0x0100)
+    patch_proto: Optional[int] = None     # patch<<8 | protocol (e.g. 0x0001)
+    checksum: Optional[int] = None        # HR11 — single stable anchor
+    # Which register map the values came from.
+    register_map: str = REGISTER_MAP_UNKNOWN
     freshness: str = FRESHNESS_UNKNOWN
     observation_timestamp: Optional[str] = None
     evidence_level: str = core.UNKNOWN
+
+    def holding_registers(self) -> Dict[str, Optional[int]]:
+        """Derive the HR-address -> value view for this snapshot's map.
+
+        Addresses come from :data:`REGISTER_ADDRESS_TABLES`. When
+        ``register_map`` is ``UNKNOWN`` the result is empty — HR numbers are
+        never invented. ``HR11`` is the checksum address in every known map.
+        """
+        table = REGISTER_ADDRESS_TABLES.get(self.register_map)
+        if table is None:
+            return {}
+        semantic = {
+            "identity": self.identity,
+            "version": self.fw_version,
+            "patch_proto": self.patch_proto,
+            "checksum": self.checksum,
+        }
+        out: Dict[str, Optional[int]] = {}
+        for name, addr in table.items():
+            if name in semantic:
+                out["HR%d" % addr] = semantic[name]
+        return out
 
     def to_dict(self) -> dict:
         return {
             "slave_number": self.slave_number,
             "detected": self.detected,
-            "holding_registers": dict(self.holding_registers),
+            "identity": self.identity,
+            "fw_version": self.fw_version,
+            "patch_proto": self.patch_proto,
+            "checksum": self.checksum,
+            "register_map": self.register_map,
+            "holding_registers": self.holding_registers(),
             "freshness": self.freshness,
             "observation_timestamp": self.observation_timestamp,
             "evidence_level": self.evidence_level,
@@ -309,15 +373,64 @@ _AMP_IDENTITY_RE = re.compile(r"\bidentity\s*=\s*(0x[0-9a-fA-F]+|\d+)", re.IGNOR
 _AMP_VERSION_RE = re.compile(r"\bversion\s*=\s*(0x[0-9a-fA-F]+|\d+)", re.IGNORECASE)
 _AMP_PATCH_RE = re.compile(r"\bpatch\s*=\s*(0x[0-9a-fA-F]+|\d+)", re.IGNORECASE)
 _AMP_CHECKSUM_RE = re.compile(r"\bchecksum\s*=\s*(0x[0-9a-fA-F]+|\d+)", re.IGNORECASE)
+_AMP_MAP_RE = re.compile(r"\bmap\s*=\s*([A-Za-z0-9_]+)", re.IGNORECASE)
+
+
+def _normalize_map(token: Optional[str]) -> str:
+    if token is None:
+        return REGISTER_MAP_UNKNOWN
+    t = token.strip().upper()
+    if t in ("LEGACY_12", "LEGACY12", "LEGACY", "12"):
+        return REGISTER_MAP_LEGACY_12
+    if t in ("PHASE1_23", "PHASE1_23", "PHASE1", "23"):
+        return REGISTER_MAP_PHASE1_23
+    return REGISTER_MAP_UNKNOWN
+
+
+def _amplifier_evidence_level(
+    slave: Optional[int],
+    detected: Optional[bool],
+    identity: Optional[int],
+    fw_version: Optional[int],
+    patch_proto: Optional[int],
+    checksum: Optional[int],
+    register_map: str,
+) -> str:
+    """Fail-closed evidence level for an amplifier snapshot.
+
+    A usable observation requires ``slave`` + ``detected``. Completeness is
+    map-aware: LEGACY_12 only has a checksum; PHASE1_23 has identity/version/
+    patch_proto/checksum; UNKNOWN accepts either a complete Phase-1-style read
+    or a legacy-style checksum-only read. Anything incomplete is UNKNOWN.
+    """
+    if slave is None or detected is None:
+        return core.UNKNOWN
+    if register_map == REGISTER_MAP_LEGACY_12:
+        return core.ACKNOWLEDGED if checksum is not None else core.UNKNOWN
+    if register_map == REGISTER_MAP_PHASE1_23:
+        complete = all(
+            v is not None for v in (identity, fw_version, patch_proto, checksum)
+        )
+        return core.ACKNOWLEDGED if complete else core.UNKNOWN
+    # UNKNOWN map: accept a complete Phase-1-style read or a legacy-style
+    # checksum-only read. Otherwise fail closed.
+    if all(v is not None for v in (identity, fw_version, patch_proto, checksum)):
+        return core.ACKNOWLEDGED
+    if checksum is not None and identity is None and fw_version is None and patch_proto is None:
+        return core.ACKNOWLEDGED
+    return core.UNKNOWN
 
 
 def parse_amplifier_snapshot(text: str) -> AmplifierSnapshot:
-    """Parse a recorded amplifier snapshot from a textual SLAVEINFO-style line.
+    """Parse a recorded amplifier snapshot from a textual line.
 
-    Accepts e.g. ``slave 3 detected=1 identity=0xF101 version=0x0100
-    patch=0x0001 checksum=0x251F``. Missing fields are recorded as ``None`` and
-    degrade the evidence level to ``UNKNOWN`` (fail-closed) — they are never
-    fabricated. A line with no recognisable field raises ``ValueError``.
+    Accepts semantic field names, e.g. ``slave 3 detected=1 identity=0xF101
+    version=0x0100 patch=0x0001 checksum=0x251F`` (optionally with a
+    ``map=PHASE1_23`` / ``map=LEGACY_12`` hint). Semantic fields are stored
+    map-independently; without a map hint ``register_map`` is ``UNKNOWN`` and no
+    HR numbers are invented. Missing fields are recorded as ``None`` and degrade
+    the evidence level to ``UNKNOWN`` (fail-closed) — they are never fabricated.
+    A line with no recognisable field raises ``ValueError``.
     """
     if not isinstance(text, str):
         raise ValueError(
@@ -333,26 +446,25 @@ def parse_amplifier_snapshot(text: str) -> AmplifierSnapshot:
     version = _match_int(_AMP_VERSION_RE.search(t))
     patch = _match_int(_AMP_PATCH_RE.search(t))
     checksum = _match_int(_AMP_CHECKSUM_RE.search(t))
+    map_m = _AMP_MAP_RE.search(t)
+    register_map = _normalize_map(map_m.group(1)) if map_m else REGISTER_MAP_UNKNOWN
 
-    if slave is None and detected is None and identity is None and version is None \
-            and patch is None and checksum is None:
+    if all(
+        v is None for v in (slave, detected, identity, version, patch, checksum)
+    ):
         raise ValueError("malformed amplifier snapshot: %r" % t)
 
-    holding = {
-        HR_IDENTITY: identity,
-        HR_VERSION: version,
-        HR_PATCH_PROTO: patch,
-        HR_CHECKSUM: checksum,
-    }
-    complete = all(
-        v is not None
-        for v in (slave, detected, identity, version, patch, checksum)
-    )
     return AmplifierSnapshot(
         slave_number=slave,
         detected=detected,
-        holding_registers=holding,
-        evidence_level=core.ACKNOWLEDGED if complete else core.UNKNOWN,
+        identity=identity,
+        fw_version=version,
+        patch_proto=patch,
+        checksum=checksum,
+        register_map=register_map,
+        evidence_level=_amplifier_evidence_level(
+            slave, detected, identity, version, patch, checksum, register_map
+        ),
     )
 
 
@@ -578,13 +690,22 @@ def capabilities() -> dict:
         "capability_classifications": list(CAPABILITY_CLASSIFICATIONS),
         "operation_classifications": dict(_OPERATION_CLASSIFICATIONS),
         "models": ["ControllerSnapshot", "AmplifierSnapshot", "AmplifierInventory"],
-        "holding_register_keys": list(HR_REGISTER_KEYS),
+        "register_maps": list(REGISTER_MAPS),
+        "register_address_tables": {
+            map_name: {name: "HR%d" % addr for name, addr in table.items()}
+            for map_name, table in REGISTER_ADDRESS_TABLES.items()
+        },
+        "checksum_register": "HR%d" % HR_CHECKSUM,
         "evidence_levels": list(core.EVIDENCE_LEVELS),
         "notes": (
             "Offline recorded-observation modelling only. Never opens a socket, "
-            "serial port, or hardware connection. A parsed response is classified "
-            "ACKNOWLEDGED at most (never PHYSICALLY_OBSERVED/VERIFIED); missing "
-            "fields degrade to UNKNOWN and are never fabricated. Capability "
+            "serial port, or hardware connection. Amplifier snapshots use "
+            "map-independent semantic fields (identity/fw_version/patch_proto/"
+            "checksum) with a register_map discriminator; HR11 (checksum) is the "
+            "single stable anchor in both the LEGACY_12 and PHASE1_23 maps, and "
+            "register addresses are a derived per-map view. A parsed response is "
+            "classified ACKNOWLEDGED at most (never PHYSICALLY_OBSERVED/VERIFIED); "
+            "missing fields degrade to UNKNOWN and are never fabricated. Capability "
             "classification is advisory and grants no execution authority."
         ),
     }
