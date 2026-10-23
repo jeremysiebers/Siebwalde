@@ -1,9 +1,10 @@
-# Siebwalde Diagnostics (K4-B) — offline core + MCP
+# Siebwalde Diagnostics (K4-B / K5) — offline core + OBSERVE adapter + MCP
 
-Minimal **offline** Diagnostics Core plus a narrow **read-only Diagnostics MCP**.
-The core analyses *saved* textual traces from the K3 fail-closed single-target
-flash driver `TrackController5/Python/flash_one.py`; it never opens a socket, a
-serial port, or a hardware connection, and it never imports `Comm`/`DataAquisition`
+Minimal **offline** Diagnostics Core + typed OBSERVE adapter plus a narrow
+**read-only Diagnostics MCP**. The core analyses *saved* textual traces from the
+K3 fail-closed single-target flash driver `TrackController5/Python/flash_one.py`
+and recorded controller/amplifier snapshots; it never opens a socket, a serial
+port, or a hardware connection, and it never imports `Comm`/`DataAquisition`
 (or `flash_one.py` itself, whose import graph reaches the UDP transport).
 
 ## Layout
@@ -11,7 +12,8 @@ serial port, or a hardware connection, and it never imports `Comm`/`DataAquisiti
 ```
 tools/diagnostics/
   core.py                 typed, MCP-independent, stdlib-only diagnostic core
-  mcp_server/server.py    FastMCP server ("diagnostics"); four read-only tools
+  observe.py              typed OFFLINE OBSERVE adapter (snapshots + classification)
+  mcp_server/server.py    FastMCP server ("diagnostics"); nine read-only tools
   mcp_server/__main__.py  `python -m tools.diagnostics.mcp_server`
   tests/                  deterministic offline pytest suite
 ```

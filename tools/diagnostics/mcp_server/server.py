@@ -1,4 +1,4 @@
-"""Diagnostics MCP server — offline trace analysis over the Diagnostics Core.
+"""Diagnostics MCP server — offline trace analysis + OBSERVE parsing.
 
 Run as a module (FastMCP, stdio transport)::
 
@@ -9,17 +9,18 @@ The venv used for now is the shared project venv ``tools/knowledge/.venv``
 
     C:\\Localdata\\Siebwalde\\tools\\knowledge\\.venv
 
-Read-only and offline only: four fixed tools, no filesystem access, no raw
-command, no hardware-control tool, no network. The wrapped core
-(``tools.diagnostics.core``) never opens a socket, a serial port, or a hardware
-connection, so this adapter is incapable of opening a PIC32 connection.
+Read-only and offline only: fixed tools, no filesystem access, no raw command,
+no hardware-control tool, no network. The wrapped core (``tools.diagnostics.core``)
+and OBSERVE adapter (``tools.diagnostics.observe``) never open a socket, a serial
+port, or a hardware connection, so this adapter is incapable of opening a PIC32
+connection.
 """
 
 from __future__ import annotations
 
 from fastmcp import FastMCP
 
-from .. import core
+from .. import core, observe
 
 mcp = FastMCP("diagnostics")
 
@@ -63,13 +64,35 @@ def _guard_int_list(value, name: str):
     return None
 
 
+def _guard_str_list(value, name: str):
+    """Validate a list-of-str argument; return an error dict or None."""
+    if value is None:
+        return _error("%s: missing input" % name)
+    if not isinstance(value, list):
+        return _error("%s: expected a list of strings, got %s" % (name, type(value).__name__))
+    if len(value) > MAX_LIST_LEN:
+        return _error("%s: too many elements (%d > %d)" % (name, len(value), MAX_LIST_LEN))
+    for i, item in enumerate(value):
+        if not isinstance(item, str):
+            return _error("%s[%d]: expected a string, got %s" % (name, i, type(item).__name__))
+    return None
+
+
 @mcp.tool()
 def diagnostics_capabilities() -> dict:
-    """Describe the offline-only Diagnostics Core operations and evidence levels.
+    """Describe the offline-only Diagnostics Core + OBSERVE operations.
 
-    Read-only. Reports ``offline_only: true`` and ``hardware_access: false``.
+    Read-only. Reports ``offline_only: true``, ``hardware_access: false``, the
+    offline operations, and the capability-classification vocabulary.
     """
-    return core.capabilities()
+    caps = dict(core.capabilities())
+    obs = observe.capabilities()
+    caps["operations"] = sorted(set(caps.get("operations", [])) | set(obs["operations"]))
+    caps["capability_classifications"] = obs["capability_classifications"]
+    caps["operation_classifications"] = obs["operation_classifications"]
+    caps["models"] = obs["models"]
+    caps["holding_register_keys"] = obs["holding_register_keys"]
+    return caps
 
 
 @mcp.tool()
@@ -114,6 +137,99 @@ def diagnostics_compare_protocol_traces(expected: list, actual: list) -> dict:
     if err is not None:
         return err
     return core.compare_protocol_traces(expected, actual)
+
+
+@mcp.tool()
+def diagnostics_parse_controller_snapshot(text: str) -> dict:
+    """Parse a recorded command-113 controller version response into a snapshot.
+
+    Accepts the textual form (``version 1.0.0 protocol 0x01 build 2026-10-17``)
+    or the raw bytes as a hex string. Malformed input returns an error dict.
+    Read-only, offline.
+    """
+    err = _guard_text(text, "text")
+    if err is not None:
+        return err
+    try:
+        snapshot = observe.parse_controller_version_response(text)
+    except ValueError as exc:
+        return _error("parse_controller_snapshot: %s" % exc)
+    return snapshot.to_dict()
+
+
+@mcp.tool()
+def diagnostics_parse_amplifier_snapshot(text: str) -> dict:
+    """Parse a recorded amplifier snapshot line into a typed snapshot.
+
+    Accepts e.g. ``slave 3 detected=1 identity=0xF101 version=0x0100
+    patch=0x0001 checksum=0x251F``. Missing fields degrade evidence to UNKNOWN
+    (never fabricated); unparseable input returns an error dict. Read-only,
+    offline.
+    """
+    err = _guard_text(text, "text")
+    if err is not None:
+        return err
+    try:
+        snapshot = observe.parse_amplifier_snapshot(text)
+    except ValueError as exc:
+        return _error("parse_amplifier_snapshot: %s" % exc)
+    return snapshot.to_dict()
+
+
+@mcp.tool()
+def diagnostics_compare_amplifier_inventory(expected: list, actual: list) -> dict:
+    """Compare two amplifier inventories (lists of snapshot lines) as detected sets.
+
+    Returns ``{expected, actual, expected_detected, actual_detected, missing,
+    extra, unexpected, match}``. ``missing`` = detected in expected but not
+    actual; ``extra`` = detected in actual but not expected; ``unexpected`` =
+    unparseable actual lines. Read-only, offline.
+    """
+    err = _guard_str_list(expected, "expected")
+    if err is not None:
+        return err
+    err = _guard_str_list(actual, "actual")
+    if err is not None:
+        return err
+    try:
+        return observe.compare_amplifier_inventory(expected, actual)
+    except ValueError as exc:
+        return _error("compare_amplifier_inventory: %s" % exc)
+
+
+@mcp.tool()
+def diagnostics_classify_operation(name: str) -> dict:
+    """Classify an operation name by capability effect class.
+
+    Returns ``{name, classification}``. Offline parse/compare/report operations
+    classify ``OFFLINE_ONLY``; unknown names classify ``UNKNOWN_EFFECT``. The
+    label is advisory and grants NO execution authority. Read-only, offline.
+    """
+    if name is None:
+        return _error("name: missing input")
+    if not isinstance(name, str):
+        return _error("name: expected a string, got %s" % type(name).__name__)
+    if not name.strip():
+        return _error("name: empty input")
+    classification = observe.classify_operation(name)
+    return {"name": name, "classification": classification}
+
+
+@mcp.tool()
+def diagnostics_report_init_discrepancies(expected_sequence: list, actual_sequence: list) -> dict:
+    """Report structured discrepancies between two ordered init sequences.
+
+    Returns ``{expected, actual, missing, unexpected, wrong_order, match}``.
+    ``missing``/``unexpected`` are multiset differences; ``wrong_order`` reports
+    elements present in both but out of order. Read-only, offline.
+    """
+    err = _guard_str_list(expected_sequence, "expected_sequence")
+    if err is not None:
+        return err
+    err = _guard_str_list(actual_sequence, "actual_sequence")
+    if err is not None:
+        return err
+    return observe.report_init_discrepancies(expected_sequence, actual_sequence)
 
 
 def main() -> None:

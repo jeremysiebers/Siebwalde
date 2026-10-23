@@ -25,6 +25,8 @@ from .core import (  # noqa: F401
     compare_protocol_traces,
 )
 
+from . import observe  # noqa: F401
+
 __all__ = [
     "ACKNOWLEDGED",
     "EVIDENCE_LEVELS",
