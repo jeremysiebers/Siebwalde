@@ -177,7 +177,7 @@ Controleer in deze exacte volgorde; bevestig elk punt expliciet aan de Project L
 
 **E. Artefact-verificatie**
 15. Volledige SHA-256 van de tijdelijke `0x2D00`-firmware geverifieerd: `ABAEF621C25E1AB046FB98834E7A5DB84D49C0FBEAF49AFEAF62DAAF082D9E53`.
-16. Rollback `0x251F` Offset-image beschikbaar (SHA-256 `B848EF04…`); juiste bron-/toolrevisies.
+16. Rollback `0x251F` Offset-image beschikbaar (SHA-256 `B848EF040DBA538D983EE92D96D84119AF922F686C7C879892E14323E1C1887D`); juiste bron-/toolrevisies.
 17. **Geen** fleet-update-commando (122) ingeschakeld; alleen single-target 123→…→130.
 
 De sessie begint **niet** met speculatieve bedrading of firmware-operaties. De scope wordt vóór elke destructieve stap geactiveerd.
