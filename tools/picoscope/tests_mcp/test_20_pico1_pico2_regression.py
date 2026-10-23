@@ -1,4 +1,4 @@
-"""Category 20: PICO-1 / PICO-2 regression (157 offline tests) still passes."""
+"""Category 20: PICO-1 / PICO-2 regression (161 offline tests) still passes."""
 
 import subprocess
 import sys
@@ -17,4 +17,4 @@ def test_pico1_pico2_regression_still_passes():
     )
     combined = proc.stdout + "\n" + proc.stderr
     assert proc.returncode == 0, f"PICO-1/PICO-2 regression failed:\n{combined}"
-    assert "157 passed" in combined, f"expected 157 passed, got:\n{combined}"
+    assert "161 passed" in combined, f"expected 161 passed, got:\n{combined}"

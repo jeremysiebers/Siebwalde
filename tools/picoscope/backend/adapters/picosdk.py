@@ -581,9 +581,16 @@ class Ps3000aDevice:
     def _trigger_sample_index(self, pre: int, interval_ns: int) -> int:
         """Actual trigger sample index, refined from the hardware offset if possible.
 
-        ``ps3000aGetTriggerTimeOffset64`` reports the trigger point relative to the
-        start of the capture; converted to samples this is the actual trigger index.
-        On failure (or absent entry point) the nominal ``pre`` is returned.
+        For a ps3000a BLOCK capture the trigger is placed at the pre/post boundary,
+        i.e. the trigger index is ``pre`` by definition. ``ps3000aGetTriggerTimeOffset64``
+        reports the trigger point relative to the start of the capture; converted to
+        samples this is the actual trigger index, and is used **only as a refinement**.
+
+        Some devices return a 0 offset for digital block triggers even though the
+        trigger fired at the pre/post boundary, so a non-positive (or sub-sample)
+        conversion must not overwrite the correct ``pre``. On failure, an absent
+        entry point, an unknown time unit, or an offset that converts to less than
+        one sample, the nominal ``pre`` is returned.
         """
         func = getattr(self._lib, "ps3000aGetTriggerTimeOffset64", None)
         if func is None or interval_ns <= 0:
@@ -598,7 +605,13 @@ class Ps3000aDevice:
         if sec_per_unit is None:
             return pre
         offset_ns = time_value.value * sec_per_unit * 1e9
-        return int(round(offset_ns / interval_ns))
+        index = int(round(offset_ns / interval_ns))
+        # Sensible-value guard: only accept a positive (>= 1 sample) refinement.
+        # A 0 (or sub-sample) offset is a driver quirk for digital block triggers;
+        # keep the nominal ``pre`` in that case.
+        if index < 1:
+            return pre
+        return index
 
     def _nearest_range(self, range_v: float) -> int:
         best = min(PS3000A_RANGES.items(), key=lambda kv: abs(kv[1] - range_v))

@@ -293,6 +293,40 @@ def test_trigger_index_falls_back_to_pre_on_offset_error():
     assert cap.trigger_index == 100
 
 
+def test_trigger_index_falls_back_to_pre_on_zero_offset():
+    # Regression (PICO-4T): the driver returns time_value=0 for a digital block
+    # trigger even though the trigger fired at the pre/post boundary. The zero
+    # offset must NOT overwrite the correct ``pre``.
+    cap, lib = _capture(ready=True, offset_ns=0, interval_ns=2048.0)
+    assert cap.trigger_status == "triggered"
+    assert cap.trigger_position == 100
+    assert cap.trigger_index == 100
+    assert lib.ps3000aGetTriggerTimeOffset64.calls
+
+
+def test_trigger_index_uses_sensible_nonzero_offset():
+    # A positive, >= 1 sample hardware offset refines the index beyond ``pre``.
+    device, lib = _device(ready=True, interval_ns=2048.0, offset_ns=40960)
+    device.configure_digital_port(0, True, 1000)
+    device.configure_trigger("D0", 0.0, "rising", 100, 900)
+    cap = device.capture_block(trigger_wait_ms=10)
+    # 40960 ns / 2048 ns == 20 samples.
+    assert cap.trigger_status == "triggered"
+    assert cap.trigger_index == 20
+
+
+def test_trigger_sample_index_zero_offset_returns_pre_direct():
+    # Direct helper check matching the real capture geometry (pre=62500, 16 ns).
+    device, lib = _device(ready=True, interval_ns=16.0, offset_ns=0)
+    assert device._trigger_sample_index(62500, 16) == 62500
+
+
+def test_trigger_sample_index_sensible_offset_direct():
+    device, lib = _device(ready=True, interval_ns=16.0, offset_ns=16000)
+    # 16000 ns / 16 ns == 1000 samples.
+    assert device._trigger_sample_index(62500, 16) == 1000
+
+
 def test_timeout_capture_records_timeout_state():
     cap, lib = _capture(ready=False, wait_ms=1)
     assert cap.trigger_status == "timeout"
