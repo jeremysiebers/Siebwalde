@@ -16,8 +16,8 @@ Inherited 22 (pico-5b-plan entanglement), grouped:
 | C# HR22 protocol gate | `128a0d81` | **DEFER** (separate `feature/protocol-version-gate`) |
 | Phase-1 preflight doc | `5c916522` | passive doc |
 | Baseline-0 firmware archive + readback | `78a4a6a5`, `667a490f` | immutable artifacts |
-| Firmware flash/recovery reference + amp-1 evidence docs | `69a501f2`, `7167e85` | passive docs |
-| PicoScope MCP PICO-1..4T | `d24daef1`…`80694e9b` (14) | accepted instrumentation |
+| Firmware flash/recovery reference + amp-1 evidence docs | `69a501f2`, `d7167e85` | passive docs |
+| PicoScope MCP PICO-1..4T | `d24daef1`…`80694e9b` (13) | accepted instrumentation |
 | PICO-5B docs | `c95ea616`, `e440605a`, `1f89c0b8` | passive docs |
 
 K-series 17: K0/K1 (4), K2 (2), K3 (3), K4 (3), K5 (5).
