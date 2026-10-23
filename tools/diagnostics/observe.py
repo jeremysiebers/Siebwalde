@@ -382,7 +382,7 @@ def _normalize_map(token: Optional[str]) -> str:
     t = token.strip().upper()
     if t in ("LEGACY_12", "LEGACY12", "LEGACY", "12"):
         return REGISTER_MAP_LEGACY_12
-    if t in ("PHASE1_23", "PHASE1_23", "PHASE1", "23"):
+    if t in ("PHASE1_23", "PHASE1", "23"):
         return REGISTER_MAP_PHASE1_23
     return REGISTER_MAP_UNKNOWN
 
