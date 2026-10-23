@@ -22,39 +22,48 @@ Inherited 22 (pico-5b-plan entanglement), grouped:
 
 K-series 17: K0/K1 (4), K2 (2), K3 (3), K4 (3), K5 (5).
 
-## B. Integration strategy (recommended)
+## B. Integration strategy (binary; recommended = Option A)
 
-**Recommendation: Option A — layered, preserve identities**, conditional on the
-HR22 gate decision (below). Integrate `feature/pico-5b-plan` (`1f89c0b`) into
-master as the prerequisite layer (it is already reviewed/instrumentation +
-immutable artifacts + docs), then the K-series (`a6e9dde..c75094f`) merges as a
-fast-forward — **no history rewrite, all commit identities preserved**.
+The HR22 gate (`128a0d81`) is the **direct child of master** `376c56e`; all 21
+other pico-5b-plan commits descend from it. Therefore "defer the gate" and
+"preserve commit identities" are **topologically mutually exclusive** — the
+choice is binary:
 
-**Fallback: Option B — curated** (only if the HR22 gate is deferred): drop
-`128a0d81` and re-stage the picoscope + baseline-0 + docs + K-series as new
-curated commits. This is a history rewrite (new identities) and requires
-explicit PO approval before execution.
+- **Option A — layered, preserve identities** (only if the gate is GO): merge
+  `feature/pico-5b-plan` (`1f89c0b`) into master as the prerequisite layer
+  (fast-forward while master stays at `376c56e`), then the K-series
+  (`a6e9dde..c75094f`) fast-forwards cleanly — **no history rewrite**; all commit
+  identities AND all 67 `source_revision:"1f89c0b"` provenance references stay valid.
+- **Option B — curated, drop the gate** (if the gate is NO-GO/deferred): drop
+  `128a0d81` and re-stage the picoscope + baseline-0 + docs + K-series as new
+  curated commits. This is a history rewrite (new identities) that also
+  **invalidates 67 seed `source_revision:"1f89c0b"` references** (plus `9ff8e39` /
+  `8fa3a6e` / `e880fde` / `26a7bf8`) — requiring a provenance re-pinning pass.
+  Requires explicit PO approval for the rewrite.
 
-The decisive input is the HR22 gate GO/NO-GO (Section C). Do not select a
-strategy on mechanical speed alone.
+**Recommended: Option A**, because the HR22 gate is safe (fail-closed, behind
+HR7, legacy-unaffected) and integrating it as the prerequisite layer preserves
+both commit identities and knowledge provenance, subject to its independent C#
+review (Section C). Note: master must still be at `376c56e` at integration time
+for the fast-forward to hold.
 
 ## C. Production-impact assessment
 
-### C# HR22 protocol gate (`128a0d81`) — **DEFER to independent review**
+### C# HR22 protocol gate (`128a0d81`) — **GO conditional (integrate as prerequisite, after independent C# review)**
 
 - A fail-closed Phase-1 protocol check (HR22 == 0x01) **strictly behind** the
-  existing HR7 identity check. `AmplifierPhase1Safety.Compatible` now requires
-  identity AND protocol; `IncompatibilityReason` distinguishes firmware vs
-  protocol. 5 new tests + simulator protocol overrides.
-- For the **currently deployed legacy firmware (0x251F) + PIC32 L1**, the HR7
-  identity check fails first, so the HR22 check never applies — legacy behavior
-  is unchanged. It only refines Phase-1 amplifier compatibility.
-- **Recommendation: keep on `feature/protocol-version-gate`; defer from the
-  K-series integration.** It is a production C# behavior change, not required by
-  the knowledge/diagnostics/tooling integration, and needs an independent .NET
-  build + test review (482 baseline + the 5 gate tests) plus its own PO decision.
-  A separate GO/NO-GO: **NO-GO to integrate now** (defer), because it is a
-  Phase-1-specific change unverified against the current legacy deployment.
+  existing HR7 identity check (verified in `AmplifierPhase1Safety.cs:17-49` and
+  `TrackAmplifierRegisters.cs:55-62`). `0x00` (absent/legacy/exception) and
+  `0x02` → deny ("never compatible by default"); legacy 0x251F / PIC32-L1 fail
+  the HR7/register-count check first, so legacy behavior is unchanged.
+- **Recommendation: GO as part of the prerequisite layer (Option A)**, gated on
+  an independent C# review (.NET build + 482 baseline + the 5 gate tests), which
+  the K-series chain did not perform. Do not treat a feature-branch test-pass as
+  integration approval.
+- **Separate GO/NO-GO: GO-conditional** — if the C# review passes, integrate; if
+  it cannot be reviewed now, defer (which forces Option B + the 67-reference
+  provenance re-pinning cost). Note `feature/protocol-version-gate` also carries
+  `5c916522` (the Phase-1 preflight doc) — both travel together.
 
 ### K3 `TrackController5/Python/Comm.py` — **isolate the operational change**
 
@@ -91,13 +100,17 @@ rebuild idempotent, MCPs register offline.
 
 ## F. PO decisions required
 
-1. **HR22 gate**: defer (recommended) vs integrate independently — the gate is a
-   Phase-1 C# behavior change unverified against the current legacy deployment.
-2. **Integration strategy**: Option A (layered, preserve identities, integrates
-   the full pico-5b-plan including the gate) vs Option B (curated, requires
-   history rewrite + PO approval to drop the gate).
+1. **HR22 gate**: GO-conditional (integrate as the prerequisite layer after an
+   independent C# review) — the gate is safe/fail-closed/legacy-unaffected and is
+   the single production-C# change in the entanglement. If it cannot be reviewed
+   now, defer (which forces Option B + the provenance re-pinning cost).
+2. **Integration strategy**: binary — Option A (layered, preserve identities +
+   provenance, requires the gate GO) vs Option B (curated, drop the gate, history
+   rewrite + re-pin 67 `source_revision` references, requires PO approval for the
+   rewrite).
 3. **Comm.py operational change**: isolate/revert the hardcoded-IP change vs
-   accept it as a diagnostic-only modification.
+   accept it as a diagnostic-only modification (the parse-loop fix is a separate
+   compatibility correction).
 
 ## G. Next increment
 
