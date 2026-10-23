@@ -70,10 +70,12 @@ Rules:
   and "operation verified" are distinct evidence levels and are never
   automatically promoted.
 - Any timeout, `*_RETURNED_NOK`, `BOOTLOADER_START_BYTE_ERROR`,
-  `BOOTLOADER_DATA_RECEIVE_ERROR`, unexpected frame, or missing ack on a
-  destructive command (125-129) moves the state to
-  `FAILED_UNKNOWN_HARDWARE_STATE` and raises `FlashAbort`. The driver never
-  continues to the next destructive stage on an unverified success assumption.
+  `BOOTLOADER_DATA_RECEIVE_ERROR`, or unexpected ERROR frame on a destructive
+  command (125-129) moves the state to `FAILED_UNKNOWN_HARDWARE_STATE` and
+  raises `FlashAbort`. (A non-ERROR out-of-order frame is logged and discarded,
+  so it never satisfies the ack and the ack-timeout still aborts.) The driver
+  never continues to the next destructive stage on an unverified success
+  assumption.
 - No auto-retry, no auto-reset, no auto-recovery.
 - The removed `--proceed-on-timeout` (ASSUME-OK) behavior is gone; a
   `*_RECEIVE_DATA_TIMEOUT` is **never** converted into a successful operation.

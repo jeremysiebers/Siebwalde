@@ -676,7 +676,7 @@ NODES: list[tuple[str, dict]] = [
         "status": "PROVEN_OFFLINE_TEST",
         "summary": "K3 corrected the unsafe ASSUME-OK behavior: the driver now fails closed (43 offline tests, incl. 13 fail-closed regression tests).",
         "source_path": "docs/K3-FAIL-CLOSED-FIRMWARE-DIAGNOSTICS.md",
-        "source_location": "2", "source_revision": "8fa3a6e", "evidence_status": "TEST_PASS",
+        "source_location": "2", "source_revision": "e880fde", "evidence_status": "TEST_PASS",
     }),
     ("Decision", {
         "id": "decision:proceed-on-timeout", "label": "--proceed-on-timeout / ASSUME-OK (PO)",
