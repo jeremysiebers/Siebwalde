@@ -8,6 +8,10 @@ The product owner confirmed component roles and priorities on 2026-09-11 (see `d
 
 ## Current Continuation Pass
 
+### K6 live physical OBSERVE (command 113) — 2026-10-24
+
+**Investigated + physically validated (read-only):** K6-A built and reviewed a typed, allowlisted PIC32 live OBSERVE transport (`tools/diagnostics/live_transport.py` + `observe_guard.py` + `k6b_observe.py`, branch `feature/k6-observe`, commits `5cc2402f`/`ae18cb44`). K6-B executed exactly one `GET_CONTROLLER_VERSION` (113) request against the verified PIC32 `192.168.1.193` under a single-use PO grant: **OBSERVE_PASS**, firmware **0.1.0 / protocol 0 / build "2026-10-20"**. Integrator `PASS` (pre + post); Architect `DESIGN_ACCEPTABLE`. Knowledge graph updated (command-113 contract + physical readback + version-mismatch observations; 144 nodes / 83 rels). Evidence `Logging/K6B/k6b-observe-20261024T092944Z.json`. See `docs/K6-LIVE-OBSERVE-VALIDATION.md`. Remaining: master `version.h` (1.0.0) was never flashed to the physical PIC32 (deployed = 0.1.0); amp-1/amp-3 PIC18 state still UNKNOWN; Architect residual risks logged to backlog. Not merged (requires separate PO authorization).
+
 ### KIS-10 selected-profile composition (2026-10-13)
 
 **Investigated (software-only):** `TrackSimulationPageViewModel.ApplyProfileSelection` -> `TrackApplicationRuntimeHost.SelectFullSimulationProfile` -> `TrackControlHost.SetProfile` -> Real `TrackControlIntegration` carrier/feedback; `TrackApplicationRuntimeHost.ComposeTrackPartAsync` -> `Kis09PassiveObserverFactory.Create` -> `KoploperLogicalSectionShadowObserver` 1:N map. `OvaaltjeLoop2CompositionTests` adds 2 executed wiring checks (real host with inert comm and loopback only; passive factory without starting readers). Full Debug/Release **971/971** on HEAD `fe17ebe` plus uncommitted KIS-10 work. No defect or production fix. Remaining gap: interactive WPF guard, full selected-profile startup and live/physical validation were not exercised by these targeted checks. See the dated Developer entry in `docs/handoff.md`.

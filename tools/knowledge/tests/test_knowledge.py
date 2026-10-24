@@ -269,3 +269,47 @@ def test_knowledge_tools_lists_protected():
     # the filter narrows to a substring of name/purpose
     filtered = server.knowledge_tools("PicoScope")["results"]
     assert {r["id"] for r in filtered} == {"tool:picoscope-mcp"}
+
+
+# ---------------------------------------------------------------------------
+# K6-B OBSERVE findings (command 113 contract + physical readback + discrepancy)
+# ---------------------------------------------------------------------------
+
+def test_k6b_command_113_contract():
+    """Command 113 (GET_CONTROLLER_VERSION) is a read-only source-proven contract."""
+    prot = server.knowledge_protocol_contract("113")
+    assert prot["count"] == 1
+    c = prot["results"][0]["command"]
+    assert c["n.id"] == "command:113"
+    assert c["n.command_name"] == "GET_CONTROLLER_VERSION"
+    assert c["n.direction"] == "HOST_TO_PIC32"
+    assert c["n.destructive"] is False
+    assert c["n.status"] == "PROVEN_SOURCE"
+    assert "REPLYxCONTROLLERxVERSION" in c["n.summary"]
+    assert c["n.source_path"] == "TrackController5/firmware/src/controller.c"
+
+
+def test_k6b_observations_recorded():
+    """Both K6-B observations exist and keep the REPORTS-vs-flash-content distinction."""
+    rs = _search_results("K6-B")
+    by_id = {r["id"]: r for r in rs}
+    assert "obs:k6b-cmd113-readback" in by_id
+    assert "obs:k6b-version-mismatch" in by_id
+    rb = by_id["obs:k6b-cmd113-readback"]
+    assert rb["status"] == "PROVEN_HARDWARE"
+    # the readback proves what the controller REPORTS, not the flash image content
+    assert "REPORTS" in rb["summary"] and "not independently" in rb["summary"]
+    assert rb["source_path"] == "tools/diagnostics/k6b_observe.py"
+    mm = by_id["obs:k6b-version-mismatch"]
+    assert mm["status"] == "PROVEN_HARDWARE"
+    assert mm["source_path"] == "TrackController5/firmware/src/version.h"
+    assert "never flashed" in mm["summary"]
+
+
+def test_k6b_does_not_change_runs_firmware():
+    """K6-B must NOT change device:pic32 RUNS_FIRMWARE firmware:pic32-0.1.0."""
+    fw = server.knowledge_firmware_state()["results"]
+    pic32 = [r for r in fw if r["d.id"] == "device:pic32"]
+    assert len(pic32) == 1
+    assert pic32[0]["f.id"] == "firmware:pic32-0.1.0"
+    assert pic32[0]["f.version"] == "0.1.0"

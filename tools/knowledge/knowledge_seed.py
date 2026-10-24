@@ -351,6 +351,14 @@ NODES: list[tuple[str, dict]] = [
         "source_path": "docs/firmware-flash-recovery-technical-reference.md",
         "source_location": "2.5", "source_revision": "1f89c0b", "evidence_status": "OBSERVED",
     }),
+    ("ProtocolCommand", {
+        "id": "command:113", "command": 113, "command_name": "GET_CONTROLLER_VERSION",
+        "direction": "HOST_TO_PIC32", "destructive": False,
+        "status": "PROVEN_SOURCE",
+        "summary": "Read-only controller version query; request [0xAA,0x71] (no payload/footer); reply CONTROLLER(10) + echo 113 + MAJOR/MINOR/PATCH + PROTOCOL + build timestamp. Implemented by REPLYxCONTROLLERxVERSION (controller.c); only side effect is a UDP version reply (no flash/reset/MBUS).",
+        "source_path": "TrackController5/firmware/src/controller.c",
+        "source_location": "REPLYxCONTROLLERxVERSION", "source_revision": "5269624e", "evidence_status": "SOURCE_REF",
+    }),
     # Expected acks (taskcommand feedback)
     ("ProtocolCommand", {
         "id": "ack:202", "command": 202, "command_name": "ERASE_FLASH_RETURNED_OK",
@@ -629,6 +637,28 @@ NODES: list[tuple[str, dict]] = [
         "summary": "PO reported no amplifier stuck in bootloader after the PICO-5B attempt; consistent with ERASE not having executed, but the exact target state was not independently re-verified.",
         "source_path": "docs/PICO-5B-PHYSICAL-SESSION-PREFLIGHT.md",
         "source_location": "operator", "source_revision": "1f89c0b", "evidence_status": "UNVERIFIED", "observed_date": "2026-10-23",
+    }),
+    ("Observation", {
+        "id": "obs:k6b-cmd113-readback", "label": "K6-B command-113 physical readback",
+        "what": "K6-B single command-113 OBSERVE (2026-10-24) against PIC32 192.168.1.193 returned version 0.1.0, protocol 0, build 2026-10-20 (OBSERVE_PASS). One request `aa71`, 82-byte reply `aa0a71...`, source 192.168.1.193, SHA-256 f40a31edf3924488f82e1ee542bac9400d6dd9d3864249b8492504acb4a669c8.",
+        "date": "2026-10-24", "method": "UDP command-113 via tools/diagnostics/live_transport.py (allowlisted, single-use)",
+        "status": "PROVEN_HARDWARE",
+        "summary": "Physical K6-B command-113 readback returned version 0.1.0 / protocol 0 / build 2026-10-20 (OBSERVE_PASS); proves the controller REPORTS 0.1.0, not independently the flash image content.",
+        "source_path": "tools/diagnostics/k6b_observe.py",
+        "source_revision": "ae18cb4",
+        "evidence_ref": "Logging/K6B/k6b-observe-20261024T092944Z.json",
+        "evidence_status": "OBSERVED", "observed_date": "2026-10-24",
+    }),
+    ("Observation", {
+        "id": "obs:k6b-version-mismatch", "label": "K6-B firmware version discrepancy (0.1.0 vs 1.0.0)",
+        "what": "K6-B physical readback 0.1.0 / protocol 0 / '2026-10-20' differs from master-branch version.h 1.0.0 / protocol 0x01 / '2026-10-17'; the version.h bump was never flashed to the physical PIC32. Deployed firmware 0.1.0 matches the recorded firmware:pic32-0.1.0 node.",
+        "date": "2026-10-24", "method": "command-113 readback vs source version.h",
+        "status": "PROVEN_HARDWARE",
+        "summary": "K6-B physical readback (0.1.0 / protocol 0 / '2026-10-20') differs from master-branch version.h (1.0.0 / protocol 0x01 / '2026-10-17'); the version.h bump was never flashed, so deployed firmware remains 0.1.0.",
+        "source_path": "TrackController5/firmware/src/version.h",
+        "source_location": "6-13", "source_revision": "5269624e",
+        "evidence_ref": "Logging/K6B/k6b-observe-20261024T092944Z.json",
+        "evidence_status": "OBSERVED", "observed_date": "2026-10-24",
     }),
 
     # ==================================================================

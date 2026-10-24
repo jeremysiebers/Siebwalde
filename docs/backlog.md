@@ -2,6 +2,19 @@
 
 This backlog records proposed improvements discovered during analysis. None of these items are approved for implementation yet.
 
+## K6 residual risks (Architect review, non-safety-critical)
+
+Recorded from the K6-A live OBSERVE transport architecture review (branch `feature/k6-observe`, commits `5cc2402f` + `ae18cb44`). None blocked K6-B (the operation is hard-coded 113, read-only); a bounded corrective increment is recommended before any further physical diagnostics.
+
+| Item | Evidence | Suggested acceptance criteria |
+| --- | --- | --- |
+| Single-use authorization is enforced only at the orchestration layer, not the transport boundary. | `Command113Transport.send_get_controller_version()` is stateless and does not consult `ObserveSession`; "exactly one" relies on `k6b_observe.py` calling consume-once + send-once, plus port-10001 exclusivity. A second request is technically possible via a direct transport import (read-only blast radius). | The transport is bound to a consumed session (or is self-consuming one-shot), OR the single-use boundary is explicitly documented as orchestration-level with a test proving no second send. |
+| `except OSError` branch over-claims `"sent": True`. | `live_transport.py` OSError branch reports `sent: True` unconditionally; on a bind-failure (port busy) nothing was sent. | The failure reason distinguishes bind vs sendto vs recv; `sent: False` on bind-failure. |
+| (minor) `port`/`recv_port` are not validated. | `live_transport.py` constructor only does `int(...)`. | Ports are range-validated against the fixed `10000`/`10001` defaults. |
+| (minor) Socket creation sits outside the `try`. | `socket.socket()` failure propagates as an exception rather than `UNKNOWN`. | Socket creation is inside the guarded path and maps resource-exhaustion to `UNKNOWN`. |
+| (minor) No dedicated EADDRINUSE (bind-failure) test. | Existing socket-error test simulates a `recvfrom` failure, not a bind failure. | A test asserts bind-failure returns `UNKNOWN` with `sent: False`. |
+
+
 ## Confirmed Priority Order (from product clarification, 2026-09-11)
 
 The product owner confirmed the following order. Items remain unapproved for implementation until explicitly selected.
