@@ -691,6 +691,17 @@ NODES: list[tuple[str, dict]] = [
         "source_location": "SIP4 MESSAGE3", "source_revision": "bd5a9fa2",
         "evidence_status": "SOURCE_REF",
     }),
+    ("Observation", {
+        "id": "obs:k8-slaveryinfo-passive-blocked", "label": "K8 passive SLAVEINFO observation BLOCKED",
+        "what": "K8 feasibility (2026-10-24): a genuinely passive SLAVEINFO observation of PIC18 amps 1/3 is BLOCKED. SLAVEINFO (0xFF) is unicast to the single connected client (UDP 10001, server 10000; no multicast/broadcast), request-driven (command 106 START_DATA_UPLOAD sets UPLOAD_STATE_ALL), and the meaningful SERVICE_TASKS stream requires command 105 ENABLE (HR1=0x8000, outputs on) plus a 100ms motion-permission broadcast. 101/104 also write. Access alternatives: state-changing read-only-enablement (250->100->101->104->106->105 via KIS-09 guard), L2 capture of an already-running stream, or warm-reconnect (250 only) against an already-enabled master. Ownership is single-connection; the write-allowlist/guard is process-local (no cross-process arbitration).",
+        "date": "2026-10-24",
+        "method": "source inspection (ethernet.c, mbus.c, controller.c, slavestartup.c, slavehandler.c, C# RawUdpTransport/TrackCommClientAsync/ReadOnlyTelemetryValidationHost)",
+        "status": "PROVEN_SOURCE",
+        "summary": "K8 feasibility (2026-10-24): a genuinely passive SLAVEINFO observation of PIC18 amps 1/3 is BLOCKED (unicast + request-driven 106 + state-changing 105 ENABLE); access requires a non-passive method.",
+        "source_path": "docs/K8-SLAVEINFO-FEASIBILITY.md",
+        "source_location": "delivery mechanism", "source_revision": "14789a5a",
+        "evidence_status": "SOURCE_REF",
+    }),
 
     # ==================================================================
     # Incident

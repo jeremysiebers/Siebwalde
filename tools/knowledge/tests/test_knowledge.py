@@ -365,3 +365,23 @@ def test_k7_next_readonly_hr11_slaveryinfo():
     assert "SLAVEINFO" in props["n.what"]
     assert "HR11" in props["n.what"]
     assert "NOT fully passive" in props["n.what"]
+
+
+# ---------------------------------------------------------------------------
+# K8 feasibility (passive SLAVEINFO observation is BLOCKED)
+# ---------------------------------------------------------------------------
+
+def test_k8_slaveryinfo_passive_blocked():
+    """K8 records that a genuinely passive SLAVEINFO observation is BLOCKED
+    (PROVEN_SOURCE), traced to docs/K8-SLAVEINFO-FEASIBILITY.md."""
+    props = server.knowledge_node("obs:k8-slaveryinfo-passive-blocked")["node"]["properties"]
+    assert props["n.id"] == "obs:k8-slaveryinfo-passive-blocked"
+    assert props["n.status"] == "PROVEN_SOURCE"
+    assert props["n.source_path"] == "docs/K8-SLAVEINFO-FEASIBILITY.md"
+    assert props["n.source_location"] == "delivery mechanism"
+    assert props["n.source_revision"] == "14789a5a"
+    assert props["n.evidence_status"] == "SOURCE_REF"
+    assert props["n.date"] == "2026-10-24"
+    assert "BLOCKED" in props["n.what"]
+    assert "unicast" in props["n.what"]
+    assert "105 ENABLE" in props["n.what"]
