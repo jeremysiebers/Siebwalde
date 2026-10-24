@@ -1591,6 +1591,35 @@ A branch MAY later become a deletion candidate when:
 
 Deletion of a branch classified as evidence-bearing remains human-authorized in Workflow v1.
 
+### 10.14 Temporary repositories, Git worktrees, and workspace lifecycle
+
+This section defines the standing workspace convention for all temporary development environments (newly created Git worktrees, test repositories, experimental clones, integration-test checkouts, and isolated agent development environments).
+
+**Directory convention.** All newly created temporary worktrees and test repositories MUST be located under `C:\Localdata\Siebwalde_temp\`, using clearly identifiable increment/task-based names (for example `K8-observe`, `K9-firmware-test`, `integration-validation`). Temporary Siebwalde repositories MUST NOT be created directly under `C:\Localdata`, and MUST NOT be created inside the canonical repository.
+
+**Permanent directory roles.**
+
+| Role | Path |
+| --- | --- |
+| Canonical source | `C:\Localdata\Siebwalde` |
+| Permanent historical preservation | `C:\Localdata\Siebwalde-Bewaarmap` |
+| Temporary development and testing | `C:\Localdata\Siebwalde_temp` |
+| Independent historical repository | `C:\Localdata\Siebwalde Backup` |
+
+The independent historical repository is excluded from temporary-worktree cleanup. Protected evidence-bearing worktrees (for example `Siebwalde-k6` while its original physical evidence awaits durable preservation) are not relocated or removed by this rule.
+
+**Lifecycle ownership.** The Project Lead owns the complete lifecycle of temporary development environments.
+
+Before creating a new worktree: check whether a suitable temporary worktree already exists; avoid unnecessary duplication; record the purpose, owning increment, branch, base revision, and intended lifecycle; and prefer a Git worktree over a duplicate full clone when appropriate.
+
+During development: preserve source revision and branch traceability; keep accepted MCP tooling functional without silently using a stale MCP implementation from another checkout; and do not place permanent hardware evidence in a disposable temporary directory without an explicit preservation path.
+
+At increment closure, in order: (1) determine whether the worktree is still required; (2) verify accepted changes are committed and preserved; (3) inspect staged, unstaged, untracked, and ignored contents; (4) transfer unique valuable material to the central preservation directory; (5) verify preserved material with SHA-256; (6) preserve unique Git commits and required references; (7) confirm no agent, process, or tool still depends on the worktree; (8) obtain the required independent preservation/cleanup review; (9) remove safely eligible temporary worktrees using normal Git procedures without force; (10) report retained worktrees and their reasons.
+
+**Exception policy.** A temporary worktree MAY remain after increment closure only when development is actively continuing, important evidence has not yet been durably preserved, another approved workflow depends on that exact worktree, or removal would risk unique or unrecoverable content. Every such exception MUST be documented with an owner, reason, and the next cleanup condition.
+
+The word "temporary" does NOT authorize deleting unpreserved content. Temporary worktrees MUST NOT accumulate indefinitely.
+
 ---
 
 ## 11. Human authority gates
