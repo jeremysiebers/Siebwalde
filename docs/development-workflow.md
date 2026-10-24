@@ -2122,6 +2122,15 @@ Closure MAY include:
 
 `merged` does not automatically mean `closed`.
 
+Every Project Lead increment closure report MUST include a dedicated **Worktree lifecycle** field reporting the disposition of each temporary worktree or test repository created or used by the increment:
+
+- `REMOVED` — safely removed after preservation and verification;
+- `RETAINED` — intentionally retained; report exact path, reason, owner, and expected cleanup condition;
+- `BLOCKED` — removal cannot safely proceed; report exact path, blocking evidence, owner, and required resolution;
+- `NOT_APPLICABLE` — no temporary worktree was created or used.
+
+If an increment uses multiple worktrees, each worktree MUST be reported separately. No temporary worktree MAY be removed before its unique source code, Git history, and evidence have been preserved and verified.
+
 ### 14.3 Durable decision updates
 
 The Project Lead SHOULD determine whether an increment introduced a durable decision.
