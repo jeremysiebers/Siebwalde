@@ -551,9 +551,11 @@ namespace SiebwaldeApp.Integration
         // ---------------------------------------------------------------------------------
 
         /// <summary>
-        /// Phase-1 identity gate + config download + APPLY + readback verification for every
-        /// domain amplifier (AC6 / AC2/AC3). An amplifier whose HR7 identity is incompatible is
-        /// left with <c>Phase1Failure = "incompatible firmware"</c> and is never configured,
+        /// Phase-1 identity + protocol gate + config download + APPLY + readback verification for
+        /// every domain amplifier (AC6 / AC2/AC3). An amplifier whose HR7 identity is incompatible
+        /// is left with <c>Phase1Failure = "incompatible firmware"</c>, and an amplifier with a
+        /// compatible HR7 identity but a mismatched/absent HR22 PROTOCOL_VERSION is left with
+        /// <c>Phase1Failure = "incompatible protocol version"</c>; either is never configured,
         /// enabled or granted drive. A compatible amplifier has its config set downloaded and
         /// APPLYed, and only becomes <see cref="TrackAmplifierItem.ConfigurationVerified"/> once
         /// <c>HR_STATE</c> reports <c>INIT_DONE</c>+<c>CONFIG_OK</c> with the config echoed back.
@@ -607,8 +609,11 @@ namespace SiebwaldeApp.Integration
 
                 if (!AmplifierPhase1Safety.Compatible(item))
                 {
-                    // Identity fail-closed: never download, never enable, never grant for this amp.
-                    item.Phase1Failure ??= AmplifierPhase1Safety.IncompatibleFirmware;
+                    // Identity/protocol fail-closed: never download, never enable, never grant for
+                    // this amp. The reason distinguishes a legacy/unknown identity from a Phase-1
+                    // identity carrying a mismatched HR22 PROTOCOL_VERSION.
+                    item.Phase1Failure ??= AmplifierPhase1Safety.IncompatibilityReason(item)
+                        ?? AmplifierPhase1Safety.IncompatibleFirmware;
                     item.ConfigurationVerified = false;
                     continue;
                 }

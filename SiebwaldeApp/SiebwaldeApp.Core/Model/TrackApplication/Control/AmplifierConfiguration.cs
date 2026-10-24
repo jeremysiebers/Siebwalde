@@ -25,7 +25,8 @@ namespace SiebwaldeApp.Core
             item.ConfigurationVerified = false;
             if (!AmplifierPhase1Safety.Compatible(item))
             {
-                item.Phase1Failure = "incompatible firmware";
+                item.Phase1Failure = AmplifierPhase1Safety.IncompatibilityReason(item)
+                    ?? AmplifierPhase1Safety.IncompatibleFirmware;
                 return false;
             }
             if ((item.HoldingReg[7] & TrackAmplifierRegisters.TwoPhaseConfigCapability) == 0)
@@ -52,7 +53,7 @@ namespace SiebwaldeApp.Core
                 await _comm.SendAsync(Exchange(item.SlaveNumber, 15, 0, true), deadline.Token).ConfigureAwait(false);
                 await WaitAsync(() => item.ProtocolReadbackSequence > sequence && item.HoldingReg[15] == 1 &&
                     (item.HoldingReg[8] & 0x0600) == 0x0600 && values.SequenceEqual(item.HoldingReg.Skip(3).Take(4)), deadline.Token).ConfigureAwait(false);
-                if (!AmplifierPhase1Safety.Compatible(item)) throw new InvalidOperationException("identity changed during configuration");
+                if (!AmplifierPhase1Safety.Compatible(item)) throw new InvalidOperationException("compatibility changed during configuration");
                 item.ConfigurationVerified = true;
                 item.Phase1Failure = null;
                 return true;

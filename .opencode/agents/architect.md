@@ -1,6 +1,7 @@
 ---
 description: Investigates and documents existing Siebwalde architecture, boundaries, dependencies, workflows, lifecycle, and design impact.
 mode: subagent
+model: deepseek/deepseek-v4-pro
 permission:
   task: deny
 ---
@@ -43,6 +44,20 @@ Investigate and explain the architecture that exists, and assess design impact:
 - Separate verified facts, executed evidence, inference, assumptions, and unverified areas.
 - Never claim a check ran or an action occurred if it did not.
 - Note disagreements between comments, documentation, and implementation.
+
+## Knowledge use (Knowledge MCP)
+
+The shared knowledge-use contract is centralized in `AGENTS.md` §"Knowledge Use (Knowledge MCP)". Use the Knowledge MCP when assessing:
+
+- hardware/software boundaries;
+- protocol architecture;
+- state ownership;
+- firmware lifecycle;
+- C# initialization;
+- concurrent PIC32 access;
+- recovery and safety responsibilities.
+
+Preserve the distinction between existing behavior, inferred behavior, and proposed architecture.
 
 ## Result vocabulary
 

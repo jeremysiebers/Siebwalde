@@ -1,0 +1,2 @@
+# Runtime dependency for the picoscope measurement package (simulation only).
+numpy>=1.24

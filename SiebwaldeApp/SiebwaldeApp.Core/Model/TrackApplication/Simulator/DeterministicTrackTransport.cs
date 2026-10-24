@@ -44,6 +44,13 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         public IReadOnlyDictionary<byte, ushort> AppliedPwmReadbackOverrides { get; }
 
         /// <summary>
+        /// Per-slave override for the HR22 PROTOCOL_VERSION byte reported by a detected slave, used
+        /// to model a Phase-1-compatible identity carrying a mismatched (or absent) protocol
+        /// version. Defaults to <see cref="TrackAmplifierRegisters.Phase1ProtocolVersion"/>.
+        /// </summary>
+        public IReadOnlyDictionary<byte, ushort> ProtocolVersionOverrides { get; }
+
+        /// <summary>
         /// When set, the transport emits a fresh SLAVEINFO frame for every detected slave on this
         /// interval (modelling the real master's cyclic FC03 refresh). When null, the transport
         /// stays fully deterministic with no timer (the pre-existing contract).
@@ -59,6 +66,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             IReadOnlyCollection<byte>? droppedEchoSlaves = null,
             IReadOnlyDictionary<byte, ushort>? hr0ReadbackOverrides = null,
             IReadOnlyDictionary<byte, ushort>? appliedPwmReadbackOverrides = null,
+            IReadOnlyDictionary<byte, ushort>? protocolVersionOverrides = null,
             TimeSpan? periodicSlaveInfoInterval = null,
             bool emitGlobalStopArmedStatus = false)
         {
@@ -75,6 +83,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             AppliedPwmReadbackOverrides = appliedPwmReadbackOverrides is null
                 ? new Dictionary<byte, ushort>()
                 : new Dictionary<byte, ushort>(appliedPwmReadbackOverrides);
+            ProtocolVersionOverrides = protocolVersionOverrides is null
+                ? new Dictionary<byte, ushort>()
+                : new Dictionary<byte, ushort>(protocolVersionOverrides);
             PeriodicSlaveInfoInterval = periodicSlaveInfoInterval;
             EmitGlobalStopArmedStatus = emitGlobalStopArmedStatus;
         }
@@ -127,7 +138,11 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
             foreach (var slave in _config.DetectedSlaves)
             {
-                _amplifiers[slave] = new SimulatedTrackAmplifier(slave, firmwareChecksum: _config.FirmwareChecksum);
+                var protocolVersion = _config.ProtocolVersionOverrides.TryGetValue(slave, out var overrideProtocol)
+                    ? overrideProtocol
+                    : TrackAmplifierRegisters.Phase1ProtocolVersion;
+                _amplifiers[slave] = new SimulatedTrackAmplifier(slave, firmwareChecksum: _config.FirmwareChecksum,
+                    protocolVersion: protocolVersion);
                 _detected.Add(slave);
             }
 

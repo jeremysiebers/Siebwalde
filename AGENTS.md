@@ -69,3 +69,32 @@ See `docs/inventory.md` for the full inventory and `docs/analysis-coverage.md` f
 - Update `docs/handoff.md` before ending a session or when a material uncertainty remains.
 - Keep `AGENTS.md` concise and link to detailed docs instead of duplicating the knowledge base.
 - The project-specific OpenCode agents live in `.opencode/agents/`. Restart OpenCode before relying on newly created or changed agent definitions.
+
+## Knowledge Use (Knowledge MCP)
+
+The project exposes a **read-only Knowledge MCP** (server `knowledge`, tools `knowledge_*`) over a persistent LadybugDB engineering-knowledge graph (see `docs/SIEBWALDE-KNOWLEDGE-AND-DIAGNOSTICS-ARCHITECTURE.md` and `tools/knowledge/README.md`). This section is the single, centralized knowledge-use contract; each role file adds only its role-specific obligations and points back here.
+
+For work involving **firmware, hardware protocols, bootloader, PIC32, PIC18, backplane, C# initialization, recovery or safety-critical behavior**, retrieve relevant engineering knowledge through the Knowledge MCP *before* implementing or approving a change. Determine:
+
+- the existing proven baseline;
+- the relevant protocol and safety invariants;
+- previous successful procedures;
+- previous failed approaches;
+- experimental versus physically-proven functionality;
+- known contradictions;
+- current unresolved uncertainties;
+- the traceable source-evidence references.
+
+Rules:
+
+- The graph is a **structured evidence index**, not a source of truth. Git source, immutable firmware artifacts and raw test evidence remain authoritative.
+- **Critical claims must be verified against original source, immutable artifacts or recorded hardware evidence** — never accept a graph summary as final proof.
+- Never promote a hypothesis to a proven fact merely because it appears in the graph.
+- Never interpret a firmware artifact's identity (a file path, build header, version string or checksum) as proof of deployed physical firmware integrity.
+- If knowledge is unavailable or stale, **fall back to authoritative repository sources and explicitly report the limitation**. Do not let unavailable knowledge silently authorize a risky action.
+- The Knowledge MCP is **read-only and advisory**; it is not a substitute for deterministic protocol and safety enforcement, and it grants no hardware authority.
+- An agent must report **UNKNOWN** when the data does not support a conclusion; do not invent knowledge to fill a gap.
+
+## Tool registry (reuse before re-creating)
+
+Before creating new engineering tooling or replacing established tooling, search the tool registry `tools/tool-registry.yaml` (and the Knowledge MCP `knowledge_tools`) for an existing reusable component. Accepted Siebwalde MCP capabilities (`picoscope`, `knowledge`) and protected/historical tools are preserved by Product Owner policy: deletion, retirement or destructive replacement requires an explicit PO decision, and migration does not imply deletion. Reuse the existing implementation rather than duplicating firmware state machines, protocol parsers or instrument drivers.

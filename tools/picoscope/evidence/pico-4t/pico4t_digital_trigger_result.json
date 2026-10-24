@@ -1,0 +1,366 @@
+{
+  "backend": "ps3000a",
+  "backend_requested": "real",
+  "capture_result": {
+    "artifact_paths": {
+      "json": "C:\\Localdata\\Siebwalde\\tools\\picoscope\\evidence\\mcp\\68575a41f8bbd6530f37e5ab2d187299.json",
+      "npz": "C:\\Localdata\\Siebwalde\\tools\\picoscope\\evidence\\mcp\\68575a41f8bbd6530f37e5ab2d187299.npz"
+    },
+    "backend": "ps3000a",
+    "capture_id": "68575a41f8bbd6530f37e5ab2d187299",
+    "channel_mapping": {
+      "analog": {},
+      "digital": {
+        "D0": 0,
+        "D1": 1,
+        "D2": 2,
+        "D3": 3,
+        "D4": 4,
+        "D5": 5,
+        "D6": 6,
+        "D7": 7
+      }
+    },
+    "result": "ok",
+    "sample_count": 250000,
+    "sample_interval_ns": 16,
+    "simulated": false,
+    "trigger_index": 0,
+    "trigger_position": 62500,
+    "trigger_status": "triggered",
+    "warnings": []
+  },
+  "checks": {
+    "acquisition_status": "OK",
+    "capture_backend": "ps3000a",
+    "capture_simulated": false,
+    "device_driver_version": "2.2.160.7569",
+    "device_model": "3406D MSO",
+    "device_serial": "JY908/0278",
+    "device_variant": "3406DMSO",
+    "gate_was_open": true,
+    "metadata_backend": "ps3000a",
+    "metadata_simulated": false,
+    "provenance": {
+      "backend": "ps3000a",
+      "evidence_kind": "real",
+      "hardware_validated": true,
+      "mcp_layer": "pico-3",
+      "mcp_notes": "PICO-4T physical validation: ONE bounded digital-edge-triggered capture. D1 falling edge, 16 ns/sample, pre=1 ms post=3 ms (250k samples). Trigger from normal UART traffic only (no PIC32 command).",
+      "repo_head": "ee32e47396790702be27a5bc8c55b07c9f23b5e7"
+    },
+    "sample_count": 250000,
+    "sample_interval_ns": 16,
+    "trigger": {
+      "edge": "falling",
+      "source": "D1",
+      "threshold": 0.0
+    },
+    "trigger_index": 0,
+    "trigger_position": 62500,
+    "trigger_status": "triggered"
+  },
+  "export": {
+    "artifact_paths": {
+      "json": "C:\\Localdata\\Siebwalde\\tools\\picoscope\\evidence\\mcp\\68575a41f8bbd6530f37e5ab2d187299.json",
+      "npz": "C:\\Localdata\\Siebwalde\\tools\\picoscope\\evidence\\mcp\\68575a41f8bbd6530f37e5ab2d187299.npz"
+    },
+    "backend": "ps3000a",
+    "capture_id": "68575a41f8bbd6530f37e5ab2d187299",
+    "metadata": {
+      "acquisition_status": "OK",
+      "analog_channels": [],
+      "capture_id": "68575a41f8bbd6530f37e5ab2d187299",
+      "channel_mapping": {
+        "analog": {},
+        "digital": {
+          "D0": 0,
+          "D1": 1,
+          "D2": 2,
+          "D3": 3,
+          "D4": 4,
+          "D5": 5,
+          "D6": 6,
+          "D7": 7
+        }
+      },
+      "device": {
+        "backend": "ps3000a",
+        "driver_version": "2.2.160.7569",
+        "model": "3406D MSO",
+        "serial": "JY908/0278",
+        "variant": "3406DMSO"
+      },
+      "digital_ports": [
+        {
+          "enabled": true,
+          "port": 0,
+          "threshold_mv": 1500.0
+        }
+      ],
+      "errors": [],
+      "provenance": {
+        "backend": "ps3000a",
+        "evidence_kind": "real",
+        "hardware_validated": true,
+        "mcp_layer": "pico-3",
+        "mcp_notes": "PICO-4T physical validation: ONE bounded digital-edge-triggered capture. D1 falling edge, 16 ns/sample, pre=1 ms post=3 ms (250k samples). Trigger from normal UART traffic only (no PIC32 command).",
+        "repo_head": "ee32e47396790702be27a5bc8c55b07c9f23b5e7"
+      },
+      "sample_count": 250000,
+      "sample_interval_ns": 16,
+      "samples": {
+        "analog": {},
+        "digital": {
+          "D0": {
+            "dtype": "uint8",
+            "shape": [
+              250000
+            ]
+          },
+          "D1": {
+            "dtype": "uint8",
+            "shape": [
+              250000
+            ]
+          },
+          "D2": {
+            "dtype": "uint8",
+            "shape": [
+              250000
+            ]
+          },
+          "D3": {
+            "dtype": "uint8",
+            "shape": [
+              250000
+            ]
+          },
+          "D4": {
+            "dtype": "uint8",
+            "shape": [
+              250000
+            ]
+          },
+          "D5": {
+            "dtype": "uint8",
+            "shape": [
+              250000
+            ]
+          },
+          "D6": {
+            "dtype": "uint8",
+            "shape": [
+              250000
+            ]
+          },
+          "D7": {
+            "dtype": "uint8",
+            "shape": [
+              250000
+            ]
+          }
+        }
+      },
+      "timestamp": "2026-10-23T07:50:13.348547Z",
+      "trigger": {
+        "edge": "falling",
+        "source": "D1",
+        "threshold": 0.0
+      },
+      "trigger_index": 0,
+      "trigger_position": 62500,
+      "trigger_status": "triggered",
+      "warnings": []
+    },
+    "result": "ok",
+    "simulated": false
+  },
+  "failure": null,
+  "files": {
+    "json": {
+      "bytes": 2397,
+      "path": "C:\\Localdata\\Siebwalde\\tools\\picoscope\\evidence\\mcp\\68575a41f8bbd6530f37e5ab2d187299.json",
+      "sha256": "e016ce3144cd7b5c1a0d6900f7a7b005fef6f66559eb18668f2399dd4f649a0f"
+    },
+    "npz": {
+      "bytes": 4165,
+      "path": "C:\\Localdata\\Siebwalde\\tools\\picoscope\\evidence\\mcp\\68575a41f8bbd6530f37e5ab2d187299.npz",
+      "sha256": "4e9add10f34fc35a59ce070c640909676b7536a0571fb2be49d40f28bad9590e"
+    }
+  },
+  "gate": {
+    "PICOSCOPE_MCP_ALLOW_REAL_env": "1",
+    "allow_real_backend": true,
+    "evidence_dir": "C:\\Localdata\\Siebwalde\\tools\\picoscope\\evidence\\mcp"
+  },
+  "git_head": "ee32e47396790702be27a5bc8c55b07c9f23b5e7",
+  "metadata": {
+    "acquisition_status": "OK",
+    "analog_channels": [],
+    "artifact_paths": {
+      "json": "C:\\Localdata\\Siebwalde\\tools\\picoscope\\evidence\\mcp\\68575a41f8bbd6530f37e5ab2d187299.json",
+      "npz": "C:\\Localdata\\Siebwalde\\tools\\picoscope\\evidence\\mcp\\68575a41f8bbd6530f37e5ab2d187299.npz"
+    },
+    "backend": "ps3000a",
+    "capture_id": "68575a41f8bbd6530f37e5ab2d187299",
+    "channel_mapping": {
+      "analog": {},
+      "digital": {
+        "D0": 0,
+        "D1": 1,
+        "D2": 2,
+        "D3": 3,
+        "D4": 4,
+        "D5": 5,
+        "D6": 6,
+        "D7": 7
+      }
+    },
+    "device": {
+      "backend": "ps3000a",
+      "driver_version": "2.2.160.7569",
+      "model": "3406D MSO",
+      "serial": "JY908/0278",
+      "variant": "3406DMSO"
+    },
+    "digital_ports": [
+      {
+        "enabled": true,
+        "port": 0,
+        "threshold_mv": 1500.0
+      }
+    ],
+    "errors": [],
+    "provenance": {
+      "backend": "ps3000a",
+      "evidence_kind": "real",
+      "hardware_validated": true,
+      "mcp_layer": "pico-3",
+      "mcp_notes": "PICO-4T physical validation: ONE bounded digital-edge-triggered capture. D1 falling edge, 16 ns/sample, pre=1 ms post=3 ms (250k samples). Trigger from normal UART traffic only (no PIC32 command).",
+      "repo_head": "ee32e47396790702be27a5bc8c55b07c9f23b5e7"
+    },
+    "sample_count": 250000,
+    "sample_interval_ns": 16,
+    "samples": {
+      "analog": {},
+      "digital": {
+        "D0": {
+          "dtype": "uint8",
+          "shape": [
+            250000
+          ]
+        },
+        "D1": {
+          "dtype": "uint8",
+          "shape": [
+            250000
+          ]
+        },
+        "D2": {
+          "dtype": "uint8",
+          "shape": [
+            250000
+          ]
+        },
+        "D3": {
+          "dtype": "uint8",
+          "shape": [
+            250000
+          ]
+        },
+        "D4": {
+          "dtype": "uint8",
+          "shape": [
+            250000
+          ]
+        },
+        "D5": {
+          "dtype": "uint8",
+          "shape": [
+            250000
+          ]
+        },
+        "D6": {
+          "dtype": "uint8",
+          "shape": [
+            250000
+          ]
+        },
+        "D7": {
+          "dtype": "uint8",
+          "shape": [
+            250000
+          ]
+        }
+      }
+    },
+    "simulated": false,
+    "timestamp": "2026-10-23T07:50:13.348547Z",
+    "trigger": {
+      "edge": "falling",
+      "source": "D1",
+      "threshold": 0.0
+    },
+    "trigger_index": 0,
+    "trigger_position": 62500,
+    "trigger_status": "triggered",
+    "warnings": []
+  },
+  "npz_reload": {
+    "keys": [
+      "digital_D0",
+      "digital_D1",
+      "digital_D2",
+      "digital_D3",
+      "digital_D4",
+      "digital_D5",
+      "digital_D6",
+      "digital_D7"
+    ]
+  },
+  "ownership_after": "available",
+  "parameters": {
+    "digital_port": 0,
+    "post_samples": 187500,
+    "pre_samples": 62500,
+    "sample_count": 250000,
+    "serial": "JY908/0278",
+    "threshold_mv": 1500,
+    "timebase": 4,
+    "trigger_edge": "falling",
+    "trigger_source": "D1",
+    "trigger_wait_ms": 5000
+  },
+  "scope_info": {
+    "backend": "ps3000a",
+    "capabilities": {
+      "analog_channels": 4,
+      "block_capture": true,
+      "digital_lines": 16,
+      "digital_ports": 2,
+      "measurement_only": true
+    },
+    "limits": {
+      "max_analog_channels": 4,
+      "max_capture_file_bytes": 67108864,
+      "max_digital_ports": 2,
+      "max_duration_s": 10.0,
+      "max_memory_bytes": 67108864,
+      "max_metadata_response_bytes": 262144,
+      "max_sample_count": 1000000,
+      "max_trigger_wait_ms": 60000,
+      "total_acquisition_timeout_s": 60.0
+    },
+    "model": "3406D MSO",
+    "ownership": "available",
+    "real_backend_gate": "open",
+    "sdk_driver": "",
+    "serial": "JY908/0278",
+    "simulated": false,
+    "variant": ""
+  },
+  "simulator_fallback": false,
+  "step": "PICO-4T physical validation: ONE bounded digital-edge-triggered capture",
+  "timestamp_utc": "2026-10-23T07:50:10.310946Z"
+}

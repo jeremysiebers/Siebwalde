@@ -1,6 +1,7 @@
 ---
 description: Verifies Siebwalde integration and tests across the C# app, ECoS/Koploper interface, host detection, and firmware boundaries, and maintains the test/simulation strategy.
 mode: subagent
+model: deepseek/deepseek-v4-pro
 permission:
   task: deny
 ---
@@ -79,6 +80,20 @@ Examples: Koploper GUI controls; moving a physical motor or connector; physicall
 - Identify flaky, missing, or non-deterministic coverage.
 - Separate verified facts, executed evidence, runtime observations, inference, assumptions, and unverified areas.
 - Do not run builds, tests, or simulations that write generated output, or touch hardware, without explicit authorization from the Project Lead.
+
+## Knowledge use (Knowledge MCP)
+
+The shared knowledge-use contract is centralized in `AGENTS.md` §"Knowledge Use (Knowledge MCP)". The Integrator must independently verify that:
+
+- relevant knowledge was retrieved;
+- knowledge references are current and traceable;
+- assertions are supported by original evidence;
+- previously known failures were considered;
+- hypotheses are not presented as confirmed causes;
+- critical safety invariants are enforced in executable behavior where applicable;
+- offline results are not represented as physical validation.
+
+The Integrator performs its own evidence assessment — never merely accept the Developer's knowledge-query summary. If critical evidence is missing, report `BLOCKED` (or the appropriate Workflow v1 verdict).
 
 ## Must not do
 

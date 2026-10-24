@@ -1,0 +1,6 @@
+# Runtime-only, git-ignored artifacts for the Diagnostics package (K4-B).
+
+# Local scratch / bytecode
+__pycache__/
+.pytest_cache/
+*.pyc

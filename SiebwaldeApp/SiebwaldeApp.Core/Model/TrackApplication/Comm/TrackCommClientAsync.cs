@@ -194,15 +194,25 @@ namespace SiebwaldeApp.Core
                     if (TrackAmplifierAddress.IsTrackAmplifierAddress(slaveNumber))
                     {
                         var identity = holdingReg[TrackAmplifierRegisters.Identity];
-                        if (TrackAmplifierRegisters.HasCompatibleIdentityFields(identity))
+                        if (!TrackAmplifierRegisters.HasCompatibleIdentityFields(identity))
                         {
-                            if (amplifier.Phase1Failure == AmplifierPhase1Safety.IncompatibleFirmware)
-                                amplifier.Phase1Failure = null;
-                        }
-                        else
-                        {
+                            // Primary check: legacy/unknown firmware is never granted authority.
                             amplifier.Phase1Failure = AmplifierPhase1Safety.IncompatibleFirmware;
                             amplifier.ConfigurationVerified = false;
+                        }
+                        else if (!TrackAmplifierRegisters.HasCompatibleProtocolVersion(
+                                     holdingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]))
+                        {
+                            // Secondary check, strictly behind HR7 identity: a Phase-1 identity with a
+                            // mismatched or absent HR22 PROTOCOL_VERSION (0x00 = unknown/legacy) is
+                            // denied write/control authority but stays readable.
+                            amplifier.Phase1Failure = AmplifierPhase1Safety.IncompatibleProtocolVersion;
+                            amplifier.ConfigurationVerified = false;
+                        }
+                        else if (amplifier.Phase1Failure is AmplifierPhase1Safety.IncompatibleFirmware or
+                                 AmplifierPhase1Safety.IncompatibleProtocolVersion)
+                        {
+                            amplifier.Phase1Failure = null;
                         }
                     }
                     // Explicit protocol-readback evidence: the current HoldingReg content is a

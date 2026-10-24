@@ -37,14 +37,28 @@ class Bootloader:
         self.rx_data         = [] 
 
 
+def _resolve_ip_address(ip_address=None):
+    """Resolve the controller TX address.
+
+    An explicit `ip_address` (e.g. flash_one.py --ip) selects the diagnostic
+    target directly; otherwise the historical DNS 'TRACKCONTROL' + .100 fallback
+    is preserved so the shared transport is not hard-wired to one controller.
+    """
+    if ip_address:
+        return ip_address
+    try:
+        return socket.gethostbyname('TRACKCONTROL')
+    except Exception:
+        return '192.168.1.100'
+
+
 class DataAquisition:
-    def __init__(self, AmountOfAmplifiers):
-        try:
-            self.IPAddr = socket.gethostbyname('TRACKCONTROL') 
-            print("Ip address of TRACKCONTROL found: " + str(self.IPAddr))
-        except:
-            print('Ip address not found, assuming 192.168.1.100...')
-            self.IPAddr = '192.168.1.100'
+    def __init__(self, AmountOfAmplifiers, ip_address=None):
+        # Configurable controller addressing (I2 correction). An explicit
+        # `ip_address` selects the diagnostic target directly; otherwise the
+        # historical DNS 'TRACKCONTROL' + .100 fallback is preserved.
+        self.IPAddr = _resolve_ip_address(ip_address)
+        print("Ip address of TRACKCONTROL (PIC32) set to: " + str(self.IPAddr))
         
         self.UDP_IP_RECV = ''
         self.UDP_PORT_RECV = 10001 
@@ -119,16 +133,27 @@ class DataAquisition:
         try:
             self.line, addr = self.sock_recv.recvfrom(200)            
         except:
-            pass
+            # Nothing available (non-blocking socket): reset and bail out.
+            self.line = 0
+            return
+        
+        if not self.line:
+            return
         
         try:
-            while (len(self.line) > 0):
+            # Bounded parse loop.  A stray/malformed datagram without the 0xAA
+            # header previously looped forever on `self.line = self.line[-1:]`
+            # (header_index == -1).  Guard and bound it.
+            loop_count = 0
+            while (len(self.line) > 0) and (loop_count < 8):
+                loop_count += 1
             
                 self.header_index = self.line.find(self.header)
+                if(self.header_index < 0):
+                    return  # no 0xAA header present: drop this datagram
                             
                 if(self.header_index != 0):
                     self.line = self.line[self.header_index:]
-                    print ("header found at " + str(self.header_index))            
                 
                 try:
                     self.data = struct.unpack ("<5B", self.line[:5])

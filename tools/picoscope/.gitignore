@@ -1,0 +1,16 @@
+# Python bytecode and caches
+__pycache__/
+*.pyc
+*.pyo
+
+# Local virtualenv (install-independent simulation; never committed)
+.venv/
+
+# Transient capture output (PICO-1 demo/tests; durable evidence convention
+# is decided explicitly before PICO-2, see PICO-2-PREFLIGHT.md)
+captures/
+tmp/
+
+# Transient Layer C (MCP) runtime evidence. Durable hardware evidence lives in
+# evidence/pico-2/ and is committed separately.
+evidence/mcp/

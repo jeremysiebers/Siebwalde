@@ -16,6 +16,8 @@ The operational Active State Manifest for the active increment is local and git-
 
 ### Domain / durable reference
 
+For the amplifier Phase-2 measurement continuation, start with [P2-A measurement handoff and consolidated PL prompt](amplifier-phase2a-measurement-handoff.md). It records the proven HO720 connection/capture, ADC findings, PO scope authority and the first proposed baseline session; it does not declare protection or deployed firmware validated.
+
 | File | Purpose |
 | --- | --- |
 | `product.md` | Confirmed project purpose, current documentation scope, and separated open questions. |
@@ -23,6 +25,7 @@ The operational Active State Manifest for the active increment is local and git-
 | `amplifier-system-requirements.md` | Consolidated amplifier-system requirements (global stop, drive behavior, parameter ownership, initialization, protection/recovery, BEMF, FY/yard transfer, shutdown) with agreed/verify/research/deferred status markers. |
 | `amplifier-system-architecture.md` | Cross-layer amplifier-system design (PIC18/PIC32/C# responsibility + state model, cooperative execution, versioned register/interface contract, verification strategy) plus the phased implementation roadmap and the first PIC18 increment proposal. |
 | `firmware-toolchain-readiness.md` | PIC18/PIC32 firmware development and toolchain readiness assessment under Workflow v1: toolchain inventory, executed build results, source/artifact baseline analysis, and proposals for automated builds/tests, artifact traceability, simulator integration, controlled flashing, and firmware increments. |
+| `firmware-flash-recovery-technical-reference.md` | **Current authoritative cross-layer firmware flashing/recovery/baseline reference** (2026-10-18): device/topology, immutable Baseline 0 + 1.0.0 artifacts, ICD3/IPECMD, CONNECT/command-113, PIC32↔PIC18 9-bit/8-bit contracts, bootloader entry + checksum, `FlashFwTrackamplifiersStep`/`RecoverSlavesStep`/`<3`-slave semantics, recovery policy, and the required P0–P5 test order. Mandatory reading for amplifier-firmware increments. |
 | `application-guide.md` | Human-readable guide to the application: system overview, structure, workflows, endpoints, and status. |
 | `koploper-interface.md` | Verified Koploper/ECoS interface: ports, commands, position records, and the translation-layer design. |
 | `architecture.md` | Existing architecture, boundaries, workflows, lifecycle, concurrency, and cross-component dependencies. |

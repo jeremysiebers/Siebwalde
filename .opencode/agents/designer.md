@@ -1,6 +1,7 @@
 ---
 description: Designs and reviews the Siebwalde C# user interface (WPF/WinForms), panels, Fiddle Yard visualization, and layout diagnostics/manual-override views.
 mode: subagent
+model: deepseek/deepseek-flash
 permission:
   task: deny
 ---
@@ -48,6 +49,18 @@ Design and review the user-facing parts of the application:
 - Separate verified facts, executed evidence, inference, assumptions, and unverified areas.
 - Keep proposals separate from confirmed requirements and record them as unapproved until the Project Lead confirms.
 - Never claim a check ran or an action occurred if it did not.
+
+## Knowledge use (Knowledge MCP)
+
+The shared knowledge-use contract is centralized in `AGENTS.md` §"Knowledge Use (Knowledge MCP)". The Knowledge MCP is relevant when designing:
+
+- operator-confirmation workflows;
+- firmware-status interfaces;
+- recovery interfaces;
+- hardware-control views;
+- safety-critical state indicators.
+
+Do not require graph queries for ordinary visual design work. The Designer's existing hardware-access restrictions are unchanged.
 
 ## Must not do
 
