@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
+using SiebwaldeApp.Core;
 using SiebwaldeApp.Core.Koploper;
 using SiebwaldeApp.Core.Koploper.Validation;
 using SiebwaldeApp.Core.TrackApplication.Topology;
@@ -30,6 +31,9 @@ namespace SiebwaldeApp.Koploper.Validation.Host
         private const string ReadonlyDefaultTracePath = "readonly-validation.jsonl";
         private const int DefaultCycles = 10;
         private const int DefaultIntervalMs = 500;
+        private const int DefaultReadRegisterWaitMs = 5000;
+        private const int ReadRegisterPollIntervalMs = 250;
+        private static readonly int[] ReadRegisterSlaves = { 1, 3, 4, 6 };
 
         private static readonly KoploperValidationOptions ValidationOptions = new();
 
@@ -326,8 +330,10 @@ namespace SiebwaldeApp.Koploper.Validation.Host
         {
             bool live = false;
             bool warm = false;
+            bool readRegisters = false;
             int cycles = DefaultCycles;
             int intervalMs = DefaultIntervalMs;
+            int readRegisterWaitMs = DefaultReadRegisterWaitMs;
             string tracePath = ReadonlyDefaultTracePath;
 
             for (int i = 0; i < args.Length; i++)
@@ -339,6 +345,12 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                         break;
                     case "--warm":
                         warm = true;
+                        break;
+                    case "--read-registers":
+                        readRegisters = true;
+                        break;
+                    case "--wait-ms" when i + 1 < args.Length:
+                        readRegisterWaitMs = int.Parse(args[++i]);
                         break;
                     case "--cycles" when i + 1 < args.Length:
                         cycles = int.Parse(args[++i]);
@@ -358,6 +370,12 @@ namespace SiebwaldeApp.Koploper.Validation.Host
             if (cycles < 0)
             {
                 Console.Error.WriteLine("--cycles must be >= 0.");
+                return 2;
+            }
+
+            if (readRegisterWaitMs < 0)
+            {
+                Console.Error.WriteLine("--wait-ms must be >= 0.");
                 return 2;
             }
 
@@ -403,48 +421,14 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                     host.EnableSessionAsync().GetAwaiter().GetResult();
                 }
 
-                using var file = new StreamWriter(
-                    tracePath,
-                    append: true,
-                    new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-
-                file.WriteLine(JsonSerializer.Serialize(new
+                if (readRegisters)
                 {
-                    type = "readonlyValidateScenarioStart",
-                    live,
-                    profileId = host.Profile.Name,
-                    timestampUtc = DateTimeOffset.UtcNow.ToString("O")
-                }, jsonOptions));
-
-                for (int cycle = 0; cycle < cycles; cycle++)
-                {
-                    LogicalPhysicalReconciliationObservation observation = host.Refresh();
-                    PhysicalSectionOccupancyObservation physical = host.ReadPhysicalObservation();
-
-                    KoploperTelemetryTraceRecord trace = KoploperTelemetryTraceBuilder.Build(
-                        cycle,
-                        DateTimeOffset.UtcNow,
-                        host.SessionCommandGuard,
-                        physical,
-                        observation,
-                        host.Profile,
-                        host.Variables);
-
-                    file.WriteLine(JsonSerializer.Serialize(trace, jsonOptions));
-
-                    if (cycle < cycles - 1)
-                    {
-                        Thread.Sleep(intervalMs);
-                    }
+                    RunReadRegisterReport(host, live, readRegisterWaitMs);
                 }
-
-                file.WriteLine(JsonSerializer.Serialize(new
+                else
                 {
-                    type = "readonlyValidateScenarioEnd",
-                    live,
-                    profileId = host.Profile.Name,
-                    timestampUtc = DateTimeOffset.UtcNow.ToString("O")
-                }, jsonOptions));
+                    WriteReconciliationLoop(host, tracePath, cycles, intervalMs, live, jsonOptions);
+                }
             }
             finally
             {
@@ -458,7 +442,7 @@ namespace SiebwaldeApp.Koploper.Validation.Host
 
             Console.WriteLine("== readonly-validate summary ==");
             Console.WriteLine(
-                $"Mode: {(live ? "live" : "dry (no transmission)")}; " +
+                $"Mode: {(readRegisters ? (live ? "read-registers (live)" : "read-registers (dry, no transmission)") : (live ? "live" : "dry (no transmission)"))}; " +
                 $"session: {(warm ? "warm-reconnect (250 only)" : "cold-start (250→100→101→104→106→105)")}");
 
             KoploperSessionCommandCounters counters = host.SessionCommandGuard.GetCounters();
@@ -477,8 +461,152 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 $"registerWrite(108)={counters.AmplifierRegisterWrite} hr0={counters.AmplifierHr0Writes} " +
                 $"pwm={counters.PwmWrites} direction={counters.DirectionWrites} brake={counters.BrakeWrites} " +
                 $"emo={counters.EmoStopWrites} switch={counters.SwitchWrites} loco={counters.LocomotiveCommands}");
-            Console.WriteLine($"Trace: {tracePath}");
+            if (!readRegisters)
+            {
+                Console.WriteLine($"Trace: {tracePath}");
+            }
             return 0;
+        }
+
+        // ---------------------------------------------------------------- readonly-validate: register read-back
+
+        private static void WriteReconciliationLoop(
+            ReadOnlyTelemetryValidationHost host,
+            string tracePath,
+            int cycles,
+            int intervalMs,
+            bool live,
+            JsonSerializerOptions jsonOptions)
+        {
+            using var file = new StreamWriter(
+                tracePath,
+                append: true,
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+
+            file.WriteLine(JsonSerializer.Serialize(new
+            {
+                type = "readonlyValidateScenarioStart",
+                live,
+                profileId = host.Profile.Name,
+                timestampUtc = DateTimeOffset.UtcNow.ToString("O")
+            }, jsonOptions));
+
+            for (int cycle = 0; cycle < cycles; cycle++)
+            {
+                LogicalPhysicalReconciliationObservation observation = host.Refresh();
+                PhysicalSectionOccupancyObservation physical = host.ReadPhysicalObservation();
+
+                KoploperTelemetryTraceRecord trace = KoploperTelemetryTraceBuilder.Build(
+                    cycle,
+                    DateTimeOffset.UtcNow,
+                    host.SessionCommandGuard,
+                    physical,
+                    observation,
+                    host.Profile,
+                    host.Variables);
+
+                file.WriteLine(JsonSerializer.Serialize(trace, jsonOptions));
+
+                if (cycle < cycles - 1)
+                {
+                    Thread.Sleep(intervalMs);
+                }
+            }
+
+            file.WriteLine(JsonSerializer.Serialize(new
+            {
+                type = "readonlyValidateScenarioEnd",
+                live,
+                profileId = host.Profile.Name,
+                timestampUtc = DateTimeOffset.UtcNow.ToString("O")
+            }, jsonOptions));
+        }
+
+        private static void RunReadRegisterReport(ReadOnlyTelemetryValidationHost host, bool live, int waitMs)
+        {
+            if (!live)
+            {
+                Console.WriteLine(
+                    "--read-registers without --live: composing only; NO transport opened, NO command " +
+                    "transmitted, NO registers read.");
+                return;
+            }
+
+            WaitForRegisterReadback(host.Variables, waitMs);
+
+            var jsonOptions = new JsonSerializerOptions { WriteIndented = false };
+
+            foreach (int slave in ReadRegisterSlaves)
+            {
+                TrackAmplifierItem item = host.Variables.trackAmpItems[slave];
+                if (item.SlaveDetected != 1)
+                {
+                    continue;
+                }
+
+                Console.WriteLine(JsonSerializer.Serialize(BuildReadRegisterLine(slave, item), jsonOptions));
+            }
+        }
+
+        private static void WaitForRegisterReadback(TrackApplicationVariables variables, int waitMs)
+        {
+            int elapsed = 0;
+            while (elapsed < waitMs)
+            {
+                bool allPopulated = ReadRegisterSlaves.All(slave =>
+                {
+                    TrackAmplifierItem item = variables.trackAmpItems[slave];
+                    return item.SlaveDetected == 1 && item.ProtocolReadbackObserved;
+                });
+
+                if (allPopulated)
+                {
+                    return;
+                }
+
+                Thread.Sleep(ReadRegisterPollIntervalMs);
+                elapsed += ReadRegisterPollIntervalMs;
+            }
+        }
+
+        private static object BuildReadRegisterLine(int slave, TrackAmplifierItem item)
+        {
+            ushort identity = item.HoldingReg[TrackAmplifierRegisters.Identity];
+            ushort swChecksum = item.HoldingReg[TrackAmplifierRegisters.SwChecksum];
+            ushort fwVersionMajorMinor = item.HoldingReg[TrackAmplifierRegisters.FwVersionMajorMinor];
+            ushort fwVersionPatchProtocol = item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol];
+
+            // A legacy amplifier's HR21/HR22 read 0: never decode 0 as a version. Only when both
+            // registers are non-zero do we decode the firmware version; otherwise mark UNSUPPORTED.
+            bool versionSupported = fwVersionMajorMinor != 0 && fwVersionPatchProtocol != 0;
+            string? fwVersion = versionSupported
+                ? $"{TrackAmplifierRegisters.FwMajor(fwVersionMajorMinor)}" +
+                  $".{TrackAmplifierRegisters.FwMinor(fwVersionMajorMinor)}" +
+                  $".{TrackAmplifierRegisters.FwPatch(fwVersionPatchProtocol)}"
+                : null;
+            int? fwProtocolVersion = versionSupported
+                ? TrackAmplifierRegisters.FwProtocolVersion(fwVersionPatchProtocol)
+                : (int?)null;
+
+            return new
+            {
+                type = "amplifierIdentityReadback",
+                slaveNumber = slave,
+                slaveDetected = item.SlaveDetected,
+                identity,
+                identityHex = "0x" + identity.ToString("X4"),
+                swChecksum,
+                swChecksumHex = "0x" + swChecksum.ToString("X4"),
+                fwVersionMajorMinor,
+                fwVersionMajorMinorHex = "0x" + fwVersionMajorMinor.ToString("X4"),
+                fwVersionPatchProtocol,
+                fwVersionPatchProtocolHex = "0x" + fwVersionPatchProtocol.ToString("X4"),
+                fwVersion,
+                fwProtocolVersion,
+                versionStatus = versionSupported ? "SUPPORTED" : "UNSUPPORTED",
+                protocolReadbackObserved = item.ProtocolReadbackObserved,
+                lastDataReceivedUtc = item.LastDataReceivedUtc
+            };
         }
 
         // ---------------------------------------------------------------- sample flattening
@@ -540,12 +668,17 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 "  identify\n" +
                 "      Read one coherent read-only Koploper snapshot and dump the raw per-block identity\n" +
                 "      table (InternalBlockId vs DisplayBlockNumber) plus snapshot metadata.\n" +
-                "  readonly-validate [--live] [--warm] [--cycles N] [--interval-ms N] [--trace PATH]\n" +
+                "  readonly-validate [--live] [--warm] [--read-registers] [--wait-ms N] [--cycles N] [--interval-ms N] [--trace PATH]\n" +
                 "      Compose the bounded telemetry-enablement reconciliation host and run a bounded\n" +
                 "      reconciliation loop writing machine-readable JSONL. Without --live nothing is\n" +
                 "      transmitted. With --live it sends the six-command cold sequence\n" +
                 "      (250→100→101→104→106→105) through the guard; with --warm it sends only 250\n" +
-                "      (warm reconnect). 108/107 and any other command remain unreachable.\n");
+                "      (warm reconnect). 108/107 and any other command remain unreachable.\n" +
+                "      With --read-registers (requires --live) it instead waits a bounded time for the\n" +
+                "      SLAVEINFO receive loop, then prints one machine-readable JSON line per detected\n" +
+                "      amplifier (slaves 1,3,4,6) with raw HR7/HR11/HR21/HR22 (decimal + 0x hex), the\n" +
+                "      decoded firmware version (UNSUPPORTED when HR21/HR22 read 0), and freshness\n" +
+                "      markers (protocolReadbackObserved + lastDataReceivedUtc). No new command is sent.\n");
         }
     }
 }
