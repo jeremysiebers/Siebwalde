@@ -12,6 +12,10 @@ lib/libcrypto-3-x64.dll
 db/
 *.lbdb
 
+# Snapshot/export directories produced by snapshot.py (large parquet exports,
+# git-ignored: they are reproducible via snapshot.py or rebuildable from source)
+snapshots/
+
 # Local scratch
 __pycache__/
 .pytest_cache/
