@@ -1604,7 +1604,7 @@ This section defines the standing workspace convention for all temporary develop
 | Canonical source | `C:\Localdata\Siebwalde` |
 | Permanent historical preservation | `C:\Localdata\Siebwalde-Bewaarmap` |
 | Temporary development and testing | `C:\Localdata\Siebwalde_temp` |
-| Independent historical repository | `C:\Localdata\Siebwalde Backup` |
+| Independent historical repository | `C:\Localdata\Siebwalde_Backup` |
 
 The independent historical repository is excluded from temporary-worktree cleanup. Protected evidence-bearing worktrees (for example `Siebwalde-k6` while its original physical evidence awaits durable preservation) are not relocated or removed by this rule.
 
