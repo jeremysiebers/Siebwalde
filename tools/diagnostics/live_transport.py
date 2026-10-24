@@ -402,11 +402,36 @@ class Command113Transport:
         if error is not None:
             kind, detail = error
             if kind == "timeout":
-                # sendto returned before the bounded wait elapsed.
+                # A timeout may arise during sendto (send NOT accepted) or
+                # during recvfrom (send accepted, no reply). Distinguish by the
+                # last completed stage so a sendto-timeout never over-claims.
+                if stage == "sent":
+                    # sendto returned; recvfrom timed out -> send was accepted.
+                    return self._unknown_result(
+                        reason="timeout",
+                        send_state=SEND_STATE_SENT,
+                        sent=True,
+                        authorization=auth,
+                        request=request,
+                        sent_at=sent_at,
+                    )
+                if stage == "send":
+                    # sendto itself timed out: the local send was NOT accepted.
+                    return self._unknown_result(
+                        reason="timeout",
+                        detail=detail,
+                        send_state=SEND_STATE_SEND_FAILED,
+                        sent=False,
+                        authorization=auth,
+                        request=request,
+                        sent_at=sent_at,
+                    )
+                # create/bind: nothing was transmitted (bind-timeout, very rare).
                 return self._unknown_result(
                     reason="timeout",
-                    send_state=SEND_STATE_SENT,
-                    sent=True,
+                    detail=detail,
+                    send_state=SEND_STATE_BIND_FAILED,
+                    sent=False,
                     authorization=auth,
                     request=request,
                     sent_at=sent_at,

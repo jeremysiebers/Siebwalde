@@ -176,6 +176,22 @@ def test_receive_timeout_is_unknown_and_sent_once():
     assert fake.closed is True
 
 
+def test_sendto_timeout_is_unknown_and_not_sent():
+    # A socket.timeout raised by sendto itself (not recvfrom) must NOT over-claim
+    # that the request was sent — the local send was never accepted.
+    fake = FakeSocket(send_error=socket.timeout("sendto timed out"))
+    t = Command113Transport(ENDPOINT, socket_factory=lambda: fake, session=_session())
+    res = t.send_get_controller_version()
+
+    assert res["status"] == STATUS_UNKNOWN
+    ev = res["evidence"]
+    assert ev["reason"] == "timeout"
+    assert ev["send_state"] == SEND_STATE_SEND_FAILED
+    assert ev["sent"] is False          # sendto timed out: local send NOT accepted
+    assert fake.sent == []              # nothing was transmitted
+    assert fake.sendto_calls == 1       # exactly one sendto attempt, no retry
+
+
 # --------------------------------------------------------------------------- #
 # FAILED responses (decoded but rejected) — send_state = validated
 # --------------------------------------------------------------------------- #
