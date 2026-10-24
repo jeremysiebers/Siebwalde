@@ -62,6 +62,7 @@ See `docs/inventory.md` for the full inventory and `docs/analysis-coverage.md` f
 - Support durable facts with repository-relative paths and exact symbol names.
 - Distinguish verified facts, assumptions, proposals, and open questions.
 - Do not document generated output or vendored packages line by line.
+- Create new temporary Git worktrees/test repositories only under `C:\Localdata\Siebwalde_temp\` (never directly under `C:\Localdata` or inside the canonical repo). See `docs/development-workflow.md` §10.14 "Temporary repositories, Git worktrees, and workspace lifecycle" for the full convention, lifecycle, preservation, and exception rules.
 
 ## Knowledge Maintenance
 
