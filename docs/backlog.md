@@ -14,6 +14,8 @@ Recorded from the K6-A live OBSERVE transport architecture review (branch `featu
 | (minor) Socket creation sits outside the `try`. | `socket.socket()` failure propagates as an exception rather than `UNKNOWN`. | Socket creation is inside the guarded path and maps resource-exhaustion to `UNKNOWN`. |
 | (minor) No dedicated EADDRINUSE (bind-failure) test. | Existing socket-error test simulates a `recvfrom` failure, not a bind failure. | A test asserts bind-failure returns `UNKNOWN` with `sent: False`. |
 
+**K7 corrective hardening (OFFLINE ONLY, branch `feature/k7-diagnostics-hardening`) closed items 1, 2, 4 and 5.** The transport is now bound to a single-use, thread-safe `ObserveSession` (consumed atomically at send time; absent/invalid/consumed → `UNKNOWN`, no send); `send_state` + accurate `sent` distinguish bind/sendto/recv/validated; socket creation is inside the guarded path; dedicated bind-failure/send-failure/no-reuse/concurrency tests added. Item 3 (`port`/`recv_port` range validation) is **unchanged/out of scope** and remains open. See `docs/K6-LIVE-OBSERVE-VALIDATION.md` §"K7 — Corrective hardening".
+
 
 ## Confirmed Priority Order (from product clarification, 2026-09-11)
 

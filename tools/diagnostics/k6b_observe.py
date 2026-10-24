@@ -4,10 +4,12 @@ This script is the ONLY sanctioned live entry point for K6-B. It performs a
 single bounded, read-only diagnostic transaction against the allowlisted PIC32
 endpoint:
 
-    1. construct an :class:`ObserveSession` and consume the single-use
-       authorization exactly once (before any I/O);
+    1. construct an :class:`ObserveSession` single-use authority (not consumed
+       here);
     2. send exactly one ``GET_CONTROLLER_VERSION`` (113) request through the
-       allowlisted :class:`Command113Transport` and receive one bounded reply;
+       allowlisted :class:`Command113Transport`, which consumes the single-use
+       authority atomically (thread-safe) immediately before any I/O and
+       receives one bounded reply;
     3. write durable evidence (request/response bytes, hashes, timestamps,
        classification) to a git-ignored evidence directory.
 
@@ -37,14 +39,19 @@ def main() -> int:
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
 
-    # 1. Single-use authorization, consumed exactly once BEFORE the send.
-    #    A second consume() would raise AuthorizationBlocked; there is no loop.
+    # 1. Construct the single-use authority. It is NOT consumed here; the
+    #    transport consumes it atomically inside send_get_controller_version()
+    #    immediately before any I/O. A second send (or a second transport bound
+    #    to the same token) is refused because the token is already consumed.
     session = ObserveSession(command_id=113, endpoint=ENDPOINT, timeout=TIMEOUT)
-    auth = session.consume()  # AUTHORIZED_COMMAND_COUNT_REMAINING 1 -> 0
 
-    # 2. Exactly one command-113 request + one bounded receive (no retry).
-    transport = Command113Transport(endpoint=ENDPOINT, timeout=TIMEOUT)
+    # 2. Exactly one command-113 request + one bounded receive (no retry),
+    #    gated by the token-checking transport.
+    transport = Command113Transport(endpoint=ENDPOINT, timeout=TIMEOUT, session=session)
     result = transport.send_get_controller_version()
+
+    # The transport returns the consumed authorization in its evidence.
+    auth = (result.get("evidence") or {}).get("authorization")
 
     status = result.get("status")
     if status == "PASS":

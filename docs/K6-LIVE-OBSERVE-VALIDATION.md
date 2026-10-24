@@ -111,3 +111,31 @@ A bounded corrective increment to close the Architect residual risks 1–2 (bind
 
 ### New PO decision required for further hardware diagnostics
 This K6 authorization was single-use, target-specific, command-specific, and is now consumed. Any further physical command (including a different command, target, or a repeat of 113) requires a new scoped Product Owner grant.
+
+---
+
+## K7 — Corrective hardening (OFFLINE ONLY)
+
+**Status:** implemented + offline-tested; no hardware, no socket, no firmware/C# change, no master merge. Branch `feature/k7-diagnostics-hardening` (worktree `C:\Localdata\Siebwalde-k6`).
+
+Closes the Architect residual risks 1, 2, 4, 5 (risk 3 — port range validation — is unchanged/out of scope).
+
+### 1. Sent-state accuracy (`tools/diagnostics/live_transport.py`)
+- `send_get_controller_version()` now records a typed `send_state` plus an accurate `sent` flag in `evidence`.
+- `send_state` vocabulary (the furthest stage actually completed): `not_attempted` → `bind_failed` (socket create + bind) → `send_failed` (sendto raised) → `sent` (sendto returned) → `received` (recvfrom returned) → `validated` (response decoded).
+- `sent` is `True` **only** when `sendto` returned. A bind/socket-create failure yields `sent: False` and `send_state: "bind_failed"`; a sendto failure yields `sent: False` and `send_state: "send_failed"`.
+- `sock = self._socket_factory()` was moved inside the guarded block, so a socket-creation failure maps to `UNKNOWN` (not an exception). Fail-closed classifications (PASS/FAILED/UNKNOWN) and the command-113-only allowlist are unchanged.
+- A decoded `PASS` is explicitly labeled `controller_reported: true` and `physical_execution: "unknown"` — the readback proves the controller *reported* a version, never the programmed flash content.
+
+### 2. Single-use authorization at the transport boundary (`tools/diagnostics/live_transport.py` + `observe_guard.py` + `k6b_observe.py`)
+- `Command113Transport` now accepts a single-use `ObserveSession` and **consumes it atomically** (thread-safe) inside `send_get_controller_version()` immediately before any I/O.
+- A missing / invalid / already-consumed session yields `UNKNOWN` (reason `authorization absent` / `command blocked` / `endpoint blocked` / `authorization already consumed`) with **no send**.
+- `ObserveSession.consume()` is guarded by a `threading.Lock`, so two concurrent callers cannot both consume the same grant (exactly one succeeds).
+- The token is **not restored** after an I/O error: a failing send still consumes the authorization, so there is no second attempt.
+
+### Single-use boundary (explicit)
+The authorization token is an **in-memory, single-process** object. It enforces single-use within one process only. It is **NOT** a system-wide hardware lock, and a process restart (which re-creates a fresh, un-consumed session) must **NOT** be interpreted as renewed permission. Durable, cross-process authority is deliberately out of scope; any physical command still requires a fresh, separate Product Owner grant.
+
+### Offline regression
+- `tools/diagnostics/tests`: **111 passed** (91 baseline + 20 new: send-state accuracy + single-use/concurrency).
+- `TrackController5/Python/test_flash_one.py`: **43 OK**; `test_Comm.py`: **5 OK**; `tools/knowledge/tests`: **25 passed**; `tools/preservation_guard.py`: **exit 0**.

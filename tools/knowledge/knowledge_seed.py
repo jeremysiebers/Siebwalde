@@ -660,6 +660,37 @@ NODES: list[tuple[str, dict]] = [
         "evidence_ref": "Logging/K6B/k6b-observe-20261024T092944Z.json",
         "evidence_status": "OBSERVED", "observed_date": "2026-10-24",
     }),
+    ("Observation", {
+        "id": "obs:k7-pic32-identity-transition", "label": "PIC32 firmware identity transition (1.0.0 -> 0.1.0)",
+        "what": "PIC32 1.0.0 was deployed (ICD3 flash + command-113 readback 1.0.0/protocol 0x01/'2026-10-17' confirmed 2026-10-19, firmware-flash-recovery §2.2/§2.3), but the K6 readback (2026-10-24) reported 0.1.0/protocol 0/'2026-10-20'. The current physical image does NOT match master version.h (1.0.0); the 1.0.0→0.1.0 transition is UNKNOWN (no captured re-flash evidence).",
+        "date": "2026-10-24", "method": "source history (version.h/controller.c) + K6 command-113 readback",
+        "status": "PROVEN_HARDWARE",
+        "summary": "Deployed PIC32 1.0.0 (proven 2026-10-19) does not match the K6 readback 0.1.0/protocol 0/'2026-10-20'; the 1.0.0->0.1.0 transition is UNKNOWN (no captured re-flash evidence).",
+        "source_path": "docs/K7-FIRMWARE-IDENTITY-TIMELINE.md",
+        "source_location": "timeline", "source_revision": "bd5a9fa2",
+        "evidence_ref": "Logging/K6B/k6b-observe-20261024T092944Z.json",
+        "evidence_status": "OBSERVED", "observed_date": "2026-10-24",
+    }),
+    ("Observation", {
+        "id": "obs:k7-cmd124-ineligible", "label": "Command 124 INELIGIBLE for read-only grant",
+        "what": "Command 124 GET_BOOTLOADER_VERSION is INELIGIBLE for a read-only grant: it requires the target already in bootloader (state-changing 123+reset), is unaddressed (cannot identify which amplifier), returns bootloader version not the application HR11 checksum, and is reported non-functional (PO-removed from the pre-ERASE gate).",
+        "date": "2026-10-24", "method": "source inspection (slavefwhandler.c, slavebootloaderroutines.c, flash_one.py) + docs",
+        "status": "PROVEN_SOURCE",
+        "summary": "Command 124 is not a read-only application-identity probe: it needs bootloader entry (123+reset), is unaddressed, returns bootloader (not HR11) version, and is non-functional (PO-removed from the pre-ERASE gate).",
+        "source_path": "TrackController5/firmware/src/slavefwhandler.c",
+        "source_location": "EXEC_FW_STATE_GET_BOOTLOADER_VERSION", "source_revision": "bd5a9fa2",
+        "evidence_status": "SOURCE_REF",
+    }),
+    ("Observation", {
+        "id": "obs:k7-next-readonly-hr11-slaveryinfo", "label": "Next read-only path: passive SLAVEINFO HR11",
+        "what": "Next read-only operation to establish PIC18 amp-1/amp-3 application identity: passive SLAVEINFO observation of HR11 (+HR7/HR21/HR22) at assigned addresses 1/3 during SERVICE_TASKS, via the cyclic FC03 poll -> SLAVEINFO stream (slavehandler.c SIP4 reads HOLDINGREG10 qty=2 -> MASTER_SLAVE_DATA[addr].HoldingReg[11]). No bootloader, no 123/124, no reset. A cold-start readback (100->106->101->104->105) is NOT fully passive (105 ENABLE).",
+        "date": "2026-10-24", "method": "source inspection (slavehandler.c, PetitModbus.c, TrackAmplifier4.X)",
+        "status": "PROVEN_SOURCE",
+        "summary": "Passive SLAVEINFO observation of HR11 at addresses 1/3 during SERVICE_TASKS is the next read-only path to establish amp-1/amp-3 application identity; no bootloader/123/124/reset.",
+        "source_path": "TrackController5/firmware/src/slavehandler.c",
+        "source_location": "SIP4 MESSAGE3", "source_revision": "bd5a9fa2",
+        "evidence_status": "SOURCE_REF",
+    }),
 
     # ==================================================================
     # Incident

@@ -11,17 +11,27 @@ performed. Every restriction below is enforced in code, not in a docstring:
   guard never resolves a hostname and never substitutes a default address.
 * **Single-use authorization**: :meth:`ObserveSession.consume` flips
   ``AUTHORIZED_COMMAND_COUNT_REMAINING`` from ``1`` to ``0`` exactly once; a
-  second call is ``BLOCKED``.
+  second call is ``BLOCKED``. The 1 -> 0 transition is guarded by a
+  ``threading.Lock`` so two concurrent callers cannot both observe ``1`` and
+  both consume the same grant.
 * **Bounded timeout** (:func:`bound_timeout`); **no implicit retry**; **no
   recovery**; **no flash/reset state-machine invocation**.
 
 This module never imports ``Comm`` / ``DataAquisition`` / ``flash_one`` /
 ``bootload``, never opens a socket, and never touches hardware. It is the
 read-only enforcement gate that the live transport consults before any I/O.
+
+**Single-use boundary (explicit):** the token is an *in-memory* object. It
+enforces single-use within one process only. It is NOT a system-wide hardware
+lock, and a process restart (which re-creates a fresh, un-consumed session) must
+NOT be interpreted as renewed permission. Durable, cross-process authority is
+deliberately out of scope here; any physical command still requires a fresh,
+separate Product Owner grant.
 """
 
 from __future__ import annotations
 
+import threading
 from typing import Optional
 
 # --------------------------------------------------------------------------- #
@@ -144,6 +154,8 @@ class ObserveSession:
         self._command_status = validate_command(command_id)
         self._endpoint_status = validate_endpoint(endpoint)
         self.AUTHORIZED_COMMAND_COUNT_REMAINING = 1
+        # Guards the 1 -> 0 consume transition so exactly one caller wins.
+        self._lock = threading.Lock()
 
     def _ensure_authorizable(self) -> None:
         if self._command_status != ALLOWED:
@@ -160,18 +172,20 @@ class ObserveSession:
             raise AuthorizationBlocked("authorization already consumed")
 
     def consume(self) -> dict:
-        """Consume the single-use authorization exactly once.
+        """Consume the single-use authorization exactly once (thread-safe).
 
         Returns an ``ALLOWED`` result the first time; raises a subclass of
         :class:`ObserveGuardError` (BLOCKED) on any subsequent call or when the
-        session never held valid ownership.
+        session never held valid ownership. The 1 -> 0 transition is atomic:
+        two concurrent callers cannot both succeed.
         """
-        self._ensure_authorizable()
-        self.AUTHORIZED_COMMAND_COUNT_REMAINING = 0
-        return {
-            "status": ALLOWED,
-            "command_id": self.command_id,
-            "endpoint": self.endpoint,
-            "timeout": self.timeout,
-            "authorized_command_count_remaining": self.AUTHORIZED_COMMAND_COUNT_REMAINING,
-        }
+        with self._lock:
+            self._ensure_authorizable()
+            self.AUTHORIZED_COMMAND_COUNT_REMAINING = 0
+            return {
+                "status": ALLOWED,
+                "command_id": self.command_id,
+                "endpoint": self.endpoint,
+                "timeout": self.timeout,
+                "authorized_command_count_remaining": self.AUTHORIZED_COMMAND_COUNT_REMAINING,
+            }

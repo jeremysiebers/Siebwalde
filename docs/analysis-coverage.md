@@ -8,6 +8,10 @@ The product owner confirmed component roles and priorities on 2026-09-11 (see `d
 
 ## Current Continuation Pass
 
+### K7 diagnostics hardening + firmware-identity reconciliation — 2026-10-24
+
+**Investigated (offline-only, no hardware):** K7 corrected the K6 diagnostics transport (typed `send_state` accuracy + transport-level single-use authorization) and reconciled the PIC32 firmware identity. Finding: PIC32 **1.0.0 was actually deployed** (flash ~2026-10-18 `69a501f2` + command-113-confirmed ~2026-10-19 `d7167e85`), but K6 read back **0.1.0/protocol 0/"2026-10-20"** — a different untracked build; the 1.0.0→0.1.0 transition is UNKNOWN. Next read-only candidate: passive SLAVEINFO HR11 observation of amps 1/3; command 124 INELIGIBLE. Diagnostics 111 passed; knowledge 28; Architect DESIGN_ACCEPTABLE; Integrator PASS. See `docs/K7-DIAGNOSTICS-HARDENING-AND-IDENTITY-RECONCILIATION.md`, `docs/K7-FIRMWARE-IDENTITY-TIMELINE.md`, `docs/K6-EVIDENCE-MANIFEST.md`. Not merged; no live hardware.
+
 ### K6 live physical OBSERVE (command 113) — 2026-10-24
 
 **Investigated + physically validated (read-only):** K6-A built and reviewed a typed, allowlisted PIC32 live OBSERVE transport (`tools/diagnostics/live_transport.py` + `observe_guard.py` + `k6b_observe.py`, branch `feature/k6-observe`, commits `5cc2402f`/`ae18cb44`). K6-B executed exactly one `GET_CONTROLLER_VERSION` (113) request against the verified PIC32 `192.168.1.193` under a single-use PO grant: **OBSERVE_PASS**, firmware **0.1.0 / protocol 0 / build "2026-10-20"**. Integrator `PASS` (pre + post); Architect `DESIGN_ACCEPTABLE`. Knowledge graph updated (command-113 contract + physical readback + version-mismatch observations; 144 nodes / 83 rels). Evidence `Logging/K6B/k6b-observe-20261024T092944Z.json`. See `docs/K6-LIVE-OBSERVE-VALIDATION.md`. Remaining: master `version.h` (1.0.0) was never flashed to the physical PIC32 (deployed = 0.1.0); amp-1/amp-3 PIC18 state still UNKNOWN; Architect residual risks logged to backlog. Not merged (requires separate PO authorization).

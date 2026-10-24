@@ -48,7 +48,26 @@ Safety posture:
         mismatch yields ``FAILED``/``UNKNOWN`` and is never promoted to ``PASS``;
       * the live socket is opened only inside :meth:`send_get_controller_version`
         and is always closed in a ``finally`` block. A test can inject a socket
-        factory so the offline test path never touches a real socket.
+        factory so the offline test path never touches a real socket;
+      * a send requires a *consumed single-use authority*: the transport is bound
+        to an :class:`~tools.diagnostics.observe_guard.ObserveSession` and
+        consumes it atomically immediately before any I/O. A missing, invalid, or
+        already-consumed session yields ``UNKNOWN`` and performs no send.
+
+Send-state evidence (fail-closed, no over-claim):
+      * ``send_state`` records the furthest transport stage actually completed:
+        ``not_attempted`` -> ``bind_failed`` (socket create + bind) ->
+        ``send_failed`` (sendto raised) -> ``sent`` (sendto returned) ->
+        ``received`` (recvfrom returned) -> ``validated`` (response decoded).
+      * ``sent`` is ``True`` only when ``sendto`` returned (the local UDP send was
+        accepted). A bind/socket-create/send failure yields ``sent: False``.
+
+Single-use boundary (explicit): the authorization token is an *in-memory* object
+and enforces single-use within one process only. It is NOT a system-wide hardware
+lock, and a process restart must not be interpreted as renewed permission. A
+command-113 readback only ever proves the controller *reported* a version; the
+physical execution (programmed flash content / energized output) remains UNKNOWN
+and is reported as ``physical_execution: "unknown"``.
 
 This module uses the standard library only (socket / struct / datetime /
 hashlib). It MUST NOT import ``Comm`` / ``DataAquisition`` (their import graph
@@ -83,6 +102,32 @@ DEFAULT_TIMEOUT = observe_guard.DEFAULT_TIMEOUT_SECONDS
 STATUS_PASS = "PASS"
 STATUS_FAILED = "FAILED"
 STATUS_UNKNOWN = "UNKNOWN"
+
+# Send-state vocabulary: the furthest transport stage actually completed for a
+# single command-113 attempt. This keeps "requested" distinct from "actually
+# transmitted" so a bind/send failure is never misreported as SENT.
+SEND_STATE_NOT_ATTEMPTED = "not_attempted"
+SEND_STATE_BIND_FAILED = "bind_failed"     # socket create + bind failed: nothing sent
+SEND_STATE_SEND_FAILED = "send_failed"     # bind ok, sendto raised: send NOT accepted
+SEND_STATE_SENT = "sent"                   # sendto returned: local UDP send accepted
+SEND_STATE_RECEIVED = "received"           # recvfrom returned: response received
+SEND_STATE_VALIDATED = "validated"         # response decoded (PASS or FAILED)
+
+SEND_STATES = frozenset(
+    {
+        SEND_STATE_NOT_ATTEMPTED,
+        SEND_STATE_BIND_FAILED,
+        SEND_STATE_SEND_FAILED,
+        SEND_STATE_SENT,
+        SEND_STATE_RECEIVED,
+        SEND_STATE_VALIDATED,
+    }
+)
+
+# A command-113 readback only ever observes a controller-*reported* reply.
+# Physical execution (programmed flash content / energized output) stays
+# unobservable from this read-only query and is therefore always UNKNOWN.
+PHYSICAL_EXECUTION_UNKNOWN = "unknown"
 
 # Minimum structural length of a valid reply: header, command, echo,
 # MAJOR/MINOR/PATCH, PROTOCOL, reserved.
@@ -207,6 +252,12 @@ class Command113Transport:
     The endpoint is validated against the explicit allowlisted address (no
     fallback, no DNS). The timeout is bounded; there is no retry and no
     recovery.
+
+    A send requires a *consumed single-use authority*: the transport is bound to
+    an :class:`~tools.diagnostics.observe_guard.ObserveSession` and consumes it
+    atomically (thread-safe) immediately before any I/O. A missing, invalid, or
+    already-consumed session yields ``UNKNOWN`` and performs no send. The token
+    is in-memory only and is NOT restored after an I/O failure.
     """
 
     def __init__(
@@ -216,6 +267,7 @@ class Command113Transport:
         recv_port: int = DEFAULT_RECV_PORT,
         timeout: float = DEFAULT_TIMEOUT,
         socket_factory: Optional[Callable[[], "socket.socket"]] = None,
+        session: Optional[observe_guard.ObserveSession] = None,
     ) -> None:
         # Endpoint enforcement is delegated to the executable guard.
         if observe_guard.validate_endpoint(endpoint) != observe_guard.ALLOWED:
@@ -228,8 +280,51 @@ class Command113Transport:
         self.recv_port = int(recv_port)
         self.timeout = observe_guard.bound_timeout(timeout)
         self._socket_factory = socket_factory or _default_socket_factory
+        # Single-use authority token (in-memory only). ``None`` => no authority,
+        # so send_get_controller_version() refuses with UNKNOWN and no send.
+        self._session = session
 
     # -- single command-113 request ----------------------------------------- #
+
+    def _refusal(self, reason: str, send_state: str) -> dict:
+        """Fail-closed refusal before any I/O: ``UNKNOWN``, no send."""
+        return {
+            "status": STATUS_UNKNOWN,
+            "controller_version": None,
+            "evidence": {
+                "reason": reason,
+                "send_state": send_state,
+                "sent": False,
+            },
+        }
+
+    def _unknown_result(
+        self,
+        *,
+        reason: str,
+        send_state: str,
+        sent: bool,
+        authorization: dict,
+        request: bytes,
+        sent_at: str,
+        detail: Optional[str] = None,
+    ) -> dict:
+        """Build a fail-closed ``UNKNOWN`` result with accurate send evidence."""
+        evidence = {
+            "reason": reason,
+            "send_state": send_state,
+            "sent": sent,
+            "authorization": authorization,
+            "request_bytes": request.hex(),
+            "sent_at": sent_at,
+        }
+        if detail is not None:
+            evidence["detail"] = detail
+        return {
+            "status": STATUS_UNKNOWN,
+            "controller_version": None,
+            "evidence": evidence,
+        }
 
     def send_get_controller_version(self) -> dict:
         """Send exactly one command-113 request and receive one bounded reply.
@@ -240,59 +335,117 @@ class Command113Transport:
               "status": "PASS" | "FAILED" | "UNKNOWN",
               "controller_version": {major, minor, patch, protocol,
                                      build_timestamp} | None,
-              "evidence": {...},
+              "evidence": {
+                  "send_state": "not_attempted" | "bind_failed" |
+                                "send_failed" | "sent" | "received" |
+                                "validated",
+                  "sent": bool,     # True ONLY when sendto returned
+                  "reason": str, "authorization": {...}, ...
+              },
             }
 
         A timeout / socket error / wrong source / malformed frame yields
         ``FAILED`` or ``UNKNOWN`` and is never promoted to ``PASS``. The socket
-        is opened here, used once, and closed in a ``finally`` block.
+        is opened here, used once, and closed in a ``finally`` block. The
+        single-use authorization is consumed exactly once (thread-safe) before
+        any I/O and is NOT restored if the I/O below fails.
         """
         request = build_get_controller_version_request()
         sent_at = datetime.now(timezone.utc).isoformat()
 
-        # Double enforcement before any I/O (executable, not advisory).
+        # 1. Command allowlist (executable, not advisory). The id is fixed at
+        #    113; this gate stays so a future edit cannot silently broaden it.
         if observe_guard.validate_command(CMD_GET_CONTROLLER_VERSION) != observe_guard.ALLOWED:
-            return {
-                "status": STATUS_UNKNOWN,
-                "controller_version": None,
-                "evidence": {"reason": "command blocked", "sent": False},
-            }
+            return self._refusal("command blocked", SEND_STATE_NOT_ATTEMPTED)
 
-        sock = self._socket_factory()
+        # 2. Single-use authorization, consumed exactly once before any I/O.
+        #    Absent / invalid / already-consumed authority => UNKNOWN, no send.
+        if self._session is None:
+            return self._refusal("authorization absent", SEND_STATE_NOT_ATTEMPTED)
         try:
+            auth = self._session.consume()
+        except observe_guard.AuthorizationBlocked:
+            return self._refusal("authorization already consumed", SEND_STATE_NOT_ATTEMPTED)
+        except observe_guard.CommandBlocked:
+            return self._refusal("command blocked", SEND_STATE_NOT_ATTEMPTED)
+        except observe_guard.EndpointBlocked:
+            return self._refusal("endpoint blocked", SEND_STATE_NOT_ATTEMPTED)
+
+        # From here the token is consumed (count 0) and is NOT restored if the
+        # I/O below fails. Exactly one datagram is attempted; there is no retry.
+        sock = None
+        stage = "create"  # progression: create -> bind -> send -> sent -> received
+        data = None
+        addr = None
+        error = None
+        try:
+            sock = self._socket_factory()      # inside try: creation failure -> UNKNOWN
+            stage = "bind"
             sock.settimeout(self.timeout)
             sock.bind(("", self.recv_port))
+            stage = "send"
             sock.sendto(request, (self.endpoint, self.port))
+            stage = "sent"                     # sendto returned: local send accepted
             data, addr = sock.recvfrom(2048)
+            stage = "received"                 # recvfrom returned: response received
         except (socket.timeout, TimeoutError):
-            return {
-                "status": STATUS_UNKNOWN,
-                "controller_version": None,
-                "evidence": {
-                    "reason": "timeout",
-                    "sent": True,
-                    "request_bytes": request.hex(),
-                    "sent_at": sent_at,
-                },
-            }
+            error = ("timeout", None)
         except OSError as exc:
-            return {
-                "status": STATUS_UNKNOWN,
-                "controller_version": None,
-                "evidence": {
-                    "reason": "socket_error",
-                    "detail": str(exc),
-                    "sent": True,
-                    "request_bytes": request.hex(),
-                    "sent_at": sent_at,
-                },
-            }
+            error = ("socket_error", str(exc))
         finally:
-            try:
-                sock.close()
-            except Exception:
-                pass
+            if sock is not None:
+                try:
+                    sock.close()
+                except Exception:
+                    pass
 
+        if error is not None:
+            kind, detail = error
+            if kind == "timeout":
+                # sendto returned before the bounded wait elapsed.
+                return self._unknown_result(
+                    reason="timeout",
+                    send_state=SEND_STATE_SENT,
+                    sent=True,
+                    authorization=auth,
+                    request=request,
+                    sent_at=sent_at,
+                )
+            # socket_error: map the stage to an accurate send_state.
+            if stage == "sent":
+                # sendto returned; the failure happened on recvfrom.
+                return self._unknown_result(
+                    reason="socket_error",
+                    detail=detail,
+                    send_state=SEND_STATE_SENT,
+                    sent=True,
+                    authorization=auth,
+                    request=request,
+                    sent_at=sent_at,
+                )
+            if stage == "send":
+                # sendto raised: the local UDP send was NOT accepted.
+                return self._unknown_result(
+                    reason="socket_error",
+                    detail=detail,
+                    send_state=SEND_STATE_SEND_FAILED,
+                    sent=False,
+                    authorization=auth,
+                    request=request,
+                    sent_at=sent_at,
+                )
+            # create/bind: nothing was transmitted.
+            return self._unknown_result(
+                reason="socket_error",
+                detail=detail,
+                send_state=SEND_STATE_BIND_FAILED,
+                sent=False,
+                authorization=auth,
+                request=request,
+                sent_at=sent_at,
+            )
+
+        # stage == "received": decode the reply (validated).
         received_at = datetime.now(timezone.utc).isoformat()
         source_ip = addr[0] if isinstance(addr, tuple) and len(addr) >= 1 else None
         source_port = addr[1] if isinstance(addr, tuple) and len(addr) >= 2 else None
@@ -319,6 +472,11 @@ class Command113Transport:
                 "source_port": source_port,
                 "sent_at": sent_at,
                 "received_at": received_at,
+                "send_state": SEND_STATE_VALIDATED,
+                "sent": True,
+                "authorization": auth,
+                "controller_reported": result["status"] == STATUS_PASS,
+                "physical_execution": PHYSICAL_EXECUTION_UNKNOWN,
             }
         )
         result["evidence"] = evidence

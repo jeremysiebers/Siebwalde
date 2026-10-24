@@ -36,11 +36,16 @@ from tools.diagnostics.live_transport import (  # noqa: E402
     build_get_controller_version_request,
     decode_controller_version_response,
 )
-from tools.diagnostics.observe_guard import EndpointBlocked  # noqa: E402
+from tools.diagnostics.observe_guard import EndpointBlocked, ObserveSession  # noqa: E402
 
 ENDPOINT = "192.168.1.193"
 TX_PORT = 10000
 RECV_PORT = 10001
+
+
+def _session() -> ObserveSession:
+    """An unconsumed single-use authority; the transport consumes it on send."""
+    return ObserveSession(113, ENDPOINT)
 
 
 def _valid_reply(build: bytes = b"2026-10-17", length: int = 82) -> bytes:
@@ -187,7 +192,7 @@ def test_decode_malformed_fails():
 
 def test_transport_sends_exact_request_and_destination():
     fake = FakeSocket(replies=[(_valid_reply(), (ENDPOINT, RECV_PORT))])
-    t = Command113Transport(ENDPOINT, socket_factory=lambda: fake)
+    t = Command113Transport(ENDPOINT, socket_factory=lambda: fake, session=_session())
     res = t.send_get_controller_version()
 
     assert len(fake.sent) == 1  # exactly one send, no retry
@@ -200,7 +205,7 @@ def test_transport_sends_exact_request_and_destination():
 
 def test_transport_valid_roundtrip_pass():
     fake = FakeSocket(replies=[(_valid_reply(), (ENDPOINT, RECV_PORT))])
-    t = Command113Transport(ENDPOINT, socket_factory=lambda: fake)
+    t = Command113Transport(ENDPOINT, socket_factory=lambda: fake, session=_session())
     res = t.send_get_controller_version()
 
     assert res["status"] == STATUS_PASS
@@ -222,7 +227,7 @@ def test_transport_valid_roundtrip_pass():
 
 def test_transport_timeout_is_unknown_and_single_shot():
     fake = FakeSocket(timeout=True)
-    t = Command113Transport(ENDPOINT, socket_factory=lambda: fake)
+    t = Command113Transport(ENDPOINT, socket_factory=lambda: fake, session=_session())
     res = t.send_get_controller_version()
 
     assert res["status"] == STATUS_UNKNOWN
@@ -234,7 +239,7 @@ def test_transport_timeout_is_unknown_and_single_shot():
 
 def test_transport_wrong_source_is_failed():
     fake = FakeSocket(replies=[(_valid_reply(), ("192.168.1.200", RECV_PORT))])
-    t = Command113Transport(ENDPOINT, socket_factory=lambda: fake)
+    t = Command113Transport(ENDPOINT, socket_factory=lambda: fake, session=_session())
     res = t.send_get_controller_version()
 
     assert res["status"] == STATUS_FAILED
@@ -248,7 +253,7 @@ def test_transport_socket_error_is_unknown():
             raise OSError("network unreachable")
 
     fake = Boom()
-    t = Command113Transport(ENDPOINT, socket_factory=lambda: fake)
+    t = Command113Transport(ENDPOINT, socket_factory=lambda: fake, session=_session())
     res = t.send_get_controller_version()
 
     assert res["status"] == STATUS_UNKNOWN
