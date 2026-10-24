@@ -269,3 +269,119 @@ def test_knowledge_tools_lists_protected():
     # the filter narrows to a substring of name/purpose
     filtered = server.knowledge_tools("PicoScope")["results"]
     assert {r["id"] for r in filtered} == {"tool:picoscope-mcp"}
+
+
+# ---------------------------------------------------------------------------
+# K6-B OBSERVE findings (command 113 contract + physical readback + discrepancy)
+# ---------------------------------------------------------------------------
+
+def test_k6b_command_113_contract():
+    """Command 113 (GET_CONTROLLER_VERSION) is a read-only source-proven contract."""
+    prot = server.knowledge_protocol_contract("113")
+    assert prot["count"] == 1
+    c = prot["results"][0]["command"]
+    assert c["n.id"] == "command:113"
+    assert c["n.command_name"] == "GET_CONTROLLER_VERSION"
+    assert c["n.direction"] == "HOST_TO_PIC32"
+    assert c["n.destructive"] is False
+    assert c["n.status"] == "PROVEN_SOURCE"
+    assert "REPLYxCONTROLLERxVERSION" in c["n.summary"]
+    assert c["n.source_path"] == "TrackController5/firmware/src/controller.c"
+
+
+def test_k6b_observations_recorded():
+    """Both K6-B observations exist and keep the REPORTS-vs-flash-content distinction."""
+    rs = _search_results("K6-B")
+    by_id = {r["id"]: r for r in rs}
+    assert "obs:k6b-cmd113-readback" in by_id
+    assert "obs:k6b-version-mismatch" in by_id
+    rb = by_id["obs:k6b-cmd113-readback"]
+    assert rb["status"] == "PROVEN_HARDWARE"
+    # the readback proves what the controller REPORTS, not the flash image content
+    assert "REPORTS" in rb["summary"] and "not independently" in rb["summary"]
+    assert rb["source_path"] == "tools/diagnostics/k6b_observe.py"
+    mm = by_id["obs:k6b-version-mismatch"]
+    assert mm["status"] == "PROVEN_HARDWARE"
+    assert mm["source_path"] == "TrackController5/firmware/src/version.h"
+    assert "never flashed" in mm["summary"]
+
+
+def test_k6b_does_not_change_runs_firmware():
+    """K6-B must NOT change device:pic32 RUNS_FIRMWARE firmware:pic32-0.1.0."""
+    fw = server.knowledge_firmware_state()["results"]
+    pic32 = [r for r in fw if r["d.id"] == "device:pic32"]
+    assert len(pic32) == 1
+    assert pic32[0]["f.id"] == "firmware:pic32-0.1.0"
+    assert pic32[0]["f.version"] == "0.1.0"
+
+
+# ---------------------------------------------------------------------------
+# K7 findings (firmware-identity reconciliation + read-only eligibility/path)
+# ---------------------------------------------------------------------------
+
+def test_k7_pic32_identity_transition():
+    """K7 records the PIC32 1.0.0 -> 0.1.0 identity transition (PROVEN_HARDWARE),
+    with the transition itself UNKNOWN; device:pic32 RUNS_FIRMWARE stays 0.1.0."""
+    props = server.knowledge_node("obs:k7-pic32-identity-transition")["node"]["properties"]
+    assert props["n.id"] == "obs:k7-pic32-identity-transition"
+    assert props["n.status"] == "PROVEN_HARDWARE"
+    assert props["n.source_path"] == "docs/K7-FIRMWARE-IDENTITY-TIMELINE.md"
+    assert props["n.source_location"] == "timeline"
+    assert props["n.source_revision"] == "bd5a9fa2"
+    assert props["n.evidence_ref"] == "Logging/K6B/k6b-observe-20261024T092944Z.json"
+    assert props["n.evidence_status"] == "OBSERVED"
+    assert props["n.observed_date"] == "2026-10-24"
+    assert "does NOT match" in props["n.what"]
+    assert "transition is UNKNOWN" in props["n.what"]
+    # finding 1 must not change the recorded current firmware for the PIC32
+    fw = server.knowledge_firmware_state()["results"]
+    pic32 = [r for r in fw if r["d.id"] == "device:pic32"]
+    assert len(pic32) == 1
+    assert pic32[0]["f.id"] == "firmware:pic32-0.1.0"
+
+
+def test_k7_cmd124_ineligible():
+    """K7 records command 124 as INELIGIBLE for a read-only grant (PROVEN_SOURCE)."""
+    props = server.knowledge_node("obs:k7-cmd124-ineligible")["node"]["properties"]
+    assert props["n.id"] == "obs:k7-cmd124-ineligible"
+    assert props["n.status"] == "PROVEN_SOURCE"
+    assert props["n.source_path"] == "TrackController5/firmware/src/slavefwhandler.c"
+    assert props["n.source_location"] == "EXEC_FW_STATE_GET_BOOTLOADER_VERSION"
+    assert props["n.source_revision"] == "bd5a9fa2"
+    assert props["n.evidence_status"] == "SOURCE_REF"
+    assert "INELIGIBLE" in props["n.what"]
+    assert "bootloader version not the application HR11 checksum" in props["n.what"]
+
+
+def test_k7_next_readonly_hr11_slaveryinfo():
+    """K7 records the next read-only path: passive SLAVEINFO HR11 (PROVEN_SOURCE)."""
+    props = server.knowledge_node("obs:k7-next-readonly-hr11-slaveryinfo")["node"]["properties"]
+    assert props["n.id"] == "obs:k7-next-readonly-hr11-slaveryinfo"
+    assert props["n.status"] == "PROVEN_SOURCE"
+    assert props["n.source_path"] == "TrackController5/firmware/src/slavehandler.c"
+    assert props["n.source_location"] == "SIP4 MESSAGE3"
+    assert props["n.source_revision"] == "bd5a9fa2"
+    assert props["n.evidence_status"] == "SOURCE_REF"
+    assert "SLAVEINFO" in props["n.what"]
+    assert "HR11" in props["n.what"]
+    assert "NOT fully passive" in props["n.what"]
+
+
+# ---------------------------------------------------------------------------
+# K8 feasibility (passive SLAVEINFO observation is BLOCKED)
+# ---------------------------------------------------------------------------
+
+def test_k8_slaveryinfo_passive_blocked():
+    """K8 records that a genuinely passive SLAVEINFO observation is BLOCKED
+    (PROVEN_SOURCE), traced to docs/K8-SLAVEINFO-FEASIBILITY.md."""
+    props = server.knowledge_node("obs:k8-slaveryinfo-passive-blocked")["node"]["properties"]
+    assert props["n.id"] == "obs:k8-slaveryinfo-passive-blocked"
+    assert props["n.status"] == "PROVEN_SOURCE"
+    assert props["n.source_path"] == "docs/K8-SLAVEINFO-FEASIBILITY.md"
+    assert props["n.source_location"] == "delivery mechanism"
+    assert props["n.source_revision"] == "14789a5a"
+    assert props["n.evidence_status"] == "SOURCE_REF"
+    assert props["n.date"] == "2026-10-24"
+    assert "BLOCKED" in props["n.what"]
+    assert "unicast" in props["n.what"]
+    assert "105 ENABLE" in props["n.what"]
