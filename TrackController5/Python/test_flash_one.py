@@ -48,6 +48,7 @@ CHECKSUM_OK = 104
 MBUS_STATE_SLAVES_ON = 0x02
 MBUS_STATE_SLAVE_DETECT = 0x04
 MBUS_STATE_START_DATA_UPLOAD = 0x08
+MBUS_STATE_RESET = 0x0A
 
 # Bootloader-routine acks (taskid = routine enum, taskcommand = *_RETURNED_OK/NOK).
 ERASE_FLASH = 200
@@ -91,6 +92,7 @@ EXIT = 130
 SLAVES_ON = 100
 START_DATA_UPLOAD = 106
 SLAVE_DETECT = 101
+MBUS_RESET = 107
 FORBIDDEN = (122, 131, 132)
 
 # 125-129 *_RECEIVE_DATA_TIMEOUT acks (taskstate=ERROR): the PIC18 executed the
@@ -189,7 +191,11 @@ class MockTransport(object):
         elif cmd == RESET:
             self._queue.append((RESET_SLAVE, RESET_SLAVE_OK, DONE, NONE))
         elif cmd == SLAVES_ON:
-            self._queue.append((MBUS, MBUS_STATE_SLAVES_ON, DONE, NONE))
+            if cmd not in self._no_ack_cmds:
+                self._queue.append((MBUS, MBUS_STATE_SLAVES_ON, DONE, NONE))
+        elif cmd == MBUS_RESET:
+            if cmd not in self._no_ack_cmds:
+                self._queue.append((MBUS, MBUS_STATE_RESET, DONE, NONE))
         elif cmd == START_DATA_UPLOAD:
             self._queue.append((MBUS, MBUS_STATE_START_DATA_UPLOAD, DONE, NONE))
         elif cmd == SLAVE_DETECT:
@@ -205,6 +211,17 @@ class MockTransport(object):
 
 def commands_of(transport):
     return [pkt[1] for pkt in transport.sent]
+
+
+def expected_sequence(n):
+    """Canonical full command sequence.  107/100 (global reset) precede 103 so
+    the PIC18 enters its bootloader at the unconfigured 0xAA Config phase and
+    the 123 SELECT_SLAVE bootloader-entry write is accepted (PICO-5B)."""
+    return ([CONNECT, MBUS_RESET, SLAVES_ON, SLAVE_FW_FLASH, RECEIVE_FW_FILE] +
+            [FW_DATA] * n +
+            [RECEIVE_CONFIG_WORD, CFG_DATA] +
+            [SELECT_SLAVE, ERASE, WRITE, WRITE_CONFIG, CHECK, RESET, EXIT] +
+            [SLAVES_ON, START_DATA_UPLOAD, SLAVE_DETECT])
 
 
 def make_driver(transport, image, slave_id=7, **kw):
@@ -290,22 +307,29 @@ class TestCommandSequence(unittest.TestCase):
 
     def test_exact_command_order(self):
         transport = self._run()
-        expected = [CONNECT, SLAVE_FW_FLASH, RECEIVE_FW_FILE] + \
-                   [FW_DATA] * self.n + \
-                   [RECEIVE_CONFIG_WORD, CFG_DATA] + \
-                   [SELECT_SLAVE, ERASE, WRITE, WRITE_CONFIG, CHECK, RESET, EXIT] + \
-                   [SLAVES_ON, START_DATA_UPLOAD, SLAVE_DETECT]
-        self.assertEqual(commands_of(transport), expected)
+        self.assertEqual(commands_of(transport), expected_sequence(self.n))
 
     def test_enter_fw_handler_before_receive_fw_file(self):
         """Fix 1: 103 must appear after CONNECT and before RECEIVE_FW_FILE."""
         transport = self._run()
         emitted = commands_of(transport)
         self.assertEqual(emitted[0], CONNECT)
-        self.assertEqual(emitted[1], SLAVE_FW_FLASH)
-        self.assertEqual(emitted[2], RECEIVE_FW_FILE)
         self.assertLess(emitted.index(SLAVE_FW_FLASH),
                         emitted.index(RECEIVE_FW_FILE))
+
+    def test_global_reset_precedes_fw_handler(self):
+        """PICO-5B: 107 then 100 (global reset to 0xAA) precede 103, so the
+        PIC18 bootloader-entry write is accepted, not dropped."""
+        transport = self._run()
+        emitted = commands_of(transport)
+        self.assertLess(emitted.index(MBUS_RESET),
+                        emitted.index(SLAVE_FW_FLASH))
+        self.assertLess(emitted.index(SLAVES_ON),
+                        emitted.index(SLAVE_FW_FLASH))
+        # 107 immediately precedes 100, which immediately precedes 103.
+        self.assertEqual(emitted[1], MBUS_RESET)
+        self.assertEqual(emitted[2], SLAVES_ON)
+        self.assertEqual(emitted[3], SLAVE_FW_FLASH)
 
     def test_readback_command_order(self):
         """Fix 2: readback commands 100/106/101 follow EXIT (130), in order."""
@@ -320,9 +344,9 @@ class TestCommandSequence(unittest.TestCase):
         primitives = [c for c in commands_of(transport)
                       if c not in (FW_DATA, CFG_DATA)]
         self.assertEqual(primitives,
-                         [CONNECT, SLAVE_FW_FLASH, RECEIVE_FW_FILE,
-                          RECEIVE_CONFIG_WORD, SELECT_SLAVE, ERASE, WRITE,
-                          WRITE_CONFIG, CHECK, RESET, EXIT,
+                         [CONNECT, MBUS_RESET, SLAVES_ON, SLAVE_FW_FLASH,
+                          RECEIVE_FW_FILE, RECEIVE_CONFIG_WORD, SELECT_SLAVE,
+                          ERASE, WRITE, WRITE_CONFIG, CHECK, RESET, EXIT,
                           SLAVES_ON, START_DATA_UPLOAD, SLAVE_DETECT])
 
     def test_forbidden_commands_never_emitted(self):
@@ -338,6 +362,23 @@ class TestCommandSequence(unittest.TestCase):
         self.assertEqual(len(select_pkts), 1)
         # data[0] must hold the slave id (slavefwhandler.c: fwData.data = data[0])
         self.assertEqual(select_pkts[0], bytes([0xAA, SELECT_SLAVE, 7, 0x55]))
+
+    def test_select_slave_forwards_exact_slave_id_no_escalation(self):
+        """Wrong-target safety: the driver forwards exactly the requested slave
+        id in 123 (never escalates, never emits 122/131/132).  The isolation
+        between candidate ids is upstream, but the driver must faithfully send
+        one id and only that id."""
+        for sid in (1, 3):
+            transport = MockTransport(self.n)
+            make_driver(transport, self.image, slave_id=sid).run()
+            select_pkts = [p for p in transport.sent if p[1] == SELECT_SLAVE]
+            self.assertEqual(len(select_pkts), 1, "slave_id=%d" % sid)
+            self.assertEqual(select_pkts[0],
+                             bytes([0xAA, SELECT_SLAVE, sid, 0x55]),
+                             "slave_id=%d" % sid)
+            for bad in FORBIDDEN:
+                self.assertNotIn(bad, commands_of(transport),
+                                 "slave_id=%d emitted forbidden %d" % (sid, bad))
 
     def test_fw_data_packet_size(self):
         transport = self._run()
@@ -402,7 +443,8 @@ class TestStopConditions(unittest.TestCase):
         with self.assertRaises(FlashAbort):
             driver.run()
         self.assertEqual(commands_of(transport),
-                         [CONNECT, SLAVE_FW_FLASH, RECEIVE_FW_FILE])
+                         [CONNECT, MBUS_RESET, SLAVES_ON, SLAVE_FW_FLASH,
+                          RECEIVE_FW_FILE])
         self.assertNotIn(SELECT_SLAVE, commands_of(transport))
 
     def test_missing_config_ack_stops(self):
@@ -411,7 +453,8 @@ class TestStopConditions(unittest.TestCase):
         with self.assertRaises(FlashAbort):
             driver.run()
         self.assertEqual(commands_of(transport),
-                         [CONNECT, SLAVE_FW_FLASH, RECEIVE_FW_FILE] +
+                         [CONNECT, MBUS_RESET, SLAVES_ON, SLAVE_FW_FLASH,
+                          RECEIVE_FW_FILE] +
                          [FW_DATA] * self.n + [RECEIVE_CONFIG_WORD])
         self.assertNotIn(SELECT_SLAVE, commands_of(transport))
 
@@ -436,7 +479,8 @@ class TestErrorAbort(unittest.TestCase):
         self.assertIn("RECEIVED_WRONG_COMMAND", msg)
         # Aborted during the 120 phase: no FW data or select ever emitted.
         self.assertEqual(commands_of(transport),
-                         [CONNECT, SLAVE_FW_FLASH, RECEIVE_FW_FILE])
+                         [CONNECT, MBUS_RESET, SLAVES_ON, SLAVE_FW_FLASH,
+                          RECEIVE_FW_FILE])
         self.assertNotIn(FW_DATA, commands_of(transport))
         self.assertNotIn(SELECT_SLAVE, commands_of(transport))
 
@@ -462,12 +506,7 @@ class TestBootloaderAcks(unittest.TestCase):
         self.assertIn(SELECT_SLAVE, emitted)
         self.assertIn(EXIT, emitted)
         # The full sequence still holds (acks are consumed, not emitted).
-        expected = [CONNECT, SLAVE_FW_FLASH, RECEIVE_FW_FILE] + \
-                   [FW_DATA] * self.n + \
-                   [RECEIVE_CONFIG_WORD, CFG_DATA] + \
-                   [SELECT_SLAVE, ERASE, WRITE, WRITE_CONFIG, CHECK, RESET, EXIT] + \
-                   [SLAVES_ON, START_DATA_UPLOAD, SLAVE_DETECT]
-        self.assertEqual(emitted, expected)
+        self.assertEqual(emitted, expected_sequence(self.n))
 
     def test_bootloader_error_aborts(self):
         # 125 (ERASE) acks with ERASE_FLASH_RETURNED_NOK/ERROR -> abort, not hang.
@@ -596,12 +635,7 @@ class TestFailClosed(unittest.TestCase):
         for bad in FORBIDDEN:
             self.assertNotIn(bad, emitted,
                              "forbidden command %d was emitted" % bad)
-        expected = [CONNECT, SLAVE_FW_FLASH, RECEIVE_FW_FILE] + \
-                   [FW_DATA] * self.n + \
-                   [RECEIVE_CONFIG_WORD, CFG_DATA] + \
-                   [SELECT_SLAVE, ERASE, WRITE, WRITE_CONFIG, CHECK, RESET, EXIT] + \
-                   [SLAVES_ON, START_DATA_UPLOAD, SLAVE_DETECT]
-        self.assertEqual(emitted, expected)
+        self.assertEqual(emitted, expected_sequence(self.n))
 
     def test_state_transitions_are_logged(self):
         transport = MockTransport(self.n)
@@ -623,11 +657,83 @@ class TestFailClosed(unittest.TestCase):
         transport = MockTransport(self.n, timeout_cmds=(ERASE,))
         driver, emitted = self._run_expect_abort(transport)
         self.assertEqual(driver.state, FlashState.FAILED_UNKNOWN_HARDWARE_STATE)
-        self.assertEqual(emitted, [CONNECT, SLAVE_FW_FLASH, RECEIVE_FW_FILE] +
+        self.assertEqual(emitted, [CONNECT, MBUS_RESET, SLAVES_ON,
+                                   SLAVE_FW_FLASH, RECEIVE_FW_FILE] +
                          [FW_DATA] * self.n +
                          [RECEIVE_CONFIG_WORD, CFG_DATA, SELECT_SLAVE, ERASE])
         for bad in FORBIDDEN:
             self.assertNotIn(bad, emitted)
+
+    def test_interrupted_sequence_leaves_fail_closed_state(self):
+        """An injected FlashAbort mid-sequence (after ERASE confirmed) must
+        leave the driver in a fail-closed observable state, never a success
+        state, and must not emit any later destructive command."""
+        transport = MockTransport(self.n)
+        driver = make_driver(transport, self.image, slave_id=7)
+
+        original = driver._bootloader_step
+
+        def interrupt_after_erase(command, ack_taskid, ack_ok, name,
+                                  state_in_flight, state_confirmed):
+            result = original(command, ack_taskid, ack_ok, name,
+                              state_in_flight, state_confirmed)
+            if command == ERASE:
+                # Simulate a host-side abort immediately after ERASE confirmed.
+                raise FlashAbort("injected abort after ERASE")
+            return result
+
+        driver._bootloader_step = interrupt_after_erase
+
+        with self.assertRaises(FlashAbort):
+            driver.run()
+
+        self.assertNotEqual(driver.state, FlashState.VERIFIED_COMPLETE)
+        self.assertEqual(driver.state, FlashState.ERASE_CONFIRMED)
+        emitted = commands_of(transport)
+        self.assertIn(ERASE, emitted)
+        self.assertNotIn(WRITE, emitted)
+
+
+class TestGlobalResetFailClosed(unittest.TestCase):
+    """PICO-5B: the 107/100 global-reset acks are required and fail-closed.
+
+    A missing MBUS_STATE_RESET/DONE (107) or MBUS_STATE_SLAVES_ON/DONE (100)
+    ack must raise FlashAbort BEFORE 103 is emitted (and therefore before any
+    FW download or destructive command).  No ASSUME-OK, no retry.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.image = HexImage(HEX_PATH)
+        cls.n = cls.image.row_packet_count
+
+    def test_missing_reset_ack_aborts_before_103(self):
+        clock = FakeClock()
+        transport = ClockAdvancingTransport(self.n, clock,
+                                            no_ack_cmds=(MBUS_RESET,))
+        driver = make_driver(transport, self.image, slave_id=7, clock=clock,
+                             ack_timeout=0.2)
+        with self.assertRaises(FlashAbort) as ctx:
+            driver.run()
+        self.assertIn("timed out", str(ctx.exception))
+        emitted = commands_of(transport)
+        self.assertEqual(emitted, [CONNECT, MBUS_RESET])
+        self.assertNotIn(SLAVE_FW_FLASH, emitted)
+        self.assertNotIn(ERASE, emitted)
+
+    def test_missing_slaves_on_ack_aborts_before_103(self):
+        clock = FakeClock()
+        transport = ClockAdvancingTransport(self.n, clock,
+                                            no_ack_cmds=(SLAVES_ON,))
+        driver = make_driver(transport, self.image, slave_id=7, clock=clock,
+                             ack_timeout=0.2)
+        with self.assertRaises(FlashAbort) as ctx:
+            driver.run()
+        self.assertIn("timed out", str(ctx.exception))
+        emitted = commands_of(transport)
+        self.assertEqual(emitted, [CONNECT, MBUS_RESET, SLAVES_ON])
+        self.assertNotIn(SLAVE_FW_FLASH, emitted)
+        self.assertNotIn(ERASE, emitted)
 
 
 class TestPreEraseGate(unittest.TestCase):
@@ -701,12 +807,7 @@ class TestPreEraseGate(unittest.TestCase):
         make_driver(transport, self.image, slave_id=7).run()
         emitted = commands_of(transport)
         self.assertNotIn(GET_BOOTLOADER_VERSION_CMD, emitted)
-        expected = [CONNECT, SLAVE_FW_FLASH, RECEIVE_FW_FILE] + \
-                   [FW_DATA] * self.n + \
-                   [RECEIVE_CONFIG_WORD, CFG_DATA] + \
-                   [SELECT_SLAVE, ERASE, WRITE, WRITE_CONFIG, CHECK, RESET, EXIT] + \
-                   [SLAVES_ON, START_DATA_UPLOAD, SLAVE_DETECT]
-        self.assertEqual(emitted, expected)
+        self.assertEqual(emitted, expected_sequence(self.n))
 
 
 class TestStaleFrameDrain(unittest.TestCase):
