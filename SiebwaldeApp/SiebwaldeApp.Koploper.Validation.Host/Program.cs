@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -331,6 +332,7 @@ namespace SiebwaldeApp.Koploper.Validation.Host
             bool live = false;
             bool warm = false;
             bool readRegisters = false;
+            bool json = false;
             int cycles = DefaultCycles;
             int intervalMs = DefaultIntervalMs;
             int readRegisterWaitMs = DefaultReadRegisterWaitMs;
@@ -348,6 +350,9 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                         break;
                     case "--read-registers":
                         readRegisters = true;
+                        break;
+                    case "--json":
+                        json = true;
                         break;
                     case "--wait-ms" when i + 1 < args.Length:
                         readRegisterWaitMs = int.Parse(args[++i]);
@@ -379,33 +384,50 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 return 2;
             }
 
-            ReadOnlyTelemetryValidationHost host = ReadOnlyTelemetryValidationHost.Create("Simple Loop");
-
             var jsonOptions = new JsonSerializerOptions
             {
                 WriteIndented = false,
                 Converters = { new JsonStringEnumConverter() }
             };
 
+            // The C# transport binds the local receive port inside composition; a bind failure
+            // (another application already owns port 10001) surfaces here as a SocketException.
+            ReadOnlyTelemetryValidationHost host;
             try
             {
-                Console.WriteLine("== readonly-validate composition ==");
-                Console.WriteLine($"Profile: {host.Profile.Name}");
-                Console.WriteLine($"KoploperBlockBindings: {host.KoploperBlockBindingMap.Count}");
-                foreach (KeyValuePair<int, IReadOnlyList<int>> binding in host.KoploperBlockBindingMap.OrderBy(kv => kv.Key))
-                {
-                    Console.WriteLine($"  internalBlock {binding.Key} -> logicalSections [{string.Join(", ", binding.Value)}]");
-                }
+                host = ReadOnlyTelemetryValidationHost.Create("Simple Loop");
+            }
+            catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressAlreadyInUse)
+            {
+                WriteSessionConflict(ex.Message);
+                return 3;
+            }
 
-                Console.WriteLine($"PhysicalAmplifierMapping: {host.Profile.PhysicalAmplifierMapping.Count}");
-                foreach (LayoutPhysicalAmplifierBinding binding in host.Profile.PhysicalAmplifierMapping)
+            try
+            {
+                if (!json)
                 {
-                    Console.WriteLine($"  section {binding.SectionId} -> physicalAmplifier {binding.PhysicalAmplifier}");
+                    Console.WriteLine("== readonly-validate composition ==");
+                    Console.WriteLine($"Profile: {host.Profile.Name}");
+                    Console.WriteLine($"KoploperBlockBindings: {host.KoploperBlockBindingMap.Count}");
+                    foreach (KeyValuePair<int, IReadOnlyList<int>> binding in host.KoploperBlockBindingMap.OrderBy(kv => kv.Key))
+                    {
+                        Console.WriteLine($"  internalBlock {binding.Key} -> logicalSections [{string.Join(", ", binding.Value)}]");
+                    }
+
+                    Console.WriteLine($"PhysicalAmplifierMapping: {host.Profile.PhysicalAmplifierMapping.Count}");
+                    foreach (LayoutPhysicalAmplifierBinding binding in host.Profile.PhysicalAmplifierMapping)
+                    {
+                        Console.WriteLine($"  section {binding.SectionId} -> physicalAmplifier {binding.PhysicalAmplifier}");
+                    }
                 }
 
                 if (!live)
                 {
-                    Console.WriteLine("--live not supplied: composing only; NO transport opened, NO command transmitted.");
+                    if (!json)
+                    {
+                        Console.WriteLine("--live not supplied: composing only; NO transport opened, NO command transmitted.");
+                    }
                 }
                 else if (warm)
                 {
@@ -430,6 +452,22 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                     WriteReconciliationLoop(host, tracePath, cycles, intervalMs, live, jsonOptions);
                 }
             }
+            catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressAlreadyInUse)
+            {
+                WriteSessionConflict(ex.Message);
+                return 3;
+            }
+            catch (KoploperSessionCommandAcknowledgementTimeoutException ex)
+            {
+                Console.WriteLine(JsonSerializer.Serialize(new
+                {
+                    type = "initFailure",
+                    command = (int)ex.Command,
+                    commandName = KoploperSessionCommandAllowlist.GetDisplayName(ex.Command),
+                    reason = "ack_timeout"
+                }, jsonOptions));
+                return 4;
+            }
             finally
             {
                 if (live)
@@ -440,33 +478,133 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 host.DisposeAsync().GetAwaiter().GetResult();
             }
 
-            Console.WriteLine("== readonly-validate summary ==");
-            Console.WriteLine(
-                $"Mode: {(readRegisters ? (live ? "read-registers (live)" : "read-registers (dry, no transmission)") : (live ? "live" : "dry (no transmission)"))}; " +
-                $"session: {(warm ? "warm-reconnect (250 only)" : "cold-start (250→100→101→104→106→105)")}");
-
             KoploperSessionCommandCounters counters = host.SessionCommandGuard.GetCounters();
-            Console.WriteLine("Telemetry-enablement (session) commands — transmitted / acknowledged:");
-            Console.WriteLine($"  CLIENT_CONNECTION_REQUEST: {counters.ClientConnectionRequestTransmitted} / {counters.ClientConnectionRequestAcknowledged}");
-            Console.WriteLine($"  EXEC_MBUS_STATE_SLAVES_ON: {counters.ExecMbusStateSlavesOnTransmitted} / {counters.ExecMbusStateSlavesOnAcknowledged}");
-            Console.WriteLine($"  EXEC_MBUS_STATE_SLAVE_DETECT: {counters.ExecMbusStateSlaveDetectTransmitted} / {counters.ExecMbusStateSlaveDetectAcknowledged}");
-            Console.WriteLine($"  EXEC_MBUS_STATE_SLAVE_INIT: {counters.ExecMbusStateSlaveInitTransmitted} / {counters.ExecMbusStateSlaveInitAcknowledged}");
-            Console.WriteLine($"  EXEC_MBUS_STATE_START_DATA_UPLOAD: {counters.ExecMbusStateStartDataUploadTransmitted} / {counters.ExecMbusStateStartDataUploadAcknowledged}");
-            Console.WriteLine($"  EXEC_MBUS_STATE_SLAVE_ENABLE: {counters.ExecMbusStateSlaveEnableTransmitted} / {counters.ExecMbusStateSlaveEnableAcknowledged}");
-            Console.WriteLine($"Rejected (allowlist) commands: {counters.RejectedCommands}");
-            Console.WriteLine($"Order violations: {counters.OrderViolations}");
-            Console.WriteLine($"Acknowledgement timeouts: {counters.AcknowledgementTimeouts}");
-            Console.WriteLine(
-                "Application/movement control (always 0 by construction): " +
-                $"registerWrite(108)={counters.AmplifierRegisterWrite} hr0={counters.AmplifierHr0Writes} " +
-                $"pwm={counters.PwmWrites} direction={counters.DirectionWrites} brake={counters.BrakeWrites} " +
-                $"emo={counters.EmoStopWrites} switch={counters.SwitchWrites} loco={counters.LocomotiveCommands}");
-            if (!readRegisters)
+
+            if (json)
             {
-                Console.WriteLine($"Trace: {tracePath}");
+                Console.WriteLine(JsonSerializer.Serialize(
+                    BuildSessionSummary(host, counters, live, warm, readRegisters, cycles, intervalMs),
+                    jsonOptions));
+            }
+            else
+            {
+                Console.WriteLine("== readonly-validate summary ==");
+                Console.WriteLine(
+                    $"Mode: {(readRegisters ? (live ? "read-registers (live)" : "read-registers (dry, no transmission)") : (live ? "live" : "dry (no transmission)"))}; " +
+                    $"session: {(warm ? "warm-reconnect (250 only)" : "cold-start (250→100→101→104→106→105)")}");
+
+                Console.WriteLine("Telemetry-enablement (session) commands — transmitted / acknowledged:");
+                Console.WriteLine($"  CLIENT_CONNECTION_REQUEST: {counters.ClientConnectionRequestTransmitted} / {counters.ClientConnectionRequestAcknowledged}");
+                Console.WriteLine($"  EXEC_MBUS_STATE_SLAVES_ON: {counters.ExecMbusStateSlavesOnTransmitted} / {counters.ExecMbusStateSlavesOnAcknowledged}");
+                Console.WriteLine($"  EXEC_MBUS_STATE_SLAVE_DETECT: {counters.ExecMbusStateSlaveDetectTransmitted} / {counters.ExecMbusStateSlaveDetectAcknowledged}");
+                Console.WriteLine($"  EXEC_MBUS_STATE_SLAVE_INIT: {counters.ExecMbusStateSlaveInitTransmitted} / {counters.ExecMbusStateSlaveInitAcknowledged}");
+                Console.WriteLine($"  EXEC_MBUS_STATE_START_DATA_UPLOAD: {counters.ExecMbusStateStartDataUploadTransmitted} / {counters.ExecMbusStateStartDataUploadAcknowledged}");
+                Console.WriteLine($"  EXEC_MBUS_STATE_SLAVE_ENABLE: {counters.ExecMbusStateSlaveEnableTransmitted} / {counters.ExecMbusStateSlaveEnableAcknowledged}");
+                Console.WriteLine($"Rejected (allowlist) commands: {counters.RejectedCommands}");
+                Console.WriteLine($"Order violations: {counters.OrderViolations}");
+                Console.WriteLine($"Acknowledgement timeouts: {counters.AcknowledgementTimeouts}");
+                Console.WriteLine(
+                    "Application/movement control (always 0 by construction): " +
+                    $"registerWrite(108)={counters.AmplifierRegisterWrite} hr0={counters.AmplifierHr0Writes} " +
+                    $"pwm={counters.PwmWrites} direction={counters.DirectionWrites} brake={counters.BrakeWrites} " +
+                    $"emo={counters.EmoStopWrites} switch={counters.SwitchWrites} loco={counters.LocomotiveCommands}");
+                if (!readRegisters)
+                {
+                    Console.WriteLine($"Trace: {tracePath}");
+                }
             }
             return 0;
         }
+
+        // ---------------------------------------------------------------- readonly-validate: session summary / conflict
+
+        private static void WriteSessionConflict(string detail)
+        {
+            Console.WriteLine(JsonSerializer.Serialize(new
+            {
+                type = "sessionConflict",
+                reason = "recv_port_in_use",
+                detail
+            }));
+        }
+
+        private static object BuildCommandSummary(int command, string name, long transmitted, long acknowledged)
+            => new
+            {
+                command,
+                name,
+                transmitted,
+                acknowledged,
+                state = acknowledged > 0 ? "DONE" : "PENDING"
+            };
+
+        private static object BuildSessionSummary(
+            ReadOnlyTelemetryValidationHost host,
+            KoploperSessionCommandCounters counters,
+            bool live,
+            bool warm,
+            bool readRegisters,
+            int cycles,
+            int intervalMs)
+        {
+            var commands = new object[]
+            {
+                BuildCommandSummary(250, "CLIENT_CONNECTION_REQUEST",
+                    counters.ClientConnectionRequestTransmitted, counters.ClientConnectionRequestAcknowledged),
+                BuildCommandSummary(100, "EXEC_MBUS_STATE_SLAVES_ON",
+                    counters.ExecMbusStateSlavesOnTransmitted, counters.ExecMbusStateSlavesOnAcknowledged),
+                BuildCommandSummary(101, "EXEC_MBUS_STATE_SLAVE_DETECT",
+                    counters.ExecMbusStateSlaveDetectTransmitted, counters.ExecMbusStateSlaveDetectAcknowledged),
+                BuildCommandSummary(104, "EXEC_MBUS_STATE_SLAVE_INIT",
+                    counters.ExecMbusStateSlaveInitTransmitted, counters.ExecMbusStateSlaveInitAcknowledged),
+                BuildCommandSummary(106, "EXEC_MBUS_STATE_START_DATA_UPLOAD",
+                    counters.ExecMbusStateStartDataUploadTransmitted, counters.ExecMbusStateStartDataUploadAcknowledged),
+                BuildCommandSummary(105, "EXEC_MBUS_STATE_SLAVE_ENABLE",
+                    counters.ExecMbusStateSlaveEnableTransmitted, counters.ExecMbusStateSlaveEnableAcknowledged),
+            };
+
+            bool ready = counters.AcknowledgementTimeouts == 0 &&
+                         counters.ClientConnectionRequestAcknowledged > 0 &&
+                         counters.ExecMbusStateSlavesOnAcknowledged > 0 &&
+                         counters.ExecMbusStateSlaveDetectAcknowledged > 0 &&
+                         counters.ExecMbusStateSlaveInitAcknowledged > 0 &&
+                         counters.ExecMbusStateStartDataUploadAcknowledged > 0 &&
+                         counters.ExecMbusStateSlaveEnableAcknowledged > 0;
+
+            string readiness = counters.AcknowledgementTimeouts > 0
+                ? "FAILED"
+                : (ready ? "READY" : "INCOMPLETE");
+
+            return new
+            {
+                type = "sessionSummary",
+                live,
+                profile = host.Profile.Name,
+                session = warm ? "warm-reconnect (250 only)" : "cold-start (250→100→101→104→106→105)",
+                readRegisters,
+                init = new
+                {
+                    sequence = new[] { 250, 100, 101, 104, 106, 105 },
+                    commands,
+                    rejected_commands = counters.RejectedCommands,
+                    order_violations = counters.OrderViolations,
+                    acknowledgement_timeouts = counters.AcknowledgementTimeouts,
+                    movement_writes = new
+                    {
+                        register_write_108 = counters.AmplifierRegisterWrite,
+                        hr0 = counters.AmplifierHr0Writes,
+                        pwm = counters.PwmWrites,
+                        direction = counters.DirectionWrites,
+                        brake = counters.BrakeWrites,
+                        emo = counters.EmoStopWrites,
+                        @switch = counters.SwitchWrites,
+                        loco = counters.LocomotiveCommands,
+                    },
+                    readiness,
+                }
+            };
+        }
+
 
         // ---------------------------------------------------------------- readonly-validate: register read-back
 
@@ -539,13 +677,37 @@ namespace SiebwaldeApp.Koploper.Validation.Host
             foreach (int slave in ReadRegisterSlaves)
             {
                 TrackAmplifierItem item = host.Variables.trackAmpItems[slave];
-                if (item.SlaveDetected != 1)
+
+                // A track amplifier is "observed" when its last ModBus exchange succeeded
+                // (MbCommError == SLAVE_DATA_OK) and it returned a non-zero legacy checksum
+                // (HR11) or identity (HR7). SlaveDetected is a DETECT-phase latch (command 101)
+                // that the legacy firmware leaves 0 even while the amp is being polled, so it
+                // must NOT be the sole detection gate. It is surfaced as a raw field below.
+                if (!IsObservedAmplifier(item))
                 {
                     continue;
                 }
 
-                Console.WriteLine(JsonSerializer.Serialize(BuildReadRegisterLine(slave, item), jsonOptions));
+                Console.WriteLine(JsonSerializer.Serialize(BuildReadRegisterLine(slave, item, host.Profile), jsonOptions));
             }
+        }
+
+        /// <summary>Firmware <c>SLAVE_DATA</c> enum value <c>SLAVE_DATA_OK</c> (PetitModbus.h).</summary>
+        private const uint SlaveDataOk = 0x02;
+
+        /// <summary>
+        /// True when a track-amplifier frame carries positive evidence of a successful, data-bearing
+        /// ModBus exchange: <see cref="TrackAmplifierItem.MbCommError"/> equals SLAVE_DATA_OK and the
+        /// legacy checksum (HR11) or identity (HR7) is non-zero. Intentionally does NOT require
+        /// <see cref="TrackAmplifierItem.SlaveDetected"/> != 0, because the legacy firmware reports
+        /// SlaveDetected=0 even while polling the amplifier.
+        /// </summary>
+        private static bool IsObservedAmplifier(TrackAmplifierItem item)
+        {
+            ushort[] regs = item.HoldingReg;
+            return item.MbCommError == SlaveDataOk &&
+                   (regs[TrackAmplifierRegisters.SwChecksum] != 0 ||
+                    regs[TrackAmplifierRegisters.Identity] != 0);
         }
 
         private static void WaitForRegisterReadback(TrackApplicationVariables variables, int waitMs)
@@ -556,7 +718,7 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 bool allPopulated = ReadRegisterSlaves.All(slave =>
                 {
                     TrackAmplifierItem item = variables.trackAmpItems[slave];
-                    return item.SlaveDetected == 1 && item.ProtocolReadbackObserved;
+                    return IsObservedAmplifier(item) && item.ProtocolReadbackObserved;
                 });
 
                 if (allPopulated)
@@ -569,12 +731,17 @@ namespace SiebwaldeApp.Koploper.Validation.Host
             }
         }
 
-        private static object BuildReadRegisterLine(int slave, TrackAmplifierItem item)
+        private static object BuildReadRegisterLine(int slave, TrackAmplifierItem item, LayoutProfile profile)
         {
-            ushort identity = item.HoldingReg[TrackAmplifierRegisters.Identity];
+            ushort hr7Raw = item.HoldingReg[TrackAmplifierRegisters.Identity];
             ushort swChecksum = item.HoldingReg[TrackAmplifierRegisters.SwChecksum];
             ushort fwVersionMajorMinor = item.HoldingReg[TrackAmplifierRegisters.FwVersionMajorMinor];
             ushort fwVersionPatchProtocol = item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol];
+
+            // The physical section bound to this real amplifier (ModBus slave), from the profile's
+            // declarative PhysicalAmplifierMapping. Null when no binding declares this amplifier.
+            int? physicalSection = profile.PhysicalAmplifierMapping
+                .FirstOrDefault(b => b.PhysicalAmplifier == slave)?.SectionId;
 
             // A legacy amplifier's HR21/HR22 read 0: never decode 0 as a version. Only when both
             // registers are non-zero do we decode the firmware version; otherwise mark UNSUPPORTED.
@@ -593,8 +760,10 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 type = "amplifierIdentityReadback",
                 slaveNumber = slave,
                 slaveDetected = item.SlaveDetected,
-                identity,
-                identityHex = "0x" + identity.ToString("X4"),
+                // Legacy HR7 is a raw register dump, NOT a firmware identity (see
+                // docs/K8B-COMMUNICATION-RECOVERY.md §4): relabelled to hr7Raw.
+                hr7Raw,
+                hr7RawHex = "0x" + hr7Raw.ToString("X4"),
                 swChecksum,
                 swChecksumHex = "0x" + swChecksum.ToString("X4"),
                 fwVersionMajorMinor,
@@ -604,10 +773,27 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 fwVersion,
                 fwProtocolVersion,
                 versionStatus = versionSupported ? "SUPPORTED" : "UNSUPPORTED",
+                mbCommError = item.MbCommError,
+                mbCommErrorName = MbCommErrorName(item.MbCommError),
+                physicalSection,
                 protocolReadbackObserved = item.ProtocolReadbackObserved,
-                lastDataReceivedUtc = item.LastDataReceivedUtc
+                lastDataReceivedUtc = item.LastDataReceivedUtc,
+                fresh = TrackAmplifierDataFreshness.HasFreshProtocolReadback(item)
             };
         }
+
+        /// <summary>Maps the firmware <c>SLAVE_DATA</c> enum value to its name (PetitModbus.h).</summary>
+        private static string MbCommErrorName(uint mbCommError) => mbCommError switch
+        {
+            0x00 => "SLAVE_DATA_IDLE",
+            0x01 => "SLAVE_DATA_BUSY",
+            0x02 => "SLAVE_DATA_OK",
+            0x03 => "SLAVE_DATA_NOK",
+            0x04 => "SLAVE_DATA_TIMEOUT",
+            0x05 => "SLAVE_DATA_EXCEPTION",
+            0x06 => "SLAVE_DATA_UNKNOWN",
+            _ => "UNKNOWN"
+        };
 
         // ---------------------------------------------------------------- sample flattening
 

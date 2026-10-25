@@ -1,0 +1,111 @@
+"""Siebwalde K8B active-session guard — allowlist + shutdown classification.
+
+The *active* half of the diagnostics surface (B2/B3/B5) runs the validated cold
+start through the proven C# ``SiebwaldeApp.Koploper.Validation.Host`` as a
+bounded child process. This module is the executable vocabulary for that surface
+and for the combined active allowlist. It contains NO socket and NO subprocess:
+it only declares the command sets and classifies a terminated session.
+
+Command allowlist (a cross-check, not the enforcement):
+
+* ``ACTIVE_COMMANDS`` = the six telemetry-enablement commands the C# host may
+  ever send (250→100→101→104→106→105).
+* ``ACTIVE_ALLOWLIST`` = those six plus the read-only command 113, mirroring the
+  combined reachable set across the C# host and the Python 113 transport.
+* 108 (EXEC_MBUS_SLAVE_DATA_EXCH — the only HR0/PWM/movement write vector), 107
+  (RESET), and every flash/recovery command (120..130, 200..243) are
+  structurally unreachable and are never present in either set.
+
+Shutdown classification (fail-closed) maps a terminated session to exactly one
+of :data:`SHUTDOWN_CLASSIFICATIONS`; ``unknown``, ``ack_timeout`` and
+``incomplete_init`` are never promoted to success.
+"""
+
+from __future__ import annotations
+
+# --------------------------------------------------------------------------- #
+# Active command allowlist
+# --------------------------------------------------------------------------- #
+
+# The six telemetry-enablement commands, in the mandated cold-start order
+# (mirrors SiebwaldeApp.Core/Koploper/Telemetry/KoploperSessionCommandAllowlist.cs
+# ``ColdStartOrder``).
+ACTIVE_COMMANDS = frozenset({250, 100, 101, 104, 106, 105})
+
+# Combined reachable set: the six state-changing commands + the read-only 113.
+ACTIVE_ALLOWLIST = ACTIVE_COMMANDS | {113}
+
+COLD_START_ORDER = (250, 100, 101, 104, 106, 105)
+
+# Structurally unreachable commands (never in the active allowlist).
+BLOCKED_DESTRUCTIVE = (108, 107)
+
+# Stable display names for the reachable commands (used by the orchestrator to
+# label the init sequence without decoding anything on the wire).
+COMMAND_NAMES = {
+    250: "CLIENT_CONNECTION_REQUEST",
+    100: "EXEC_MBUS_STATE_SLAVES_ON",
+    101: "EXEC_MBUS_STATE_SLAVE_DETECT",
+    104: "EXEC_MBUS_STATE_SLAVE_INIT",
+    106: "EXEC_MBUS_STATE_START_DATA_UPLOAD",
+    105: "EXEC_MBUS_STATE_SLAVE_ENABLE",
+    113: "GET_CONTROLLER_VERSION",
+}
+
+# --------------------------------------------------------------------------- #
+# Shutdown classification
+# --------------------------------------------------------------------------- #
+
+CLEAN_SHUTDOWN = "clean_shutdown"
+ACK_TIMEOUT = "ack_timeout"
+CONTROLLER_UNAVAILABLE = "controller_unavailable"
+SESSION_CONFLICT = "session_conflict"
+INCOMPLETE_INIT = "incomplete_init"
+SAFETY_STOP = "safety_stop"
+PO_INTERVENTION = "po_intervention"
+UNKNOWN = "unknown"
+
+SHUTDOWN_CLASSIFICATIONS = (
+    CLEAN_SHUTDOWN,
+    ACK_TIMEOUT,
+    CONTROLLER_UNAVAILABLE,
+    SESSION_CONFLICT,
+    INCOMPLETE_INIT,
+    SAFETY_STOP,
+    PO_INTERVENTION,
+    UNKNOWN,
+)
+
+
+def classify_shutdown(exit_code, stdout, timed_out: bool = False, aborted: bool = False) -> str:
+    """Classify a terminated session into exactly one shutdown class.
+
+    Precedence (first match wins, fail-closed):
+
+    1. ``aborted``            → ``safety_stop`` (explicit abort / kill)
+    2. ``sessionConflict``    → ``session_conflict`` (bind/ownership failure)
+    3. ``initFailure``        → ``ack_timeout`` (DONE ack timed out)
+    4. ``controllerUnavailable`` → ``controller_unavailable``
+    5. ``poIntervention``     → ``po_intervention``
+    6. ``timed_out``          → ``incomplete_init``
+    7. ``exit_code == 0`` and ``sessionSummary`` present → ``clean_shutdown``
+    8. otherwise             → ``unknown``
+
+    ``unknown`` is never promoted to success.
+    """
+    text = stdout if isinstance(stdout, str) else ""
+    if aborted:
+        return SAFETY_STOP
+    if "sessionConflict" in text:
+        return SESSION_CONFLICT
+    if "initFailure" in text:
+        return ACK_TIMEOUT
+    if "controllerUnavailable" in text:
+        return CONTROLLER_UNAVAILABLE
+    if "poIntervention" in text:
+        return PO_INTERVENTION
+    if timed_out:
+        return INCOMPLETE_INIT
+    if exit_code == 0 and "sessionSummary" in text:
+        return CLEAN_SHUTDOWN
+    return UNKNOWN

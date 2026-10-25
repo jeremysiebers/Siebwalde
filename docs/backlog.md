@@ -2,6 +2,17 @@
 
 This backlog records proposed improvements discovered during analysis. None of these items are approved for implementation yet.
 
+## K8B residual findings (Integrator R2 review, non-blocking)
+
+Recorded from the K8B independent R2 review (branch `fix/k8b-legacy-12-register-slaveryinfo`, 2026-10-25). None blocked the K8B merge.
+
+| Item | Evidence | Suggested acceptance criteria |
+| --- | --- | --- |
+| Pre-existing flaky V3 integration test `ObservedNeutralV3IntegrationTests.RealMode_PhysicalMappingProfile_ResolvesPhysicalDomain_AndGrantsAfterObservedNeutral` failed once (1046/1047) on a full-suite run; passes in isolation and on re-run. | Not in the K8B diff (last touched `61939130`); real TCP ports + timing-dependent observed-neutral. | Reproduce under load; add determinism or mark the timing dependency explicitly. |
+| `session_authority.Grant.max_uses` is parsed but not enforced (single-use is enforced by the atomic `.consumed` rename instead). | `session_authority.py` `Grant.max_uses`; `consume()` rename. | Either honor `max_uses > 1` or drop the field to avoid implying multi-use. |
+| `MIN_WAIT_MS = 0` allows `wait_ms=0` (→ 0.001s subprocess timeout). | `active_session.py` `MIN_WAIT_MS = 0`. | Set a non-zero minimum readback wait. |
+| `cold_start_slaveinfo_capture.py:classify_frame` checks legacy (footer 40) before Phase-1 (footer 62), opposite to the C# decoder; a 63-byte frame whose byte 40 is coincidentally 0x55 would be mislabelled. | `cold_start_slaveinfo_capture.py` `classify_frame`. | Align detection order with the C# decoder (Phase-1 first). Display-only. |
+
 ## K6 residual risks (Architect review, non-safety-critical)
 
 Recorded from the K6-A live OBSERVE transport architecture review (branch `feature/k6-observe`, commits `5cc2402f` + `ae18cb44`). None blocked K6-B (the operation is hard-coded 113, read-only); a bounded corrective increment is recommended before any further physical diagnostics.

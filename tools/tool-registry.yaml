@@ -195,3 +195,54 @@ tools:
     source_revision: 8fa3a6e
     mcp_service: null
     migration_candidate: false
+
+  - id: diagnostics-cold-start-capture
+    name: Cold-start SLAVEINFO raw-UDP capture + dual-layout decoder
+    path: tools/diagnostics/cold_start_slaveinfo_capture.py
+    purpose: Bounded single-session cold start (250->100->101->104->106->105) with raw UDP capture; classifies every datagram and decodes the deployed legacy 12-register and Phase-1 23-register SLAVEINFO layouts (footer-position discrimination). Proved the K8B root cause.
+    lifecycle: ACTIVE
+    preservation_policy: KEEP
+    po_decision: "K8B — KEEP_IN_REPOSITORY (proven working reference tool, physically validated 2026-10-25)"
+    language: Python
+    runtime: project venv (tools/knowledge/.venv)
+    entry_points: [tools/diagnostics/cold_start_slaveinfo_capture.py]
+    hardware: PIC32 master (UDP) — live path sends only the six cold-start commands; no 108/107/flash
+    side_effect: STATE_CHANGING (live cold-start); decode/classification offline is side-effect-free
+    capabilities:
+      - cold_start_init_sequence
+      - raw_udp_capture
+      - slaveryinfo_dual_layout_decode
+      - presence_signal_mb_comm_error
+    offline_tested: true       # 4 deterministic classifier tests
+    physically_proven: true    # K8B live capture (33310 frames) + physical HR11=0x251F
+    source_revision: a49ea004
+    mcp_service: null
+    migration_candidate: false
+    related: [diagnostics-mcp]
+
+  - id: diagnostics-mcp-active-session
+    name: Diagnostics MCP active controller-session extension (B1..B5)
+    path: tools/diagnostics/
+    purpose: Grant-gated live controller operation for the Diagnostics MCP: ownership preflight (B1), command-113 identity probe (B4), bounded cold-start init + SLAVEINFO readback + safe stop (B2/B3/B5), and safety abort (B5). Hybrid reuse (C# Validation.Host subprocess + existing Python 113 transport); no second protocol stack.
+    lifecycle: ACTIVE
+    preservation_policy: KEEP_ACTIVE_MCP
+    po_decision: "K8B — KEEP_IN_REPOSITORY (accepted Diagnostics MCP surface; live V4 validated 2026-10-25)"
+    language: Python (+ reuses C# SiebwaldeApp.Koploper.Validation.Host)
+    runtime: project venv (tools/knowledge/.venv) + net8.0 C# host artifact
+    entry_points: [tools.diagnostics.mcp_server (python -m tools.diagnostics.mcp_server)]
+    hardware: PIC32 master (UDP) — live path only via scoped single-use grant
+    side_effect: STATE_CHANGING (grant-gated session); OFFLINE tools remain side-effect-free
+    capabilities:
+      - controller_preflight
+      - command_113_identity_probe
+      - bounded_controller_session
+      - slaveryinfo_readback
+      - safe_abort
+      - single_use_grant
+      - active_offline_separation
+    offline_tested: true       # 192 diagnostics tests (incl. 56 new active/grant tests)
+    physically_proven: true    # K8B live V4: PASS, clean_shutdown, 4 amps HR11=0x251F
+    source_revision: a49ea004
+    mcp_service: diagnostics
+    migration_candidate: false
+    related: [diagnostics-cold-start-capture, picoscope-mcp, knowledge-foundation]
