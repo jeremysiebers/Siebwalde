@@ -134,9 +134,11 @@ Mitigation: mandatory pre-ERASE PicoScope capture of the slot-select line.
 (which is independent of the `Startup_Machine==1` gate). At SelectSlave case 2 its RA0
 goes HIGH and its bootloader starts — so a 125 ERASE could reach BOTH amps (the 8-bit
 bootloader UART is addressless). This is a real gap in the "double isolation" claim.
-Mitigations (choose one, both recommended):
-  (a) explicit "release all slots" (`HoldingReg0=0`) before 107/100, or
-  (b) mandatory pre-ERASE PicoScope capture proving exactly one slot is selected.
+**RESOLVED (software):** `flash_one.py` now emits `101 SLAVE_DETECT` BEFORE the 107/100
+reset (`_release_all_slots()`); `SLAVExDETECT`→`DetectSlave` ends each amp iteration by
+writing `HoldingReg0 = 0` (`slavestartup.c:324-338` case 7), releasing every slot before
+the power-cycle. Residual physical confirmation: a pre-ERASE PicoScope capture of the
+slot-select line remains recommended as belt-and-braces (see execution plan).
 Note: the historical fleet 122 route has the same property (it ran after a full init
 whose detect flow released the slot), so this is not new to flash_one.py — but for a
 standalone single-target driver it must be explicitly closed.
