@@ -532,10 +532,40 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 return;
             }
 
-            WaitForRegisterReadback(host.Variables, waitMs);
+            // Log each freshly-parsed SLAVEINFO frame to stderr for diagnosis. The inner comm
+            // client also re-publishes cached amplifier data on a 2 Hz timer without advancing
+            // ProtocolReadbackSequence, so de-duplicate on that sequence to log only new frames.
+            var lastSequenceBySlave = new Dictionary<int, long>();
+            void LogSlaveinfoFrame(object? sender, AmplifierDataEventArgs e)
+            {
+                TrackAmplifierItem item = e.Amplifier;
+                int slave = item.SlaveNumber;
+                long sequence = item.ProtocolReadbackSequence;
+                if (lastSequenceBySlave.TryGetValue(slave, out long last) && last == sequence)
+                {
+                    return; // 2 Hz re-publish of an already-logged frame.
+                }
+
+                lastSequenceBySlave[slave] = sequence;
+                Console.Error.WriteLine(
+                    $"[SLAVEINFO] slave={slave} detected={item.SlaveDetected} " +
+                    $"HR7=0x{item.HoldingReg[TrackAmplifierRegisters.Identity]:X4} " +
+                    $"HR11=0x{item.HoldingReg[TrackAmplifierRegisters.SwChecksum]:X4}");
+            }
+
+            host.SessionCommandGuard.AmplifierDataReceived += LogSlaveinfoFrame;
+            try
+            {
+                WaitForRegisterReadback(host.Variables, waitMs);
+            }
+            finally
+            {
+                host.SessionCommandGuard.AmplifierDataReceived -= LogSlaveinfoFrame;
+            }
 
             var jsonOptions = new JsonSerializerOptions { WriteIndented = false };
 
+            int emitted = 0;
             foreach (int slave in ReadRegisterSlaves)
             {
                 TrackAmplifierItem item = host.Variables.trackAmpItems[slave];
@@ -545,6 +575,25 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 }
 
                 Console.WriteLine(JsonSerializer.Serialize(BuildReadRegisterLine(slave, item), jsonOptions));
+                emitted++;
+            }
+
+            if (emitted == 0)
+            {
+                long slaveInfoFramesObserved = host.Variables.trackAmpItems.Sum(item => item.ProtocolReadbackSequence);
+                int[] detectedSlaveNumbers = host.Variables.trackAmpItems
+                    .Where(item => item.SlaveDetected == 1)
+                    .Select(item => (int)item.SlaveNumber)
+                    .OrderBy(slave => slave)
+                    .ToArray();
+
+                Console.WriteLine(JsonSerializer.Serialize(new
+                {
+                    type = "NO_AMPLIFIERS_DETECTED",
+                    slaveInfoFramesObserved,
+                    detectedSlaveNumbers,
+                    waitMs
+                }, jsonOptions));
             }
         }
 

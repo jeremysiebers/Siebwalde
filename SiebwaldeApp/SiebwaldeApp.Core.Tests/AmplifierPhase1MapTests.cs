@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using SiebwaldeApp.Core;
@@ -26,6 +27,58 @@ namespace SiebwaldeApp.Core.Tests
             Assert.Equal(0x11223344u, item.MbCommError);
             Assert.Equal(5, item.MbExceptionCode);
             Assert.Equal(6, item.SpiCommErrorCounter);
+            Assert.True(item.ProtocolReadbackObserved);
+        }
+
+        [Fact]
+        public void FirmwareLayoutFrame_Parses82ByteEnvelopeWithAlignmentPadding()
+        {
+            // The real firmware emits the full 82-byte udpTrans_t envelope (ethernet.c sends
+            // sizeof(udpTrans_t)), and its SLAVE_INFO struct carries 2 bytes of alignment padding
+            // before the 4-byte MbCommError enum, so the firmware trailer is 2 bytes longer than the
+            // packed 63-byte simulator layout. Both must decode to the same register content.
+            var registers = new ushort[TrackAmplifierRegisters.Count];
+            registers[TrackAmplifierRegisters.Identity] = 0xF101;               // HR7
+            registers[TrackAmplifierRegisters.SwChecksum] = 0xE906;             // HR11
+            registers[TrackAmplifierRegisters.FwVersionMajorMinor] = 0x0100;    // HR21
+            registers[TrackAmplifierRegisters.FwVersionPatchProtocol] = 0x0001; // HR22
+
+            using var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream);
+            writer.Write(new byte[] { 0xAA, 0xFF, 0xAA, 3, 1, 0 }); // header, command, Header, slave=3, detected=1, pad
+            foreach (ushort value in registers)
+            {
+                writer.Write(value);
+            }
+            writer.Write((ushort)123); // MbReceiveCounter
+            writer.Write((ushort)456); // MbSentCounter
+            writer.Write((ushort)0);   // 2-byte alignment padding before MbCommError (firmware layout)
+            writer.Write(0x11223344u); // MbCommError
+            writer.Write((byte)5);     // MbExceptionCode
+            writer.Write((byte)6);     // SpiCommErrorCounter
+            writer.Write((byte)0x55);  // Footer
+            while (stream.Length < 82)
+            {
+                writer.Write((byte)0xEE); // trailing udpTrans_t garbage
+            }
+
+            byte[] frame = stream.ToArray();
+            Assert.Equal(82, frame.Length);
+
+            var variables = new TrackApplicationVariables();
+            var client = new TrackCommClientAsync(new UnusedTransport(), variables);
+            Parse(client, frame);
+
+            TrackAmplifierItem item = variables.trackAmpItems[3];
+            Assert.Equal(1, item.SlaveDetected);
+            Assert.Equal(registers, item.HoldingReg);
+            Assert.Equal((ushort)0xF101, item.HoldingReg[TrackAmplifierRegisters.Identity]);
+            Assert.Equal((ushort)0xE906, item.HoldingReg[TrackAmplifierRegisters.SwChecksum]);
+            Assert.Equal((ushort)0x0100, item.HoldingReg[TrackAmplifierRegisters.FwVersionMajorMinor]);
+            Assert.Equal((ushort)0x0001, item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]);
+            Assert.Equal((ushort)123, item.MbReceiveCounter);
+            Assert.Equal((ushort)456, item.MbSentCounter);
+            Assert.Equal(0x11223344u, item.MbCommError);
             Assert.True(item.ProtocolReadbackObserved);
         }
 
