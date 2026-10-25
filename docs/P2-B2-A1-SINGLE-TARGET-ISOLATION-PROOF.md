@@ -64,8 +64,8 @@ Amp 1 `RESET()` → `Bootload_Required()`: RA0 still LOW (slot not yet released)
 
 ### 5. Slot released (SelectSlave case 6)
 
-`SelectSlave` case 6 writes backplane `HoldingReg0 = 0` (`slavefwhandler.c:1239` in
-FlashSequencer case 8: `:968-977`). RA0 goes HIGH → bootloader's `while(RA0==LOW)`
+`SelectSlave` case 6 writes backplane `HoldingReg0 = 0` (`slavefwhandler.c:1266-1279`,
+the `Data.RegData0 = 0` at :1275). RA0 goes HIGH → bootloader's `while(RA0==LOW)`
 exits → bootloader starts communicating (8-bit UART). Amps 3/4/6 remain in application
 `Startup_Machine=0`.
 
@@ -119,6 +119,32 @@ the same preceding 107+100 global reset. Amp 1's RA0 pin being the sole pin pull
 by the backplane slot-select — combined with the application-side `Startup_Machine==1`
 gate — is a double isolation: amps 3/4/6 neither enter the bootloader nor accept the
 bootloader-entry write.
+
+## Residual risks (must be closed before hardware flash)
+
+**R1 — backplane AMP_IDx_SET → amp RA0 wiring (hardware-level, not KiCad-traced).**
+The entire isolation rests on this one physical link. Corroborated by naming + physical
+evidence (amps detected at 1/3/4/6 in K8B/P2-B1) but not net-traced this session.
+Mitigation: mandatory pre-ERASE PicoScope capture of the slot-select line.
+
+**R2 — backplane `HoldingReg0` initial state not established (source-inferred).**
+107/100 resets only the amps (RD1 line), NOT the backplane. `flash_one.py` does not set
+`HoldingReg0=0` before 107/100. If a PRIOR operation left a slot selected, then at the
+100 power-up that amp boots with RA0 LOW and enters the bootloader via the IO-pin path
+(which is independent of the `Startup_Machine==1` gate). At SelectSlave case 2 its RA0
+goes HIGH and its bootloader starts — so a 125 ERASE could reach BOTH amps (the 8-bit
+bootloader UART is addressless). This is a real gap in the "double isolation" claim.
+Mitigations (choose one, both recommended):
+  (a) explicit "release all slots" (`HoldingReg0=0`) before 107/100, or
+  (b) mandatory pre-ERASE PicoScope capture proving exactly one slot is selected.
+Note: the historical fleet 122 route has the same property (it ran after a full init
+whose detect flow released the slot), so this is not new to flash_one.py — but for a
+standalone single-target driver it must be explicitly closed.
+
+**R3 — intact-firmware premise for amps 3/4/6.** The proof assumes amps 3/4/6 have
+valid firmware (checksum intact), so they do not enter the bootloader via the
+checksum-mismatch path. This holds (all read `0x251F`, detected=1) but is a premise,
+not a per-run guarantee.
 
 ## Evidence classification (honesty note)
 
