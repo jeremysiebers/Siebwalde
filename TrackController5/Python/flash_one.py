@@ -44,7 +44,7 @@ It MUST NOT (and never does) emit 122 (FLASH_ALL_SLAVES) or 131/132.
 
 The FW handler is entered via EXEC_MBUS_STATE_SLAVE_FW_FLASH (103): the
 controller only routes MBUS commands + CLIENT_CONNECTION_REQUEST
-(`controller.c:196-259`), and the FW handler runs only inside
+(`controller.c:306-384`), and the FW handler runs only inside
 MBUS_STATE_SLAVE_FW_FLASH (`mbus.c:307-318`).
 
 Commands 123 (SELECT_SLAVE) and 130 (EXIT_SLAVExFWxHANDLER) emit NO host ack
