@@ -539,13 +539,37 @@ namespace SiebwaldeApp.Koploper.Validation.Host
             foreach (int slave in ReadRegisterSlaves)
             {
                 TrackAmplifierItem item = host.Variables.trackAmpItems[slave];
-                if (item.SlaveDetected != 1)
+
+                // A track amplifier is "observed" when its last ModBus exchange succeeded
+                // (MbCommError == SLAVE_DATA_OK) and it returned a non-zero legacy checksum
+                // (HR11) or identity (HR7). SlaveDetected is a DETECT-phase latch (command 101)
+                // that the legacy firmware leaves 0 even while the amp is being polled, so it
+                // must NOT be the sole detection gate. It is surfaced as a raw field below.
+                if (!IsObservedAmplifier(item))
                 {
                     continue;
                 }
 
                 Console.WriteLine(JsonSerializer.Serialize(BuildReadRegisterLine(slave, item), jsonOptions));
             }
+        }
+
+        /// <summary>Firmware <c>SLAVE_DATA</c> enum value <c>SLAVE_DATA_OK</c> (PetitModbus.h).</summary>
+        private const uint SlaveDataOk = 0x02;
+
+        /// <summary>
+        /// True when a track-amplifier frame carries positive evidence of a successful, data-bearing
+        /// ModBus exchange: <see cref="TrackAmplifierItem.MbCommError"/> equals SLAVE_DATA_OK and the
+        /// legacy checksum (HR11) or identity (HR7) is non-zero. Intentionally does NOT require
+        /// <see cref="TrackAmplifierItem.SlaveDetected"/> != 0, because the legacy firmware reports
+        /// SlaveDetected=0 even while polling the amplifier.
+        /// </summary>
+        private static bool IsObservedAmplifier(TrackAmplifierItem item)
+        {
+            ushort[] regs = item.HoldingReg;
+            return item.MbCommError == SlaveDataOk &&
+                   (regs[TrackAmplifierRegisters.SwChecksum] != 0 ||
+                    regs[TrackAmplifierRegisters.Identity] != 0);
         }
 
         private static void WaitForRegisterReadback(TrackApplicationVariables variables, int waitMs)
@@ -556,7 +580,7 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 bool allPopulated = ReadRegisterSlaves.All(slave =>
                 {
                     TrackAmplifierItem item = variables.trackAmpItems[slave];
-                    return item.SlaveDetected == 1 && item.ProtocolReadbackObserved;
+                    return IsObservedAmplifier(item) && item.ProtocolReadbackObserved;
                 });
 
                 if (allPopulated)
@@ -605,7 +629,8 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 fwProtocolVersion,
                 versionStatus = versionSupported ? "SUPPORTED" : "UNSUPPORTED",
                 protocolReadbackObserved = item.ProtocolReadbackObserved,
-                lastDataReceivedUtc = item.LastDataReceivedUtc
+                lastDataReceivedUtc = item.LastDataReceivedUtc,
+                fresh = TrackAmplifierDataFreshness.HasFreshProtocolReadback(item)
             };
         }
 

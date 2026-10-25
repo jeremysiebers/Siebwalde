@@ -84,6 +84,65 @@ namespace SiebwaldeApp.Core.Tests
             => Assert.Throws<ArgumentException>(() => TrackSlaveInfoFrame.Encode(1, 1, new ushort[12]));
 
         [Fact]
+        public void Legacy12RegisterFrame_DecodesDeployedLayout()
+        {
+            // Real captured 82-byte legacy SLAVEINFO frame (slave 1) from the deployed PIC32
+            // 12-register firmware. Footer must sit at wire offset 40, not 62.
+            byte[] frame =
+            {
+                0xAA, 0xFF, 0xAA, 0x01, 0x00, 0x00, 0x8F, 0x01, 0x00, 0x80, 0x00, 0x2A,
+                0x00, 0x00, 0x49, 0x02, 0x37, 0x00, 0x0C, 0x00, 0x49, 0x66, 0x3F, 0x66,
+                0x00, 0x00, 0x00, 0x00, 0x1F, 0x25, 0x48, 0x66, 0x84, 0x66, 0x02, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x88, 0xFF, 0x07,
+                0x80, 0xB8, 0x12, 0x01, 0x80, 0x00, 0x00, 0x00, 0x00, 0x20, 0x12, 0x01,
+                0x80, 0x20, 0x12, 0x01, 0x80, 0x01, 0x00, 0x00, 0x25, 0x00
+            };
+            Assert.Equal(82, frame.Length);
+            Assert.Equal(0x55, frame[TrackSlaveInfoFrame.LegacyFooterOffset]);
+
+            var variables = new TrackApplicationVariables();
+            var client = new TrackCommClientAsync(new UnusedTransport(), variables);
+            Parse(client, frame);
+
+            TrackAmplifierItem item = variables.trackAmpItems[1];
+            Assert.Equal((ushort)0, item.SlaveDetected);       // legacy reports 0 while polled
+            Assert.Equal((ushort)0x018F, item.HoldingReg[0]); // HR0 neutral PWM
+            Assert.Equal((ushort)0x6649, item.HoldingReg[7]); // HR7 identity (amp1)
+            Assert.Equal((ushort)0x251F, item.HoldingReg[11]); // HR11 legacy checksum
+            Assert.Equal(2u, item.MbCommError);                 // SLAVE_DATA_OK
+            Assert.True(item.ProtocolReadbackObserved);
+            // HR21/HR22 do not exist in the 12-register layout: never decoded as a version.
+            Assert.Equal((ushort)0, item.HoldingReg[TrackAmplifierRegisters.FwVersionMajorMinor]);
+            Assert.Equal((ushort)0, item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]);
+            // Legacy identity (0x6649) fails the Phase-1 shape check -> fail-closed.
+            Assert.Equal(AmplifierPhase1Safety.IncompatibleFirmware, item.Phase1Failure);
+        }
+
+        [Fact]
+        public void Legacy12RegisterFrame_WrongFooter_DoesNotEstablishReadback()
+        {
+            byte[] frame =
+            {
+                0xAA, 0xFF, 0xAA, 0x01, 0x00, 0x00, 0x8F, 0x01, 0x00, 0x80, 0x00, 0x2A,
+                0x00, 0x00, 0x49, 0x02, 0x37, 0x00, 0x0C, 0x00, 0x49, 0x66, 0x3F, 0x66,
+                0x00, 0x00, 0x00, 0x00, 0x1F, 0x25, 0x48, 0x66, 0x84, 0x66, 0x02, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x88, 0xFF, 0x07,
+                0x80, 0xB8, 0x12, 0x01, 0x80, 0x00, 0x00, 0x00, 0x00, 0x20, 0x12, 0x01,
+                0x80, 0x20, 0x12, 0x01, 0x80, 0x01, 0x00, 0x00, 0x25, 0x00
+            };
+            frame[TrackSlaveInfoFrame.LegacyFooterOffset] = 0x00; // corrupt footer at byte 40
+
+            var variables = new TrackApplicationVariables();
+            var client = new TrackCommClientAsync(new UnusedTransport(), variables);
+            Parse(client, frame);
+
+            Assert.False(variables.trackAmpItems[1].ProtocolReadbackObserved);
+        }
+
+
+        [Fact]
         public void ControllerVersionReply_SurfacesVersionWithoutGating()
         {
             var variables = new TrackApplicationVariables();

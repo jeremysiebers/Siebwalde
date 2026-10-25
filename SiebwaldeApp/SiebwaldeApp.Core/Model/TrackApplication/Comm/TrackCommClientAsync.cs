@@ -154,81 +154,11 @@ namespace SiebwaldeApp.Core
             // 1) Amplifier data frame: HEADER + SLAVEINFO
             if (header == HEADER && sender == SLAVEINFO)
             {
-                // Never interpret a legacy/truncated map as a Phase-1 observation.
-                if (buffer.Length != TrackSlaveInfoFrame.Length || buffer[2] != HEADER || buffer[^1] != FOOTER)
-                    return;
-                // EXACT dezelfde volgorde als in TrackIOHandle.HandleNewData :contentReference[oaicite:6]{index=6}
-
-                ushort mbHeader = reader.ReadByte();
-                ushort slaveNumber = reader.ReadByte();
-                ushort slaveDetected = reader.ReadByte();
-                ushort padding = reader.ReadByte();
-
-                ushort[] holdingReg = new ushort[TrackAmplifierRegisters.Count];
-                for (int i = 0; i < TrackAmplifierRegisters.Count; i++)
-                {
-                    holdingReg[i] = reader.ReadUInt16();
-                }
-
-                ushort mbReceiveCounter = reader.ReadUInt16();
-                ushort mbSentCounter = reader.ReadUInt16();
-
-                uint mbCommError = reader.ReadUInt32();
-
-                ushort mbExceptionCode = reader.ReadByte();
-                ushort spiCommErrorCounter = reader.ReadByte();
-                ushort mbFooter = reader.ReadByte();
-
-                int index = slaveNumber; // net als in TrackIOHandle: trackAmpItems[SlaveNumber]
-
-                if (index >= 0 && index < _variables.trackAmpItems.Count)
-                {
-                    TrackAmplifierItem amplifier = _variables.trackAmpItems[index];
-
-                    amplifier.SlaveDetected = slaveDetected;
-                    amplifier.HoldingReg = holdingReg;
-                    amplifier.ProtocolReadbackSequence++;
-                    // Identity fail-closed (AC6): a track amplifier whose HR7 does not carry the
-                    // compatible identity fields is blocked. Backplane/config slaves (51..55) use a
-                    // different register semantics and are not identity-checked here.
-                    if (TrackAmplifierAddress.IsTrackAmplifierAddress(slaveNumber))
-                    {
-                        var identity = holdingReg[TrackAmplifierRegisters.Identity];
-                        if (!TrackAmplifierRegisters.HasCompatibleIdentityFields(identity))
-                        {
-                            // Primary check: legacy/unknown firmware is never granted authority.
-                            amplifier.Phase1Failure = AmplifierPhase1Safety.IncompatibleFirmware;
-                            amplifier.ConfigurationVerified = false;
-                        }
-                        else if (!TrackAmplifierRegisters.HasCompatibleProtocolVersion(
-                                     holdingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]))
-                        {
-                            // Secondary check, strictly behind HR7 identity: a Phase-1 identity with a
-                            // mismatched or absent HR22 PROTOCOL_VERSION (0x00 = unknown/legacy) is
-                            // denied write/control authority but stays readable.
-                            amplifier.Phase1Failure = AmplifierPhase1Safety.IncompatibleProtocolVersion;
-                            amplifier.ConfigurationVerified = false;
-                        }
-                        else if (amplifier.Phase1Failure is AmplifierPhase1Safety.IncompatibleFirmware or
-                                 AmplifierPhase1Safety.IncompatibleProtocolVersion)
-                        {
-                            amplifier.Phase1Failure = null;
-                        }
-                    }
-                    // Explicit protocol-readback evidence: the current HoldingReg content is a
-                    // genuine SLAVEINFO readback from this runtime, not a locally-written default.
-                    amplifier.ProtocolReadbackObserved = true;
-                    amplifier.LastDataReceivedUtc = DateTimeOffset.UtcNow;
-                    amplifier.MbReceiveCounter = mbReceiveCounter;
-                    amplifier.MbSentCounter = mbSentCounter;
-                    amplifier.MbCommError = mbCommError;
-                    amplifier.MbExceptionCode = mbExceptionCode;
-                    amplifier.SpiCommErrorCounter = spiCommErrorCounter;
-
-                    AmplifierDataReceived?.Invoke(
-                        this,
-                        new AmplifierDataEventArgs(index, amplifier));
-                }
+                // Layout-aware decode: the DEPLOYED legacy PIC32 firmware sends the
+                // 12-register SLAVE_INFO (footer at wire offset 40); the Phase-1 simulator
+                // (and any Phase-1 firmware) sends the 23-register frame (footer at 62).
+                // See TrackSlaveInfoFrame for both layouts.
+                ApplySlaveInfoFrame(buffer);
             }
             // 2) Controller/bootloader message frame: HEADER + iets anders dan SLAVEINFO
             else if (header == HEADER)
@@ -264,6 +194,126 @@ namespace SiebwaldeApp.Core
                 // Onbekend frame (geen HEADER) -> negeren (zelfde gedrag als oude code)
             }
         }
+
+        /// <summary>
+        /// Decodes and applies one SLAVEINFO frame in either the deployed legacy
+        /// 12-register layout (footer at wire offset 40) or the Phase-1 23-register
+        /// layout (63-byte simulator/firmware frame, footer at offset 62). A legacy
+        /// frame is mapped onto a 23-register array with HR12..HR22 zeroed, so HR21/HR22
+        /// (which do not exist in the 12-register firmware) are never decoded as a
+        /// firmware version. Neither shape establishes FC03 freshness on its own.
+        /// </summary>
+        private void ApplySlaveInfoFrame(byte[] buffer)
+        {
+            // Inner SLAVE_INFO.Header must be present and correct.
+            if (buffer.Length < 3 || buffer[2] != HEADER)
+                return;
+
+            ushort slaveNumber;
+            ushort slaveDetected;
+            ushort[] holdingReg = new ushort[TrackAmplifierRegisters.Count];
+            ushort mbReceiveCounter;
+            ushort mbSentCounter;
+            uint mbCommError;
+            ushort mbExceptionCode;
+            ushort spiCommErrorCounter;
+
+            if (buffer.Length == TrackSlaveInfoFrame.Length &&
+                buffer[TrackSlaveInfoFrame.Length - 1] == FOOTER)
+            {
+                // Phase-1 23-register frame (simulator / Phase-1 firmware).
+                slaveNumber = buffer[3];
+                slaveDetected = buffer[4];
+                for (int i = 0; i < TrackAmplifierRegisters.Count; i++)
+                {
+                    holdingReg[i] = ReadUInt16Le(buffer, TrackSlaveInfoFrame.RegisterOffset + 2 * i);
+                }
+                mbReceiveCounter = ReadUInt16Le(buffer, TrackSlaveInfoFrame.TrailerOffset);
+                mbSentCounter = ReadUInt16Le(buffer, TrackSlaveInfoFrame.TrailerOffset + 2);
+                mbCommError = ReadUInt32Le(buffer, TrackSlaveInfoFrame.TrailerOffset + 4);
+                mbExceptionCode = buffer[TrackSlaveInfoFrame.TrailerOffset + 8];
+                spiCommErrorCounter = buffer[TrackSlaveInfoFrame.TrailerOffset + 9];
+            }
+            else if (buffer.Length >= TrackSlaveInfoFrame.LegacyMinLength &&
+                     buffer[TrackSlaveInfoFrame.LegacyFooterOffset] == FOOTER)
+            {
+                // Deployed legacy 12-register frame. HR12..HR22 stay 0 (UNSUPPORTED).
+                slaveNumber = buffer[3];
+                slaveDetected = buffer[4];
+                for (int i = 0; i < TrackSlaveInfoFrame.LegacyRegisterCount; i++)
+                {
+                    holdingReg[i] = ReadUInt16Le(buffer, TrackSlaveInfoFrame.LegacyRegisterOffset + 2 * i);
+                }
+                mbReceiveCounter = ReadUInt16Le(buffer, TrackSlaveInfoFrame.LegacyMbReceiveCounterOffset);
+                mbSentCounter = ReadUInt16Le(buffer, TrackSlaveInfoFrame.LegacyMbSentCounterOffset);
+                mbCommError = ReadUInt32Le(buffer, TrackSlaveInfoFrame.LegacyMbCommErrorOffset);
+                mbExceptionCode = buffer[TrackSlaveInfoFrame.LegacyMbExceptionCodeOffset];
+                spiCommErrorCounter = buffer[TrackSlaveInfoFrame.LegacySpiCommErrorCounterOffset];
+            }
+            else
+            {
+                // Not a valid Phase-1 or legacy SLAVEINFO frame: ignore (fail-closed).
+                return;
+            }
+
+            int index = slaveNumber; // net als in TrackIOHandle: trackAmpItems[SlaveNumber]
+
+            if (index >= 0 && index < _variables.trackAmpItems.Count)
+            {
+                TrackAmplifierItem amplifier = _variables.trackAmpItems[index];
+
+                amplifier.SlaveDetected = slaveDetected;
+                amplifier.HoldingReg = holdingReg;
+                amplifier.ProtocolReadbackSequence++;
+                // Identity fail-closed (AC6): a track amplifier whose HR7 does not carry the
+                // compatible identity fields is blocked. Backplane/config slaves (51..55) use a
+                // different register semantics and are not identity-checked here.
+                if (TrackAmplifierAddress.IsTrackAmplifierAddress(slaveNumber))
+                {
+                    var identity = holdingReg[TrackAmplifierRegisters.Identity];
+                    if (!TrackAmplifierRegisters.HasCompatibleIdentityFields(identity))
+                    {
+                        // Primary check: legacy/unknown firmware is never granted authority.
+                        amplifier.Phase1Failure = AmplifierPhase1Safety.IncompatibleFirmware;
+                        amplifier.ConfigurationVerified = false;
+                    }
+                    else if (!TrackAmplifierRegisters.HasCompatibleProtocolVersion(
+                                 holdingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]))
+                    {
+                        // Secondary check, strictly behind HR7 identity: a Phase-1 identity with a
+                        // mismatched or absent HR22 PROTOCOL_VERSION (0x00 = unknown/legacy) is
+                        // denied write/control authority but stays readable.
+                        amplifier.Phase1Failure = AmplifierPhase1Safety.IncompatibleProtocolVersion;
+                        amplifier.ConfigurationVerified = false;
+                    }
+                    else if (amplifier.Phase1Failure is AmplifierPhase1Safety.IncompatibleFirmware or
+                             AmplifierPhase1Safety.IncompatibleProtocolVersion)
+                    {
+                        amplifier.Phase1Failure = null;
+                    }
+                }
+                // Explicit protocol-readback evidence: the current HoldingReg content is a
+                // genuine SLAVEINFO readback from this runtime, not a locally-written default.
+                amplifier.ProtocolReadbackObserved = true;
+                amplifier.LastDataReceivedUtc = DateTimeOffset.UtcNow;
+                amplifier.MbReceiveCounter = mbReceiveCounter;
+                amplifier.MbSentCounter = mbSentCounter;
+                amplifier.MbCommError = mbCommError;
+                amplifier.MbExceptionCode = mbExceptionCode;
+                amplifier.SpiCommErrorCounter = spiCommErrorCounter;
+
+                AmplifierDataReceived?.Invoke(
+                    this,
+                    new AmplifierDataEventArgs(index, amplifier));
+            }
+        }
+
+        private static ushort ReadUInt16Le(byte[] buffer, int offset)
+            => (ushort)(buffer[offset] | (buffer[offset + 1] << 8));
+
+        private static uint ReadUInt32Le(byte[] buffer, int offset)
+            => (uint)(buffer[offset] | (buffer[offset + 1] << 8) |
+                      (buffer[offset + 2] << 16) | (buffer[offset + 3] << 24));
 
         // NEW: periodic publish of current container data to UI (no bus I/O)
         private static string? DecodeBuildDate(byte[] payload, int offset)
