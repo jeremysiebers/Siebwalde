@@ -9,18 +9,21 @@ The venv used for now is the shared project venv ``tools/knowledge/.venv``
 
     C:\\Localdata\\Siebwalde\\tools\\knowledge\\.venv
 
-Read-only and offline only: fixed tools, no filesystem access, no raw command,
-no hardware-control tool, no network. The wrapped core (``tools.diagnostics.core``)
-and OBSERVE adapter (``tools.diagnostics.observe``) never open a socket, a serial
-port, or a hardware connection, so this adapter is incapable of opening a PIC32
-connection.
+Read-only offline core + a grant-gated active/live surface. The offline tools
+(fixed tools, no filesystem access, no raw command, no hardware-control tool, no
+network) wrap ``tools.diagnostics.core`` and ``tools.diagnostics.observe``, which
+never open a socket, a serial port, or a hardware connection, so the offline
+surface is incapable of opening a PIC32 connection. The four active tools
+(``active_tools.py``) are thin wrappers over ``tools.diagnostics.active_session``
+and perform NO I/O without a valid, scoped, single-use grant.
 """
 
 from __future__ import annotations
 
 from fastmcp import FastMCP
 
-from .. import core, observe
+from . import active_tools
+from .. import active_guard, core, observe
 
 mcp = FastMCP("diagnostics")
 
@@ -94,6 +97,14 @@ def diagnostics_capabilities() -> dict:
     caps["register_maps"] = obs["register_maps"]
     caps["register_address_tables"] = obs["register_address_tables"]
     caps["checksum_register"] = obs["checksum_register"]
+    # Active/live surface (additive; the offline tools above are unchanged). The
+    # server is offline by construction: the active tools are grant-gated and
+    # perform no I/O without a valid scoped grant.
+    caps["mode"] = "offline"
+    caps["active_surface_available"] = True
+    caps["active_tools"] = list(active_tools.ACTIVE_TOOL_NAMES)
+    caps["active_allowlist"] = sorted(active_guard.ACTIVE_ALLOWLIST)
+    caps["active_effect_classes"] = dict(active_tools.ACTIVE_EFFECT_CLASSES)
     return caps
 
 
@@ -236,6 +247,9 @@ def diagnostics_report_init_discrepancies(expected_sequence: list, actual_sequen
 
 def main() -> None:
     mcp.run(transport="stdio")
+
+
+active_tools.register(mcp)
 
 
 if __name__ == "__main__":

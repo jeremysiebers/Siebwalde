@@ -41,7 +41,9 @@ ALL_TOOLS = K4_TOOLS | OBSERVE_TOOLS
 
 def test_all_readonly_tools_registered():
     names = {t.name for t in asyncio.run(server.mcp.list_tools())}
-    assert names == ALL_TOOLS
+    # The 9 offline tools must remain registered; the 4 grant-gated active tools
+    # are additive (see test_mcp_active_tools.py for their registration).
+    assert ALL_TOOLS <= names
 
 
 def test_k4_tools_preserved():
