@@ -702,6 +702,43 @@ NODES: list[tuple[str, dict]] = [
         "source_location": "delivery mechanism", "source_revision": "14789a5a",
         "evidence_status": "SOURCE_REF",
     }),
+    ("Observation", {
+        "id": "obs:k8-po-firewall-observation",
+        "label": "K8 PO-reported Windows Firewall dialogs",
+        "what": "Product Owner reported that approximately 2-3 Windows Firewall permission dialogs were pending during K8 physical comm testing (operator-reported; not independently verified). No executable names or firewall-rule details are asserted here.",
+        "date": "2026-10-25",
+        "method": "PO operator report",
+        "status": "UNKNOWN",
+        "summary": "PO-REPORTED (UNVERIFIED): ~2-3 Windows Firewall permission dialogs pending during K8 physical comm testing; no exe names or rule details asserted.",
+        "source_path": "docs/K8-FIREWALL-CORRECTIVE.md",
+        "source_location": "Corrected root cause", "source_revision": "61c31f48",
+        "evidence_status": "UNVERIFIED", "observed_date": "2026-10-25",
+    }),
+    ("Observation", {
+        "id": "obs:k8-cmd250-timeout-cmd113-success",
+        "label": "K8 command-250 timeout / command-113 success",
+        "what": "During K8 physical comm testing (2026-10-25): command 250 (CLIENT_CONNECTION_REQUEST, sent by SiebwaldeApp.Koploper.Validation.Host.exe) timed out with no CONTROLLER/CONNECTED/DONE ack; command 113 (GET_CONTROLLER_VERSION, sent by python.exe) succeeded and returned 0.1.0 / protocol 0 / build 2026-10-20, byte-identical to the K6 readback. OBSERVED-RESPONSE vs INFERRED-CAUSE kept separate: the 113 reply proves what the controller REPORTS, not why 250 timed out.",
+        "date": "2026-10-25",
+        "method": "live UDP transport (K8 physical comm test)",
+        "status": "PROVEN_HARDWARE",
+        "summary": "Command 250 timed out (no CONTROLLER/CONNECTED/DONE ack); command 113 succeeded (0.1.0/protocol 0/2026-10-20, byte-identical to K6). Observed response vs inferred cause kept distinct.",
+        "source_path": "docs/K8-FIREWALL-CORRECTIVE.md",
+        "source_location": "Corrected root cause", "source_revision": "61c31f48",
+        "evidence_ref": "Logging/K6B/k6b-observe-20261024T092944Z.json",
+        "evidence_status": "OBSERVED", "observed_date": "2026-10-25",
+    }),
+    ("Observation", {
+        "id": "obs:k8-next-validation-firewall",
+        "label": "K8 next validation: firewall readiness (8 steps)",
+        "what": "Required K8 validation before re-classifying the 250 timeout: (1) identify the exact test executables; (2) inspect Windows Firewall rules and active network profiles; (3) determine the inbound UDP ports involved; (4) verify socket binding and routing; (5) compare command 113 vs 250 behavior; (6) analyze packet evidence; (7) determine the firewall-rule correction; (8) retest under a fresh LIVE_HARDWARE grant.",
+        "date": "2026-10-25",
+        "method": "planned validation (not yet executed)",
+        "status": "UNKNOWN",
+        "summary": "Next K8 validation requires 8 steps (identify exes, inspect firewall rules/profiles, determine inbound UDP ports, verify socket binding + routing, compare 113 vs 250, analyze packet evidence, determine firewall-rule correction, retest under LIVE_HARDWARE). Not yet executed.",
+        "source_path": "docs/K8-FIREWALL-CORRECTIVE.md",
+        "source_location": "Minimal corrective live test", "source_revision": "61c31f48",
+        "evidence_status": "UNVERIFIED", "observed_date": "2026-10-25",
+    }),
 
     # ==================================================================
     # Incident
@@ -747,6 +784,30 @@ NODES: list[tuple[str, dict]] = [
         "summary": "Strengthened by K5 log evidence (no auto-flash, HR11 still 0x251F); still not an independent register capture, so the target application state remains UNKNOWN in the strictest sense until a fresh independent readback.",
         "source_path": "docs/K5-CSHARP-INIT-REFERENCE-AND-PICO5B-COMPARISON.md",
         "source_location": "6", "source_revision": "26a7bf8", "evidence_status": "DERIVED",
+    }),
+    ("Hypothesis", {
+        "id": "hyp:k8-firewall-blocked-udp",
+        "label": "K8 command-250 timeout firewall-induced",
+        "hypothesis": "Windows Firewall may have blocked inbound UDP for SiebwaldeApp.Koploper.Validation.Host.exe (its permission dialog was still pending), explaining the command-250 timeout.",
+        "evidence_for": "PO reported ~2-3 pending firewall dialogs during K8 comm testing; command 113 succeeded via python.exe (which has an established inbound allow rule) while command 250 timed out via Validation.Host.exe (whose inbound UDP was the subject of the pending dialogs); both executables share UDP 10001 -> 192.168.1.193:10000.",
+        "evidence_against": "The exact rule state and whether the dialog was approved or denied during the 250 send were not independently captured; the firewall state is an inference from the PO report, not a verified rule snapshot.",
+        "status": "HYPOTHESIS",
+        "summary": "LIKELY FIREWALL-INDUCED (HYPOTHESIS, not proven): inbound UDP for Validation.Host.exe may have been blocked pending a firewall dialog, explaining the 250 timeout. Requires rule/dialog verification before promotion.",
+        "source_path": "docs/K8-FIREWALL-CORRECTIVE.md",
+        "source_location": "Corrected root cause", "source_revision": "61c31f48",
+        "evidence_status": "DERIVED",
+    }),
+    ("Hypothesis", {
+        "id": "hyp:k8-protocol-mismatch-250",
+        "label": "K8 command-250 protocol-mismatch (ALTERNATIVE)",
+        "hypothesis": "The deployed PIC32 0.1.0 CONNECT (250) semantics may be incompatible with protocol-0x01, so 250 never returns CONTROLLER/CONNECTED/DONE against the current host. (ALTERNATIVE to the firewall hypothesis.)",
+        "evidence_for": "Command 250 timed out with no ack even though the controller is reachable (command 113 succeeded).",
+        "evidence_against": "PO reported pending firewall dialogs; 113 (python.exe) succeeded while 250 (Validation.Host.exe) timed out, and the two executables differ only in which inbound path was firewalled. The firewall hypothesis better explains the 113-success/250-timeout split; deployed 0.1.0 reports protocol 0, not 0x01.",
+        "status": "HYPOTHESIS",
+        "summary": "ALTERNATIVE (NOT PROVEN): the 250 timeout could reflect a 0.1.0 CONNECT / protocol-0x01 incompatibility. Preserved as a distinct unresolved hypothesis; only re-classify if 250 still times out after firewall readiness.",
+        "source_path": "docs/K8-FIREWALL-CORRECTIVE.md",
+        "source_location": "Minimal corrective live test", "source_revision": "61c31f48",
+        "evidence_status": "DERIVED",
     }),
 
     # ==================================================================
@@ -938,6 +999,16 @@ RELS: list[tuple[str, str, str, dict]] = [
 
     # SUPERSEDES (artifact supersedes artifact)
     ("SUPERSEDES", "firmware:pic18-0xE906", "firmware:pic18-0x251F", {"note": "1.0.0 supersedes legacy on amp 1 (round-trip only; fleet not migrated)"}),
+
+    # ==================================================================
+    # K8 knowledge persistence: provenance linkage
+    # ==================================================================
+    ("OBSERVES_COMMAND", "obs:k8-cmd250-timeout-cmd113-success", "command:113", {"note": "K8 comm test exercised 113; succeeded (0.1.0/protocol 0/2026-10-20, byte-identical to K6)"}),
+    ("OBSERVES_FIRMWARE", "obs:k8-cmd250-timeout-cmd113-success", "firmware:pic32-0.1.0", {"note": "113 readback reports deployed 0.1.0"}),
+    ("RELATED_TO", "obs:k8-cmd250-timeout-cmd113-success", "obs:k8-slaveryinfo-passive-blocked", {"note": "K8 comm test is the follow-up to the passive-SLAVEINFO feasibility finding"}),
+    ("SUPPORTED_BY", "hyp:k8-firewall-blocked-udp", "obs:k8-po-firewall-observation", {"note": "pending firewall dialogs reported by PO"}),
+    ("SUPPORTED_BY", "hyp:k8-firewall-blocked-udp", "obs:k8-cmd250-timeout-cmd113-success", {"note": "113-success/250-timeout split matches the firewalled-executable hypothesis"}),
+    ("SUPPORTED_BY", "hyp:k8-protocol-mismatch-250", "obs:k8-cmd250-timeout-cmd113-success", {"note": "250 timeout despite reachable controller"}),
 ]
 
 
