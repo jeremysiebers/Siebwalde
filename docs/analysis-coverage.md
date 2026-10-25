@@ -131,3 +131,12 @@ Increment 1 (2026-09-11) fixed two of the confirmed items: the `SiebwaldeApp.Cor
 
 
 
+
+## K8B — Communication Recovery + Diagnostics MCP active operation (2026-10-25, PR #56 MERGED)
+
+| Area | Status | Evidence | Open items |
+| --- | --- | --- | --- |
+| K8 command-250 timeout root cause | PROVEN | Two host-side causes: Windows Firewall Block rule (canonical Release exe path) overrode Allow; C# decoder assumed Phase-1 23-register SLAVEINFO while the deployed firmware sends legacy 12-register (footer 0x55 at offset 40). See docs/K8B-COMMUNICATION-RECOVERY.md §2. | none (firewall hypothesis PROVEN; protocol-mismatch hypothesis CONTRADICTED) |
+| Legacy 12-register SLAVEINFO layout | PROVEN (raw UDP capture 33310 frames + C struct source) | Footer at wire offset 40, MbCommError at 34, 12 registers at 6..29. | none |
+| Fresh PIC18 register readback | PROVEN (live V4) | Amps 1/3/4/6 all HR11=0x251F; HR21/HR22 UNSUPPORTED; HR7 raw 0x002D/0x002E (not identity). | legacy HR7 semantics undefined |
+| Diagnostics MCP active controller session (B1..B5) | PROVEN (live V4) | run_controller_session PASS, clean_shutdown, 4 amps, single-use grant, fail-closed offline. | none |

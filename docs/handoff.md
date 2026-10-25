@@ -1687,3 +1687,14 @@ Next: step 2 (translation-layer design/implementation) and step 3 (4-amplifier t
 9. Increment 3 (proposed): remove confirmed Pic18-era and station-era remnants from the WPF app. - DONE (2026-09-11): station-policy feature and commented Pic18 code removed; build verified.
 10. Increment 4 (next): configuration authority / settings UI. The application guide is done.11. **Increment 6 (next major, on request): the Koploper translation path.** Protocol reconnaissance -> translation-layer design -> implement on the 4-amplifier test layout. See `docs/backlog.md`, section "Koploper Translation Path". Do not start before the product owner asks.
 12. Treat all remaining `docs/backlog.md` items as unapproved until the user selects implementation work.
+
+## K8B closure (2026-10-25, PR #56 MERGED ba0536d4)
+
+- K8B restored communication and proved the K8 command-250 timeout was host-side (Windows Firewall Block rule + a legacy 12-register SLAVEINFO decoder mismatch), NOT a firmware protocol incompatibility. See docs/K8B-COMMUNICATION-RECOVERY.md.
+- Fresh physical readback: amps 1/3/4/6 all HR11=0x251F (legacy checksum); HR21/HR22 UNSUPPORTED; HR7 raw (not a Phase-1 identity register).
+- Diagnostics MCP now has a grant-gated active controller session (B1..B5); offline tools unchanged. See docs/K8B-DIAGNOSTICS-MCP-ACTIVE-DESIGN.md.
+- Knowledge Foundation updated (firewall hypothesis PROVEN, protocol-mismatch CONTRADICTED, amp-1/amp-3 PROVEN_HARDWARE, +3 observations +2 tools); operational DB rebuilt 174 nodes / 112 rels.
+- Tool preservation: cold_start_slaveinfo_capture.py (KEEP) + Diagnostics MCP active-session (KEEP_ACTIVE_MCP) registered.
+- Evidence archived + NAS-synced under 04_HARDWARE_EVIDENCE/K8B (13 files, SHA-256 verified).
+- Integrator non-blocking findings (flaky ObservedNeutralV3 test, max_uses not enforced, MIN_WAIT_MS=0, capture-tool footer-order) recorded in docs/backlog.md.
+- K8B LIVE_HARDWARE authority EXPIRED at closure. Any further live hardware work needs a fresh scoped PO grant.
