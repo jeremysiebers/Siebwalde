@@ -777,6 +777,58 @@ NODES: list[tuple[str, dict]] = [
         "evidence_ref": "C:/Localdata/Siebwalde-Bewaarmap/04_HARDWARE_EVIDENCE/K8B/SLAVEINFO-LAYOUT/k8b-mcp-active-v4-validation.txt",
         "evidence_status": "OBSERVED", "observed_date": "2026-10-25",
     }),
+    ("Observation", {
+        "id": "obs:p2-b1-rollback-image-proven",
+        "label": "P2-B1 rollback image byte-identical to deployed 0.1.0",
+        "what": "The deployed 0.1.0 is the L1 build (commit 39577845, release/legacy-l1/PIC32-Master-L1-version-0.1.0.hex), NOT Baseline-0 A90E44. A non-destructive ICD3 readback (-GF) of the deployed firmware was byte-compared against the L1 image: 267624/267624 populated bytes identical (0 differing, 0 missing). The L1 image is therefore a byte-identical backup, not merely a functionally-equivalent candidate.",
+        "date": "2026-10-25",
+        "method": "ICD3 readback + Intel HEX byte comparison (compare_hex.py)",
+        "status": "PROVEN_HARDWARE",
+        "summary": "Rollback image EC7E3E6E (L1 0.1.0) proven byte-identical to the deployed firmware (267624/267624 bytes). A90E44 (Baseline-0, no command 113) is NOT the correct rollback target.",
+        "source_path": "docs/P2-B1-FIRMWARE-IMAGE-PROVENANCE.md",
+        "source_location": "1", "source_revision": "61fd2a4a",
+        "evidence_ref": "C:/Localdata/Siebwalde-Bewaarmap/04_HARDWARE_EVIDENCE/PIC32-1.0.0-Migration/p2-b1-phase-b-rollback-verified.txt",
+        "evidence_status": "OBSERVED", "observed_date": "2026-10-25",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b1-pic32-migration-proven",
+        "label": "P2-B1 PIC32 0.1.0 -> 1.0.0 -> 0.1.0 -> 1.0.0 physically proven",
+        "what": "Full PIC32 migration round-trip physically proven via ICD3: 0.1.0 (L1 EC7E3E6E) -> 1.0.0 (6CEC61D4) -> rollback 0.1.0 (EC7E3E6E) -> final 1.0.0 (6CEC61D4). Each program verified byte-identical (272632/272632 for 1.0.0). Final command 113 = 1.0.0/protocol 1/build 2026-10-17. PIC18 amps 1/3/4/6 remained HR11=0x251F throughout (no PIC18 flash).",
+        "date": "2026-10-25",
+        "method": "ICD3 program+verify + command 113 + cold-start + HR11 readback (scoped PIC32 FLASH authority)",
+        "status": "PROVEN_HARDWARE",
+        "summary": "PIC32 1.0.0/protocol 1 deployed and verified; rollback to 0.1.0 physically demonstrated; final state 1.0.0. PIC18 unchanged (HR11=0x251F).",
+        "source_path": "docs/P2-B1-FIRMWARE-IMAGE-PROVENANCE.md",
+        "source_location": "2", "source_revision": "61fd2a4a",
+        "evidence_ref": "C:/Localdata/Siebwalde-Bewaarmap/04_HARDWARE_EVIDENCE/PIC32-1.0.0-Migration/p2-b1-phase-i-final-1.0.0.txt",
+        "evidence_status": "OBSERVED", "observed_date": "2026-10-25",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b1-1.0.0-legacy-pic18-inert",
+        "label": "P2-B1: 1.0.0 classifies legacy PIC18 as incompatible (detected-but-inert)",
+        "what": "Under PIC32 1.0.0, the legacy 12-register PIC18 amps (HR11=0x251F, HR7=0) are detected (detected=1) but fail the Phase-1 HR7 identity shape check, so the master does not address/enable/poll them (mbCommError=IDLE). HR11=0x251F is still read back (no PIC18 flash). This is the expected Phase-1 behavior; motion requires a future PIC18 upgrade. PO-accepted.",
+        "date": "2026-10-25",
+        "method": "SLAVEINFO raw capture on 1.0.0 (30845 frames)",
+        "status": "PROVEN_HARDWARE",
+        "summary": "1.0.0 master detects but does not enable legacy PIC18 (HR7=0 fails identity gate); amps remain HR11=0x251F, inert. PO-accepted.",
+        "source_path": "docs/P2-B1-PIC32-1.0.0-LEGACY-PIC18-COMPATIBILITY.md",
+        "source_location": "3", "source_revision": "61fd2a4a",
+        "evidence_ref": "C:/Localdata/Siebwalde-Bewaarmap/04_HARDWARE_EVIDENCE/PIC32-1.0.0-Migration/p2-b1-phase-g-1.0.0-validation.txt",
+        "evidence_status": "OBSERVED", "observed_date": "2026-10-25",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b1-reset-required-after-program",
+        "label": "P2-B1: clean MCLR reset required after every ICD3 program/readback",
+        "what": "After every ICD3 program (-F) or readback (-GF), the PIC32 Ethernet stack can wedge (connected-UDP reply misdirected to a stale client address, or a stuck WAITING_FOR_CLIENT/wrong-handshake loop). A clean MCLR reset (ipecmd -I -OL) plus ~15-20s for boot+DHCP is REQUIRED before the first runtime communication, or CONNECT times out. Applied identically after both the 1.0.0 flash and the 0.1.0 rollback.",
+        "date": "2026-10-25",
+        "method": "observed during P2-B1 flash/rollback verification",
+        "status": "PROVEN_HARDWARE",
+        "summary": "A clean MCLR reset + boot wait is a reproducibility requirement after every ICD3 program/readback, not a firmware defect.",
+        "source_path": "docs/P2-B1-FIRMWARE-IMAGE-PROVENANCE.md",
+        "source_location": "procedural note", "source_revision": "61fd2a4a",
+        "evidence_ref": "C:/Localdata/Siebwalde-Bewaarmap/04_HARDWARE_EVIDENCE/PIC32-1.0.0-Migration/p2-b1-phase-h-rollback-verified.txt",
+        "evidence_status": "OBSERVED", "observed_date": "2026-10-25",
+    }),
 
     # ==================================================================
     # Incident
@@ -992,10 +1044,12 @@ NODES: list[tuple[str, dict]] = [
 RELS: list[tuple[str, str, str, dict]] = [
     # RUNS_FIRMWARE
     ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0xE906", {"since": "2026-10-19 round-trip", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0x251F", {"since": "K8B/P2-B1 fresh readback 2026-10-25", "superseded": False}),
     ("RUNS_FIRMWARE", "device:amp-3", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": False}),
     ("RUNS_FIRMWARE", "device:amp-4", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": False}),
     ("RUNS_FIRMWARE", "device:amp-6", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": False}),
-    ("RUNS_FIRMWARE", "device:pic32", "firmware:pic32-0.1.0", {"since": "L1", "superseded": False}),
+    ("RUNS_FIRMWARE", "device:pic32", "firmware:pic32-0.1.0", {"since": "L1", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:pic32", "firmware:pic32-1.0.0", {"since": "P2-B1 final deploy 2026-10-25", "superseded": False}),
 
     # IMPLEMENTED_BY (artifact built from source revision)
     ("IMPLEMENTED_BY", "firmware:pic18-0x251F", "source:928ea7c", {"note": "reproduces 0x251F byte-identically"}),
@@ -1057,6 +1111,15 @@ RELS: list[tuple[str, str, str, dict]] = [
     ("OBSERVES_FIRMWARE", "obs:k8b-legacy-12-register-slaveryinfo-layout", "firmware:pic18-0x251F", {"note": "12-register SLAVEINFO layout confirms the legacy firmware"}),
     ("RELATED_TO", "obs:k8b-fresh-pic18-readback-251f", "obs:k8b-legacy-12-register-slaveryinfo-layout", {"note": "the 12-register layout fix enabled the fresh readback"}),
     ("RELATED_TO", "obs:k8b-diagnostics-mcp-active-v4", "obs:k8b-fresh-pic18-readback-251f", {"note": "the MCP V4 session reproduced the same readback"}),
+
+    # ==================================================================
+    # P2-B1 knowledge persistence: firmware migration + rollback
+    # ==================================================================
+    ("OBSERVES_FIRMWARE", "obs:p2-b1-rollback-image-proven", "firmware:pic32-0.1.0", {"note": "deployed 0.1.0 = L1 EC7E3E6E, byte-identical to readback"}),
+    ("OBSERVES_FIRMWARE", "obs:p2-b1-pic32-migration-proven", "firmware:pic32-1.0.0", {"note": "final PIC32 1.0.0/protocol 1, byte-verified 272632/272632"}),
+    ("OBSERVES_FIRMWARE", "obs:p2-b1-1.0.0-legacy-pic18-inert", "firmware:pic18-0x251F", {"note": "legacy PIC18 HR11=0x251F detected-but-inert under 1.0.0 (no flash)"}),
+    ("RELATED_TO", "obs:p2-b1-pic32-migration-proven", "obs:p2-b1-rollback-image-proven", {"note": "rollback image enabled the mandatory 0.1.0 rollback test"}),
+    ("RELATED_TO", "obs:p2-b1-1.0.0-legacy-pic18-inert", "obs:p2-b1-pic32-migration-proven", {"note": "the inert-legacy-amps outcome was observed during 1.0.0 validation"}),
 ]
 
 
