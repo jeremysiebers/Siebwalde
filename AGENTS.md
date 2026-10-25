@@ -96,6 +96,10 @@ Rules:
 - The Knowledge MCP is **read-only and advisory**; it is not a substitute for deterministic protocol and safety enforcement, and it grants no hardware authority.
 - An agent must report **UNKNOWN** when the data does not support a conclusion; do not invent knowledge to fill a gap.
 
+## Knowledge Capture
+
+All agents MUST surface significant engineering findings — protocol contracts, firmware identities, safety invariants, proven or failed procedures, and corrections to earlier conclusions — to the Project Lead as they are identified or confirmed during an increment. Persistence follows the centralized capture workflow in `docs/development-workflow.md` §14.12 "Engineering Knowledge Capture and Knowledge Foundation Synchronization" (classify → duplicate check → provenance-bearing seed entry → deterministic rebuild → controlled operational sync → MCP readback). Role files add only role-specific obligations and MUST NOT duplicate this contract.
+
 ## Tool registry (reuse before re-creating)
 
 Before creating new engineering tooling or replacing established tooling, search the tool registry `tools/tool-registry.yaml` (and the Knowledge MCP `knowledge_tools`) for an existing reusable component. Accepted Siebwalde MCP capabilities (`picoscope`, `knowledge`) and protected/historical tools are preserved by Product Owner policy: deletion, retirement or destructive replacement requires an explicit PO decision, and migration does not imply deletion. Reuse the existing implementation rather than duplicating firmware state machines, protocol parsers or instrument drivers.

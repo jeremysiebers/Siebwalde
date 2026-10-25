@@ -2131,6 +2131,14 @@ Every Project Lead increment closure report MUST include a dedicated **Worktree 
 
 If an increment uses multiple worktrees, each worktree MUST be reported separately. No temporary worktree MAY be removed before its unique source code, Git history, and evidence have been preserved and verified.
 
+Every Project Lead increment closure report MUST include a dedicated **Knowledge Capture** field reporting the disposition of significant engineering findings discovered or confirmed by the increment, with exactly one of the following values:
+
+- `UPDATED` — knowledge was persisted; report the node/relationship ids added or changed, the source reference, and the verifying rebuild/test evidence;
+- `NO_NEW_KNOWLEDGE` — no significant, durable engineering finding was identified, confirmed, or corrected by this increment (transient debugging data is excluded by definition);
+- `BLOCKED` — a significant finding could not be persisted; report the finding, the blocking reason (e.g. unresolved contradiction, missing source evidence, no authoritative review), the owner, and the required resolution.
+
+`BLOCKED` MUST NOT be used to silently drop knowledge. A `BLOCKED` finding remains open until it is either persisted via a later `UPDATED` closure or explicitly rejected with a recorded reason. The applicable field semantics, classification, and persistence steps are defined in §14.12.
+
 ### 14.3 Durable decision updates
 
 The Project Lead SHOULD determine whether an increment introduced a durable decision.
@@ -2278,6 +2286,68 @@ Agents MUST NOT autonomously change permanent:
 solely because an increment retrospective recommends them.
 
 Approved changes are implemented through a dedicated `GOVERNANCE_CHANGE` increment and reviewed like other durable project changes.
+
+### 14.12 Engineering Knowledge Capture and Knowledge Foundation Synchronization
+
+Engineering knowledge is durable and shared through the Knowledge Foundation (`tools/knowledge/`), a read-only LadybugDB knowledge graph whose Git source of truth is `schema.py` + `knowledge_seed.py` and whose operational database (`db/siebwalde-knowledge.lbdb`) is a rebuildable cache exposed by the read-only Knowledge MCP. Knowledge capture is a continuous, role-shared obligation, not a one-time post-merge step.
+
+#### 14.12.1 Identify significant findings (every increment)
+
+During every increment, each agent MUST surface engineering findings that are significant and durable. A finding is significant when, if lost or misread, the team would be materially worse off — protocol contracts, firmware identities, safety invariants, proven or failed procedures, and corrections to earlier conclusions all qualify. Transient debugging data (temporary logs, scratch variables, one-off experiments that established nothing) is NOT knowledge and MUST NOT be persisted.
+
+#### 14.12.2 Classify before persistence
+
+Before a finding is persisted, its type and status MUST be determined and stated explicitly, using the Knowledge Foundation status vocabulary. Distinguish:
+
+- **confirmed** — physically or source proven (`PROVEN_HARDWARE`, `PROVEN_SOURCE`, `PROVEN_OFFLINE_TEST`);
+- **physical** — observed on hardware, vs **source** — traced to code/documentation;
+- **historical** — a prior state recorded for provenance, not the current state;
+- **decision** — a durable product/workflow decision with its author and date;
+- **hypothesis** — a plausible explanation, explicitly `HYPOTHESIS` (not proven);
+- **rejected** — an explanation considered and set aside, recorded with the reason;
+- **open** — an unresolved question or a required next step, `UNKNOWN`.
+
+Competing hypotheses MUST be preserved as DISTINCT unresolved records; neither is promoted merely because the other looks better. The observed response and the inferred cause MUST be kept separate — a command reply proves what the device REPORTS, not why another command failed.
+
+#### 14.12.3 Persistence steps
+
+Persisting a finding follows an ordered, deterministic path:
+
+1. **Check for a duplicate** — search the existing nodes before adding; never silently create a second record of the same fact.
+2. **Create or update versioned entries** — add or amend `knowledge_seed.py` entries (or a prior superseded assertion is marked `superseded`, never deleted).
+3. **Preserve provenance** — every node carries `id`, `source_path`, `source_location`, `source_revision`, `evidence_ref`, `evidence_status`, and `observed_date` where applicable; status is explicit.
+4. **Preserve rejected hypotheses** — a contradicted/rejected hypothesis is recorded as such (e.g. `CONTRADICTED`, or `HYPOTHESIS` with `evidence_against`), not erased.
+5. **Validate** — the records are semantically reviewed and their source claims checked against the original source/artifact.
+6. **Rebuild and test from Git** — `build_graph.py` rebuilds deterministically from the seed only; the test suite (`tools/knowledge/tests`) must pass, proving a clean Git-only rebuild yields the records.
+7. **Sync the operational LadybugDB via a safe procedure** — the operational `.lbdb` is only ever replaced by a deterministic rebuild or a verified snapshot restore; it is never edited in place.
+8. **Verify via MCP** — the read-only Knowledge MCP must see the new records (search/node/unresolved queries).
+9. **Preserve snapshots** — a verifiable snapshot (`snapshot.py`) is produced so the synced state can be restored or audited.
+10. **Keep the NAS current** — the snapshot/reference set is refreshed so offline recovery is possible without the live database.
+
+Steps 1–6 are software/offline and are the Developer/Architect/Integrator path. Steps 7–10 touch the operational database and the NAS and are controlled operations, not unrestricted direct writes.
+
+#### 14.12.4 Ownership
+
+- The **Project Lead** owns knowledge completeness: no significant finding is left uncaptured, and the closure **Knowledge Capture** field (§14.2) is accurate.
+- The **Developer** implements and validates entries (steps 1–6) and supplies evidence.
+- The **Architect** reviews semantic correctness and schema consistency.
+- The **Integrator** verifies provenance and integrity (source references resolve, counts/hashes match, the rebuild is deterministic).
+
+#### 14.12.5 Multi-agent knowledge participation
+
+All agents (Project Lead, Architect, Developer, Integrator, Designer) have READ access to the Knowledge MCP, EVALUATE responsibility against original source/artifacts, and structured PROPOSE capability for a new or changed entry. The authoritative write path is:
+
+> proposal → validation → independent review → Git seed → deterministic rebuild → controlled operational sync → MCP readback.
+
+There is **no unrestricted direct write** to the operational `.lbdb` by any agent. A minimal reusable proposal helper is `tools/knowledge/propose.py`: a CLI that emits a structured JSON proposal from arguments, performs no database writes, and is not a general-purpose editor.
+
+Per-role responsibilities:
+
+- **All agents:** read and evaluate knowledge, and propose structured additions/corrections.
+- **Developer:** implement + validate seed entries and their tests.
+- **Architect:** semantic review of node/relationship meaning and schema fit.
+- **Integrator:** verify provenance/integrity (source resolution, deterministic rebuild, snapshot/restore).
+- **Project Lead:** orchestrate the write path and own completeness.
 
 ---
 

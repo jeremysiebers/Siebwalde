@@ -216,6 +216,25 @@ REL_TABLES = {
     "REUSES": ("Tool", "Tool", []),
     "MIGRATION_CANDIDATE_FOR": ("Tool", "Capability", []),
     "PRESERVED_BY_POLICY": ("Tool", "Decision", []),
+    # --- K8 knowledge persistence: provenance-linkage relationships. ---
+    # These are the minimal typed edges needed to link hypotheses to the
+    # observations that support them, and observations to the protocol
+    # commands / firmware artifacts / other observations they concern. Added
+    # for the K8 physical-comm findings (no existing relationship type fits
+    # Hypothesis->Observation or Observation->ProtocolCommand/FirmwareArtifact/
+    # Observation). Additive only; no existing table is modified.
+    "SUPPORTED_BY": ("Hypothesis", "Observation", [
+        "note STRING",
+    ]),
+    "OBSERVES_COMMAND": ("Observation", "ProtocolCommand", [
+        "note STRING",
+    ]),
+    "OBSERVES_FIRMWARE": ("Observation", "FirmwareArtifact", [
+        "note STRING",
+    ]),
+    "RELATED_TO": ("Observation", "Observation", [
+        "note STRING",
+    ]),
 }
 
 
