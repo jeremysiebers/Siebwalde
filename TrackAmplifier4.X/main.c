@@ -52,9 +52,11 @@ static void Amplifier_ServiceTick(void)
         LastAmplifierTick++; /* bounded catch-up, one tick per super-loop pass */
         REGULATORxUPDATE();
         AmpAdapter_Refresh();
-        LED_RUN_LAT = AmpCore_IsBridgeDriving();
+        LED_RUN_LAT = PWM3EN && !amp_model.status.brake_active;
         LED_ERR_LAT = amp_model.status.state == AMP_ST_FAULT || amp_model.command.emo ||
             (amp_model.fault.causes & AMP_FAULT_COMMS) != 0;
+        if (LED_RUN_LAT) { LED_WAR = 0; LED_WAR_LAT = 0; }
+        else { LED_WAR++; }
     }
 }
 
@@ -154,7 +156,6 @@ void main(void) {
                 
                 case 5 :
                     ProcessPetitModbus();
-                    LED_WAR++;
                     Led_Blink();
                     /* Addressing complete: enter monitoring even before enable/config. */
                     if (amp_model.status.id_set){

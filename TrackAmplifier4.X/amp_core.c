@@ -36,13 +36,6 @@ void AmpCore_Inhibit(void)
     amp_model.fast_stopping = true;
 }
 
-bool AmpCore_IsBridgeDriving(void)
-{
-    /* LED_RUN contract: effective H-bridge drive = configured + enabled + not inhibited.
-     * Reflects the safety intent (any inhibit -> not driving), not the raw PWM3EN. */
-    return amp_model.status.config_ok && amp_model.command.enable && !amp_model.status.inhibited;
-}
-
 uint16_t AmpCore_StepRamp(uint16_t current, uint16_t target, uint8_t step)
 {
     if (current < 1u) current = 1u;

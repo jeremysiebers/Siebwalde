@@ -135,7 +135,7 @@ int test_transport(void)
     TC(!errors && sends == 1u && Petit_Tx_Data.DataLen == 47u);
     TC(Petit_Tx_Data.DataBuf[15] == 0xF1u && Petit_Tx_Data.DataBuf[16] == 1u);
     TC(Petit_Tx_Data.DataBuf[43] == 0x01u && Petit_Tx_Data.DataBuf[44] == 0x00u); /* HR21 = 0x0100 */
-    TC(Petit_Tx_Data.DataBuf[45] == 0x01u && Petit_Tx_Data.DataBuf[46] == 0x01u); /* HR22 = 0x0101 */
+    TC(Petit_Tx_Data.DataBuf[45] == 0x02u && Petit_Tx_Data.DataBuf[46] == 0x01u); /* HR22 = 0x0201 */
     request(3u, 1u, 65535u, 2u);
     HandlePetitModbusReadHoldingRegisters();
     TC(errors == 1u && error_code == 2u);
