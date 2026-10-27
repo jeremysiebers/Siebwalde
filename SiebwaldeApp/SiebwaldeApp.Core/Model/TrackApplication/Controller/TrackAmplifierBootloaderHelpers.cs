@@ -96,6 +96,14 @@ namespace SiebwaldeApp.Core
             // INTEL HEX format + address of used PIC is not bigger then 4 bytes
             HexFileReadSuccessful = false;
 
+            // Reentrancy: reset every per-operation accumulator before re-parsing, so a
+            // repeated Execute() (flash A then flash B on the same helper instance) cannot
+            // carry over buffer rows, checksum or the previous config word.
+            GetHexFileData.Clear();
+            GetFileCheckSum = 0;
+            mGetConfigWord = null;
+            ConfigWordReadSuccessful = false;
+
             try
             {
                 if (File.Exists(PathToFile))
