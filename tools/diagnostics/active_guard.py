@@ -35,6 +35,13 @@ ACTIVE_COMMANDS = frozenset({250, 100, 101, 104, 106, 105})
 # Combined reachable set: the six state-changing commands + the read-only 113.
 ACTIVE_ALLOWLIST = ACTIVE_COMMANDS | {113}
 
+# The state-changing safe CONFIG/APPLY command set (mode ``apply_config``): the six
+# init commands + HOST_HEARTBEAT (110) + EXEC_MBUS_SLAVE_DATA_EXCH (108, the only
+# register write vector the C# apply-config host reaches for CONFIG/APPLY). 107
+# (RESET), every flash/recovery command (120..130, 200..243) and every other
+# command remain structurally unreachable.
+APPLY_CONFIG_COMMANDS = frozenset({250, 100, 101, 104, 106, 105, 108, 110})
+
 COLD_START_ORDER = (250, 100, 101, 104, 106, 105)
 
 # Structurally unreachable commands (never in the active allowlist).
@@ -107,5 +114,33 @@ def classify_shutdown(exit_code, stdout, timed_out: bool = False, aborted: bool 
     if timed_out:
         return INCOMPLETE_INIT
     if exit_code == 0 and "sessionSummary" in text:
+        return CLEAN_SHUTDOWN
+    return UNKNOWN
+
+
+def classify_apply_config_shutdown(exit_code, stdout, timed_out: bool = False, aborted: bool = False) -> str:
+    """Classify a terminated apply-config session into exactly one shutdown class.
+
+    Mirrors :func:`classify_shutdown` but recognises the C# apply-config host's
+    ``applyConfigSummary`` marker as the clean-completion signal (present on both a
+    PASS and a FAILED config outcome — the exit code carries PASS(0)/FAILED(1), and
+    the operation status is read from the summary's ``status`` field, NOT from this
+    classification). ``unknown``/``ack_timeout``/``incomplete_init`` are never
+    promoted to success.
+    """
+    text = stdout if isinstance(stdout, str) else ""
+    if aborted:
+        return SAFETY_STOP
+    if "sessionConflict" in text:
+        return SESSION_CONFLICT
+    if "initFailure" in text:
+        return ACK_TIMEOUT
+    if "controllerUnavailable" in text:
+        return CONTROLLER_UNAVAILABLE
+    if "poIntervention" in text:
+        return PO_INTERVENTION
+    if timed_out:
+        return INCOMPLETE_INIT
+    if "applyConfigSummary" in text:
         return CLEAN_SHUTDOWN
     return UNKNOWN

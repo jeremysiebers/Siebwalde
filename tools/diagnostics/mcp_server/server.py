@@ -105,6 +105,8 @@ def diagnostics_capabilities() -> dict:
     caps["active_tools"] = list(active_tools.ACTIVE_TOOL_NAMES)
     caps["active_allowlist"] = sorted(active_guard.ACTIVE_ALLOWLIST)
     caps["active_effect_classes"] = dict(active_tools.ACTIVE_EFFECT_CLASSES)
+    # The distinct state-changing CONFIG/APPLY command set (mode "apply_config").
+    caps["apply_config_commands"] = sorted(active_guard.APPLY_CONFIG_COMMANDS)
     return caps
 
 

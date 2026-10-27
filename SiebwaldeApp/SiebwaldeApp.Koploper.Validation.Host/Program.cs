@@ -55,6 +55,7 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 "replay" => RunReplay(rest),
                 "identify" => RunIdentify(rest),
                 "readonly-validate" => RunReadonlyValidate(rest),
+                "apply-config" => RunApplyConfig(rest),
                 "--help" or "-h" or "/?" => Help(),
                 _ => Unknown(command)
             };
@@ -516,6 +517,175 @@ namespace SiebwaldeApp.Koploper.Validation.Host
             return 0;
         }
 
+        // ---------------------------------------------------------------- apply-config (safe CONFIG/APPLY, grant-gated)
+
+        private static int RunApplyConfig(string[] args)
+        {
+            string? slavesArg = null;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i].ToLowerInvariant())
+                {
+                    case "--slaves" when i + 1 < args.Length:
+                        slavesArg = args[++i];
+                        break;
+                    default:
+                        Console.Error.WriteLine($"Unknown apply-config argument: {args[i]}");
+                        return 2;
+                }
+            }
+
+            IReadOnlyList<byte>? slaves = null;
+            if (slavesArg is not null)
+            {
+                try
+                {
+                    slaves = slavesArg.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => byte.Parse(s.Trim()))
+                        .ToArray();
+                }
+                catch (Exception)
+                {
+                    Console.Error.WriteLine(
+                        "--slaves must be a comma-separated list of slave numbers (e.g. 1,3,4,6).");
+                    return 2;
+                }
+            }
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                WriteIndented = false,
+                Converters = { new JsonStringEnumConverter() }
+            };
+
+            // The transport binds local port 10001 inside composition; a bind failure surfaces here.
+            AmplifierConfigApplyOrchestrator orchestrator;
+            try
+            {
+                orchestrator = AmplifierConfigApplyOrchestrator.Create();
+            }
+            catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressAlreadyInUse)
+            {
+                WriteSessionConflict(ex.Message);
+                return 3;
+            }
+
+            try
+            {
+                AmplifierConfigApplyResult result = orchestrator.RunAsync(slaves, null)
+                    .GetAwaiter().GetResult();
+
+                if (result.FailedCommand is int failedCommand)
+                {
+                    Console.WriteLine(JsonSerializer.Serialize(new
+                    {
+                        type = "initFailure",
+                        command = failedCommand,
+                        commandName = result.FailedCommandName,
+                        reason = "ack_timeout"
+                    }, jsonOptions));
+                }
+
+                foreach (AmplifierConfigApplyAmplifierResult amp in result.Amplifiers)
+                {
+                    Console.WriteLine(JsonSerializer.Serialize(BuildApplyConfigAmplifierLine(amp), jsonOptions));
+                }
+
+                Console.WriteLine(JsonSerializer.Serialize(BuildApplyConfigSummary(result), jsonOptions));
+
+                return result.Status == "PASS" ? 0 : 1;
+            }
+            catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressAlreadyInUse)
+            {
+                WriteSessionConflict(ex.Message);
+                return 3;
+            }
+            finally
+            {
+                orchestrator.DisposeAsync().GetAwaiter().GetResult();
+            }
+        }
+
+        private static object BuildApplyConfigAmplifierLine(AmplifierConfigApplyAmplifierResult amp) => new
+        {
+            type = "amplifierConfigApply",
+            slaveNumber = amp.SlaveNumber,
+            detected = amp.Detected,
+            compatible = amp.Compatible,
+            incompatibilityReason = amp.IncompatibilityReason,
+            identityRaw = amp.IdentityRaw,
+            identityRawHex = amp.IdentityRawHex,
+            protocolVersion = amp.ProtocolVersion,
+            identityVerified = amp.IdentityVerified,
+            disableAccepted = amp.DisableAccepted,
+            disableVerified = amp.DisableVerified,
+            stateAfterDisable = amp.StateAfterDisable,
+            enableActiveAfterDisable = amp.EnableActiveAfterDisable,
+            inhibitedAfterDisable = amp.InhibitedAfterDisable,
+            configDownloaded = amp.ConfigDownloaded,
+            configVerified = amp.ConfigVerified,
+            initDoneConfigOk = amp.InitDoneConfigOk,
+            stateAfterApply = amp.StateAfterApply,
+            faultRaw = amp.FaultRaw,
+            inhibited = amp.Inhibited,
+            appliedPwm = amp.AppliedPwm,
+            pwmCommand = amp.PwmCommand,
+            pwm3Enabled = amp.Pwm3Enabled,
+            brakeActive = amp.BrakeActive,
+            failureCommand = amp.FailureCommand,
+            failureResponse = amp.FailureResponse,
+            failure = amp.Failure
+        };
+
+        private static object BuildApplyConfigSummary(AmplifierConfigApplyResult result) => new
+        {
+            type = "applyConfigSummary",
+            status = result.Status,
+            failure = result.Failure,
+            failedCommand = result.FailedCommand,
+            failedCommandName = result.FailedCommandName,
+            profile = "Simple Loop",
+            init = new
+            {
+                sequence = new[] { 250, 100, 101, 104, 106, 105 },
+                commands = result.Init.Commands.Select(c => new
+                {
+                    command = c.Command,
+                    name = c.Name,
+                    transmitted = c.Transmitted,
+                    acknowledged = c.Acknowledged,
+                    state = c.State
+                }).ToArray(),
+                rejected_commands = result.Init.RejectedCommands,
+                order_violations = result.Init.OrderViolations,
+                acknowledgement_timeouts = result.Init.AcknowledgementTimeouts,
+                movement_writes = new
+                {
+                    register_write_108 = 0,
+                    hr0 = 0,
+                    pwm = 0,
+                    direction = 0,
+                    brake = 0,
+                    emo = 0,
+                    @switch = 0,
+                    loco = 0,
+                },
+                readiness = result.Init.Readiness
+            },
+            heartbeat = new
+            {
+                supervised = result.Heartbeat.Supervised,
+                heartbeat_sent = result.Heartbeat.HeartbeatSent,
+                global_stop_sent = result.Heartbeat.GlobalStopSent,
+                global_stop_state = result.Heartbeat.GlobalStopState,
+                global_stop_reason = result.Heartbeat.GlobalStopReason,
+                last_observed_pic32_status = result.Heartbeat.LastObservedPic32Status,
+                latched = result.Heartbeat.Latched
+            },
+            amplifierCount = result.Amplifiers.Count
+        };
+
         // ---------------------------------------------------------------- readonly-validate: session summary / conflict
 
         private static void WriteSessionConflict(string detail)
@@ -864,7 +1034,14 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 "      SLAVEINFO receive loop, then prints one machine-readable JSON line per detected\n" +
                 "      amplifier (slaves 1,3,4,6) with raw HR7/HR11/HR21/HR22 (decimal + 0x hex), the\n" +
                 "      decoded firmware version (UNSUPPORTED when HR21/HR22 read 0), and freshness\n" +
-                "      markers (protocolReadbackObserved + lastDataReceivedUtc). No new command is sent.\n");
+                "      markers (protocolReadbackObserved + lastDataReceivedUtc). No new command is sent.\n" +
+                "  apply-config [--slaves 1,3,4,6]\n" +
+                "      Grant-gated safe CONFIG/APPLY diagnostic. Establishes the six-command session\n" +
+                "      (250→100→101→104→106→105) + HOST_HEARTBEAT supervision, verifies per-amp identity\n" +
+                "      + compatibility, DISABLEs each compatible amp (HR1=0x0400) and verifies enable=0 +\n" +
+                "      output-inhibited BEFORE APPLY, then runs the echo-verified config download\n" +
+                "      (HR3..6 + APPLY). Never writes HR0, never writes ENABLE (0x8000) after DISABLE, and\n" +
+                "      never enables a bridge. Emits amplifierConfigApply + applyConfigSummary JSON lines.\n");
         }
     }
 }
