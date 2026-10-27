@@ -26,6 +26,9 @@ void *memset(void *p, int value, unsigned long long size) {
 void PWM3_LoadDutyValue(uint16_t duty) { peripheral_duty = duty; }
 void AmpHw_SetBrake(bool on) { peripheral_brake = on; }
 void AmpHw_Enable(bool on) { peripheral_enable = on; }
+/* LED_RUN contract (production main.c): PWM3EN && !amp_model.status.brake_active,
+ * observed here as the actually-applied drive (peripheral_enable && !peripheral_brake). */
+static bool led_run(void) { return peripheral_enable && !peripheral_brake; }
 static uint8_t write_reg(uint16_t addr, uint16_t v) {
     return AmpAdapter_OnWrite(addr, v, false);
 }
@@ -58,7 +61,7 @@ int main(void)
     CHECK(peripheral_duty == 399u && amp_model.status.applied_pwm == 399u);
     CHECK(PetitHoldingRegisters[HR_IDENTITY].ActValue == 0xF101u);
     CHECK(PetitHoldingRegisters[HR_FW_VERSION].ActValue == 0x0100u);
-    CHECK(PetitHoldingRegisters[HR_FW_VERSION_PATCH_PROTO].ActValue == 0x0101u);
+    CHECK(PetitHoldingRegisters[HR_FW_VERSION_PATCH_PROTO].ActValue == 0x0201u);
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
     CHECK(write_reg(HR_COMMAND, 799u) == 0);
     tick();
@@ -158,6 +161,7 @@ int main(void)
     CHECK(PetitHoldingRegisters[HR_COMMAND].ActValue == 0u);
     CHECK(write_reg(HR_COMMAND, 399u) == 0);
     tick(); CHECK(peripheral_duty == 3u); /* normal deceleration, not fast-stop */
+    CHECK(led_run()); /* normal decel: bridge still switching -> LED_RUN ON */
     print("PASS: reset/config/validation/HR1/ramps\n");
 
     reset(); configure(); run(799u);
@@ -172,11 +176,12 @@ int main(void)
     for (i = 0u; i < 100u; i++) { AmpAdapter_OnFrame(1u, 3u); tick(); }
     CHECK(amp_model.status.state == AMP_ST_LEASE_EXPIRED);
     CHECK(amp_model.status.inhibited && amp_model.fault.causes == AMP_FAULT_LEASE);
-    CHECK(!AmpCore_IsBridgeDriving()); /* lease expiry -> inhibited -> LED_RUN OFF */
+    CHECK(led_run()); /* lease fast-stop ramp in progress: bridge switching -> LED_RUN ON */
     CHECK(write_reg(HR_COMMAND, 799u) == AMP_WRITE_RELATIONSHIP);
     for (i = 0u; i < 50u; i++) { AmpAdapter_OnFrame(1u, 3u); tick(); }
     CHECK(peripheral_duty == 399u && !amp_model.status.stopping_active);
     CHECK(!peripheral_enable); /* lease fast-stop reached neutral: bridge de-energized */
+    CHECK(!led_run()); /* neutral reached: LED_RUN OFF */
     CHECK(write_reg(HR_COMMAND, 799u) == 0); tick();
     CHECK(peripheral_duty == 399u); /* no renewal, command cannot release */
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_LEASE) == 0); tick();
@@ -204,10 +209,11 @@ int main(void)
     for (i = 1u; i < 147u; i++) tick();
     CHECK(amp_model.status.state == AMP_ST_COMMS_LOST);
     CHECK(amp_model.status.inhibited && amp_model.fault.causes & AMP_FAULT_COMMS);
-    CHECK(!AmpCore_IsBridgeDriving()); /* comm loss -> inhibited -> LED_RUN OFF */
+    CHECK(led_run()); /* comm-loss fast-stop ramp in progress: bridge switching -> LED_RUN ON */
     for (i = 0u; i < 50u; i++) tick();
     CHECK(peripheral_duty == 399u);
     CHECK(!peripheral_enable); /* comm-loss fast-stop reached neutral: bridge de-energized */
+    CHECK(!led_run()); /* neutral reached: LED_RUN OFF */
     AmpAdapter_OnFrame(1u, 3u); tick();
     CHECK(amp_model.fault.causes & AMP_FAULT_COMMS); /* communication alone doesn't clear latch */
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_CLEAR | HR_CONTROL_LEASE) == 0);
@@ -223,7 +229,7 @@ int main(void)
     CHECK(peripheral_duty == 401u);
     CHECK(write_reg(HR_COMMAND, HR_PWM_EMO_BIT) == 0); tick();
     CHECK(amp_model.status.state == AMP_ST_ESTOP && peripheral_brake && peripheral_duty == 401u);
-    CHECK(!AmpCore_IsBridgeDriving()); /* EMO -> inhibited -> LED_RUN OFF */
+    CHECK(!led_run()); /* EMO -> brake active -> LED_RUN OFF */
     CHECK((PetitHoldingRegisters[HR_APPLIED_PWM].ActValue & 0x3FFu) == 401u);
     CHECK(write_reg(HR_COMMAND, 399u) == 0); tick();
     CHECK(peripheral_duty == 399u && amp_model.status.inhibited);
@@ -231,25 +237,35 @@ int main(void)
     AmpHw_SetDuty(1023u); CHECK(peripheral_duty == 799u && amp_model.status.applied_pwm == 799u);
     print("PASS: comm-watchdog/latch/STOP/EMO/applied PWM tracking\n");
 
-    /* LED_RUN truth table: AmpCore_IsBridgeDriving mirrors the PO contract. */
-    reset();
-    CHECK(!AmpCore_IsBridgeDriving()); /* config_ok=0 after reset -> OFF */
-    configure();
-    CHECK(!AmpCore_IsBridgeDriving()); /* configured but not enabled -> OFF */
+    /* LED_RUN contract: effective H-bridge drive = PWM3EN && !brake_active.
+     * The harness observes the actually-applied drive as led_run() =
+     * (peripheral_enable && !peripheral_brake). */
+    reset(); configure();
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
     CHECK(write_reg(HR_COMMAND, 399u) == 0);
     tick();
-    CHECK(AmpCore_IsBridgeDriving()); /* enable + neutral -> ON (bridge actively switching) */
+    CHECK(led_run()); /* enable + neutral -> ON (bridge actively switching) */
     CHECK(write_reg(HR_COMMAND, 799u) == 0);
     tick();
-    CHECK(AmpCore_IsBridgeDriving()); /* enable + non-neutral -> ON */
+    CHECK(led_run()); /* enable + non-neutral -> ON */
+    for (i = 0u; i < 200u; i++) { AmpAdapter_OnFrame(1u, 3u); tick(); }
+    CHECK(peripheral_duty == 799u);
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_DISABLE) == 0);
-    CHECK(!AmpCore_IsBridgeDriving()); /* DISABLE -> inhibited -> OFF */
+    tick();
+    CHECK(led_run()); /* DISABLE ramp in progress -> ON */
+    for (i = 0u; i < 60u; i++) tick();
+    CHECK(!amp_model.status.stopping_active && peripheral_duty == 399u);
+    CHECK(!led_run()); /* DISABLE ramp reached neutral -> OFF */
     reset(); configure(); run(799u);
-    CHECK(AmpCore_IsBridgeDriving());
+    CHECK(led_run());
+    CHECK(write_reg(HR_COMMAND, HR_PWM_BRAKE_BIT | 799u) == 0);
+    tick();
+    CHECK(!led_run()); /* brake command -> brake_active -> OFF */
+    reset(); configure(); run(799u);
+    CHECK(led_run());
     amp_model.fault.causes |= AMP_FAULT_HARD;
     tick();
-    CHECK(!AmpCore_IsBridgeDriving()); /* hard fault -> inhibited -> OFF */
+    CHECK(!led_run()); /* hard fault -> brake active + bridge cut -> OFF */
     print("PASS: LED_RUN bridge-drive truth table\n");
 
     CHECK(test_transport() == 0);

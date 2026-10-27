@@ -126,6 +126,17 @@ NODES: list[tuple[str, dict]] = [
         "evidence_status": "OBSERVED", "observed_date": "2026-10-27",
     }),
     ("FirmwareArtifact", {
+        "id": "firmware:pic18-0xFFC2", "label": "PIC18 1.0.2 Offset 0xFFC2 (LED_RUN actual-drive + LED_WAR restoration)", "kind": "application",
+        "target": "PIC18", "checksum": "0xFFC2", "version": "1.0.2",
+        "image_path": "build/firmware/out/14b217be/TrackAmplifier4/Offset/TrackAmplifier4.X.production.hex",
+        "status": "PROVEN_HARDWARE",
+        "summary": "Phase-1 1.0.2 PIC18 application (checksum 0xFFC2). LED_RUN now reads the actual applied hardware state PWM3EN && !brake_active (ON at neutral + during controlled stop ramp; OFF on hard inhibit/brake-only/disabled); LED_WAR restored to blink while normal PWM drive is not active (WAR = !LED_RUN). Observation-only (no AmpCore/ramp/safety change). HR7=0xF101, HR22=0x0201 (patch=2 in high byte), protocol 1. Built XC8 2.31; test_amp.py PASS. DEPLOYED 2026-10-27 to all four prototype amps (1/3/4/6) via single-target 131.",
+        "source_path": "TrackAmplifier4.X/main.c",
+        "source_location": "Amplifier_ServiceTick LED_RUN_LAT = PWM3EN && !brake_active", "source_revision": "fb67387a",
+        "source_hash": "C6BA4B477D6841EAE6BC5C03D4673A6BF11DCD48427396B272EB18ABF730FA9A",
+        "evidence_status": "OBSERVED", "observed_date": "2026-10-27",
+    }),
+    ("FirmwareArtifact", {
         "id": "firmware:pic18-0x195A", "label": "PIC18 L2 0x195A candidate", "kind": "application",
         "target": "PIC18", "checksum": "0x195A", "version": "L2",
         "status": "PROVEN_SOURCE",
@@ -1182,6 +1193,15 @@ NODES: list[tuple[str, dict]] = [
         "source_path": "TrackAmplifier4.X/amp_core.c",
         "source_location": "AmpCore_IsBridgeDriving", "source_revision": "b2ea9735", "evidence_status": "OBSERVED", "observed_date": "2026-10-27",
     }),
+    ("Observation", {
+        "id": "obs:p2-b2-ffc2-deployed", "label": "All four amplifiers deployed to 1.0.2 (0xFFC2) LED actual-drive",
+        "what": "LED_RUN corrected to actual applied H-bridge drive (PWM3EN && !brake_active) and LED_WAR restored (blinks while !LED_RUN), version 1.0.2. Deployed 2026-10-27 to all four prototype amps (1/3/4/6) via single-target 131; SLAVEINFO readback confirms HR7=0xF101, HR11=0xFFC2, HR21=0x0100, HR22=0x0201 (patch=2 in high byte). Observation-only change (no motor/safety/timing change); Architect DESIGN_ACCEPTABLE, test_amp.py PASS.",
+        "date": "2026-10-27", "method": "FlashOneAmplifier CLI (single-target 131) + SLAVEINFO readback",
+        "status": "PROVEN_HARDWARE",
+        "summary": "All four amplifiers run 1.0.2 (0xFFC2): LED_RUN = actual applied drive, LED_WAR = !LED_RUN.",
+        "source_path": "TrackAmplifier4.X/main.c",
+        "source_location": "Amplifier_ServiceTick LED_RUN_LAT", "source_revision": "fb67387a", "evidence_status": "OBSERVED", "observed_date": "2026-10-27",
+    }),
 ]
 
 
@@ -1191,16 +1211,20 @@ NODES: list[tuple[str, dict]] = [
 RELS: list[tuple[str, str, str, dict]] = [
     # RUNS_FIRMWARE
     ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0xE906", {"since": "P2-B2-A1 amp-1 Phase-1 deploy 2026-10-26", "superseded": True}),
-    ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0x5263", {"since": "P2-B2 LED-corrected 1.0.1 deploy 2026-10-27", "superseded": False}),
+    ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0x5263", {"since": "P2-B2 LED-corrected 1.0.1 deploy 2026-10-27", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0xFFC2", {"since": "P2-B2 LED actual-drive 1.0.2 deploy 2026-10-27", "superseded": False}),
     ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0x251F", {"since": "K8B/P2-B1 fresh readback 2026-10-25", "superseded": True}),
     ("RUNS_FIRMWARE", "device:amp-3", "firmware:pic18-0xE906", {"since": "P2-B2-A2 amp-3 Phase-1 deploy 2026-10-26", "superseded": True}),
-    ("RUNS_FIRMWARE", "device:amp-3", "firmware:pic18-0x5263", {"since": "P2-B2 LED-corrected 1.0.1 deploy 2026-10-27", "superseded": False}),
+    ("RUNS_FIRMWARE", "device:amp-3", "firmware:pic18-0x5263", {"since": "P2-B2 LED-corrected 1.0.1 deploy 2026-10-27", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:amp-3", "firmware:pic18-0xFFC2", {"since": "P2-B2 LED actual-drive 1.0.2 deploy 2026-10-27", "superseded": False}),
     ("RUNS_FIRMWARE", "device:amp-3", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": True}),
     ("RUNS_FIRMWARE", "device:amp-4", "firmware:pic18-0xE906", {"since": "P2-B2-A2 amp-4 Phase-1 deploy 2026-10-26", "superseded": True}),
-    ("RUNS_FIRMWARE", "device:amp-4", "firmware:pic18-0x5263", {"since": "P2-B2 LED-corrected 1.0.1 deploy 2026-10-27", "superseded": False}),
+    ("RUNS_FIRMWARE", "device:amp-4", "firmware:pic18-0x5263", {"since": "P2-B2 LED-corrected 1.0.1 deploy 2026-10-27", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:amp-4", "firmware:pic18-0xFFC2", {"since": "P2-B2 LED actual-drive 1.0.2 deploy 2026-10-27", "superseded": False}),
     ("RUNS_FIRMWARE", "device:amp-4", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": True}),
     ("RUNS_FIRMWARE", "device:amp-6", "firmware:pic18-0xE906", {"since": "P2-B2-A2 amp-6 Phase-1 deploy 2026-10-26", "superseded": True}),
-    ("RUNS_FIRMWARE", "device:amp-6", "firmware:pic18-0x5263", {"since": "P2-B2 LED-corrected 1.0.1 deploy 2026-10-27", "superseded": False}),
+    ("RUNS_FIRMWARE", "device:amp-6", "firmware:pic18-0x5263", {"since": "P2-B2 LED-corrected 1.0.1 deploy 2026-10-27", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:amp-6", "firmware:pic18-0xFFC2", {"since": "P2-B2 LED actual-drive 1.0.2 deploy 2026-10-27", "superseded": False}),
     ("RUNS_FIRMWARE", "device:amp-6", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": True}),
     ("RUNS_FIRMWARE", "device:pic32", "firmware:pic32-0.1.0", {"since": "L1", "superseded": True}),
     ("RUNS_FIRMWARE", "device:pic32", "firmware:pic32-1.0.0", {"since": "P2-B1 final deploy 2026-10-25", "superseded": True}),
@@ -1247,6 +1271,7 @@ RELS: list[tuple[str, str, str, dict]] = [
     # SUPERSEDES (artifact supersedes artifact)
     ("SUPERSEDES", "firmware:pic18-0xE906", "firmware:pic18-0x251F", {"note": "1.0.0 supersedes legacy on amp 1 (round-trip only; fleet not migrated)"}),
     ("SUPERSEDES", "firmware:pic18-0x5263", "firmware:pic18-0xE906", {"note": "1.0.1 (LED-corrected + de-energize) supersedes 1.0.0"}),
+    ("SUPERSEDES", "firmware:pic18-0xFFC2", "firmware:pic18-0x5263", {"note": "1.0.2 (LED_RUN actual-drive + LED_WAR restoration) supersedes 1.0.1"}),
 
     # ==================================================================
     # K8 knowledge persistence: provenance linkage
@@ -1292,6 +1317,7 @@ RELS: list[tuple[str, str, str, dict]] = [
     ("OBSERVES_FIRMWARE", "obs:p2-b2-led-run-corrected", "firmware:pic18-0x5263", {"note": "LED_RUN correction is part of the 1.0.1 image"}),
     ("OBSERVES_FIRMWARE", "obs:p2-b2-bridge-deenergize-fix", "firmware:pic18-0x5263", {"note": "bridge de-energize fix is part of the 1.0.1 image"}),
     ("OBSERVES_FIRMWARE", "obs:p2-b2-05263-deployed", "firmware:pic18-0x5263", {"note": "all four amps read back HR11=0x5263 after deploy"}),
+    ("OBSERVES_FIRMWARE", "obs:p2-b2-ffc2-deployed", "firmware:pic18-0xFFC2", {"note": "all four amps read back HR11=0xFFC2 after deploy"}),
     ("RELATED_TO", "obs:p2-b2-a2-107-100-reset-required", "obs:p2-b2-a1-amps-4-6-default-wakeup", {"note": "the 107+100 reset resolves the post-131 default-wakeup / sub-step-7 failure"}),
     ("RELATED_TO", "obs:p2-b2-a2-all-four-phase1", "obs:p2-b2-a2-107-100-reset-required", {"note": "the 107+100 reset preceded each of the three additional amp migrations"}),
 ]
