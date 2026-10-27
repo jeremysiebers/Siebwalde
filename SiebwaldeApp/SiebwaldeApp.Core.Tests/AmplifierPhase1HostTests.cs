@@ -272,6 +272,100 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
+        public async Task ConfigDownload_SucceedsDespiteConcurrentLeaseRenewal()
+        {
+            var variables = new TrackApplicationVariables();
+            var transport = new DeterministicTrackTransport(new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1 }));
+            var client = new TrackCommClientAsync(transport, variables);
+            await client.StartAsync(false);
+
+            await client.SendAsync(new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT, Array.Empty<byte>()));
+            await WaitUntilAsync(() => variables.trackAmpItems[1].ProtocolReadbackObserved, TimeSpan.FromSeconds(2));
+
+            var item = variables.trackAmpItems[1];
+            Assert.True(AmplifierPhase1Safety.Compatible(item));
+
+            // Model the PIC32 lease renewal: the master writes HR1=0x4000 (MOTION_PERMISSION)
+            // to every detected slave every ~100 ms, which sets write_result=1 and clobbers the
+            // config writes' write_result (3..6). Run it concurrently with the config download;
+            // the downloader must succeed via register-echo verification, not write_result.
+            using var leaseCts = new CancellationTokenSource();
+            var leaseTask = Task.Run(async () =>
+            {
+                try
+                {
+                    while (!leaseCts.Token.IsCancellationRequested)
+                    {
+                        await client.SendAsync(
+                            AmplifierConfigurationDownloader.Exchange(1, TrackAmplifierRegisters.Control,
+                                TrackAmplifierRegisters.MotionPermissionBit), leaseCts.Token);
+                        await Task.Delay(10, leaseCts.Token);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // expected on cancellation
+                }
+            });
+
+            var downloader = new AmplifierConfigurationDownloader(client);
+            var config = new AmplifierConfiguration(Acceleration: 3, Deceleration: 4, FastStop: 9,
+                WatchdogMs: 300, Tag: 42);
+
+            bool ok;
+            try
+            {
+                ok = await downloader.DownloadAsync(item, config, CancellationToken.None);
+            }
+            finally
+            {
+                leaseCts.Cancel();
+                await leaseTask;
+            }
+
+            Assert.True(ok);
+            Assert.True(item.ConfigurationVerified);
+            Assert.Null(item.Phase1Failure);
+
+            var regs = transport.GetRegisters(1);
+            Assert.Equal(0x0403, regs[TrackAmplifierRegisters.ConfigRamp]); // accel 3, decel 4
+            Assert.Equal(9, regs[TrackAmplifierRegisters.ConfigFastStop]);
+            Assert.Equal(300, regs[TrackAmplifierRegisters.ConfigWatchdog]);
+            Assert.Equal(42, regs[TrackAmplifierRegisters.ConfigTag]);
+
+            await client.DisposeAsync();
+        }
+
+        [Fact]
+        public async Task ConfigDownload_RejectedConfig_FailsClosed()
+        {
+            var variables = new TrackApplicationVariables();
+            var transport = new DeterministicTrackTransport(new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1 }));
+            var client = new TrackCommClientAsync(transport, variables);
+            await client.StartAsync(false);
+
+            await client.SendAsync(new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT, Array.Empty<byte>()));
+            await WaitUntilAsync(() => variables.trackAmpItems[1].ProtocolReadbackObserved, TimeSpan.FromSeconds(2));
+
+            var item = variables.trackAmpItems[1];
+            Assert.True(AmplifierPhase1Safety.Compatible(item));
+
+            var downloader = new AmplifierConfigurationDownloader(client);
+            // Watchdog 30 (< 50) is out of range: the APPLY is rejected, so INIT_DONE|CONFIG_OK
+            // is never set and the echo+state verification must time out and fail closed.
+            var config = new AmplifierConfiguration(WatchdogMs: 30);
+            var ok = await downloader.DownloadAsync(item, config, CancellationToken.None);
+
+            Assert.False(ok);
+            Assert.False(item.ConfigurationVerified);
+            Assert.NotNull(item.Phase1Failure);
+
+            await client.DisposeAsync();
+        }
+
+        [Fact]
         public void ConfigApply_RejectsOutOfRange_AndLeavesConfigNotVerified()
         {
             var amplifier = new SimulatedTrackAmplifier(1);

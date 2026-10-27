@@ -198,10 +198,11 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Decodes and applies one SLAVEINFO frame in either the deployed legacy
         /// 12-register layout (footer at wire offset 40) or the Phase-1 23-register
-        /// layout (63-byte simulator/firmware frame, footer at offset 62). A legacy
-        /// frame is mapped onto a 23-register array with HR12..HR22 zeroed, so HR21/HR22
-        /// (which do not exist in the 12-register firmware) are never decoded as a
-        /// firmware version. Neither shape establishes FC03 freshness on its own.
+        /// layout (65-byte simulator frame, or the real 82-byte udpTrans_t envelope with
+        /// footer at wire offset 64). A legacy frame is mapped onto a 23-register array
+        /// with HR12..HR22 zeroed, so HR21/HR22 (which do not exist in the 12-register
+        /// firmware) are never decoded as a firmware version. Neither shape establishes
+        /// FC03 freshness on its own.
         /// </summary>
         private void ApplySlaveInfoFrame(byte[] buffer)
         {
@@ -218,21 +219,22 @@ namespace SiebwaldeApp.Core
             ushort mbExceptionCode;
             ushort spiCommErrorCounter;
 
-            if (buffer.Length == TrackSlaveInfoFrame.Length &&
-                buffer[TrackSlaveInfoFrame.Length - 1] == FOOTER)
+            if (buffer.Length >= TrackSlaveInfoFrame.Length &&
+                buffer[TrackSlaveInfoFrame.FooterOffset] == FOOTER)
             {
-                // Phase-1 23-register frame (simulator / Phase-1 firmware).
+                // Phase-1 23-register frame: the 65-byte simulator frame, or the real
+                // 82-byte udpTrans_t envelope (footer at 64, trailing garbage at 65..81).
                 slaveNumber = buffer[3];
                 slaveDetected = buffer[4];
                 for (int i = 0; i < TrackAmplifierRegisters.Count; i++)
                 {
                     holdingReg[i] = ReadUInt16Le(buffer, TrackSlaveInfoFrame.RegisterOffset + 2 * i);
                 }
-                mbReceiveCounter = ReadUInt16Le(buffer, TrackSlaveInfoFrame.TrailerOffset);
-                mbSentCounter = ReadUInt16Le(buffer, TrackSlaveInfoFrame.TrailerOffset + 2);
-                mbCommError = ReadUInt32Le(buffer, TrackSlaveInfoFrame.TrailerOffset + 4);
-                mbExceptionCode = buffer[TrackSlaveInfoFrame.TrailerOffset + 8];
-                spiCommErrorCounter = buffer[TrackSlaveInfoFrame.TrailerOffset + 9];
+                mbReceiveCounter = ReadUInt16Le(buffer, TrackSlaveInfoFrame.MbReceiveCounterOffset);
+                mbSentCounter = ReadUInt16Le(buffer, TrackSlaveInfoFrame.MbSentCounterOffset);
+                mbCommError = ReadUInt32Le(buffer, TrackSlaveInfoFrame.MbCommErrorOffset);
+                mbExceptionCode = buffer[TrackSlaveInfoFrame.MbExceptionCodeOffset];
+                spiCommErrorCounter = buffer[TrackSlaveInfoFrame.SpiCommErrorCounterOffset];
             }
             else if (buffer.Length >= TrackSlaveInfoFrame.LegacyMinLength &&
                      buffer[TrackSlaveInfoFrame.LegacyFooterOffset] == FOOTER)
