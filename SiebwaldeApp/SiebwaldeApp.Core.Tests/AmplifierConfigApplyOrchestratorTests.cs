@@ -229,6 +229,176 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         // ---------------------------------------------------------------------
+        // Repeated execution / reset idempotence (safety property)
+        // ---------------------------------------------------------------------
+
+        // Full re-arm + apply-config init sequence in order:
+        // 250 CONNECT → 112 REARM → 107 RESET → 100 → 106 → 101 → 104 → 105.
+        // 112 is a raw-comm command (never in the guard allowlist), tracked separately here.
+        private static readonly byte[] ApplyConfigInitOrder =
+        {
+            KoploperSessionCommandAllowlist.ClientConnectionRequest, // 250
+            TrackCommand.REARM_GLOBAL_STOP,                          // 112
+            TrackCommand.EXEC_MBUS_STATE_RESET,                      // 107
+            TrackCommand.EXEC_MBUS_STATE_SLAVES_ON,                  // 100
+            TrackCommand.EXEC_MBUS_STATE_START_DATA_UPLOAD,          // 106
+            TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT,               // 101
+            TrackCommand.EXEC_MBUS_STATE_SLAVE_INIT,                 // 104
+            TrackCommand.EXEC_MBUS_STATE_SLAVE_ENABLE,               // 105
+        };
+
+        [Fact]
+        public async Task ApplyConfig_RepeatedExecution_AlwaysRearmsAndResetsFirst()
+        {
+            // Run the orchestrator twice, each with a fresh orchestrator over a fresh deterministic
+            // transport (matching the existing test pattern; the transport is single-open). Each run
+            // must independently re-arm (112) and RESET (107) before any register write: 107 is what
+            // clears config_ok on every run, so the second run is safe even though a prior run may
+            // have left the amplifier configured/enabled.
+            for (int run = 0; run < 2; run++)
+            {
+                var transport = new DeterministicTrackTransport(new TrackSimulatorConfig(
+                    detectedSlaves: new byte[] { 1 }));
+
+                await using (var orchestrator = CreateOrchestrator(
+                    transport, heartbeatInterval: TimeSpan.FromMilliseconds(20)))
+                {
+                    await orchestrator.RunAsync(new byte[] { 1 });
+                }
+
+                AssertRearmThenResetBeforeDataExchange(
+                    transport.SentCommands, 0, transport.SentCommands.Count);
+            }
+        }
+
+        [Fact]
+        public async Task ApplyConfig_PriorPartialSuccess_ResetPrecedesConfig()
+        {
+            var transport = new DeterministicTrackTransport(new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1 }));
+            await using var orchestrator = CreateOrchestrator(transport);
+            await orchestrator.RunAsync(new byte[] { 1 });
+
+            IReadOnlyList<byte[]> frames = transport.SentFrames;
+
+            int resetIndex = -1;
+            for (int i = 0; i < frames.Count; i++)
+            {
+                if (frames[i].Length >= 2 && frames[i][1] == TrackCommand.EXEC_MBUS_STATE_RESET)
+                {
+                    resetIndex = i;
+                    break;
+                }
+            }
+
+            Assert.True(resetIndex >= 0, "107 RESET must be transmitted before any register write");
+
+            bool anyHr0Write = false;
+            bool anyEnableWrite = false;
+            int disableWrites = 0;
+            int configWrites = 0;
+            int applyWrites = 0;
+
+            for (int i = 0; i < frames.Count; i++)
+            {
+                byte[] frame = frames[i];
+                if (frame.Length < 8 || frame[1] != TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH)
+                {
+                    continue;
+                }
+
+                byte direction = frame[3];
+                byte count = frame[4];
+                byte startReg = frame[5];
+                if (direction != Enums.WRITE || count == 0)
+                {
+                    continue; // reads only
+                }
+
+                ushort value = (ushort)(frame[6] | (frame[7] << 8));
+
+                if (startReg == (byte)TrackAmplifierRegisters.PwmCommand)
+                {
+                    anyHr0Write = true;
+                }
+
+                if (startReg == (byte)TrackAmplifierRegisters.Control)
+                {
+                    if (value == TrackAmplifierRegisters.EnableBit)
+                    {
+                        anyEnableWrite = true; // HR1=0x8000 ENABLE must never be written
+                    }
+
+                    if (value == TrackAmplifierRegisters.DisableBit)
+                    {
+                        disableWrites++;
+                        Assert.True(i > resetIndex,
+                            $"DISABLE write (frame {i}, HR1=0x{value:X4}) must follow 107 RESET (frame {resetIndex})");
+                    }
+                    else if (value == TrackAmplifierRegisters.ApplyConfigBit)
+                    {
+                        applyWrites++;
+                        Assert.True(i > resetIndex,
+                            $"APPLY write (frame {i}, HR1=0x{value:X4}) must follow 107 RESET (frame {resetIndex})");
+                    }
+                }
+                else if (startReg >= (byte)TrackAmplifierRegisters.ConfigRamp &&
+                         startReg <= (byte)TrackAmplifierRegisters.ConfigTag)
+                {
+                    configWrites++;
+                    Assert.True(i > resetIndex,
+                        $"CONFIG write (frame {i}, HR{startReg}) must follow 107 RESET (frame {resetIndex})");
+                }
+            }
+
+            Assert.False(anyHr0Write, "apply-config must never write HR0 (PWM command)");
+            Assert.False(anyEnableWrite, "apply-config must never write HR1=0x8000 (ENABLE)");
+            Assert.True(disableWrites >= 1, "DISABLE (HR1=0x0400) must be written");
+            Assert.True(configWrites >= 4, "CONFIG (HR3..6) must be written");
+            Assert.True(applyWrites >= 1, "APPLY (HR1=0x2000) must be written");
+        }
+
+        private static void AssertRearmThenResetBeforeDataExchange(
+            IReadOnlyList<byte> commands, int startIndex, int endIndex)
+        {
+            // The re-arm + init subsequence must appear exactly, in order, within this run's command
+            // stream (heartbeat 110 and data-exchange 108 frames are interleaved and filtered out).
+            byte[] emitted = commands
+                .Skip(startIndex)
+                .Take(endIndex - startIndex)
+                .Where(c => ApplyConfigInitOrder.Contains(c))
+                .ToArray();
+            Assert.Equal(ApplyConfigInitOrder, emitted);
+
+            // Explicit (redundant with the exact-order assert): 112 REARM precedes 107 RESET.
+            Assert.True(
+                Array.IndexOf(emitted, (byte)TrackCommand.REARM_GLOBAL_STOP) <
+                Array.IndexOf(emitted, (byte)TrackCommand.EXEC_MBUS_STATE_RESET),
+                "112 REARM_GLOBAL_STOP must precede 107 RESET");
+
+            int resetIndex = -1;
+            int firstDataExchangeIndex = -1;
+            for (int i = startIndex; i < endIndex; i++)
+            {
+                byte command = commands[i];
+                if (command == TrackCommand.EXEC_MBUS_STATE_RESET && resetIndex < 0)
+                {
+                    resetIndex = i;
+                }
+                else if (command == TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH && firstDataExchangeIndex < 0)
+                {
+                    firstDataExchangeIndex = i;
+                    break;
+                }
+            }
+
+            Assert.True(resetIndex >= 0, "107 RESET must be transmitted in this run");
+            Assert.True(firstDataExchangeIndex >= 0, "a 108 data-exchange write must be transmitted in this run");
+            Assert.True(resetIndex < firstDataExchangeIndex,
+                "107 RESET must precede the first DISABLE/CONFIG/APPLY (108) write");
+        }
+
+        // ---------------------------------------------------------------------
         // Failure paths
         // ---------------------------------------------------------------------
 
