@@ -648,7 +648,7 @@ namespace SiebwaldeApp.Koploper.Validation.Host
             profile = "Simple Loop",
             init = new
             {
-                sequence = new[] { 250, 100, 101, 104, 106, 105 },
+                sequence = new[] { 250, 107, 100, 106, 101, 104, 105 },
                 commands = result.Init.Commands.Select(c => new
                 {
                     command = c.Command,

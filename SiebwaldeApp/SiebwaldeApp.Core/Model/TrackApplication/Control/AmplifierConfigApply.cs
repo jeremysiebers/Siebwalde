@@ -114,8 +114,8 @@ namespace SiebwaldeApp.Core
     /// <para>
     /// Reuses the production components without a second implementation:
     /// <see cref="TrackCommClientAsync"/> (transport + receive loop),
-    /// <see cref="KoploperSessionCommandGuard"/>/<see cref="KoploperSessionCommandAllowlist"/>
-    /// (the six-command init 250→100→101→104→106→105),
+    /// <see cref="KoploperSessionCommandGuard"/>/<see cref="KoploperSessionCommandApplyAllowlist"/>
+    /// (the seven-command init 250→107→100→106→101→104→105),
     /// <see cref="GlobalStopMonitor"/> (HOST_HEARTBEAT 110 supervision),
     /// <see cref="AmplifierConfigurationDownloader"/> (108 CONFIG/APPLY, echo-verified), and
     /// <see cref="AmplifierPhase1Safety"/>/<see cref="TrackAmplifierRegisters"/> (identity +
@@ -226,8 +226,11 @@ namespace SiebwaldeApp.Core
             {
                 await _guard.StartAsync(realHardwareMode: true, ct).ConfigureAwait(false);
 
-                // Cold-start init (250→100→101→104→106→105), each command ack-gated by the guard.
-                _guard.BeginNewSession();
+                // Apply-config init (250→107→100→106→101→104→105), each command ack-gated by the
+                // guard. 107 (RESET) returns the amplifiers to 0xAA so the 104 INIT identity
+                // verification (two fresh FC03 HR7 reads @ 0xAA) can succeed, and forces a
+                // controller already in SERVICE_TASKS to re-ack 100 (SLAVES_ON).
+                _guard.BeginApplyConfigSession();
                 await SendSessionCommandAsync(
                     KoploperSessionCommandAllowlist.ClientConnectionRequest, ct).ConfigureAwait(false);
 
@@ -235,10 +238,11 @@ namespace SiebwaldeApp.Core
                 _heartbeat.EstablishLink(_clock());
                 heartbeatTask = Task.Run(() => HeartbeatLoopAsync(heartbeatCts.Token), CancellationToken.None);
 
+                await SendSessionCommandAsync(KoploperSessionCommandAllowlist.ExecMbusStateReset, ct).ConfigureAwait(false);
                 await SendSessionCommandAsync(KoploperSessionCommandAllowlist.ExecMbusStateSlavesOn, ct).ConfigureAwait(false);
+                await SendSessionCommandAsync(KoploperSessionCommandAllowlist.ExecMbusStateStartDataUpload, ct).ConfigureAwait(false);
                 await SendSessionCommandAsync(KoploperSessionCommandAllowlist.ExecMbusStateSlaveDetect, ct).ConfigureAwait(false);
                 await SendSessionCommandAsync(KoploperSessionCommandAllowlist.ExecMbusStateSlaveInit, ct).ConfigureAwait(false);
-                await SendSessionCommandAsync(KoploperSessionCommandAllowlist.ExecMbusStateStartDataUpload, ct).ConfigureAwait(false);
                 await SendSessionCommandAsync(KoploperSessionCommandAllowlist.ExecMbusStateSlaveEnable, ct).ConfigureAwait(false);
 
                 // Wait for a fresh genuine SLAVEINFO readback per target slave (bounded).
@@ -520,14 +524,16 @@ namespace SiebwaldeApp.Core
             {
                 BuildCommandReport(250, "CLIENT_CONNECTION_REQUEST",
                     counters.ClientConnectionRequestTransmitted, counters.ClientConnectionRequestAcknowledged),
+                BuildCommandReport(107, "EXEC_MBUS_STATE_RESET",
+                    counters.ExecMbusStateResetTransmitted, counters.ExecMbusStateResetAcknowledged),
                 BuildCommandReport(100, "EXEC_MBUS_STATE_SLAVES_ON",
                     counters.ExecMbusStateSlavesOnTransmitted, counters.ExecMbusStateSlavesOnAcknowledged),
+                BuildCommandReport(106, "EXEC_MBUS_STATE_START_DATA_UPLOAD",
+                    counters.ExecMbusStateStartDataUploadTransmitted, counters.ExecMbusStateStartDataUploadAcknowledged),
                 BuildCommandReport(101, "EXEC_MBUS_STATE_SLAVE_DETECT",
                     counters.ExecMbusStateSlaveDetectTransmitted, counters.ExecMbusStateSlaveDetectAcknowledged),
                 BuildCommandReport(104, "EXEC_MBUS_STATE_SLAVE_INIT",
                     counters.ExecMbusStateSlaveInitTransmitted, counters.ExecMbusStateSlaveInitAcknowledged),
-                BuildCommandReport(106, "EXEC_MBUS_STATE_START_DATA_UPLOAD",
-                    counters.ExecMbusStateStartDataUploadTransmitted, counters.ExecMbusStateStartDataUploadAcknowledged),
                 BuildCommandReport(105, "EXEC_MBUS_STATE_SLAVE_ENABLE",
                     counters.ExecMbusStateSlaveEnableTransmitted, counters.ExecMbusStateSlaveEnableAcknowledged),
             };
@@ -535,7 +541,7 @@ namespace SiebwaldeApp.Core
             string readiness = overrideReadiness ??
                 (counters.AcknowledgementTimeouts > 0
                     ? "FAILED"
-                    : (counters.TotalAcknowledged == 6 ? "READY" : "INCOMPLETE"));
+                    : (counters.TotalAcknowledged == 7 ? "READY" : "INCOMPLETE"));
 
             return new AmplifierConfigApplyInitReport
             {

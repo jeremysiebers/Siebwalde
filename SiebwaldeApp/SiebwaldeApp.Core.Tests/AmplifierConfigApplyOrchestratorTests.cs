@@ -101,6 +101,44 @@ namespace SiebwaldeApp.Core.Tests
             Assert.Equal("DONE", init.State);
         }
 
+        [Fact]
+        public async Task ApplyConfig_InitOrder_Is250_107_100_106_101_104_105()
+        {
+            var transport = new DeterministicTrackTransport(new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1 }));
+            await using var orchestrator = CreateOrchestrator(transport);
+
+            AmplifierConfigApplyResult result = await orchestrator.RunAsync(new byte[] { 1 });
+
+            // The apply-config init commands must be emitted in the deployed-PIC32 order.
+            byte[] initOrder = { 250, 107, 100, 106, 101, 104, 105 };
+            byte[] emitted = transport.SentCommands.Where(c => initOrder.Contains(c)).ToArray();
+            Assert.Equal(initOrder, emitted);
+
+            // 107 RESET must precede 100 SLAVES_ON.
+            Assert.True(
+                Array.IndexOf(initOrder, (byte)107) < Array.IndexOf(initOrder, (byte)100),
+                "107 RESET must precede 100 SLAVES_ON");
+
+            AmplifierConfigApplyCommandReport resetReport = result.Init.Commands.Single(c => c.Command == 107);
+            Assert.Equal("EXEC_MBUS_STATE_RESET", resetReport.Name);
+            Assert.Equal(1, resetReport.Transmitted);
+            Assert.Equal(1, resetReport.Acknowledged);
+            Assert.Equal("DONE", resetReport.State);
+            Assert.Equal("READY", result.Init.Readiness);
+        }
+
+        [Fact]
+        public void ApplyConfigAllowlist_Includes107_ReadOnlyExcludes107()
+        {
+            // 107 is in the apply-config (state-changing) command set, never the read-only allowlist.
+            Assert.True(KoploperSessionCommandApplyAllowlist.IsPermitted(TrackCommand.EXEC_MBUS_STATE_RESET));
+            Assert.False(KoploperSessionCommandAllowlist.IsPermitted(TrackCommand.EXEC_MBUS_STATE_RESET));
+            Assert.Equal(
+                new byte[] { 250, 107, 100, 106, 101, 104, 105 },
+                KoploperSessionCommandApplyAllowlist.ApplyConfigOrder);
+        }
+
         // ---------------------------------------------------------------------
         // Safety invariant: never write HR0, never ENABLE; DISABLE before APPLY
         // ---------------------------------------------------------------------
@@ -210,8 +248,8 @@ namespace SiebwaldeApp.Core.Tests
 
             Assert.Equal("FAILED", result.Status);
             Assert.Equal("init_ack_timeout", result.Failure);
-            Assert.Equal(100, result.FailedCommand);
-            Assert.Equal("EXEC_MBUS_STATE_SLAVES_ON", result.FailedCommandName);
+            Assert.Equal(107, result.FailedCommand);
+            Assert.Equal("EXEC_MBUS_STATE_RESET", result.FailedCommandName);
             Assert.Empty(result.Amplifiers);
             Assert.Equal("FAILED", result.Init.Readiness);
         }
@@ -222,7 +260,7 @@ namespace SiebwaldeApp.Core.Tests
             // Acks the full init but never emits SLAVEINFO: the readback wait times out and the
             // amplifier is reported not-detected / not-compatible (never fabricated as configured).
             var transport = new FakeInitTransport(slave: 1, emitSlaveInfo: false,
-                new byte[] { 250, 100, 101, 104, 106, 105 });
+                new byte[] { 250, 107, 100, 106, 101, 104, 105 });
             await using var orchestrator = CreateOrchestrator(
                 transport, readbackTimeout: TimeSpan.FromMilliseconds(200));
 

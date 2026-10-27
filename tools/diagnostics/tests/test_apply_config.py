@@ -34,7 +34,7 @@ from tools.diagnostics.session_authority import (  # noqa: E402
 )
 
 ENDPOINT = "192.168.1.193"
-APPLY_CONFIG_COMMANDS = {250, 100, 101, 104, 106, 105, 108, 110}
+APPLY_CONFIG_COMMANDS = {250, 107, 100, 106, 101, 104, 105, 108, 110}
 
 
 def _apply_config_grant(grant_id="K9-AC-2026-10-27"):
@@ -125,13 +125,14 @@ _SUMMARY_LINE = {
     "failedCommandName": None,
     "profile": "Simple Loop",
     "init": {
-        "sequence": [250, 100, 101, 104, 106, 105],
+        "sequence": [250, 107, 100, 106, 101, 104, 105],
         "commands": [
             {"command": 250, "name": "CLIENT_CONNECTION_REQUEST", "transmitted": 1, "acknowledged": 1, "state": "DONE"},
+            {"command": 107, "name": "EXEC_MBUS_STATE_RESET", "transmitted": 1, "acknowledged": 1, "state": "DONE"},
             {"command": 100, "name": "EXEC_MBUS_STATE_SLAVES_ON", "transmitted": 1, "acknowledged": 1, "state": "DONE"},
+            {"command": 106, "name": "EXEC_MBUS_STATE_START_DATA_UPLOAD", "transmitted": 1, "acknowledged": 1, "state": "DONE"},
             {"command": 101, "name": "EXEC_MBUS_STATE_SLAVE_DETECT", "transmitted": 1, "acknowledged": 1, "state": "DONE"},
             {"command": 104, "name": "EXEC_MBUS_STATE_SLAVE_INIT", "transmitted": 1, "acknowledged": 1, "state": "DONE"},
-            {"command": 106, "name": "EXEC_MBUS_STATE_START_DATA_UPLOAD", "transmitted": 1, "acknowledged": 1, "state": "DONE"},
             {"command": 105, "name": "EXEC_MBUS_STATE_SLAVE_ENABLE", "transmitted": 1, "acknowledged": 1, "state": "DONE"},
         ],
         "rejected_commands": 0,
@@ -215,9 +216,17 @@ def test_apply_config_commands_are_exact():
 
 
 def test_apply_config_commands_not_in_readonly_allowlist():
-    # The read-only/session allowlist is unchanged (no 108/110).
+    # The read-only/session allowlist is unchanged (no 107/108/110).
+    assert 107 not in active_guard.ACTIVE_ALLOWLIST
+    assert 107 not in active_guard.ACTIVE_COMMANDS
     assert 108 not in active_guard.ACTIVE_ALLOWLIST
     assert 110 not in active_guard.ACTIVE_ALLOWLIST
+
+
+def test_apply_config_107_precedes_100_in_order():
+    order = active_guard.APPLY_CONFIG_ORDER
+    assert order == (250, 107, 100, 106, 101, 104, 105)
+    assert order.index(107) < order.index(100)
 
 
 def test_classify_apply_config_shutdown_clean():
@@ -385,6 +394,6 @@ def test_capabilities_reports_apply_config():
     caps = server.diagnostics_capabilities()
     assert "diagnostics_apply_config" in caps["active_tools"]
     assert caps["active_effect_classes"]["diagnostics_apply_config"] == "STATE_CHANGING"
-    assert caps["apply_config_commands"] == [100, 101, 104, 105, 106, 108, 110, 250]
+    assert caps["apply_config_commands"] == [100, 101, 104, 105, 106, 107, 108, 110, 250]
     # The read-only/session allowlist is unchanged.
     assert caps["active_allowlist"] == [100, 101, 104, 105, 106, 113, 250]

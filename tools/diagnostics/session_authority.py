@@ -39,8 +39,9 @@ CONSUMED_SUFFIX = ".consumed"
 
 # The two scoped modes a grant may authorise. ``session`` covers the six-command
 # state-changing init; ``read_only`` covers the single command-113 identity probe;
-# ``apply_config`` covers the state-changing safe CONFIG/APPLY path (the six init
-# commands + HOST_HEARTBEAT 110 + EXEC_MBUS_SLAVE_DATA_EXCH 108).
+# ``apply_config`` covers the state-changing safe CONFIG/APPLY path (the seven
+# init commands — including 107 RESET — + HOST_HEARTBEAT 110 +
+# EXEC_MBUS_SLAVE_DATA_EXCH 108).
 MODE_SESSION = "session"
 MODE_READ_ONLY = "read_only"
 MODE_APPLY_CONFIG = "apply_config"

@@ -944,7 +944,7 @@ def _build_apply_config_init(summary, classification: str) -> dict:
     summary_init = summary.get("init") if isinstance(summary, dict) else None
     if isinstance(summary_init, dict):
         return {
-            "sequence": list(summary_init.get("sequence", list(active_guard.COLD_START_ORDER))),
+            "sequence": list(summary_init.get("sequence", list(active_guard.APPLY_CONFIG_ORDER))),
             "commands": list(summary_init.get("commands", [])),
             "rejected_commands": summary_init.get("rejected_commands", 0),
             "order_violations": summary_init.get("order_violations", 0),
@@ -961,12 +961,12 @@ def _build_apply_config_init(summary, classification: str) -> dict:
             "acknowledged": 0,
             "state": "NOT_SENT",
         }
-        for cmd in active_guard.COLD_START_ORDER
+        for cmd in active_guard.APPLY_CONFIG_ORDER
     ]
     readiness = "FAILED" if classification == active_guard.ACK_TIMEOUT else "INCOMPLETE"
     ack_timeouts = 1 if classification == active_guard.ACK_TIMEOUT else 0
     return {
-        "sequence": list(active_guard.COLD_START_ORDER),
+        "sequence": list(active_guard.APPLY_CONFIG_ORDER),
         "commands": commands,
         "rejected_commands": 0,
         "order_violations": 0,
