@@ -40,11 +40,14 @@ ACTIVE_ALLOWLIST = ACTIVE_COMMANDS | {113}
 
 # The state-changing safe CONFIG/APPLY command set (mode ``apply_config``): the seven
 # init commands (including 107 RESET) + HOST_HEARTBEAT (110) + EXEC_MBUS_SLAVE_DATA_EXCH
-# (108, the only register write vector the C# apply-config host reaches for CONFIG/APPLY).
+# (108, the only register write vector the C# apply-config host reaches for CONFIG/APPLY)
+# + REARM_GLOBAL_STOP (112). 112 is emitted by the C# apply-config host on the raw comm
+# (before the 107 RESET) to clear a latched host-loss stop; it is idempotent, non-energizing
+# (it never touches config_ok/HR0/ENABLE) and is therefore part of the declared surface.
 # 107 is part of THIS set only — it stays excluded from the read-only ACTIVE_COMMANDS /
 # ACTIVE_ALLOWLIST above. Every flash/recovery command (120..130, 200..243) remains
 # structurally unreachable.
-APPLY_CONFIG_COMMANDS = frozenset({250, 107, 100, 106, 101, 104, 105, 108, 110})
+APPLY_CONFIG_COMMANDS = frozenset({250, 107, 100, 106, 101, 104, 105, 108, 110, 112})
 
 COLD_START_ORDER = (250, 100, 101, 104, 106, 105)
 

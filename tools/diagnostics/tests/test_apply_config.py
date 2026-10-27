@@ -34,7 +34,7 @@ from tools.diagnostics.session_authority import (  # noqa: E402
 )
 
 ENDPOINT = "192.168.1.193"
-APPLY_CONFIG_COMMANDS = {250, 107, 100, 106, 101, 104, 105, 108, 110}
+APPLY_CONFIG_COMMANDS = {250, 107, 100, 106, 101, 104, 105, 108, 110, 112}
 
 
 def _apply_config_grant(grant_id="K9-AC-2026-10-27"):
@@ -394,6 +394,6 @@ def test_capabilities_reports_apply_config():
     caps = server.diagnostics_capabilities()
     assert "diagnostics_apply_config" in caps["active_tools"]
     assert caps["active_effect_classes"]["diagnostics_apply_config"] == "STATE_CHANGING"
-    assert caps["apply_config_commands"] == [100, 101, 104, 105, 106, 107, 108, 110, 250]
+    assert caps["apply_config_commands"] == [100, 101, 104, 105, 106, 107, 108, 110, 112, 250]
     # The read-only/session allowlist is unchanged.
     assert caps["active_allowlist"] == [100, 101, 104, 105, 106, 113, 250]

@@ -1036,12 +1036,13 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 "      decoded firmware version (UNSUPPORTED when HR21/HR22 read 0), and freshness\n" +
                 "      markers (protocolReadbackObserved + lastDataReceivedUtc). No new command is sent.\n" +
                 "  apply-config [--slaves 1,3,4,6]\n" +
-                "      Grant-gated safe CONFIG/APPLY diagnostic. Establishes the six-command session\n" +
-                "      (250→100→101→104→106→105) + HOST_HEARTBEAT supervision, verifies per-amp identity\n" +
-                "      + compatibility, DISABLEs each compatible amp (HR1=0x0400) and verifies enable=0 +\n" +
-                "      output-inhibited BEFORE APPLY, then runs the echo-verified config download\n" +
-                "      (HR3..6 + APPLY). Never writes HR0, never writes ENABLE (0x8000) after DISABLE, and\n" +
-                "      never enables a bridge. Emits amplifierConfigApply + applyConfigSummary JSON lines.\n");
+                "      Grant-gated safe CONFIG/APPLY diagnostic. Establishes the seven-command init\n" +
+                "      (250→107→100→106→101→104→105) + HOST_HEARTBEAT supervision + a raw-comm re-arm\n" +
+                "      (112, before 107), verifies per-amp identity + compatibility, DISABLEs each\n" +
+                "      compatible amp (HR1=0x0400) and verifies enable=0 + output-inhibited BEFORE APPLY,\n" +
+                "      then runs the echo-verified config download (HR3..6 + APPLY). Never writes HR0,\n" +
+                "      never writes ENABLE (0x8000) after DISABLE, and never enables a bridge. Emits\n" +
+                "      amplifierConfigApply + applyConfigSummary JSON lines.\n");
         }
     }
 }

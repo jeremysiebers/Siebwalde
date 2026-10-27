@@ -70,7 +70,7 @@ def test_apply_config_order_is_exact():
 
 
 def test_apply_config_commands_include_107_not_readonly():
-    assert APPLY_CONFIG_COMMANDS == {250, 107, 100, 106, 101, 104, 105, 108, 110}
+    assert APPLY_CONFIG_COMMANDS == {250, 107, 100, 106, 101, 104, 105, 108, 110, 112}
     assert 107 in APPLY_CONFIG_COMMANDS
     assert 107 not in ACTIVE_COMMANDS
     assert 107 not in ACTIVE_ALLOWLIST

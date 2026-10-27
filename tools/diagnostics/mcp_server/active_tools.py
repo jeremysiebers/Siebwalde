@@ -180,13 +180,14 @@ def diagnostics_apply_config(
 ) -> dict:
     """Grant-gated safe CONFIG/APPLY diagnostic (STATE_CHANGING).
 
-    Runs the C# host in ``apply-config`` mode as a bounded child: the six-command
-    session + HOST_HEARTBEAT supervision, per-amplifier identity/compatibility
-    verification, the DISABLE safety gate (HR1=0x0400, verified enable=0 +
-    inhibited) BEFORE any CONFIG/APPLY, then the echo-verified config download
-    (HR3..6 + APPLY). Never writes HR0, never writes ENABLE (0x8000) after DISABLE.
-    Requires a distinct scoped ``apply_config`` grant (single-use, consumed before
-    any I/O); the combined command set is {250,100,101,104,106,105,108,110}.
+    Runs the C# host in ``apply-config`` mode as a bounded child: the seven-command
+    init (250->107->100->106->101->104->105) + HOST_HEARTBEAT (110) + the re-arm
+    (112, raw comm, before 107), per-amplifier identity/compatibility verification,
+    the DISABLE safety gate (HR1=0x0400, verified enable=0 + inhibited) BEFORE any
+    CONFIG/APPLY, then the echo-verified config download (HR3..6 + APPLY). Never
+    writes HR0, never writes ENABLE (0x8000) after DISABLE. Requires a distinct
+    scoped ``apply_config`` grant (single-use, consumed before any I/O); the
+    combined command set is {250,107,100,106,101,104,105,108,110,112}.
     """
     err = _guard_grant_id(authorization, "authorization")
     if err is not None:
