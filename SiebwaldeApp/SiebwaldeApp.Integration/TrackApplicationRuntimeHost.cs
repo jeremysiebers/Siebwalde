@@ -88,6 +88,12 @@ namespace SiebwaldeApp.Integration
         private Task? _globalStopTask;
         private CarrierTimingTrace? _carrierTimingTrace;
 
+        // Operator-controlled global-stop recovery gate (startup precondition). Both are fail-closed
+        // and re-armed fresh per start; recovery never proceeds without an explicit operator action
+        // (AuthorizeGlobalStopRecovery) AND positive physical-stop-clear evidence.
+        private volatile bool _operatorRecoveryAuthorized;
+        private Func<bool> _physicalStopInputsClear = () => false;
+
         /// <inheritdoc />
         public event EventHandler<TrackRuntimeStatusChangedEventArgs>? StateChanged;
 
@@ -460,10 +466,20 @@ namespace SiebwaldeApp.Integration
                 _bootloaderHelpers);
 
             // 6) Compose initialization steps.
+            // Fresh per start: a latched global stop must be re-armed only by an explicit operator
+            // action (see AuthorizeGlobalStopRecovery), never automatically.
+            _operatorRecoveryAuthorized = false;
+            _physicalStopInputsClear = () => false;
+
             var steps = new IInitializationStep[]
             {
                 new ConnectToEthernetTargetStep(_trackCommClient, _trackVariables, _loggerInstance),
                 new QueryControllerVersionStep(_trackCommClient, _trackVariables, _loggerInstance),
+                new GlobalStopPreconditionStep(
+                    _trackCommClient,
+                    operatorPermitRecovery: () => _operatorRecoveryAuthorized,
+                    physicalStopInputsClear: () => _physicalStopInputsClear(),
+                    loggerInstance: _loggerInstance),
                 new ResetAllSlavesStep(_trackCommClient, _trackVariables, _loggerInstance),
                 new DataUploadStep(_trackCommClient, _trackVariables, _loggerInstance),
                 new DetectSlavesStep(_trackCommClient, _trackVariables, _loggerInstance),
@@ -1146,6 +1162,19 @@ namespace SiebwaldeApp.Integration
                 allAmplifiersConfirmed: () => _stopConfirmation?.AreAllConfirmed ?? false);
 
             return await authority.ReleaseAsync(slaveNumber, pwmSetpoint, ct).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Explicit operator action that authorizes a global-stop re-arm during startup recovery.
+        /// Without this call the <see cref="GlobalStopPreconditionStep"/> keeps blocking and never
+        /// emits <c>REARM_GLOBAL_STOP</c> (112). The physical-stop-clear evidence source must be
+        /// supplied; when null it defaults to fail-closed (never clear), so recovery cannot proceed
+        /// without positive physical evidence. Never auto-releases a latched controller.
+        /// </summary>
+        public void AuthorizeGlobalStopRecovery(Func<bool>? physicalStopInputsClear = null)
+        {
+            _physicalStopInputsClear = physicalStopInputsClear ?? (() => false);
+            _operatorRecoveryAuthorized = true;
         }
 
         private async Task MonitorGlobalStopAsync(CancellationToken ct)
