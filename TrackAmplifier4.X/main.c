@@ -21,6 +21,7 @@ static uint8_t MODBUS_ADDRESS = 0;
 static uint8_t LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
 static uint8_t LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
 static uint8_t LED_ERR, LED_WAR = 0;
+static uint8_t LED_WAR_DIV = 0;
 static uint8_t Config = 1;
 static uint8_t Startup_Machine = 0;
 static uint8_t Sequencer = 0;
@@ -55,7 +56,7 @@ static void Amplifier_ServiceTick(void)
         LED_RUN_LAT = PWM3EN && !amp_model.status.brake_active;
         LED_ERR_LAT = amp_model.status.state == AMP_ST_FAULT || amp_model.command.emo ||
             (amp_model.fault.causes & AMP_FAULT_COMMS) != 0;
-        if (LED_RUN_LAT) { LED_WAR = 0; LED_WAR_LAT = 0; }
+        if (LED_RUN_LAT) { LED_WAR = 0; LED_WAR_LAT = 0; LED_WAR_DIV = 0; LED_WAR_STATE = 0; }
         else { LED_WAR++; }
     }
 }
@@ -239,27 +240,33 @@ void Led_Blink (){
     if(PIR4bits.TMR6IF){
         PIR4bits.TMR6IF = 0;
         
-        switch(LED_WAR_STATE){
-            case 0 : 
-                if (LED_WAR > 0){
-                    LED_WAR_LAT = 1;
-                    LED_WAR_prev = LED_WAR;
-                    LED_WAR_STATE = 1;                        
-                }
-                break;
+        /* WAR blinks at ~0.5 Hz: divide the 98.3 ms TMR6IF by 10 (~983 ms per
+         * half-cycle) so the warning is stable and clearly readable. ERR/TX/RX
+         * keep the original ~98 ms blink. */
+        if (++LED_WAR_DIV >= 10u) {
+            LED_WAR_DIV = 0;
+            switch(LED_WAR_STATE){
+                case 0 : 
+                    if (LED_WAR > 0){
+                        LED_WAR_LAT = 1;
+                        LED_WAR_prev = LED_WAR;
+                        LED_WAR_STATE = 1;                        
+                    }
+                    break;
 
-            case 1 :
-                if (LED_WAR == LED_WAR_prev || LED_WAR != LED_WAR_prev){
-                    LED_WAR_LAT = 0;
-                    LED_WAR_prev = 0;
-                    LED_WAR = 0;
-                    LED_WAR_STATE = 0;                        
-                }
-                break;
+                case 1 :
+                    if (LED_WAR == LED_WAR_prev || LED_WAR != LED_WAR_prev){
+                        LED_WAR_LAT = 0;
+                        LED_WAR_prev = 0;
+                        LED_WAR = 0;
+                        LED_WAR_STATE = 0;                        
+                    }
+                    break;
 
-            default :
-                LED_WAR_STATE = 0;
-                break;                       
+                default :
+                    LED_WAR_STATE = 0;
+                    break;                       
+            }
         }
         
         switch(LED_ERR_STATE){
