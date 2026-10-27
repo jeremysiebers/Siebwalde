@@ -25,13 +25,15 @@ namespace SiebwaldeApp.Core.Tests
             TimeSpan? acknowledgementTimeout = null,
             TimeSpan? heartbeatInterval = null,
             TimeSpan? readbackTimeout = null,
-            TimeSpan? disableVerifyTimeout = null)
+            TimeSpan? disableVerifyTimeout = null,
+            TimeSpan? rearmConfirmTimeout = null)
             => AmplifierConfigApplyOrchestrator.Create(
                 () => transport,
                 acknowledgementTimeout: acknowledgementTimeout ?? TimeSpan.FromSeconds(5),
                 heartbeatInterval: heartbeatInterval,
                 readbackTimeout: readbackTimeout ?? TimeSpan.FromSeconds(2),
-                disableVerifyTimeout: disableVerifyTimeout ?? TimeSpan.FromSeconds(2));
+                disableVerifyTimeout: disableVerifyTimeout ?? TimeSpan.FromSeconds(2),
+                rearmConfirmTimeout: rearmConfirmTimeout ?? TimeSpan.FromMilliseconds(100));
 
         // ---------------------------------------------------------------------
         // Full flow: DISABLE gate -> CONFIG/APPLY -> verified
@@ -76,6 +78,7 @@ namespace SiebwaldeApp.Core.Tests
             Assert.True(result.Heartbeat.HeartbeatSent >= 1);
             Assert.False(result.Heartbeat.Latched);
             Assert.Equal(0, result.Heartbeat.GlobalStopSent);
+            Assert.True(result.Heartbeat.Rearmed); // 112 re-arm was emitted on the completed run
 
             // Config values landed in the simulator registers (echo-verified).
             ushort[] regs = transport.GetRegisters(1);
@@ -137,6 +140,41 @@ namespace SiebwaldeApp.Core.Tests
             Assert.Equal(
                 new byte[] { 250, 107, 100, 106, 101, 104, 105 },
                 KoploperSessionCommandApplyAllowlist.ApplyConfigOrder);
+
+            // REARM_GLOBAL_STOP (112) is a raw-comm safety command: it must NEVER appear in either
+            // session allowlist — the read-only allowlist in particular, since it is not a read.
+            Assert.False(KoploperSessionCommandAllowlist.IsPermitted(TrackCommand.REARM_GLOBAL_STOP));
+            Assert.False(KoploperSessionCommandApplyAllowlist.IsPermitted(TrackCommand.REARM_GLOBAL_STOP));
+        }
+
+        // ---------------------------------------------------------------------
+        // Global-stop re-arm (112): clears a prior session's latched host-loss stop
+        // ---------------------------------------------------------------------
+
+        [Fact]
+        public async Task ApplyConfig_RearmsGlobalStop_AfterConnectBeforeReset()
+        {
+            var transport = new DeterministicTrackTransport(new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1 }));
+            await using var orchestrator = CreateOrchestrator(transport);
+
+            AmplifierConfigApplyResult result = await orchestrator.RunAsync(new byte[] { 1 });
+
+            byte[] sent = transport.SentCommands.ToArray();
+            int connect = Array.IndexOf(sent, (byte)KoploperSessionCommandAllowlist.ClientConnectionRequest);
+            int rearm = Array.IndexOf(sent, (byte)TrackCommand.REARM_GLOBAL_STOP);
+            int reset = Array.IndexOf(sent, (byte)TrackCommand.EXEC_MBUS_STATE_RESET);
+
+            Assert.True(connect >= 0, "250 CONNECT must be emitted");
+            Assert.True(rearm > connect, "112 REARM_GLOBAL_STOP must follow 250 CONNECT");
+            Assert.True(reset > rearm, "107 RESET must follow 112 REARM_GLOBAL_STOP");
+
+            // The orchestrator must never emit a GLOBAL_STOP_STATE (111) query; 111 is the PIC32's
+            // unsolicited status report and is only ever consumed, never sent. Querying it before the
+            // re-arm would read back a latched status (1/2) and sticky-latch the C# side.
+            Assert.DoesNotContain((byte)TrackCommand.GLOBAL_STOP_STATE, sent);
+
+            Assert.True(result.Heartbeat.Rearmed);
         }
 
         // ---------------------------------------------------------------------
@@ -252,6 +290,7 @@ namespace SiebwaldeApp.Core.Tests
             Assert.Equal("EXEC_MBUS_STATE_RESET", result.FailedCommandName);
             Assert.Empty(result.Amplifiers);
             Assert.Equal("FAILED", result.Init.Readiness);
+            Assert.True(result.Heartbeat.Rearmed); // re-arm precedes 107; a post-rearm failure still records it
         }
 
         [Fact]

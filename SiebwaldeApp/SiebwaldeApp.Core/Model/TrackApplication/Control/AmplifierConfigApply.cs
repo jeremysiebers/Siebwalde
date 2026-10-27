@@ -94,6 +94,9 @@ namespace SiebwaldeApp.Core
         public string? GlobalStopReason { get; set; }
         public int? LastObservedPic32Status { get; set; }
         public bool Latched { get; set; }
+
+        /// <summary>True once REARM_GLOBAL_STOP (112) was emitted on the raw comm in this run.</summary>
+        public bool Rearmed { get; set; }
     }
 
     /// <summary>Top-level structured result of the apply-config session.</summary>
@@ -122,12 +125,23 @@ namespace SiebwaldeApp.Core
     /// compatibility gate). It never writes HR0 and never sends ENABLE (105 / HR1=0x8000) after the
     /// DISABLE.
     /// </para>
+    /// <para>
+    /// <b>Re-arm safety note:</b> before the 107 RESET the orchestrator emits
+    /// <c>REARM_GLOBAL_STOP</c> (112) directly on the raw comm to clear a latched host-loss stop
+    /// left by a prior diagnostic session. 112 only transitions the PIC32 latch LATCHED→ARMED
+    /// (controller.c <c>CONTROLLERxHANDLExSAFETYxCOMMAND</c>); it does NOT energize the amplifier
+    /// bridge, because the amplifier H-bridge remains inhibited by <c>config_ok=0</c> →
+    /// <c>PWM3EN=0</c> (<c>AmpCore_Update</c>/<c>AmpHw_Enable</c> in
+    /// <c>TrackAmplifier4.X/amp_core.c</c>), an independent output-inhibition barrier the re-arm
+    /// does not touch.
+    /// </para>
     /// </summary>
     public sealed class AmplifierConfigApplyOrchestrator : IAsyncDisposable
     {
         public static readonly IReadOnlyList<byte> DefaultTargetSlaves = new byte[] { 1, 3, 4, 6 };
         public static readonly TimeSpan DefaultReadbackTimeout = TimeSpan.FromSeconds(5);
         public static readonly TimeSpan DefaultDisableVerifyTimeout = TimeSpan.FromSeconds(2);
+        public static readonly TimeSpan DefaultRearmConfirmTimeout = TimeSpan.FromSeconds(2);
 
         private readonly ITrackCommClient _rawComm;
         private readonly TrackApplicationVariables _variables;
@@ -139,6 +153,8 @@ namespace SiebwaldeApp.Core
         private readonly TimeSpan _heartbeatInterval;
         private readonly TimeSpan _readbackTimeout;
         private readonly TimeSpan _disableVerifyTimeout;
+        private readonly TimeSpan _rearmConfirmTimeout;
+        private bool _rearmed;
 
         private AmplifierConfigApplyOrchestrator(
             ITrackCommClient rawComm,
@@ -150,7 +166,8 @@ namespace SiebwaldeApp.Core
             Func<DateTimeOffset> clock,
             TimeSpan heartbeatInterval,
             TimeSpan readbackTimeout,
-            TimeSpan disableVerifyTimeout)
+            TimeSpan disableVerifyTimeout,
+            TimeSpan rearmConfirmTimeout)
         {
             _rawComm = rawComm;
             _variables = variables;
@@ -162,6 +179,7 @@ namespace SiebwaldeApp.Core
             _heartbeatInterval = heartbeatInterval;
             _readbackTimeout = readbackTimeout;
             _disableVerifyTimeout = disableVerifyTimeout;
+            _rearmConfirmTimeout = rearmConfirmTimeout;
         }
 
         /// <summary>
@@ -175,7 +193,8 @@ namespace SiebwaldeApp.Core
             TimeSpan? acknowledgementTimeout = null,
             TimeSpan? heartbeatInterval = null,
             TimeSpan? readbackTimeout = null,
-            TimeSpan? disableVerifyTimeout = null)
+            TimeSpan? disableVerifyTimeout = null,
+            TimeSpan? rearmConfirmTimeout = null)
         {
             Func<DateTimeOffset> sharedClock = clock ?? (() => DateTimeOffset.UtcNow);
 
@@ -200,7 +219,8 @@ namespace SiebwaldeApp.Core
                 commClient, variables, guard, heartbeatComm, heartbeat, downloader, sharedClock,
                 heartbeatInterval ?? GlobalStopMonitor.HeartbeatInterval,
                 readbackTimeout ?? DefaultReadbackTimeout,
-                disableVerifyTimeout ?? DefaultDisableVerifyTimeout);
+                disableVerifyTimeout ?? DefaultDisableVerifyTimeout,
+                rearmConfirmTimeout ?? DefaultRearmConfirmTimeout);
         }
 
         /// <summary>
@@ -237,6 +257,13 @@ namespace SiebwaldeApp.Core
                 // Heartbeat supervision starts ONLY after a successful 250 connect.
                 _heartbeat.EstablishLink(_clock());
                 heartbeatTask = Task.Run(() => HeartbeatLoopAsync(heartbeatCts.Token), CancellationToken.None);
+
+                // Re-arm the PIC32 global-stop latch (112) on the raw comm BEFORE the 107 RESET.
+                // A latched host-loss stop left by a prior diagnostic session forces the MBUS
+                // handler into SERVICE_TASKS (mbus.c MBUS_Tasks), so the 107 DONE ack is never
+                // sent and init times out. 112 only transitions LATCHED→ARMED; it never energizes
+                // the bridge (see the re-arm safety note on the class).
+                await RearmGlobalStopAsync(ct).ConfigureAwait(false);
 
                 await SendSessionCommandAsync(KoploperSessionCommandAllowlist.ExecMbusStateReset, ct).ConfigureAwait(false);
                 await SendSessionCommandAsync(KoploperSessionCommandAllowlist.ExecMbusStateSlavesOn, ct).ConfigureAwait(false);
@@ -465,6 +492,34 @@ namespace SiebwaldeApp.Core
         private Task SendSessionCommandAsync(byte command, CancellationToken ct)
             => _guard.SendAsync(new SendMessage(command, new byte[80]), ct);
 
+        /// <summary>
+        /// Emits REARM_GLOBAL_STOP (112) directly on the raw comm (never through the guard, which
+        /// does not know 112 and would reject it), then waits a bounded, best-effort time for the
+        /// PIC32 to report non-latched via its GLOBAL_STOP_STATE (111) status (0 Disarmed or
+        /// 3 Armed). Re-arm is idempotent and the 107 ack is the ultimate verification, so the
+        /// session is never blocked on this confirmation.
+        /// </summary>
+        private async Task RearmGlobalStopAsync(CancellationToken ct)
+        {
+            await _rawComm.SendAsync(
+                new SendMessage(TrackCommand.REARM_GLOBAL_STOP, Array.Empty<byte>()), ct)
+                .ConfigureAwait(false);
+            _rearmed = true;
+
+            DateTimeOffset deadline = _clock() + _rearmConfirmTimeout;
+            while (_clock() < deadline && !ct.IsCancellationRequested)
+            {
+                byte? status = _heartbeat.LastObservedPic32Status;
+                if (status == GlobalStopStatusMessage.Disarmed ||
+                    status == GlobalStopStatusMessage.Armed)
+                {
+                    break;
+                }
+
+                await Task.Delay(20, ct).ConfigureAwait(false);
+            }
+        }
+
         private async Task HeartbeatLoopAsync(CancellationToken ct)
         {
             try
@@ -569,6 +624,7 @@ namespace SiebwaldeApp.Core
                 GlobalStopReason = _variables.GlobalStop.Reason?.ToString(),
                 LastObservedPic32Status = _heartbeat.LastObservedPic32Status,
                 Latched = _variables.GlobalStop.IsLatched,
+                Rearmed = _rearmed,
             };
         }
 
