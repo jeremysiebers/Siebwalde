@@ -61,7 +61,7 @@ int main(void)
     CHECK(peripheral_duty == 399u && amp_model.status.applied_pwm == 399u);
     CHECK(PetitHoldingRegisters[HR_IDENTITY].ActValue == 0xF101u);
     CHECK(PetitHoldingRegisters[HR_FW_VERSION].ActValue == 0x0100u);
-    CHECK(PetitHoldingRegisters[HR_FW_VERSION_PATCH_PROTO].ActValue == 0x0201u);
+    CHECK(PetitHoldingRegisters[HR_FW_VERSION_PATCH_PROTO].ActValue == 0x0301u);
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
     CHECK(write_reg(HR_COMMAND, 799u) == 0);
     tick();
