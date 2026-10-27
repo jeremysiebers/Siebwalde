@@ -1295,14 +1295,23 @@ NODES: list[tuple[str, dict]] = [
         "source_location": "AmplifierConfigApplyOrchestrator.RunAsync", "source_revision": "c61c7617", "evidence_status": "OBSERVED", "observed_date": "2026-10-27",
     }),
     ("Hypothesis", {
-        "id": "hyp:amp6-marginal-write", "label": "Amplifier 6 has a marginal RS-422 write path (unconfirmed)",
-        "hypothesis": "Amplifier 6 config/APPLY fails reproducibly on the WRITE path (DISABLE write not clearing enable; config writes timing out) while its READ path (cyclic poll) is healthy. Candidate cause: marginal RS-422 signal on the amplifier-6 drop (wiring/termination/driver), causing intermittent write loss. NOT CONFIRMED; requires a PicoScope differential-signal measurement on the amp-6 RS-422 pair.",
-        "evidence_for": "amp 6 READ path healthy (identical cyclic-poll msg growth to 1/3/4); amp 6 identity 0xF101 correct.",
-        "evidence_against": "same code path succeeds on amps 1/3/4; msgsRx/msgsTx delta only ~10 lower (not conclusive); write_result=0x0001 is the 100ms lease-renewal HR1 clobber (address 1, AMP_WRITE_OK), NOT proof of a physical transmission failure — the actual failure is the config echo-verification timeout (HR8 never reached 0x0600).",
+        "id": "hyp:amp6-marginal-write", "label": "Amplifier 6 RX_B is electrically different / polarity-inverted (unconfirmed)",
+        "hypothesis": "Amplifier 6 RX_B (J1 pin 4) is electrically different from amplifier 3 RX_B: higher idle (0.79V vs 0.04V) and a large unipolar swing (4.44V vs 0.52V), so amplifier 6's differential idle polarity is INVERTED (A<B) versus amplifier 3 (A>B). Candidate cause: amplifier 6 RX_B wired to a different net, or a different/missing backplane termination/bias on the amplifier-6 slot. This would corrupt amplifier 6's received RS-485 data and explain the intermittent 104 identity-verification failure (identityRaw=0x0000, compatible=false, register_write_108=0). NOT CONFIRMED: requires board/connector verification of the amplifier-6 RX_B net.",
+        "evidence_for": "PicoScope 3406D (obs:p2c-rs422-measurement): amp6 RX_B idle 0.79V vs amp3 0.04V, swing 4.44V vs 0.52V, differential idle inverted (A<B vs A>B); every harness run shows amp6 identityRaw=0x0000 + register_write_108=0.",
+        "evidence_against": "RX_A is identical (~0.43V) on amp6 and amp3 (the A line is shared and consistent); write_result=0x0001 is the lease-renewal HR1 clobber, not proof of a write failure.",
         "status": "HYPOTHESIS",
-        "summary": "Unconfirmed hypothesis; do not treat as a confirmed wiring defect without physical-layer evidence.",
-        "source_path": "C:/Localdata/Siebwalde-Bewaarmap/04_HARDWARE_EVIDENCE/P2-C/p2c-harness-results.txt",
-        "source_location": "PER-AMPLIFIER CONFIG/APPLY RESULT", "source_revision": "c61c7617", "evidence_status": "UNVERIFIED", "observed_date": "2026-10-27",
+        "summary": "Measured electrical difference on amplifier 6 RX_B (inverted idle polarity); candidate wiring/termination cause, unconfirmed until board verification.",
+        "source_path": "C:/Localdata/Siebwalde-Bewaarmap/04_HARDWARE_EVIDENCE/P2-C/p2c-rs422-measurement-summary.txt",
+        "source_location": "CAPTURE b9c9667a / INTERPRETATION", "source_revision": "269b8fe3", "evidence_status": "OBSERVED", "observed_date": "2026-10-27",
+    }),
+    ("Observation", {
+        "id": "obs:p2c-rs422-measurement", "label": "P2-C RS-422 bus electrical measurement (PicoScope 3406D)",
+        "what": "Real PicoScope 3406D (JY908/0278) differential measurement of the PIC32->PIC18 RS-485 bus at 62.5 MS/s. IDLE: RX_A identical ~0.43V on amp6 (J1 pin12) and amp3 (J1 pin12); RX_B DIFFERS — amp6 J1 pin4 = 0.79V, amp3 J1 pin4 = 0.04V. TRAFFIC (trigger on amp3 RX_A 0.5V): amp6 RX_B swings to 4.44V (VCC rail) while amp6 RX_A / amp3 RX_A / amp3 RX_B stay ~0.5V. amp6 differential idle A-B = -0.36V (INVERTED, A<B) versus amp3 +0.39V (A>B). Also: RS-485 traffic amplitude on the A line is ~0.5V (below a 1V trigger threshold); every harness run (apply-config --slaves 6) shows amp6 identityRaw=0x0000, compatible=false, register_write_108=0 (no 108 write ever sent).",
+        "date": "2026-10-27", "method": "PicoScope 3406D analog A/B/C/D (J1 pin 12/4, GNDD pin 2/8, single common ground) + C# apply-config harness correlation",
+        "status": "PROVEN_HARDWARE",
+        "summary": "amp6 RX_B (J1 pin 4) is electrically different from amp3 RX_B (idle 0.79V vs 0.04V; swing 4.44V vs 0.52V); amp6 differential idle polarity is inverted (A<B) — consistent with amp6 RX_B wired to a different net (unconfirmed).",
+        "source_path": "tools/picoscope/evidence/mcp/b9c9667a458815729fdef9d2face054e.npz",
+        "source_location": "analog channels A/B/C/D", "source_revision": "269b8fe3", "evidence_status": "OBSERVED", "observed_date": "2026-10-27",
     }),
 ]
 
@@ -1432,6 +1441,7 @@ RELS: list[tuple[str, str, str, dict]] = [
     ("GUARDED_BY", "command:112", "safety:rearm-amp-neutral", {"note": "re-arm is non-energizing; safe before init"}),
     ("GUARDED_BY", "command:112", "safety:rearm-interval-no-hr0", {"note": "no amplifier HR0 write can occur in the 112->107 interval"}),
     ("SUPPORTED_BY", "hyp:amp6-marginal-write", "obs:p2c-harness-validation", {"note": "amp 6 WRITE-path failure observed; READ path healthy"}),
+    ("SUPPORTED_BY", "hyp:amp6-marginal-write", "obs:p2c-rs422-measurement", {"note": "PicoScope shows amp6 RX_B electrically different + inverted idle polarity"}),
     ("RELATED_TO", "obs:p2c-harness-validation", "obs:p2-b2-ffc2-deployed", {"note": "P2-C harness validated against the 1.0.2 (0xFFC2) deployment"}),
 ]
 
