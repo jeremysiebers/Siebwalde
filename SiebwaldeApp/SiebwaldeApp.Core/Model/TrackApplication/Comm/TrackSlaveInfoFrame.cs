@@ -7,11 +7,36 @@ namespace SiebwaldeApp.Core
     public static class TrackSlaveInfoFrame
     {
         public const int RegisterOffset = 6;
-        public const int TrailerOffset = RegisterOffset + 2 * TrackAmplifierRegisters.Count;
-        public const int Length = TrailerOffset + 11;
 
         // --------------------------------------------------------------------
-        // LEGACY 12-register SLAVEINFO (the DEPLOYED PIC32 firmware, PetitModbus.h
+        // PHASE-1 23-register SLAVEINFO (the deployed PIC32 1.0.1 firmware,
+        // PetitModbus.h with NUMBER_OF_HOLDING_PETITREGISTERS = 23 and the 4-byte
+        // SLAVE_DATA enum; XC32 without -fshort-enums). mbus.c memcpy's the inner
+        // SLAVE_INFO struct into the udpTrans_t data region at wire offset 2, and the
+        // full datagram is sizeof(udpTrans_t) = 82 bytes (header + command + data[80]).
+        //
+        // Inner SLAVE_INFO struct-relative layout (add +2 for the wire offset):
+        //   Header(1) SlaveNumber(1) SlaveDetected(1) pad(1)              -> 0..3
+        //   HoldingReg[0..22] (23 x uint16 LE)                            -> 4..49
+        //   MbReceiveCounter(2) MbSentCounter(2)                          -> 50..53
+        //   pad(2) — aligns the 4-byte SLAVE_DATA enum                    -> 54..55
+        //   MbCommError (uint32 LE) MbExceptionCode(1) SpiCommErrorCounter(1) Footer(1)
+        //                                                                 -> 56..62
+        // Wire offsets (SLAVE_INFO starts at 2): footer at 64, MbCommError at 58,
+        // MbExceptionCode at 62, SpiCommErrorCounter at 63, HoldingReg at 6..51
+        // (HR7 @20, HR11 @28, HR21 @48, HR22 @50 — confirmed by physical readback).
+        // The real 82-byte datagram carries trailing garbage at 65..81.
+        // --------------------------------------------------------------------
+        public const int MbReceiveCounterOffset = RegisterOffset + 2 * TrackAmplifierRegisters.Count; // 52
+        public const int MbSentCounterOffset = MbReceiveCounterOffset + 2;                             // 54
+        public const int MbCommErrorOffset = MbSentCounterOffset + 4;                                  // 58 (2-byte pad + enum)
+        public const int MbExceptionCodeOffset = MbCommErrorOffset + 4;                                // 62
+        public const int SpiCommErrorCounterOffset = MbExceptionCodeOffset + 1;                        // 63
+        public const int FooterOffset = SpiCommErrorCounterOffset + 1;                                 // 64
+        public const int Length = FooterOffset + 1;                                                    // 65
+
+        // --------------------------------------------------------------------
+        // LEGACY 12-register SLAVEINFO (the previously deployed PIC32 firmware, PetitModbus.h
         // with NUMBER_OF_HOLDING_PETITREGISTERS = 12). Wire layout of the 82-byte
         // UDP frame (udpTrans header + command + 80-byte data buffer):
         //   [0] udpTrans.header = 0xAA      [1] udpTrans.command = SLAVEINFO (0xFF)
@@ -43,13 +68,14 @@ namespace SiebwaldeApp.Core
             using var writer = new BinaryWriter(stream);
             writer.Write(new byte[] { 0xAA, 0xFF, 0xAA, slave, detected, 0 });
             foreach (var value in registers) writer.Write(value);
-            writer.Write(received);
-            writer.Write(sent);
-            writer.Write(error);
-            writer.Write(exception);
-            writer.Write(spiError);
-            writer.Write((byte)0x55);
-            return stream.ToArray();
+            writer.Write(received);      // MbReceiveCounter @52
+            writer.Write(sent);          // MbSentCounter    @54
+            writer.Write((ushort)0);     // 2-byte alignment padding @56..57 (before the 4-byte enum)
+            writer.Write(error);         // MbCommError (uint32 LE) @58
+            writer.Write(exception);     // MbExceptionCode @62
+            writer.Write(spiError);      // SpiCommErrorCounter @63
+            writer.Write((byte)0x55);    // Footer @64
+            return stream.ToArray();     // length 65
         }
     }
 }

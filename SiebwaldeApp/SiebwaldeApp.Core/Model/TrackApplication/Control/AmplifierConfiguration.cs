@@ -50,8 +50,11 @@ namespace SiebwaldeApp.Core
                 long sequence = item.ProtocolReadbackSequence;
                 await _comm.SendAsync(Exchange(item.SlaveNumber, 1, TrackAmplifierRegisters.ApplyConfigBit), deadline.Token).ConfigureAwait(false);
                 await _comm.SendAsync(Exchange(item.SlaveNumber, 8, 0, true), deadline.Token).ConfigureAwait(false);
+                // HR15 is read for diagnostics only. The APPLY completion signal is the HR8
+                // INIT_DONE|CONFIG_OK pair plus the HR3..6 config echo — never write_result,
+                // whose value == 1 is indistinguishable from a 100 ms lease renewal (HR1=0x4000).
                 await _comm.SendAsync(Exchange(item.SlaveNumber, 15, 0, true), deadline.Token).ConfigureAwait(false);
-                await WaitAsync(() => item.ProtocolReadbackSequence > sequence && item.HoldingReg[15] == 1 &&
+                await WaitAsync(() => item.ProtocolReadbackSequence > sequence &&
                     (item.HoldingReg[8] & 0x0600) == 0x0600 && values.SequenceEqual(item.HoldingReg.Skip(3).Take(4)), deadline.Token).ConfigureAwait(false);
                 if (!AmplifierPhase1Safety.Compatible(item)) throw new InvalidOperationException("compatibility changed during configuration");
                 item.ConfigurationVerified = true;
@@ -69,8 +72,15 @@ namespace SiebwaldeApp.Core
             long sequence = item.ProtocolReadbackSequence;
             await _comm.SendAsync(Exchange(item.SlaveNumber, address, value), ct).ConfigureAwait(false);
             await _comm.SendAsync(Exchange(item.SlaveNumber, address, 0, true), ct).ConfigureAwait(false);
+            // HR15 (write_result) is read for diagnostics only and MUST NOT gate completion:
+            // the PIC32 lease renewal writes HR1=0x4000 every ~100 ms, which sets write_result=1
+            // and clobbers the config write's write_result (address 3..6). A rejected write
+            // leaves the register echo unchanged, so verifying by the echo
+            // (HoldingReg[address] == value) still fails closed. HR1 is a decoded command
+            // register (its echo reflects enable/lease state, never the written word), so the
+            // explicit HR1=0 write is acknowledged by a fresh readback only.
             await _comm.SendAsync(Exchange(item.SlaveNumber, 15, 0, true), ct).ConfigureAwait(false);
-            await WaitAsync(() => item.ProtocolReadbackSequence > sequence && item.HoldingReg[15] == address &&
+            await WaitAsync(() => item.ProtocolReadbackSequence > sequence &&
                 (address == 1 || item.HoldingReg[address] == value), ct).ConfigureAwait(false);
         }
 

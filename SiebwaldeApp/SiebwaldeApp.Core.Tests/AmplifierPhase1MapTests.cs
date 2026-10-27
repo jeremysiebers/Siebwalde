@@ -15,7 +15,7 @@ namespace SiebwaldeApp.Core.Tests
             var registers = Enumerable.Range(0, TrackAmplifierRegisters.Count)
                 .Select(i => (ushort)(0x1000 + i)).ToArray();
             var frame = TrackSlaveInfoFrame.Encode(3, 1, registers, 123, 456, 0x11223344, 5, 6);
-            Assert.Equal(63, frame.Length);
+            Assert.Equal(65, frame.Length);
             var variables = new TrackApplicationVariables();
             var client = new TrackCommClientAsync(new UnusedTransport(), variables);
             Parse(client, frame);
@@ -29,12 +29,64 @@ namespace SiebwaldeApp.Core.Tests
             Assert.True(item.ProtocolReadbackObserved);
         }
 
+        [Fact]
+        public void Phase1_82ByteFrame_DecodesRealPic32Layout()
+        {
+            // Real PIC32 1.0.1 82-byte SLAVEINFO datagram (udpTrans_t = header + command +
+            // data[80]). The 23-register SLAVE_INFO carries a 4-byte SLAVE_DATA enum, so the
+            // wire layout has 2 alignment pad bytes before MbCommError and the footer sits at
+            // offset 64 (not 62). HR7/HR11/HR21/HR22 land at 20/28/48/50.
+            var frame = new byte[82];
+            frame[0] = 0xAA;               // udpTrans.header
+            frame[1] = 0xFF;               // SLAVEINFO command
+            frame[2] = 0x00;               // SLAVE_INFO.Header (patched below)
+            frame[3] = 1;                  // SlaveNumber
+            frame[4] = 1;                  // SlaveDetected
+            frame[5] = 0x00;               // alignment pad
+            WriteU16(frame, 20, 0xF101);   // HR7  @20 (identity)
+            WriteU16(frame, 28, 0x251F);   // HR11 @28 (checksum)
+            WriteU16(frame, 48, 0x0100);   // HR21 @48 (fw 1.0)
+            WriteU16(frame, 50, 0x0001);   // HR22 @50 (patch 0, protocol 1)
+            WriteU16(frame, 52, 123);      // MbReceiveCounter
+            WriteU16(frame, 54, 456);      // MbSentCounter
+            // 56..57 = 2-byte alignment padding (stays 0)
+            WriteU32(frame, 58, 0x11223344); // MbCommError (uint32 LE)
+            frame[62] = 5;                 // MbExceptionCode
+            frame[63] = 6;                 // SpiCommErrorCounter
+            frame[64] = 0x55;              // Footer
+            for (int i = 65; i < frame.Length; i++) frame[i] = 0xEE; // trailing garbage
+
+            Assert.Equal(0x55, frame[TrackSlaveInfoFrame.FooterOffset]);
+
+            // Corrupting the inner header proves the byte-layout assumption is the one decoded.
+            frame[2] = 0xAA;
+
+            var variables = new TrackApplicationVariables();
+            var client = new TrackCommClientAsync(new UnusedTransport(), variables);
+            Parse(client, frame);
+
+            TrackAmplifierItem item = variables.trackAmpItems[1];
+            Assert.Equal((ushort)0xF101, item.HoldingReg[TrackAmplifierRegisters.Identity]);
+            Assert.Equal((ushort)0x251F, item.HoldingReg[TrackAmplifierRegisters.SwChecksum]);
+            Assert.Equal((ushort)0x0100, item.HoldingReg[TrackAmplifierRegisters.FwVersionMajorMinor]);
+            Assert.Equal((ushort)0x0001, item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]);
+            Assert.Equal(123, item.MbReceiveCounter);
+            Assert.Equal(456, item.MbSentCounter);
+            Assert.Equal(0x11223344u, item.MbCommError);
+            Assert.Equal(5, item.MbExceptionCode);
+            Assert.Equal(6, item.SpiCommErrorCounter);
+            Assert.True(item.ProtocolReadbackObserved);
+            // Compatible identity + protocol: no fail-closed block.
+            Assert.Null(item.Phase1Failure);
+        }
+
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(41)]
         [InlineData(58)]
         [InlineData(60)]
+        [InlineData(64)]
         public void WrongLength_DoesNotEstablishReadback(int length)
         {
             var frame = new byte[length];
@@ -48,7 +100,7 @@ namespace SiebwaldeApp.Core.Tests
 
         [Theory]
         [InlineData(2)]
-        [InlineData(62)]
+        [InlineData(64)]
         public void WrongEnvelope_DoesNotEstablishReadback(int offset)
         {
             var frame = TrackSlaveInfoFrame.Encode(1, 1, new ushort[23]);
@@ -168,6 +220,20 @@ namespace SiebwaldeApp.Core.Tests
         private static void Parse(TrackCommClientAsync client, byte[] frame)
             => typeof(TrackCommClientAsync).GetMethod("HandleNewData", BindingFlags.NonPublic | BindingFlags.Instance)!
                 .Invoke(client, new object[] { frame });
+
+        private static void WriteU16(byte[] frame, int offset, ushort value)
+        {
+            frame[offset] = (byte)(value & 0xFF);
+            frame[offset + 1] = (byte)(value >> 8);
+        }
+
+        private static void WriteU32(byte[] frame, int offset, uint value)
+        {
+            frame[offset] = (byte)(value & 0xFF);
+            frame[offset + 1] = (byte)((value >> 8) & 0xFF);
+            frame[offset + 2] = (byte)((value >> 16) & 0xFF);
+            frame[offset + 3] = (byte)((value >> 24) & 0xFF);
+        }
 
         private sealed class UnusedTransport : ITrackTransport
         {
