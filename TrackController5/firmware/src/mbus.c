@@ -266,7 +266,7 @@ void MBUS_Tasks ( void )
             }
 
             actualFrequency = DRV_TMR_CounterFrequencyGet(mbusData.ModbusReceiveTimeoutHandle);
-            divider = actualFrequency/(uint32_t)4002; // cacluate divider value
+            divider = actualFrequency/(uint32_t)2000; // Modbus answer timeout ~500us: the PIC18 response turnaround (RX + service tick + Modbus + TX) can reach ~272us, exceeding the prior ~250us (4002) and causing intermittent 104 identity-verification timeouts
 //            LOG_Push("Mbus handler\t: ModbusReceiveTimeoutHandle divider is %d.\r\n", divider);
 //            if (DRV_TMR_AlarmRegister(mbusData.ModbusReceiveTimeoutHandle, 82,true, 0, ModbusReceiveTimeoutCallBack) == true){
             if (DRV_TMR_AlarmRegister(mbusData.ModbusReceiveTimeoutHandle, divider,true, 0, ModbusReceiveTimeoutCallBack) == true){
