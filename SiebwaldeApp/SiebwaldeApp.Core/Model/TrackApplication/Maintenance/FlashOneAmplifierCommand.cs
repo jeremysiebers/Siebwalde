@@ -47,7 +47,8 @@ namespace SiebwaldeApp.Core
 
     /// <summary>
     /// Drives the existing PIC32 firmware-flash wire path for exactly ONE amplifier:
-    /// CONNECT (250) -> GET_CONTROLLER_VERSION (113) -> enter the FW handler (103) ->
+    /// CONNECT (250) -> GET_CONTROLLER_VERSION (113) -> global MBUS reset
+    /// (EXEC_MBUS_STATE_RESET 107 -> EXEC_MBUS_STATE_SLAVES_ON 100) -> enter the FW handler (103) ->
     /// download the firmware file (120 + 141 chunks) -> download the config word (121 + 151) ->
     /// EXEC_FW_STATE_FLASH_ONE_SLAVE (131) -> wait for DONE/ERROR.
     ///
@@ -152,7 +153,29 @@ namespace SiebwaldeApp.Core
                         $"Controller version not acceptable: {observed}.", amplifier);
                 }
 
-                // 3. Enter the FW handler (the master re-announces FWHANDLERINIT/CONNECTED).
+                // 3. Global MBUS reset before entering the FW handler. A target amplifier at its
+                // ASSIGNED address (not the default 0xAA) only accepts the FlashSequencer HR11=0
+                // bootloader-entry write after a fresh global reset re-broadcasts the slave
+                // addresses; without it sub-step 7 fails. The MBUS DONE ack carries the MBUS
+                // STATE enum value in Taskcommand (EnumMbusStatus.MBUS_STATE_*), NOT the command
+                // value 107/100 (see TrackController5/firmware/src/mbus.c CREATExTASKxSTATUSxMESSAGE).
+                await SendAndWaitAsync(
+                    queue.Reader,
+                    new SendMessage(TrackCommand.EXEC_MBUS_STATE_RESET, new byte[80]),
+                    m => m.TaskId == TaskId.MBUS &&
+                         m.Taskcommand == EnumMbusStatus.MBUS_STATE_RESET &&
+                         m.Taskstate == TaskStates.DONE,
+                    _messageTimeout, cancellationToken).ConfigureAwait(false);
+
+                await SendAndWaitAsync(
+                    queue.Reader,
+                    new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVES_ON, new byte[80]),
+                    m => m.TaskId == TaskId.MBUS &&
+                         m.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVES_ON &&
+                         m.Taskstate == TaskStates.DONE,
+                    _messageTimeout, cancellationToken).ConfigureAwait(false);
+
+                // 4. Enter the FW handler (the master re-announces FWHANDLERINIT/CONNECTED).
                 await SendAndWaitAsync(
                     queue.Reader,
                     new SendMessage(TrackCommand.EXEC_MBUS_STATE_SLAVE_FW_FLASH, new byte[80]),
@@ -161,13 +184,13 @@ namespace SiebwaldeApp.Core
                          m.Taskstate == TaskStates.CONNECTED,
                     _messageTimeout, cancellationToken).ConfigureAwait(false);
 
-                // 4. Download the firmware file.
+                // 5. Download the firmware file.
                 await DownloadFirmwareFileAsync(queue.Reader, cancellationToken).ConfigureAwait(false);
 
-                // 5. Download the config word.
+                // 6. Download the config word.
                 await DownloadConfigWordAsync(queue.Reader, cancellationToken).ConfigureAwait(false);
 
-                // 6. Flash exactly one amplifier (normal 131 or bootloader-only 132).
+                // 7. Flash exactly one amplifier (normal 131 or bootloader-only 132).
                 var flashCommand = bootloaderOnly
                     ? TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY
                     : TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE;

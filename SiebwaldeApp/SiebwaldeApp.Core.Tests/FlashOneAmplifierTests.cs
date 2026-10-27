@@ -50,6 +50,90 @@ public class FlashOneAmplifierTests
         }
     }
 
+    [Fact]
+    public async Task ExecuteAsync_EmitsGlobalReset107Then100Before131_AndNeverSends122()
+    {
+        var hexPath = WritePic18HexFile(seed: 21);
+        try
+        {
+            var validation = FirmwareArtifactVerifier.Validate(hexPath, expectedSha256Hex: null);
+            Assert.True(validation.Success, validation.Error);
+            var artifact = validation.Artifact!;
+
+            var transport = new ScriptedPIC32Transport { Responder = BuildFlashSequenceResponder() };
+            var variables = new TrackApplicationVariables();
+            await using var comm = new TrackCommClientAsync(transport, variables);
+            await comm.StartAsync(realHardwareMode: false);
+
+            var sendNext = new SendNextFwDataPacket(comm, artifact.Helpers);
+            var command = new FlashOneAmplifierCommand(
+                comm, variables, artifact.Helpers, sendNext,
+                messageTimeout: TimeSpan.FromSeconds(10), flashTimeout: TimeSpan.FromSeconds(10));
+
+            var result = await command.ExecuteAsync(6);
+            Assert.True(result.Success, result.Error);
+
+            var commands = transport.SentFrames.Select(f => f[1]).ToArray();
+
+            int resetIdx = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_RESET);       // 107
+            int onIdx = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_SLAVES_ON);      // 100
+            int fwHandlerIdx = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_FW_FLASH); // 103
+            int flashIdx = Array.IndexOf(commands, (byte)TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE);      // 131
+
+            Assert.True(resetIdx >= 0, "EXEC_MBUS_STATE_RESET (107) was not emitted.");
+            Assert.True(onIdx > resetIdx, "EXEC_MBUS_STATE_SLAVES_ON (100) must follow RESET (107).");
+            Assert.True(fwHandlerIdx > onIdx, "FW-handler entry (103) must follow the global reset.");
+            Assert.True(flashIdx > fwHandlerIdx, "FLASH_ONE_SLAVE (131) must follow FW-handler entry.");
+            Assert.DoesNotContain((byte)TrackCommand.EXEC_FW_STATE_FLASH_ALL_SLAVES, commands);
+        }
+        finally
+        {
+            TryDelete(hexPath);
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteBootloaderOnlyAsync_EmitsGlobalReset107Then100Before132_AndNeverSends122()
+    {
+        var hexPath = WritePic18HexFile(seed: 22);
+        try
+        {
+            var validation = FirmwareArtifactVerifier.Validate(hexPath, expectedSha256Hex: null);
+            Assert.True(validation.Success, validation.Error);
+            var artifact = validation.Artifact!;
+
+            var transport = new ScriptedPIC32Transport { Responder = BuildBootloaderOnlyResponder(failAtEraseStep: false) };
+            var variables = new TrackApplicationVariables();
+            await using var comm = new TrackCommClientAsync(transport, variables);
+            await comm.StartAsync(realHardwareMode: false);
+
+            var sendNext = new SendNextFwDataPacket(comm, artifact.Helpers);
+            var command = new FlashOneAmplifierCommand(
+                comm, variables, artifact.Helpers, sendNext,
+                messageTimeout: TimeSpan.FromSeconds(10), flashTimeout: TimeSpan.FromSeconds(10));
+
+            var result = await command.ExecuteBootloaderOnlyAsync(6);
+            Assert.True(result.Success, result.Error);
+
+            var commands = transport.SentFrames.Select(f => f[1]).ToArray();
+
+            int resetIdx = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_RESET);       // 107
+            int onIdx = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_SLAVES_ON);      // 100
+            int fwHandlerIdx = Array.IndexOf(commands, (byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_FW_FLASH); // 103
+            int flashIdx = Array.IndexOf(commands, (byte)TrackCommand.EXEC_FW_STATE_FLASH_ONE_SLAVE_BOOTLOADER_ONLY); // 132
+
+            Assert.True(resetIdx >= 0, "EXEC_MBUS_STATE_RESET (107) was not emitted.");
+            Assert.True(onIdx > resetIdx, "EXEC_MBUS_STATE_SLAVES_ON (100) must follow RESET (107).");
+            Assert.True(fwHandlerIdx > onIdx, "FW-handler entry (103) must follow the global reset.");
+            Assert.True(flashIdx > fwHandlerIdx, "FLASH_ONE_SLAVE_BOOTLOADER_ONLY (132) must follow FW-handler entry.");
+            Assert.DoesNotContain((byte)TrackCommand.EXEC_FW_STATE_FLASH_ALL_SLAVES, commands);
+        }
+        finally
+        {
+            TryDelete(hexPath);
+        }
+    }
+
     // -------------------------------------------------------------------------
     // (a) bootloader-only single-target sequence (skip HR11=0, run bootloader primitives)
     // -------------------------------------------------------------------------
@@ -487,6 +571,10 @@ public class FlashOneAmplifierTests
                     return new[] { Ctrl(TaskId.CONTROLLER, TaskStates.CONNECTED, TaskStates.DONE, TaskMessages.NONE) };
                 case TrackCommand.GET_CONTROLLER_VERSION: // 113
                     return new[] { new byte[] { Enums.HEADER, TaskId.CONTROLLER, TrackCommand.GET_CONTROLLER_VERSION, 1, 0, 0, 0x01, 0 } };
+                case TrackCommand.EXEC_MBUS_STATE_RESET: // 107
+                    return new[] { Ctrl(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_RESET, TaskStates.DONE, TaskMessages.NONE) };
+                case TrackCommand.EXEC_MBUS_STATE_SLAVES_ON: // 100
+                    return new[] { Ctrl(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVES_ON, TaskStates.DONE, TaskMessages.NONE) };
                 case TrackCommand.EXEC_MBUS_STATE_SLAVE_FW_FLASH: // 103
                     return new[] { Ctrl(TaskId.FWHANDLER, TrackCommand.FWHANDLERINIT, TaskStates.CONNECTED, TaskMessages.NONE) };
                 case TrackCommand.EXEC_FW_STATE_RECEIVE_FW_FILE: // 120
