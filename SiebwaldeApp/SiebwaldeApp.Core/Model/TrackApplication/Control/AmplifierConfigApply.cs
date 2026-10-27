@@ -140,7 +140,7 @@ namespace SiebwaldeApp.Core
     /// <c>config_ok=0</c>. 107 RESET asserts <c>Slaves_Disable_On()</c> (RD1 HIGH,
     /// <c>mbus.c:377-386</c>, <c>system_config/Production/system_config.h:515</c>), power-cycling
     /// every amplifier so <c>AmpCore_Init</c> (<c>amp_core.c:12-27</c>) zeroes
-    /// <c>config_ok</c>/<c>enable</c>/<c>inhibited</c> on every run. <c>config_ok</c> becomes 1 only
+    /// <c>config_ok</c>/<c>enable</c>/<c>enable_active</c>/<c>inhibited</c> on every run. <c>config_ok</c> becomes 1 only
     /// via this harness's own CONFIG/APPLY (108), strictly after the DISABLE gate, so the bridge is
     /// never energized during init/config even after a prior successful CONFIG/APPLY, a retained
     /// ENABLE, or a partial prior success.
