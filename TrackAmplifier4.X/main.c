@@ -56,7 +56,7 @@ static void Amplifier_ServiceTick(void)
         LED_RUN_LAT = PWM3EN && !amp_model.status.brake_active;
         LED_ERR_LAT = amp_model.status.state == AMP_ST_FAULT || amp_model.command.emo ||
             (amp_model.fault.causes & AMP_FAULT_COMMS) != 0;
-        if (LED_RUN_LAT) { LED_WAR = 0; LED_WAR_LAT = 0; }
+        if (LED_RUN_LAT) { LED_WAR = 0; LED_WAR_LAT = 0; LED_WAR_DIV = 0; LED_WAR_STATE = 0; }
         else { LED_WAR++; }
     }
 }
