@@ -5,7 +5,7 @@
  * into the build manifest. MAP_VERSION stays 0x01 (21->23 is additive). */
 #define AMP_FW_MAJOR 1u
 #define AMP_FW_MINOR 0u
-#define AMP_FW_PATCH 0u
+#define AMP_FW_PATCH 1u
 #define AMP_PROTOCOL_VERSION 0x01u
 #define AMP_MAP_VERSION 0x01u
 #define AMP_DEVICE_CLASS 1u

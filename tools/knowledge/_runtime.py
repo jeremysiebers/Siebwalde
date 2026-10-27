@@ -116,7 +116,7 @@ def seed_counts() -> dict:
     """Return the per-table node/relationship counts implied by the seed.
 
     This is the authoritative "complete publishable knowledge" reference: the
-    seed (``knowledge_seed.py``) holds 153 nodes / 89 relationships, which is
+    seed (``knowledge_seed.py``) holds 193 nodes / 138 relationships, which is
     the Git source of truth for what a rebuilt database must contain.
     """
     node_counts: dict[str, int] = {t: 0 for t in schema.NODE_TABLES}

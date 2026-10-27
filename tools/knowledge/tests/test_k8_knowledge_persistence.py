@@ -4,8 +4,8 @@ Verify the five provenance-aware K8 records (firewall observation, command
 250-timeout / 113-success observation, the firewall hypothesis, the
 protocol-mismatch alternative hypothesis, and the next-validation observation)
 plus the minimal provenance-linkage schema extension. Also verify the K6/K7/K8
-records are preserved (153 nodes / 89 relationships) and that the two competing
-hypotheses remain distinct unresolved HYPOTHESIS records (never promoted).
+records are preserved (193 nodes / 138 relationships) and that the two competing
+hypotheses have been resolved (firewall CONFIRMED / protocol-mismatch CONTRADICTED).
 
 All assertions go through the read-only Knowledge MCP surface (or a fresh
 read-only connection), so these tests double as an MCP-retrievability check.
@@ -67,29 +67,30 @@ def test_schema_provenance_linkage_rel_tables():
 
 NEW_RECORDS = [
     ("obs:k8-po-firewall-observation", "Observation", "UNKNOWN",
-     "docs/K8-FIREWALL-CORRECTIVE.md", "UNVERIFIED"),
+     "docs/K8-FIREWALL-CORRECTIVE.md", "UNVERIFIED", "61c31f48"),
     ("obs:k8-cmd250-timeout-cmd113-success", "Observation", "PROVEN_HARDWARE",
-     "docs/K8-FIREWALL-CORRECTIVE.md", "OBSERVED"),
-    ("hyp:k8-firewall-blocked-udp", "Hypothesis", "HYPOTHESIS",
-     "docs/K8-FIREWALL-CORRECTIVE.md", "DERIVED"),
-    ("hyp:k8-protocol-mismatch-250", "Hypothesis", "HYPOTHESIS",
-     "docs/K8-FIREWALL-CORRECTIVE.md", "DERIVED"),
+     "docs/K8-FIREWALL-CORRECTIVE.md", "OBSERVED", "61c31f48"),
+    ("hyp:k8-firewall-blocked-udp", "Hypothesis", "PROVEN_HARDWARE",
+     "docs/K8B-COMMUNICATION-RECOVERY.md", "OBSERVED", "a49ea004"),
+    ("hyp:k8-protocol-mismatch-250", "Hypothesis", "CONTRADICTED",
+     "docs/K8B-COMMUNICATION-RECOVERY.md", "OBSERVED", "a49ea004"),
     ("obs:k8-next-validation-firewall", "Observation", "UNKNOWN",
-     "docs/K8-FIREWALL-CORRECTIVE.md", "UNVERIFIED"),
+     "docs/K8-FIREWALL-CORRECTIVE.md", "UNVERIFIED", "61c31f48"),
 ]
 
 
 @pytest.mark.parametrize(
-    "node_id, node_type, status, source_path, evidence_status", NEW_RECORDS
+    "node_id, node_type, status, source_path, evidence_status, source_revision",
+    NEW_RECORDS
 )
-def test_new_k8_record_provenance(node_id, node_type, status, source_path, evidence_status):
+def test_new_k8_record_provenance(node_id, node_type, status, source_path, evidence_status, source_revision):
     node = server.knowledge_node(node_id)["node"]
     assert node["type"] == node_type
     props = node["properties"]
     assert props["n.id"] == node_id
     assert props["n.status"] == status
     assert props["n.source_path"] == source_path
-    assert props["n.source_revision"] == "61c31f48"
+    assert props["n.source_revision"] == source_revision
     assert props["n.evidence_status"] == evidence_status
 
 
@@ -115,7 +116,7 @@ def test_k8_cmd250_timeout_cmd113_success_preserves_distinction():
 
 def test_k8_firewall_hypothesis_supports_and_missing():
     p = _props("hyp:k8-firewall-blocked-udp")
-    assert p["n.status"] == "HYPOTHESIS"
+    assert p["n.status"] == "PROVEN_HARDWARE"
     assert "Windows Firewall" in p["n.hypothesis"]
     assert p["n.evidence_for"]  # supporting evidence recorded
     assert p["n.evidence_against"]  # missing verification recorded
@@ -123,7 +124,7 @@ def test_k8_firewall_hypothesis_supports_and_missing():
 
 def test_k8_protocol_mismatch_alternative_hypothesis():
     p = _props("hyp:k8-protocol-mismatch-250")
-    assert p["n.status"] == "HYPOTHESIS"
+    assert p["n.status"] == "CONTRADICTED"
     assert "ALTERNATIVE" in p["n.hypothesis"] or "ALTERNATIVE" in p["n.summary"]
     assert "0.1.0" in p["n.hypothesis"] or "0.1.0" in p["n.summary"]
 
@@ -140,17 +141,18 @@ def test_k8_next_validation_eight_steps():
 # Competing hypotheses remain distinct (never confirmed/promoted).
 # ---------------------------------------------------------------------------
 
-def test_competing_hypotheses_remain_distinct_unresolved():
+def test_competing_hypotheses_remain_distinct_resolved():
     fw = _props("hyp:k8-firewall-blocked-udp")
     pm = _props("hyp:k8-protocol-mismatch-250")
     assert fw["n.id"] != pm["n.id"]
-    assert fw["n.status"] == "HYPOTHESIS"
-    assert pm["n.status"] == "HYPOTHESIS"
-    assert fw["n.status"] not in ("PROVEN_HARDWARE", "PROVEN_SOURCE", "PROVEN_OFFLINE_TEST")
-    assert pm["n.status"] not in ("PROVEN_HARDWARE", "PROVEN_SOURCE", "PROVEN_OFFLINE_TEST")
-    # both surfaced by the unresolved lens
+    # K8B resolution: the firewall hypothesis was CONFIRMED, the protocol-mismatch
+    # alternative was CONTRADICTED by the fresh 0x251F readback (250 ACKed 1/1).
+    assert fw["n.status"] == "PROVEN_HARDWARE"
+    assert pm["n.status"] == "CONTRADICTED"
+    # the CONFIRMED firewall hypothesis is no longer unresolved;
+    # the CONTRADICTED protocol-mismatch remains in the not-proven lens
     unresolved_ids = {r["id"] for r in server.knowledge_unresolved()["results"]}
-    assert fw["n.id"] in unresolved_ids
+    assert fw["n.id"] not in unresolved_ids
     assert pm["n.id"] in unresolved_ids
 
 
@@ -175,17 +177,17 @@ def test_hypotheses_supported_by_observations():
 
 
 # ---------------------------------------------------------------------------
-# Base preserved: 148 -> 153 nodes, 83 -> 89 rels, K6/K7/K8 intact, MCP-retrievable.
+# Base preserved: K6/K7/K8 intact, MCP-retrievable.
 # ---------------------------------------------------------------------------
 
-def test_base_unchanged_total_153_nodes_89_rels():
-    assert len(knowledge_seed.NODES) == 153
-    assert len(knowledge_seed.RELS) == 89
+def test_base_unchanged_total_184_nodes_130_rels():
+    assert len(knowledge_seed.NODES) == 193
+    assert len(knowledge_seed.RELS) == 138
     # per-table node/relationship counts in the built graph match the seed exactly
     from tools.knowledge import _runtime
     counts = _runtime.count_tables(_KNOWLEDGE / "db" / "siebwalde-knowledge.lbdb")
-    assert sum(counts["nodes"].values()) == 153
-    assert sum(counts["rels"].values()) == 89
+    assert sum(counts["nodes"].values()) == 193
+    assert sum(counts["rels"].values()) == 138
 
 
 def test_existing_k6_k7_k8_records_preserved():

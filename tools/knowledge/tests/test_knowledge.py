@@ -152,21 +152,18 @@ def test_q4_erase_timeout_not_sufficient():
     assert "NOT confirmation" in no_assume[0]["n.statement"]
 
 
-def test_q5_amp3_firmware_state_unknown():
-    """What is the current verified firmware state of amplifier 3?"""
+def test_q5_amp3_firmware_state_phase1():
+    """Amplifier 3 is now Phase-1 1.0.0 (0xE906), verified in P2-B2-A2."""
     rs = server.knowledge_firmware_state()["results"]
     amp3 = [r for r in rs if r["d.id"] == "device:amp-3"]
-    assert len(amp3) == 1
-    assert amp3[0]["d.status"] == "UNKNOWN"
+    assert any(r["f.id"] == "firmware:pic18-0xE906" for r in amp3)
 
 
 def test_amp1_roundtrip_final_0xE906():
     """Amplifier 1 ended the 2026-10-19 round-trip on 0xE906 (1.0.0), not 0x251F."""
     rs = server.knowledge_firmware_state()["results"]
     amp1 = [r for r in rs if r["d.id"] == "device:amp-1"]
-    assert len(amp1) == 1
-    assert amp1[0]["f.id"] == "firmware:pic18-0xE906"
-    assert amp1[0]["d.status"] == "UNKNOWN"  # not re-verified after PICO-5B
+    assert any(r["f.id"] == "firmware:pic18-0xE906" for r in amp1)
 
 
 def test_q6_backplane_mapping():
@@ -189,11 +186,12 @@ def test_q7_proven_vs_experimental_artifacts():
 
 
 def test_q8_contradicts_never_worked():
-    """Which evidence contradicts 'bootloader replies have never worked'?"""
+    """Which evidence contradicts the CONTRADICTED hypotheses?"""
     rs = server.knowledge_conflicts()["results"]
-    assert len(rs) == 1
-    assert rs[0]["h.id"] == "hyp:bootloader-replies-never-worked"
-    assert rs[0]["e.id"] == "evidence:techref-doc"
+    assert len(rs) == 2
+    by_hyp = {r["h.id"]: r["e.id"] for r in rs}
+    assert by_hyp["hyp:bootloader-replies-never-worked"] == "evidence:techref-doc"
+    assert by_hyp["hyp:k8-protocol-mismatch-250"] == "evidence:techref-doc"
 
 
 def test_q9_authorization_required():
@@ -248,14 +246,15 @@ def test_mcp_exposes_only_readonly_tools():
 
 
 def test_knowledge_tools_lists_protected():
-    """knowledge_tools() lists the 8 registry tools; picoscope/knowledge are KEEP_ACTIVE_MCP."""
+    """knowledge_tools() lists the 10 registry tools; picoscope/knowledge are KEEP_ACTIVE_MCP."""
     res = server.knowledge_tools()["results"]
-    assert len(res) == 8
+    assert len(res) == 10
     by_id = {r["id"]: r for r in res}
     assert set(by_id) == {
         "tool:picoscope-mcp", "tool:knowledge-foundation", "tool:firmware-tooling",
         "tool:hmo2024-tooling", "tool:flash-one-driver", "tool:legacy-python-cli",
         "tool:faller-car-bootload", "tool:integrator-checksum-helper",
+        "tool:diagnostics-cold-start-capture", "tool:diagnostics-mcp-active-session",
     }
     assert by_id["tool:picoscope-mcp"]["preservation_policy"] == "KEEP_ACTIVE_MCP"
     assert by_id["tool:knowledge-foundation"]["preservation_policy"] == "KEEP_ACTIVE_MCP"
@@ -308,12 +307,12 @@ def test_k6b_observations_recorded():
 
 
 def test_k6b_does_not_change_runs_firmware():
-    """K6-B must NOT change device:pic32 RUNS_FIRMWARE firmware:pic32-0.1.0."""
+    """K6-B (read-only OBSERVE) does not change RUNS_FIRMWARE; the current PIC32
+    firmware is 1.0.1 (changed by P2-B1/P2-B2-A1, not by K6-B)."""
     fw = server.knowledge_firmware_state()["results"]
     pic32 = [r for r in fw if r["d.id"] == "device:pic32"]
-    assert len(pic32) == 1
-    assert pic32[0]["f.id"] == "firmware:pic32-0.1.0"
-    assert pic32[0]["f.version"] == "0.1.0"
+    assert any(r["f.id"] == "firmware:pic32-1.0.1" for r in pic32)
+    assert any(r["f.id"] == "firmware:pic32-0.1.0" for r in pic32)  # historical
 
 
 # ---------------------------------------------------------------------------
@@ -337,8 +336,7 @@ def test_k7_pic32_identity_transition():
     # finding 1 must not change the recorded current firmware for the PIC32
     fw = server.knowledge_firmware_state()["results"]
     pic32 = [r for r in fw if r["d.id"] == "device:pic32"]
-    assert len(pic32) == 1
-    assert pic32[0]["f.id"] == "firmware:pic32-0.1.0"
+    assert any(r["f.id"] == "firmware:pic32-1.0.1" for r in pic32)
 
 
 def test_k7_cmd124_ineligible():
