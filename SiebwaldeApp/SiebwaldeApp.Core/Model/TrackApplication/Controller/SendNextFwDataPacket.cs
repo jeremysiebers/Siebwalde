@@ -65,5 +65,15 @@ namespace SiebwaldeApp
 
             IterationCounter += Enums.JUMPSIZE;
         }
+
+        /// <summary>
+        /// Resets the packet-iteration counter back to the start of the firmware image.
+        /// A repeated flash operation on the same instance (e.g. flash A then flash B) must
+        /// call this first so the counter cannot carry over and skip the first data packets.
+        /// </summary>
+        public void Reset()
+        {
+            IterationCounter = 0;
+        }
     }
 }

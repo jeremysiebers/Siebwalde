@@ -12,6 +12,13 @@ neither of which ever sends `SELECT_SLAVE` (123).
 Emitted command sequence (byte values; each packet starts with header 0xAA):
 
     250  CLIENT_CONNECTION_REQUEST          (CONNECT -- wait for CONNECTED ack)
+    101  EXEC_MBUS_STATE_SLAVE_DETECT       (release all slots -- wait MBUS_STATE_SLAVE_DETECT/DONE)
+        (release any leftover backplane slot so the 100 power-up cannot
+         bootloader-entry the wrong amp via the IO-pin path -- R2)
+    107  EXEC_MBUS_STATE_RESET              (global RD1 reset -- wait MBUS_STATE_RESET/DONE)
+    100  EXEC_MBUS_STATE_SLAVES_ON          (release reset -- wait MBUS_STATE_SLAVES_ON/DONE)
+        (107/100 reset the amps to the unconfigured 0xAA Config phase so the PIC18
+         bootloader-entry write of 123 is accepted instead of dropped -- PICO-5B)
     103  EXEC_MBUS_STATE_SLAVE_FW_FLASH     (enter FW handler -- wait FWHANDLERINIT)
     120  EXEC_FW_STATE_RECEIVE_FW_FILE      (wait for FWFILEDOWNLOAD STANDBY ack)
     141  FILEDOWNLOAD_STATE_FW_DATA_RECEIVE x N   (N = 4-row / 64-byte packets)
@@ -37,7 +44,7 @@ It MUST NOT (and never does) emit 122 (FLASH_ALL_SLAVES) or 131/132.
 
 The FW handler is entered via EXEC_MBUS_STATE_SLAVE_FW_FLASH (103): the
 controller only routes MBUS commands + CLIENT_CONNECTION_REQUEST
-(`controller.c:196-259`), and the FW handler runs only inside
+(`controller.c:306-384`), and the FW handler runs only inside
 MBUS_STATE_SLAVE_FW_FLASH (`mbus.c:307-318`).
 
 Commands 123 (SELECT_SLAVE) and 130 (EXIT_SLAVExFWxHANDLER) emit NO host ack
@@ -548,6 +555,8 @@ class FlashOneDriver(object):
         self._log("START  slave=%d hex=%s" % (self.slave_id, self.hex_image.path))
         self._drain_feedback("startup")
         self._connect()
+        self._release_all_slots()
+        self._global_reset()
         self._enter_fw_handler()
         self._receive_fw_file()
         self._receive_config_word()
@@ -563,6 +572,54 @@ class FlashOneDriver(object):
                        and f[2] == EnumTaskStates.DONE),
             "CONNECT (CLIENT_CONNECTION_REQUEST)")
         self._sleep(self.delays["connect"])
+
+    def _release_all_slots(self):
+        # R2 -- release any leftover backplane slot BEFORE the 107/100 power-cycle.
+        # 107/100 resets ONLY the amplifiers (RD1 Slaves_Disable line); it does NOT
+        # clear the backplane HoldingReg0 slot-select register.  If a prior aborted
+        # operation left a slot selected (e.g. an earlier flash that died between
+        # SelectSlave case 2 "select slot" and case 6 "release slot"), the 100
+        # power-up would boot the amplifier with RA0 LOW into its bootloader via
+        # the IO-pin path (pic18f_bootload.c:171), which is INDEPENDENT of the
+        # application-side Startup_Machine==1 gate.  A later 125 ERASE could then
+        # reach BOTH amps (the bootloader UART is addressless).  101
+        # (SLAVExDETECT -> DetectSlave) ends each amplifier iteration by writing
+        # HoldingReg0 = 0 ("select no amplifier slave", slavestartup.c:324-338
+        # case 7), releasing every slot.  It is read-only: it reads HRs and writes
+        # only the backplane slot release.  K3: any missing ack / timeout / ERROR
+        # -> FlashAbort (no ASSUME-OK, no retry).
+        self._send_simple(EnumCommand.EXEC_MBUS_STATE_SLAVE_DETECT)  # 101
+        self._wait_feedback(
+            lambda f: (f[0] == EnumTaskId.MBUS
+                       and f[1] == EnumMbusStatus.MBUS_STATE_SLAVE_DETECT
+                       and f[2] == EnumTaskStates.DONE),
+            "SLAVE_DETECT")
+        self._sleep(self.delays["detect"])
+
+    def _global_reset(self):
+        # Global RD1 reset line: hold all amplifiers in reset so the PIC18
+        # enters its bootloader at the unconfigured Config phase (0xAA).  A
+        # running amp answers on its assigned address, so the 123 SELECT_SLAVE
+        # bootloader-entry write would otherwise be dropped (PICO-5B).  After
+        # 100 releases reset the controller sits in MBUS_STATE_WAIT and does NOT
+        # auto-run detect/init/enable, so amps stay at 0xAA until 123 selects.
+        # 107 has a ~1s internal wait before it acks; ACK_TIMEOUT (10 s) is a
+        # comfortable margin.  K3: any missing ack / timeout / ERROR -> FlashAbort
+        # (no ASSUME-OK, no retry).
+        self._send_simple(EnumCommand.EXEC_MBUS_STATE_RESET)  # 107
+        self._wait_feedback(
+            lambda f: (f[0] == EnumTaskId.MBUS
+                       and f[1] == EnumMbusStatus.MBUS_STATE_RESET
+                       and f[2] == EnumTaskStates.DONE),
+            "MBUS_STATE_RESET")
+
+        self._send_simple(EnumCommand.EXEC_MBUS_STATE_SLAVES_ON)  # 100
+        self._wait_feedback(
+            lambda f: (f[0] == EnumTaskId.MBUS
+                       and f[1] == EnumMbusStatus.MBUS_STATE_SLAVES_ON
+                       and f[2] == EnumTaskStates.DONE),
+            "MBUS_STATE_SLAVES_ON")
+        self._sleep(self.delays["slaves_on"])
 
     def _enter_fw_handler(self):
         # 103 -> controller routes to MBUS_STATE_SLAVE_FW_FLASH; the FW handler
@@ -975,6 +1032,9 @@ class SelfAckTransport(RecordingTransport):
                                 EnumTaskStates.DONE, EnumTaskMessages.NONE))
         elif cmd == _E.EXEC_MBUS_STATE_SLAVES_ON:
             self._queue.append((EnumTaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVES_ON,
+                                EnumTaskStates.DONE, EnumTaskMessages.NONE))
+        elif cmd == _E.EXEC_MBUS_STATE_RESET:
+            self._queue.append((EnumTaskId.MBUS, EnumMbusStatus.MBUS_STATE_RESET,
                                 EnumTaskStates.DONE, EnumTaskMessages.NONE))
         elif cmd == _E.EXEC_MBUS_STATE_START_DATA_UPLOAD:
             self._queue.append((EnumTaskId.MBUS,

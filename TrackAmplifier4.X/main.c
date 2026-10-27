@@ -52,7 +52,7 @@ static void Amplifier_ServiceTick(void)
         LastAmplifierTick++; /* bounded catch-up, one tick per super-loop pass */
         REGULATORxUPDATE();
         AmpAdapter_Refresh();
-        LED_RUN_LAT = amp_model.status.state == AMP_ST_RUN;
+        LED_RUN_LAT = AmpCore_IsBridgeDriving();
         LED_ERR_LAT = amp_model.status.state == AMP_ST_FAULT || amp_model.command.emo ||
             (amp_model.fault.causes & AMP_FAULT_COMMS) != 0;
     }

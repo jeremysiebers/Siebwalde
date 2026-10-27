@@ -58,7 +58,7 @@ int main(void)
     CHECK(peripheral_duty == 399u && amp_model.status.applied_pwm == 399u);
     CHECK(PetitHoldingRegisters[HR_IDENTITY].ActValue == 0xF101u);
     CHECK(PetitHoldingRegisters[HR_FW_VERSION].ActValue == 0x0100u);
-    CHECK(PetitHoldingRegisters[HR_FW_VERSION_PATCH_PROTO].ActValue == 0x0001u);
+    CHECK(PetitHoldingRegisters[HR_FW_VERSION_PATCH_PROTO].ActValue == 0x0101u);
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
     CHECK(write_reg(HR_COMMAND, 799u) == 0);
     tick();
@@ -162,6 +162,7 @@ int main(void)
 
     reset(); configure(); run(799u);
     CHECK(peripheral_duty == 401u);
+    CHECK(peripheral_enable); /* normal enabled run: bridge ON */
     CHECK(PetitHoldingRegisters[HR_COMMAND].ActValue == 799u);
     CHECK(PetitHoldingRegisters[HR_TARGET_PWM].ActValue == 401u);
     CHECK((PetitHoldingRegisters[HR_APPLIED_PWM].ActValue & 0x3FFu) == peripheral_duty);
@@ -171,13 +172,16 @@ int main(void)
     for (i = 0u; i < 100u; i++) { AmpAdapter_OnFrame(1u, 3u); tick(); }
     CHECK(amp_model.status.state == AMP_ST_LEASE_EXPIRED);
     CHECK(amp_model.status.inhibited && amp_model.fault.causes == AMP_FAULT_LEASE);
+    CHECK(!AmpCore_IsBridgeDriving()); /* lease expiry -> inhibited -> LED_RUN OFF */
     CHECK(write_reg(HR_COMMAND, 799u) == AMP_WRITE_RELATIONSHIP);
     for (i = 0u; i < 50u; i++) { AmpAdapter_OnFrame(1u, 3u); tick(); }
     CHECK(peripheral_duty == 399u && !amp_model.status.stopping_active);
+    CHECK(!peripheral_enable); /* lease fast-stop reached neutral: bridge de-energized */
     CHECK(write_reg(HR_COMMAND, 799u) == 0); tick();
     CHECK(peripheral_duty == 399u); /* no renewal, command cannot release */
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_LEASE) == 0); tick();
     CHECK(amp_model.status.inhibited && peripheral_duty == 399u);
+    CHECK(!peripheral_enable); /* still inhibited at neutral: bridge stays de-energized */
     CHECK(write_reg(HR_COMMAND, 799u) == 0); tick();
     CHECK(!amp_model.status.inhibited && peripheral_duty == 401u);
     /* Default-config bound measured in logical ticks from the last renewal. */
@@ -189,8 +193,10 @@ int main(void)
     CHECK(amp_model.status.lease_fresh && peripheral_duty == 799u);
     AmpAdapter_OnFrame(1u, 3u); tick();
     CHECK(amp_model.status.state == AMP_ST_LEASE_EXPIRED && peripheral_duty == 791u);
+    CHECK(peripheral_enable); /* fast-stop ramp in progress: bridge still switching */
     for (i = 0u; i < 49u; i++) { AmpAdapter_OnFrame(1u, 3u); tick(); }
     CHECK(peripheral_duty == 399u && amp_model.status.inhibited && !amp_model.status.stopping_active);
+    CHECK(!peripheral_enable); /* neutral reached: bridge de-energized */
     /* 343 ticks = 584.472 ms; contract allows <=2 additional scheduling ticks. */
     print("PASS: lease expires despite FC03 / fast-stop / inhibit / fresh release\n");
 
@@ -198,8 +204,10 @@ int main(void)
     for (i = 1u; i < 147u; i++) tick();
     CHECK(amp_model.status.state == AMP_ST_COMMS_LOST);
     CHECK(amp_model.status.inhibited && amp_model.fault.causes & AMP_FAULT_COMMS);
+    CHECK(!AmpCore_IsBridgeDriving()); /* comm loss -> inhibited -> LED_RUN OFF */
     for (i = 0u; i < 50u; i++) tick();
     CHECK(peripheral_duty == 399u);
+    CHECK(!peripheral_enable); /* comm-loss fast-stop reached neutral: bridge de-energized */
     AmpAdapter_OnFrame(1u, 3u); tick();
     CHECK(amp_model.fault.causes & AMP_FAULT_COMMS); /* communication alone doesn't clear latch */
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_CLEAR | HR_CONTROL_LEASE) == 0);
@@ -215,12 +223,35 @@ int main(void)
     CHECK(peripheral_duty == 401u);
     CHECK(write_reg(HR_COMMAND, HR_PWM_EMO_BIT) == 0); tick();
     CHECK(amp_model.status.state == AMP_ST_ESTOP && peripheral_brake && peripheral_duty == 401u);
+    CHECK(!AmpCore_IsBridgeDriving()); /* EMO -> inhibited -> LED_RUN OFF */
     CHECK((PetitHoldingRegisters[HR_APPLIED_PWM].ActValue & 0x3FFu) == 401u);
     CHECK(write_reg(HR_COMMAND, 399u) == 0); tick();
     CHECK(peripheral_duty == 399u && amp_model.status.inhibited);
     AmpHw_SetDuty(0u); CHECK(peripheral_duty == 1u && amp_model.status.applied_pwm == 1u);
     AmpHw_SetDuty(1023u); CHECK(peripheral_duty == 799u && amp_model.status.applied_pwm == 799u);
     print("PASS: comm-watchdog/latch/STOP/EMO/applied PWM tracking\n");
+
+    /* LED_RUN truth table: AmpCore_IsBridgeDriving mirrors the PO contract. */
+    reset();
+    CHECK(!AmpCore_IsBridgeDriving()); /* config_ok=0 after reset -> OFF */
+    configure();
+    CHECK(!AmpCore_IsBridgeDriving()); /* configured but not enabled -> OFF */
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
+    CHECK(write_reg(HR_COMMAND, 399u) == 0);
+    tick();
+    CHECK(AmpCore_IsBridgeDriving()); /* enable + neutral -> ON (bridge actively switching) */
+    CHECK(write_reg(HR_COMMAND, 799u) == 0);
+    tick();
+    CHECK(AmpCore_IsBridgeDriving()); /* enable + non-neutral -> ON */
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_DISABLE) == 0);
+    CHECK(!AmpCore_IsBridgeDriving()); /* DISABLE -> inhibited -> OFF */
+    reset(); configure(); run(799u);
+    CHECK(AmpCore_IsBridgeDriving());
+    amp_model.fault.causes |= AMP_FAULT_HARD;
+    tick();
+    CHECK(!AmpCore_IsBridgeDriving()); /* hard fault -> inhibited -> OFF */
+    print("PASS: LED_RUN bridge-drive truth table\n");
+
     CHECK(test_transport() == 0);
     print("PASS: production FC03/06/16 handlers, broadcast/range/readonly/malformed frames\n");
     CHECK(checks > 260000u);

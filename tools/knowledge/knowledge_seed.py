@@ -115,6 +115,17 @@ NODES: list[tuple[str, dict]] = [
         "evidence_status": "OBSERVED",
     }),
     ("FirmwareArtifact", {
+        "id": "firmware:pic18-0x5263", "label": "PIC18 1.0.1 Offset 0x5263 (LED-corrected + de-energize)", "kind": "application",
+        "target": "PIC18", "checksum": "0x5263", "version": "1.0.1",
+        "image_path": "build/firmware/out/b2ea9735/TrackAmplifier4/Offset/TrackAmplifier4.X.production.hex",
+        "status": "PROVEN_HARDWARE",
+        "summary": "Phase-1 1.0.1 PIC18 application (checksum 0x5263) bundling (a) the PO-approved LED_RUN correction AmpCore_IsBridgeDriving()=config_ok&&enable&&!inhibited (replaces state==AMP_ST_RUN) and (b) the PO-approved bridge de-energize on comm-loss/lease-expiry/STOP_REQUEST once neutral is reached (AmpHw_Enable enable-term gains &&!inhibited; hard fault still cuts via !hard). HR7=0xF101, HR22=0x0101, protocol 1. Built XC8 2.31 / MPLABX v6.20 / PIC18F25K40; test_amp.py PASS. DEPLOYED 2026-10-27 to all four prototype amps (1/3/4/6) via single-target 131 (FlashOneAmplifier), verified by SLAVEINFO readback.",
+        "source_path": "TrackAmplifier4.X/amp_core.c",
+        "source_location": "AmpCore_IsBridgeDriving + AmpCore_Update AmpHw_Enable", "source_revision": "b2ea9735",
+        "source_hash": "EE08DAA56D637F123908CE88EF8CE45B1396EFDCE4E0A0E87A4C6057844BC1EB",
+        "evidence_status": "OBSERVED", "observed_date": "2026-10-27",
+    }),
+    ("FirmwareArtifact", {
         "id": "firmware:pic18-0x195A", "label": "PIC18 L2 0x195A candidate", "kind": "application",
         "target": "PIC18", "checksum": "0x195A", "version": "L2",
         "status": "PROVEN_SOURCE",
@@ -160,6 +171,16 @@ NODES: list[tuple[str, dict]] = [
         "source_path": "docs/firmware-flash-recovery-technical-reference.md",
         "source_location": "2.2", "source_revision": "1f89c0b",
         "source_hash": "6CEC61D4C28F514D34C22B4537D9D11A2F4ADEA9A7BDB5C2957E3E2674152101",
+        "evidence_status": "OBSERVED",
+    }),
+    ("FirmwareArtifact", {
+        "id": "firmware:pic32-1.0.1", "label": "PIC32 1.0.1", "kind": "application",
+        "target": "PIC32", "version": "1.0.1",
+        "status": "PROVEN_HARDWARE",
+        "summary": "PIC32 1.0.1 (commands 131/132 single-target flash; controller-version 113 = 1.0.1/protocol 0x01/build 2026-10-26). Deployed P2-B2-A1.",
+        "source_path": "docs/P2-B2-A1-PIC32-1.0.1-IMPLEMENTATION-PREFLIGHT.md",
+        "source_location": "1", "source_revision": "b09ac316",
+        "source_hash": "AD4EC03A96EA879D7F2AEC0DADB34C979FC57E56B13C62E3A2CF63190D42306D",
         "evidence_status": "OBSERVED",
     }),
 
@@ -1035,6 +1056,132 @@ NODES: list[tuple[str, dict]] = [
         "source_path": "docs/PICO-5B-PHYSICAL-SESSION-PREFLIGHT.md",
         "source_location": "3", "source_revision": "1f89c0b", "evidence_status": "SOURCE_REF",
     }),
+
+    # ==================================================================
+    # P2-B2-A1 knowledge persistence (2026-10-26): amp-1 Phase-1 + reset semantics
+    # ==================================================================
+    ("Observation", {
+        "id": "obs:p2-b2-a1-icd3-reset-resets-all", "label": "ICD3 PIC32 MCLR reset = full-system reset",
+        "what": "ipecmd -P32MZ2048EFH144 -TPICD3 -I (hold) then -OK -OL (release) resets the PIC32, and the PIC32 reboot re-initialises the RS-422 slaves (MBUS init toggles the RD1 'Slaves_Disable' line via Slaves_Disable_On/Off), so the ICD3 PIC32 reset is a FULL-SYSTEM reset (PIC32 + all amplifiers). PO-confirmed: the equivalent physical hard reset also resets everything. This is the recovery path when amplifiers 3/4/6 are stuck in default-wakeup after a command-131 global reset.",
+        "date": "2026-10-26", "method": "ICD3 -I/-OK/-OL + PO physical confirmation",
+        "status": "PROVEN_HARDWARE",
+        "summary": "ICD3 PIC32 MCLR reset resets the PIC32 AND all amplifiers (via the PIC32 reboot's MBUS init on the RD1 slave-disable line); full-system reset.",
+        "source_path": "docs/firmware-flash-recovery-technical-reference.md",
+        "source_location": "3.1", "source_revision": "b2ea9735", "evidence_status": "OBSERVED", "observed_date": "2026-10-26",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b2-a1-amp1-phase1-deployed", "label": "Amplifier 1 Phase-1 1.0.0 deployed",
+        "what": "Amp 1 flashed via command 131 (FlashOneAmplifier --amp 1, single-target FlashSequencer). Runtime readback: HR7=0xF101, HR11=0xE906, HR21=0x0100, HR22=0x0001, HR0=399 neutral, MbCommError=OK.",
+        "date": "2026-10-26", "method": "FlashOneAmplifier CLI + fresh SLAVEINFO readback",
+        "status": "PROVEN_HARDWARE",
+        "summary": "Amplifier 1 now runs Phase-1 1.0.0 (HR11=0xE906); identity 0xF101; version HR21=0x0100/HR22=0x0001.",
+        "source_path": "docs/P2-B2-A1-PIC32-1.0.1-IMPLEMENTATION-PREFLIGHT.md",
+        "source_location": "deployment", "source_revision": "b2ea9735", "evidence_status": "OBSERVED", "observed_date": "2026-10-26",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b2-a1-amps-4-6-default-wakeup", "label": "Amps 4/6 default-wakeup after 131 global reset",
+        "what": "After command 131's global reset, amplifiers 4 and 6 (and 3) stopped answering their assigned unicast addresses (MbCommError=TIMEOUT); HR11=0x251F remained cached. PO physical observation: amps 4/6 in 'default wakeup state' (error LED), amp 1 RX-blink/RUN-off, amp 3 WARN+RX. Software re-init (cold-start, 107 RESET + generous delays) did NOT recover them; a full PIC32 reset (ICD3 or physical hard reset) is the recovery path.",
+        "date": "2026-10-26", "method": "SLAVEINFO readback + PO LED observation",
+        "status": "PROVEN_HARDWARE",
+        "summary": "Amps 4/6 entered a default-wakeup/error state after the 131 global reset and did not recover via software re-init; full-system PIC32 reset required.",
+        "source_path": "docs/firmware-flash-recovery-technical-reference.md",
+        "source_location": "2.5", "source_revision": "b2ea9735", "evidence_status": "OBSERVED", "observed_date": "2026-10-26",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b2-a2-107-100-reset-required", "label": "107 RESET + 100 SLAVES_ON required before single-target 131 flash",
+        "what": "A legacy amplifier re-addressed to its assigned unicast address (e.g. amp 3 at address 3) drops the FlashSequencer HR11=0 bootloader-entry write (case 6, sent to SLAVE_INITIAL_ADDR 0xAA) -> flash fails at sub-step 7 'verify bootloader entry'. The fix is the documented global reset: send EXEC_MBUS_STATE_RESET (107) -> EXEC_MBUS_STATE_SLAVES_ON (100) before the flash, which power-cycles all amps (RD1 Slaves_Disable line) back to default address 0xAA so the HR11=0 write is received. The current FlashOneAmplifierCommand OMITS this reset (documentation drift); amp-1 migration succeeded only because amp 1 was already at 0xAA.",
+        "date": "2026-10-26", "method": "live flash attempt + source verification (FlashOneAmplifierCommand.cs, firmware-flash-recovery-technical-reference.md §2.5)",
+        "status": "PROVEN_HARDWARE",
+        "summary": "The 107+100 global reset must precede a single-target 131 flash when the target amp is at its assigned address, or the HR11=0 entry write is dropped at sub-step 7.",
+        "source_path": "docs/firmware-flash-recovery-technical-reference.md",
+        "source_location": "2.5", "source_revision": "b2ea9735", "evidence_status": "OBSERVED", "observed_date": "2026-10-26",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b2-a2-all-four-phase1", "label": "All four amplifiers migrated to Phase-1 1.0.0",
+        "what": "Amps 3, 4, 6 migrated individually via 107/100 reset + command 131 (single-target FlashSequencer). Full init cycle (250->100->106->101->104->105) verified all four: HR7=0xF101, HR11=0xE906, HR21=0x0100, HR22=0x0001, MbCommError=OK.",
+        "date": "2026-10-26", "method": "FlashOneAmplifier CLI + full-init SLAVEINFO readback",
+        "status": "PROVEN_HARDWARE",
+        "summary": "Prototype fully migrated: PIC32 1.0.1 + all four amplifiers Phase-1 1.0.0 (0xE906).",
+        "source_path": "docs/firmware-flash-recovery-technical-reference.md",
+        "source_location": "2.5", "source_revision": "b2ea9735", "evidence_status": "OBSERVED", "observed_date": "2026-10-26",
+    }),
+
+    # ==================================================================
+    # P2-B2 baseline audit (LED behavior + performance)
+    # ==================================================================
+    ("Observation", {
+        "id": "obs:p2-b2-led-run-semantics-changed", "label": "LED_RUN semantics changed ENABLE -> RUN (motion)",
+        "what": "Legacy (928ea7c) main.c CONFIG case 5 set LED_RUN_LAT=1 when ENABLE (HR_BEMF_CTRL & HR_BEMF_ENABLE_AMPLIFIER_BIT, bit 15 of HR1). Phase-1 (commit 2f27d863 'Implement PIC18 Control Core-lite') redefined LED_RUN: main.c:55 sets LED_RUN_LAT = (amp_model.status.state == AMP_ST_RUN), and main.c:165 sets LED_RUN_LAT=0 at addressing-complete. AMP_ST_RUN (amp_core.c:86-87) requires command.enable && !inhibited && lease_fresh && pwm != AMP_NEUTRAL. So LED_RUN no longer illuminates after init+communication (amp is ENABLED but at neutral setpoint, state=AMP_ST_READY). No PO approval of this observable-behavior change was found.",
+        "date": "2026-10-26", "method": "git blame + source diff (928ea7c vs current main.c/amp_core.c)",
+        "status": "PROVEN_SOURCE",
+        "summary": "LED_RUN changed from 'amplifier ENABLED' (legacy) to 'amplifier RUNNING with motion commanded' (Phase-1). LED pins unchanged (RB5 RUN/RB4 WAR/RB3 ERR/RB2 RX/RB1 TX, active-high).",
+        "source_path": "TrackAmplifier4.X/main.c",
+        "source_location": "main.c:55,165 vs 928ea7c case 5", "source_revision": "b2ea9735", "evidence_status": "SOURCE_REF", "observed_date": "2026-10-26",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b2-led-run-corrected", "label": "LED_RUN corrected to effective H-bridge drive (1.0.1)",
+        "what": "PO approved LED_RUN = 'H-bridge actually enabled and actively driven' (ON at neutral and non-neutral when enabled; OFF on power-on/unaddressed/not-enabled/disabled/FAULT/ESTOP/comm-loss/lease-expiry). Implemented as AmpCore_IsBridgeDriving() = status.config_ok && command.enable && !status.inhibited (amp_core.c), wired at main.c:55 (was state==AMP_ST_RUN). LED_WAR/ERR/RX/TX/OCC untouched. Architect DESIGN_ACCEPTABLE.",
+        "date": "2026-10-26", "method": "source change + test_amp.py LED truth table + Architect review",
+        "status": "PROVEN_OFFLINE_TEST",
+        "summary": "LED_RUN now indicates enabled-and-not-inhibited (effective bridge drive), matching the legacy 'ENABLED' diagnostic meaning under the Phase-1 safety architecture.",
+        "source_path": "TrackAmplifier4.X/amp_core.c",
+        "source_location": "AmpCore_IsBridgeDriving", "source_revision": "b2ea9735", "evidence_status": "TEST_PASS", "observed_date": "2026-10-26",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b2-bridge-deenergize-fix", "label": "Bridge de-energizes at neutral after comm/lease/stop",
+        "what": "Pre-existing: on comm-loss/lease-expiry/STOP_REQUEST the bridge forced neutral but left PWM3EN ON (switching ~50% duty, brake released). PO chose de-energize (floating/coast). Fix: AmpCore_Update AmpHw_Enable expression now = config_ok && ((enable && !inhibited) || stopping_active) && !hard, so the bridge keeps switching during the fast-stop ramp then drops PWM3EN at neutral. DISABLE/normal-run/hard-fault behavior unchanged (hard still cuts immediately via !hard). Architect DESIGN_ACCEPTABLE (7 claims). V4 physical verification of PWM3EN=0 pending.",
+        "date": "2026-10-26", "method": "source change + test_amp.py peripheral_enable asserts + Architect review",
+        "status": "PROVEN_OFFLINE_TEST",
+        "summary": "Safety-stop (comm/lease/stop) now de-energizes the bridge once neutral is reached, so LED_RUN OFF corresponds to a de-energized (floating/coasting) output.",
+        "source_path": "TrackAmplifier4.X/amp_core.c",
+        "source_location": "AmpCore_Update AmpHw_Enable", "source_revision": "b2ea9735", "evidence_status": "TEST_PASS", "observed_date": "2026-10-26",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b2-led-war-semantics-shifted", "label": "LED_WAR blink exit shifted ENABLE -> id_set",
+        "what": "Led_Blink mechanism (TMR6IF ~98ms toggle) is byte-identical legacy vs Phase-1, but the CONFIG case-5 exit condition moved: legacy waited for ENABLE (bit15 HR1) then set LED_WAR=0 + LED_RUN=1; Phase-1 waits for id_set (address assigned) then LED_WAR=0 + LED_RUN=0. Net: LED_WAR stops blinking at address-assigned (before H-bridge enabled), leaving no indication for 'addressed but not yet enabled'. The solid LED seen is LED_ERR (case 0 slot-select wait), identical in both. Recommendation (not yet PO-approved): restore WAR to blink while the bridge is not effectively enabled (=!LED_RUN).",
+        "date": "2026-10-26", "method": "source diff 928ea7c vs current main.c CONFIG case 5",
+        "status": "PROVEN_SOURCE",
+        "summary": "LED_WAR blink semantics regressed from 'waiting for ENABLE' to 'waiting for address' in commit 2f27d863; restoration is a separate PO decision.",
+        "source_path": "TrackAmplifier4.X/main.c",
+        "source_location": "CONFIG case 5", "source_revision": "b2ea9735", "evidence_status": "SOURCE_REF", "observed_date": "2026-10-26",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b2-pic18-performance-baseline", "label": "PIC18 Phase-1 performance baseline (calculated)",
+        "what": "Fosc 64 MHz HFINTOSC (no PLL), Fcy 16 MHz, 62.5 ns/cycle, 16M cycles/s. 2 Mbaud UART (9-bit RX/8-bit TX; 88 cyc/RX byte, 80 cyc/TX byte). PWM 20 kHz (TMR2), control tick 1.704 ms (TMR4, 586.85 Hz, 27264 cycles). HW watchdog OFF; 500 ms software lease. Continuous spin (no sleep). Phase-1 baseline ~500 cyc/tick (~1.8-3% CPU) vs legacy ~65 cyc/tick (~0.24%); Modbus ~104 us/request; unaddressed ~1 RX ISR/frame. Phase-2 capacity: conditionally acceptable (>=94% tick free). Memory MEASURED (XC8 2.31 build, memoryfile.xml): Phase-1 1.0.1 FLASH 14446 B (7223 words, 47.0%) / RAM 526 B (25.7%); legacy 6358 B FLASH (20.7%) / 295 B RAM (14.4%).",
+        "date": "2026-10-26", "method": "source analysis (device_config.c, eusart.c, tmr2/4.c, amp_core.c) + datasheet + XC8 2.31 build memoryfile.xml",
+        "status": "PROVEN_SOURCE",
+        "summary": "PIC18 Phase-1 runs at 16 MIPS with >=94% of each 1.704 ms control tick free; Modbus adds ~104 us/request; ISR/peripheral layer byte-identical to legacy; memory measured (FLASH 7223 words / RAM 526 B for 1.0.1).",
+        "source_path": "TrackAmplifier4.X/mcc_generated_files/device_config.c",
+        "source_location": "config words + tmr4.c", "source_revision": "b2ea9735", "evidence_status": "SOURCE_REF", "observed_date": "2026-10-26",
+    }),
+    ("SafetyInvariant", {
+        "id": "safety:led-diagnostic-contract", "label": "Human-observable LED behavior is a controlled product interface",
+        "statement": "Human-observable hardware diagnostic behavior (LED meanings, startup sequences, blink patterns, fault/ready/run/bootloader indications) is a controlled product interface. Changing it requires a legacy-behavior comparison, description of the new behavior, technical reason, safety analysis, effect on operator diagnosis, and explicit PO approval before deployment.",
+        "applies_to": "PIC18 amplifier LEDs (LED_RUN RB5, LED_WAR RB4, LED_ERR RB3, LED_RX RB2, LED_TX RB1, LED_OCC RA5)",
+        "requires_authorization": True,
+        "status": "PROVEN_SOURCE",
+        "summary": "LED semantics must not change silently during firmware refactoring; observable-behavior changes require PO approval. Established P2-B2 (LED_RUN ENABLE->RUN change was unapproved).",
+        "source_path": "TrackAmplifier4.X/main.c",
+        "source_location": "main.c:55,165 (Phase-1) vs 928ea7c case 5", "source_revision": "b2ea9735", "evidence_status": "SOURCE_REF",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b2-perf-measured", "label": "PIC18 Phase-1 performance PHYSICALLY MEASURED (PicoScope)",
+        "what": "Real PicoScope 3406D (JY908/0278) measurements on amp 1 with PT1/PT2 instrumentation builds: M1 control service = Amplifier_ServiceTick 72.5 us / AmpCore_Update 43.4 us per 1695 us tick (4.28% CPU, jitter 11.8 us). M2 Modbus = ProcessPetitModbus 5.19 us idle-poll / 108 us worst-case full request. M3 main loop = 7.66 us/iteration (~128 kHz spin, no sleep), p99 21.3 us, max 182 us (service tick + full Modbus frame). M4 unaddressed 71.8 us vs addressed 72.5 us per tick (~same). M5 combined 182 us max. M6 safety = stop/fault -> AmpHw_Enable(false) within one AmpCore_Update (~43 us), worst-case one tick. Memory (1.0.1): FLASH 7223 words (47.0%), RAM 526 B (25.7%).",
+        "date": "2026-10-27", "method": "PT1/PT2 instrumentation builds (0xEA54/0xEABE) + PicoScope block capture + analysis",
+        "status": "PROVEN_HARDWARE",
+        "summary": "Phase-1 runs the service tick in 72.5 us (4.28% of the 1695 us tick); main loop spins ~128 kHz dominated by Modbus idle-poll; ample tick headroom (95.7%) for Phase-2.",
+        "source_path": "TrackAmplifier4.X/main.c",
+        "source_location": "Amplifier_ServiceTick / while(1) loop", "source_revision": "b2ea9735", "evidence_status": "OBSERVED", "observed_date": "2026-10-27",
+    }),
+    ("Observation", {
+        "id": "obs:p2-b2-05263-deployed", "label": "All four amplifiers deployed to 1.0.1 (0x5263)",
+        "what": "Full init cycle (250->100->106->101->104->105) then SLAVEINFO readback (2026-10-27): amps 1/3/4/6 all HR7=0xF101, HR11=0x5263, HR21=0x0100, HR22=0x0101. Deployed via single-target 131 (FlashOneAmplifier) with built-in 107/100 reset; a stale-PIC32 sub-step-7 failure was cleared by a PIC32 ICD3 hard reset. PIC32 unchanged (1.0.1); PIC18 bootloader unchanged.",
+        "date": "2026-10-27", "method": "FlashOneAmplifier CLI (single-target 131) + SLAVEINFO readback",
+        "status": "PROVEN_HARDWARE",
+        "summary": "All four prototype amplifiers run 1.0.1 (0x5263): LED_RUN correction + bridge de-energize deployed and identity-verified.",
+        "source_path": "TrackAmplifier4.X/amp_core.c",
+        "source_location": "AmpCore_IsBridgeDriving", "source_revision": "b2ea9735", "evidence_status": "OBSERVED", "observed_date": "2026-10-27",
+    }),
 ]
 
 
@@ -1043,13 +1190,21 @@ NODES: list[tuple[str, dict]] = [
 # ---------------------------------------------------------------------------
 RELS: list[tuple[str, str, str, dict]] = [
     # RUNS_FIRMWARE
-    ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0xE906", {"since": "2026-10-19 round-trip", "superseded": True}),
-    ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0x251F", {"since": "K8B/P2-B1 fresh readback 2026-10-25", "superseded": False}),
-    ("RUNS_FIRMWARE", "device:amp-3", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": False}),
-    ("RUNS_FIRMWARE", "device:amp-4", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": False}),
-    ("RUNS_FIRMWARE", "device:amp-6", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": False}),
+    ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0xE906", {"since": "P2-B2-A1 amp-1 Phase-1 deploy 2026-10-26", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0x5263", {"since": "P2-B2 LED-corrected 1.0.1 deploy 2026-10-27", "superseded": False}),
+    ("RUNS_FIRMWARE", "device:amp-1", "firmware:pic18-0x251F", {"since": "K8B/P2-B1 fresh readback 2026-10-25", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:amp-3", "firmware:pic18-0xE906", {"since": "P2-B2-A2 amp-3 Phase-1 deploy 2026-10-26", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:amp-3", "firmware:pic18-0x5263", {"since": "P2-B2 LED-corrected 1.0.1 deploy 2026-10-27", "superseded": False}),
+    ("RUNS_FIRMWARE", "device:amp-3", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:amp-4", "firmware:pic18-0xE906", {"since": "P2-B2-A2 amp-4 Phase-1 deploy 2026-10-26", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:amp-4", "firmware:pic18-0x5263", {"since": "P2-B2 LED-corrected 1.0.1 deploy 2026-10-27", "superseded": False}),
+    ("RUNS_FIRMWARE", "device:amp-4", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:amp-6", "firmware:pic18-0xE906", {"since": "P2-B2-A2 amp-6 Phase-1 deploy 2026-10-26", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:amp-6", "firmware:pic18-0x5263", {"since": "P2-B2 LED-corrected 1.0.1 deploy 2026-10-27", "superseded": False}),
+    ("RUNS_FIRMWARE", "device:amp-6", "firmware:pic18-0x251F", {"since": "pre-PICO-5B", "superseded": True}),
     ("RUNS_FIRMWARE", "device:pic32", "firmware:pic32-0.1.0", {"since": "L1", "superseded": True}),
-    ("RUNS_FIRMWARE", "device:pic32", "firmware:pic32-1.0.0", {"since": "P2-B1 final deploy 2026-10-25", "superseded": False}),
+    ("RUNS_FIRMWARE", "device:pic32", "firmware:pic32-1.0.0", {"since": "P2-B1 final deploy 2026-10-25", "superseded": True}),
+    ("RUNS_FIRMWARE", "device:pic32", "firmware:pic32-1.0.1", {"since": "P2-B2-A1 deploy 2026-10-26", "superseded": False}),
 
     # IMPLEMENTED_BY (artifact built from source revision)
     ("IMPLEMENTED_BY", "firmware:pic18-0x251F", "source:928ea7c", {"note": "reproduces 0x251F byte-identically"}),
@@ -1091,6 +1246,7 @@ RELS: list[tuple[str, str, str, dict]] = [
 
     # SUPERSEDES (artifact supersedes artifact)
     ("SUPERSEDES", "firmware:pic18-0xE906", "firmware:pic18-0x251F", {"note": "1.0.0 supersedes legacy on amp 1 (round-trip only; fleet not migrated)"}),
+    ("SUPERSEDES", "firmware:pic18-0x5263", "firmware:pic18-0xE906", {"note": "1.0.1 (LED-corrected + de-energize) supersedes 1.0.0"}),
 
     # ==================================================================
     # K8 knowledge persistence: provenance linkage
@@ -1106,7 +1262,7 @@ RELS: list[tuple[str, str, str, dict]] = [
     # K8B knowledge persistence: root cause + protocol + physical readback
     # ==================================================================
     ("SUPPORTED_BY", "hyp:k8-firewall-blocked-udp", "obs:k8b-fresh-pic18-readback-251f", {"note": "after the firewall Allow rule, 250 ACKed 1/1 and the cold start succeeded"}),
-    ("CONTRADICTED_BY", "hyp:k8-protocol-mismatch-250", "obs:k8b-fresh-pic18-readback-251f", {"note": "250 ACKed 1/1 after firewall fix; no protocol-0x01 incompatibility"}),
+    ("CONTRADICTED_BY", "hyp:k8-protocol-mismatch-250", "evidence:techref-doc", {"note": "techref documents the K8B fresh 0x251F readback (250 ACKed 1/1 after firewall fix); no protocol-0x01 incompatibility"}),
     ("OBSERVES_FIRMWARE", "obs:k8b-fresh-pic18-readback-251f", "firmware:pic18-0x251F", {"note": "fresh HR11=0x251F for amps 1/3/4/6"}),
     ("OBSERVES_FIRMWARE", "obs:k8b-legacy-12-register-slaveryinfo-layout", "firmware:pic18-0x251F", {"note": "12-register SLAVEINFO layout confirms the legacy firmware"}),
     ("RELATED_TO", "obs:k8b-fresh-pic18-readback-251f", "obs:k8b-legacy-12-register-slaveryinfo-layout", {"note": "the 12-register layout fix enabled the fresh readback"}),
@@ -1120,6 +1276,24 @@ RELS: list[tuple[str, str, str, dict]] = [
     ("OBSERVES_FIRMWARE", "obs:p2-b1-1.0.0-legacy-pic18-inert", "firmware:pic18-0x251F", {"note": "legacy PIC18 HR11=0x251F detected-but-inert under 1.0.0 (no flash)"}),
     ("RELATED_TO", "obs:p2-b1-pic32-migration-proven", "obs:p2-b1-rollback-image-proven", {"note": "rollback image enabled the mandatory 0.1.0 rollback test"}),
     ("RELATED_TO", "obs:p2-b1-1.0.0-legacy-pic18-inert", "obs:p2-b1-pic32-migration-proven", {"note": "the inert-legacy-amps outcome was observed during 1.0.0 validation"}),
+
+    # ==================================================================
+    # P2-B2-A1 knowledge persistence: amp-1 Phase-1 + reset semantics
+    # ==================================================================
+    ("OBSERVES_FIRMWARE", "obs:p2-b2-a1-amp1-phase1-deployed", "firmware:pic18-0xE906", {"note": "amp 1 HR11=0xE906, HR7=0xF101, HR21=0x0100, HR22=0x0001"}),
+    ("OBSERVES_FIRMWARE", "obs:p2-b2-a1-amp1-phase1-deployed", "firmware:pic32-1.0.1", {"note": "131 single-target flash drove the amp-1 Phase-1 deploy"}),
+    ("OBSERVES_FIRMWARE", "obs:p2-b2-a1-amps-4-6-default-wakeup", "firmware:pic18-0x251F", {"note": "amps 3/4/6 remain legacy 0x251F but were stuck in default-wakeup/TIMEOUT after 131"}),
+    ("RELATED_TO", "obs:p2-b2-a1-amps-4-6-default-wakeup", "obs:p2-b2-a1-icd3-reset-resets-all", {"note": "the ICD3/full PIC32 reset is the recovery path for the post-131 default-wakeup state"}),
+
+    # ==================================================================
+    # P2-B2-A2 knowledge persistence: full four-amplifier Phase-1 migration
+    # ==================================================================
+    ("OBSERVES_FIRMWARE", "obs:p2-b2-a2-all-four-phase1", "firmware:pic18-0xE906", {"note": "amps 1/3/4/6 all HR7=0xF101 HR11=0xE906 HR21=0x0100 HR22=0x0001"}),
+    ("OBSERVES_FIRMWARE", "obs:p2-b2-led-run-corrected", "firmware:pic18-0x5263", {"note": "LED_RUN correction is part of the 1.0.1 image"}),
+    ("OBSERVES_FIRMWARE", "obs:p2-b2-bridge-deenergize-fix", "firmware:pic18-0x5263", {"note": "bridge de-energize fix is part of the 1.0.1 image"}),
+    ("OBSERVES_FIRMWARE", "obs:p2-b2-05263-deployed", "firmware:pic18-0x5263", {"note": "all four amps read back HR11=0x5263 after deploy"}),
+    ("RELATED_TO", "obs:p2-b2-a2-107-100-reset-required", "obs:p2-b2-a1-amps-4-6-default-wakeup", {"note": "the 107+100 reset resolves the post-131 default-wakeup / sub-step-7 failure"}),
+    ("RELATED_TO", "obs:p2-b2-a2-all-four-phase1", "obs:p2-b2-a2-107-100-reset-required", {"note": "the 107+100 reset preceded each of the three additional amp migrations"}),
 ]
 
 

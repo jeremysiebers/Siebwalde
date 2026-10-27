@@ -36,6 +36,13 @@ void AmpCore_Inhibit(void)
     amp_model.fast_stopping = true;
 }
 
+bool AmpCore_IsBridgeDriving(void)
+{
+    /* LED_RUN contract: effective H-bridge drive = configured + enabled + not inhibited.
+     * Reflects the safety intent (any inhibit -> not driving), not the raw PWM3EN. */
+    return amp_model.status.config_ok && amp_model.command.enable && !amp_model.status.inhibited;
+}
+
 uint16_t AmpCore_StepRamp(uint16_t current, uint16_t target, uint8_t step)
 {
     if (current < 1u) current = 1u;
@@ -104,7 +111,13 @@ void AmpCore_Update(void)
     /* Retained EMO semantics: latch brake immediately, do not load PWM. */
     if (!m->command.emo) AmpHw_SetDuty(m->ramp_current);
     m->status.dir_active = m->status.applied_pwm > AMP_NEUTRAL;
-    AmpHw_Enable(m->status.config_ok && (m->command.enable || m->status.stopping_active) && !hard);
+    /* De-energize the bridge once neutral is reached after any inhibit
+     * (comm-loss / lease-expiry / STOP_REQUEST / DISABLE): keep the PWM stage
+     * switching only while actively ramping down, then drop PWM3EN.
+     * hard faults still cut immediately (!hard). */
+    AmpHw_Enable(m->status.config_ok &&
+                 ((m->command.enable && !m->status.inhibited) || m->status.stopping_active) &&
+                 !hard);
     if (m->ramp_current == AMP_NEUTRAL && !m->command.emo) {
         m->fast_stopping = false;
         m->command.stop_request = false;

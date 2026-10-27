@@ -13,7 +13,8 @@
       "cwd": "C:\\Localdata\\Siebwalde",
       "enabled": true,
       "environment": {
-        "PICOSCOPE_EVIDENCE_DIR": "C:\\Localdata\\Siebwalde\\tools\\picoscope\\evidence\\mcp"
+        "PICOSCOPE_EVIDENCE_DIR": "C:\\Localdata\\Siebwalde\\tools\\picoscope\\evidence\\mcp",
+        "PICOSCOPE_MCP_ALLOW_REAL": "1"
       },
       "timeout": 15000
     },

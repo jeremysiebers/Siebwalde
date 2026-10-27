@@ -106,6 +106,11 @@ namespace SiebwaldeApp.Core
         {
             if (onFrameAsync is null) throw new ArgumentNullException(nameof(onFrameAsync));
 
+            // Replies are only trusted from the configured PIC32 source address. Any datagram
+            // from another sender (broadcast/misconfigured peer on the LAN) is dropped, so a
+            // stray device can never inject a plausible command acknowledgement.
+            IPAddress expectedSource = ((IPEndPoint)RemoteEndPointClient).Address;
+
             while (!token.IsCancellationRequested)
             {
                 UdpReceiveResult result;
@@ -123,6 +128,9 @@ namespace SiebwaldeApp.Core
                     await Task.Delay(50, token).ConfigureAwait(false);
                     continue;
                 }
+
+                if (result.RemoteEndPoint is not IPEndPoint source || !source.Address.Equals(expectedSource))
+                    continue; // reject datagrams from unexpected sources
 
                 if (result.Buffer is { Length: > 0 })
                 {
