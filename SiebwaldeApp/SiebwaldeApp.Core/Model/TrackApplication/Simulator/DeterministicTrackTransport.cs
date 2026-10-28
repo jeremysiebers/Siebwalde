@@ -60,6 +60,13 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         /// Software protocol model only, not proof of physical watchdog behaviour.</summary>
         public bool EmitGlobalStopArmedStatus { get; }
 
+        /// <summary>
+        /// Initial PIC32 global-stop latch state reported by the 111 query (0=disarmed,
+        /// 1=latched-host-loss, 2=latched-host-initiated, 3=armed). Defaults to disarmed. Used to
+        /// model a controller whose latch survived a previous session (host-authority loss).
+        /// </summary>
+        public byte InitialGlobalStopState { get; }
+
         public TrackSimulatorConfig(
             ushort firmwareChecksum = DefaultFirmwareChecksum,
             IReadOnlyList<byte>? detectedSlaves = null,
@@ -68,7 +75,8 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             IReadOnlyDictionary<byte, ushort>? appliedPwmReadbackOverrides = null,
             IReadOnlyDictionary<byte, ushort>? protocolVersionOverrides = null,
             TimeSpan? periodicSlaveInfoInterval = null,
-            bool emitGlobalStopArmedStatus = false)
+            bool emitGlobalStopArmedStatus = false,
+            byte initialGlobalStopState = 0)
         {
             FirmwareChecksum = firmwareChecksum;
             DetectedSlaves = detectedSlaves is null
@@ -88,6 +96,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                 : new Dictionary<byte, ushort>(protocolVersionOverrides);
             PeriodicSlaveInfoInterval = periodicSlaveInfoInterval;
             EmitGlobalStopArmedStatus = emitGlobalStopArmedStatus;
+            InitialGlobalStopState = initialGlobalStopState;
         }
     }
 
@@ -120,7 +129,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private readonly HashSet<byte> _detected = new();
         private readonly HashSet<byte> _droppedEchoSlaves = new();
         private readonly List<byte> _sentCommands = new();
-        private bool _globalStopArmed;
+        // PIC32 global-stop latch state (mirror of GLOBAL_STOP_STATE message): 0=disarmed,
+        // 1=latched-host-loss, 2=latched-host-initiated, 3=armed.
+        private byte _globalStopState = GlobalStopStatusMessage.Disarmed;
         private readonly List<byte[]> _sentFrames = new();
         public IReadOnlyList<byte[]> SentFrames
         {
@@ -208,7 +219,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                     new UnboundedChannelOptions { SingleReader = true, SingleWriter = false });
 
                 OpenCallCount++;
-                _globalStopArmed = false;
+                _globalStopState = _config.InitialGlobalStopState;
 
                 // Cyclic SLAVEINFO refresh: models the real master's periodic FC03 read that keeps
                 // the C# holding-register view fresh. Only started when a non-null interval is set.
@@ -456,18 +467,37 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                     break;
 
                 case TrackCommand.HOST_HEARTBEAT:
-                    if (_config.EmitGlobalStopArmedStatus && !_globalStopArmed && frame.Length == 4)
+                    if (_config.EmitGlobalStopArmedStatus &&
+                        _globalStopState == GlobalStopStatusMessage.Disarmed && frame.Length == 4)
                     {
-                        _globalStopArmed = true;
-                        writer.TryWrite(new byte[] { Header, TaskId.CONTROLLER, TrackCommand.GLOBAL_STOP_STATE,
-                            TaskStates.DONE, GlobalStopStatusMessage.Armed });
+                        _globalStopState = GlobalStopStatusMessage.Armed;
+                        writer.TryWrite(BuildGlobalStopStateStatusFrame(GlobalStopStatusMessage.Armed));
                     }
                     break;
 
                 case TrackCommand.EXEC_GLOBAL_STOP:
                     if (frame.Length == 4 && frame[2] == 0 && frame[3] == 0)
+                    {
+                        _globalStopState = GlobalStopStatusMessage.LatchedHostInitiated;
                         writer.TryWrite(BuildGlobalStopStateFrame(GlobalStopStatusMessage.LatchedHostInitiated));
+                    }
                     // Per-amplifier neutral is delivered through the production 108 writer.
+                    break;
+
+                case TrackCommand.GLOBAL_STOP_STATE:
+                    // Consume-only query: report the current latch state.
+                    writer.TryWrite(BuildGlobalStopStateReport());
+                    break;
+
+                case TrackCommand.REARM_GLOBAL_STOP:
+                    // 112: LATCHED -> ARMED only (idempotent/no-op when not latched), mirroring
+                    // controller.c REARM_GLOBAL_STOP (182-189). No MBUS slave write.
+                    if (_globalStopState == GlobalStopStatusMessage.LatchedHostLoss ||
+                        _globalStopState == GlobalStopStatusMessage.LatchedHostInitiated)
+                    {
+                        _globalStopState = GlobalStopStatusMessage.Armed;
+                        writer.TryWrite(BuildGlobalStopStateStatusFrame(GlobalStopStatusMessage.Armed));
+                    }
                     break;
 
                 case TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH: // 108
@@ -604,6 +634,21 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             // frame[6..] stay zero: all-detected Confirmed (0).
             return frame;
         }
+
+        /// <summary>
+        /// Builds the 111 reply for the current latch state: the full A2 delivery frame (count +
+        /// per-amplifier codes) when latched, else the compact 5-byte status frame (disarmed/armed),
+        /// mirroring REPORTxGLOBALxSTOPxSTATE in controller.c (98-108).
+        /// </summary>
+        private byte[] BuildGlobalStopStateReport()
+            => _globalStopState == GlobalStopStatusMessage.LatchedHostLoss ||
+               _globalStopState == GlobalStopStatusMessage.LatchedHostInitiated
+                ? BuildGlobalStopStateFrame(_globalStopState)
+                : BuildGlobalStopStateStatusFrame(_globalStopState);
+
+        /// <summary>Compact 111 status frame: [HEADER, CONTROLLER, 111, DONE, state].</summary>
+        private static byte[] BuildGlobalStopStateStatusFrame(byte state)
+            => new byte[] { Header, TaskId.CONTROLLER, TrackCommand.GLOBAL_STOP_STATE, TaskStates.DONE, state };
 
         private byte[] BuildSlaveInfoFrame(byte slave)
         {

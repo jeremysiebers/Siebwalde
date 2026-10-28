@@ -101,6 +101,28 @@ namespace SiebwaldeApp.Core
             return new AmplifierReleaseResult(AmplifierReleaseResultKind.Released);
         }
 
+        /// <summary>
+        /// Pure re-arm for startup recovery: emits <c>REARM_GLOBAL_STOP</c> (112) only, gated on
+        /// physical-stop-inputs-clear. Unlike <see cref="ReleaseAsync"/>, this emits NO fresh HR0
+        /// movement command (a movement command during startup would be an unintended H-bridge
+        /// energization). The caller (the init precondition step) applies the separate explicit
+        /// operator authorization gate before invoking this.
+        /// </summary>
+        public async Task<AmplifierReleaseResult> RearmGlobalStopAsync(CancellationToken ct = default)
+        {
+            if (!_physicalStopInputsClear())
+            {
+                return new AmplifierReleaseResult(AmplifierReleaseResultKind.BlockedStopInputsNotClear,
+                    "physical stop inputs are not confirmed clear.");
+            }
+
+            // REARM_GLOBAL_STOP (112): PIC32 LATCHED -> ARMED. No payload, no HR0 write.
+            await _comm.SendAsync(new SendMessage(TrackCommand.REARM_GLOBAL_STOP, Array.Empty<byte>()), ct)
+                .ConfigureAwait(false);
+
+            return new AmplifierReleaseResult(AmplifierReleaseResultKind.Released);
+        }
+
         /// <summary>Builds a single-register HR0 write for a fresh command (little-endian value).</summary>
         private static SendMessage BuildHr0Write(ushort slaveNumber, int pwmSetpoint)
         {

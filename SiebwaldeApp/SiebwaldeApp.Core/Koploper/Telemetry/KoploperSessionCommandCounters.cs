@@ -11,6 +11,8 @@ namespace SiebwaldeApp.Core.Koploper
     public sealed record KoploperSessionCommandCounters(
         long ClientConnectionRequestTransmitted,
         long ClientConnectionRequestAcknowledged,
+        long ExecMbusStateResetTransmitted,
+        long ExecMbusStateResetAcknowledged,
         long ExecMbusStateSlavesOnTransmitted,
         long ExecMbusStateSlavesOnAcknowledged,
         long ExecMbusStateSlaveDetectTransmitted,
@@ -35,13 +37,15 @@ namespace SiebwaldeApp.Core.Koploper
     {
         /// <summary>Total telemetry-enablement (session) commands forwarded to the transport.</summary>
         public long TotalTransmitted =>
-            ClientConnectionRequestTransmitted + ExecMbusStateSlavesOnTransmitted +
+            ClientConnectionRequestTransmitted + ExecMbusStateResetTransmitted +
+            ExecMbusStateSlavesOnTransmitted +
             ExecMbusStateSlaveDetectTransmitted + ExecMbusStateSlaveInitTransmitted +
             ExecMbusStateStartDataUploadTransmitted + ExecMbusStateSlaveEnableTransmitted;
 
         /// <summary>Total telemetry-enablement commands whose matching DONE acknowledgement was received.</summary>
         public long TotalAcknowledged =>
-            ClientConnectionRequestAcknowledged + ExecMbusStateSlavesOnAcknowledged +
+            ClientConnectionRequestAcknowledged + ExecMbusStateResetAcknowledged +
+            ExecMbusStateSlavesOnAcknowledged +
             ExecMbusStateSlaveDetectAcknowledged + ExecMbusStateSlaveInitAcknowledged +
             ExecMbusStateStartDataUploadAcknowledged + ExecMbusStateSlaveEnableAcknowledged;
 

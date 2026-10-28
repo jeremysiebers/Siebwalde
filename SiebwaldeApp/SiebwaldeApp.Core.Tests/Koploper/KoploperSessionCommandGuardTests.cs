@@ -33,6 +33,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
         private static ReceivedMessage AckFor(byte command) => command switch
         {
             250 => new ReceivedMessage(TaskId.CONTROLLER, TaskStates.CONNECTED, TaskStates.DONE, 0),
+            107 => new ReceivedMessage(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_RESET, TaskStates.DONE, 0),
             100 => new ReceivedMessage(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVES_ON, TaskStates.DONE, 0),
             101 => new ReceivedMessage(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVE_DETECT, TaskStates.DONE, 0),
             104 => new ReceivedMessage(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVE_INIT, TaskStates.DONE, 0),
@@ -262,6 +263,49 @@ namespace SiebwaldeApp.Core.Tests.Koploper
 
             Assert.Empty(inner.Sent);
             Assert.Equal(1, guard.RejectedCommandCount);
+        }
+
+        [Fact]
+        public async Task ApplyConfigMode_Accepts107InOrder_AndAcknowledges()
+        {
+            var inner = new FakeCommClient { AutoAck = m => AckFor(m.Command) };
+            var guard = new KoploperSessionCommandGuard(inner, TimeSpan.FromSeconds(5));
+            guard.BeginApplyConfigSession();
+
+            foreach (byte command in KoploperSessionCommandApplyAllowlist.ApplyConfigOrder)
+            {
+                await guard.SendAsync(Msg(command));
+            }
+
+            Assert.Equal(
+                KoploperSessionCommandApplyAllowlist.ApplyConfigOrder,
+                inner.Sent.Select(s => s.Command).ToArray());
+
+            KoploperSessionCommandCounters counters = guard.GetCounters();
+            Assert.Equal(7, counters.TotalTransmitted);
+            Assert.Equal(7, counters.TotalAcknowledged);
+            Assert.Equal(1, counters.ExecMbusStateResetTransmitted);
+            Assert.Equal(1, counters.ExecMbusStateResetAcknowledged);
+            Assert.Equal(0, counters.RejectedCommands);
+            Assert.Equal(0, counters.OrderViolations);
+            Assert.False(guard.IsStopped);
+        }
+
+        [Fact]
+        public async Task ApplyConfigMode_ResetBeforeConnect_IsOutOfOrder()
+        {
+            var inner = new FakeCommClient();
+            var guard = new KoploperSessionCommandGuard(inner, TimeSpan.FromSeconds(5));
+            guard.BeginApplyConfigSession();
+
+            // 107 is permitted in apply-config mode but must still follow 250.
+            var ex = await Assert.ThrowsAsync<KoploperSessionCommandOrderViolationException>(
+                () => guard.SendAsync(Msg(TrackCommand.EXEC_MBUS_STATE_RESET)));
+
+            Assert.Equal(KoploperSessionCommandOrderViolationReason.OutOfOrder, ex.Reason);
+            Assert.Equal(KoploperSessionCommandAllowlist.ClientConnectionRequest, ex.ExpectedCommand);
+            Assert.Empty(inner.Sent);
+            Assert.True(guard.IsStopped);
         }
 
         [Fact]

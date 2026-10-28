@@ -16,6 +16,7 @@
 #include "ethernet.h"
 #include "slavestartup.h"
 #include "modbus/PetitModbus.h"
+#include "mbus_event.h"
 
 #define MAILBOXRCD 100
 
@@ -310,10 +311,6 @@ bool SendNextMessage(void)
         ProcessSlaveLast = Data.SlaveAddress;
 
         SLAVExCOMMUNICATIONxHANDLER();
-                
-//        LOG_Printf("Mbus handler\t: Dt to #%d, dir %d, NoReg %d, Strt %d, Dat0 %d, Dat1 %d .",
-//                Rcd_Ptr_prev->SlaveAddress, Rcd_Ptr_prev->Direction, Rcd_Ptr_prev->NoOfRegisters, 
-//                Rcd_Ptr_prev->StartRegister, Rcd_Ptr_prev->RegData0, Rcd_Ptr_prev->RegData1);
 
         /* Na versturen naar volgende mailbox entry */
         Rcd_Ptr_prev++;
@@ -544,6 +541,12 @@ void ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(uint8_t *data)
     // Commit: schrijf-pointer verschuiven naar next
     Rcd_Ptr = next;
 
+    /* P2-C fault-B instrumentation: command-108 DONE acknowledges enqueue,
+     * NOT execution. Capture the enqueued target/register/value so the
+     * subsequent dispatch/purge can be correlated. */
+    MBUS_EVENT_PUSH(MBUS_EV_ENQUEUE, data[0], data[3],
+                    (uint16_t)(((uint16_t)data[5] << 8) | data[4]), 0u);
+
     CREATExTASKxSTATUSxMESSAGE(
         MBUS,
         EXEC_MBUS_SLAVE_DATA_EXCH,
@@ -554,6 +557,9 @@ void ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(uint8_t *data)
 void ENQUEUExGLOBALxSTOP(uint16_t hr0)
 {
     uint8_t slave;
+    /* P2-C fault-B instrumentation: a global-stop latch purges the whole
+     * command-108 mailbox, dropping any enqueued-but-undispatched write. */
+    MBUS_EVENT_PUSH(MBUS_EV_PURGE, 0u, 0u, hr0, 0u);
     /* Drop pre-latch pending commands. In-flight requests cannot be recalled.
      * Delivery retry is not a new latch edge. */
     Rcd_Ptr = Rcd_Ptr_prev = &Rcd[0];

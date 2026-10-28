@@ -62,7 +62,7 @@ public class QueryControllerVersionTests
             new ReceivedMessage(TaskId.CONTROLLER, TrackCommand.GET_CONTROLLER_VERSION, 1, 0),
             CancellationToken.None);
         Assert.Equal(InitStepResultKind.NextStep, advanced.Kind);
-        Assert.Equal("ResetAllSlaves", advanced.NextStepName);
+        Assert.Equal("GlobalStopPrecondition", advanced.NextStepName);
     }
 
     private sealed class RecordingCommClient : ITrackCommClient

@@ -13,7 +13,7 @@ and the raw test evidence.
 ## Source of truth and operational database
 
 - **Git source of truth:** `schema.py` + `knowledge_seed.py` are the complete,
-  publishable knowledge (195 nodes / 144 relationships). A fresh database can
+  publishable knowledge (219 nodes / 170 relationships). A fresh database can
   always be rebuilt from these two files alone — no archive, no NAS, no
   pre-existing `.lbdb` is required (proven by
   `tests/test_clean_rebuild_from_seed.py`).
@@ -33,7 +33,7 @@ tools/knowledge/
   setup_lbug.ps1        stage + verify the native lbug/OpenSSL runtime DLLs
   lib/                  (git-ignored) native runtime: lbug_shared.dll + OpenSSL 3
   schema.py             single-source schema (19 node tables + 21 relationship tables)
-  knowledge_seed.py     curated knowledge (195 nodes / 144 relationships, with provenance)
+  knowledge_seed.py     curated knowledge (219 nodes / 170 relationships, with provenance)
   ingest/build_graph.py deterministic ingestion -> db/siebwalde-knowledge.lbdb
   snapshot.py           EXPORT DATABASE -> verifiable snapshot dir + snapshot-manifest.json
   recover.py            IMPORT DATABASE from a snapshot + fail-closed verification
@@ -143,7 +143,7 @@ tools/knowledge/.venv/Scripts/python.exe tools/knowledge/recover.py `
 
 The target path must **not already exist** (recovery never overwrites). After
 import it verifies: per-table counts match the manifest, the totals match the
-seed (195/144), and representative nodes - including the K6/K7/K8 findings the
+seed (219/170), and representative nodes - including the K6/K7/K8 findings the
 stale operational database was missing — plus their provenance fields are
 present.
 
@@ -164,7 +164,7 @@ the seed (or restored from a snapshot taken after those findings were added).
 ## Deterministic integrity checks
 
 - Rebuilding from the seed is deterministic: the same `schema.py` +
-  `knowledge_seed.py` always produce the same 195 nodes / 144 relationships and
+  `knowledge_seed.py` always produce the same 219 nodes / 170 relationships and
   the same per-table counts (`test_clean_rebuild_from_seed.py`,
   `test_rebuild_is_deterministic`).
 - Export/import is lossless: every node's full property set (including
