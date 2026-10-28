@@ -1177,6 +1177,10 @@ namespace SiebwaldeApp.Integration
             _operatorRecoveryAuthorized = true;
         }
 
+        /// <inheritdoc />
+        public GlobalStopStateView GlobalStopState
+            => new(GlobalStop.State, GlobalStop.Reason, _operatorRecoveryAuthorized && GlobalStop.IsLatched);
+
         private async Task MonitorGlobalStopAsync(CancellationToken ct)
         {
             try

@@ -252,6 +252,51 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
+        public Task RealMode_LatchedGlobalStop_RecoveryThroughInterface_BlockedUntilPhysicalClear()
+        {
+            // The simulated controller starts latched. Exercise the recovery surface through the Core
+            // interface contract (what WPF sees): a false physical-stop-clear must keep recovery
+            // blocked (no 112), and only a positive operator-confirmed clear emits 112 and unblocks init.
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                initialGlobalStopState: GlobalStopStatusMessage.LatchedHostLoss));
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                ITrackApplicationRuntime iface = runtime;
+
+                var startTask = runtime.StartAsync(TrackControlMode.Real, ct);
+
+                await WaitUntilAsync(() => factory.Created.Count == 1, TimeSpan.FromSeconds(5));
+                var simulator = factory.Created[0];
+
+                await WaitUntilAsync(
+                    () => simulator.SentCommands.Contains(TrackCommand.GLOBAL_STOP_STATE),
+                    TimeSpan.FromSeconds(10));
+
+                // Latched: init is gated, still Starting, no 107 yet.
+                Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+                Assert.Equal(TrackRuntimeState.Starting, runtime.State);
+
+                // Operator authorizes recovery but physical-stop-clear is NOT confirmed: fail closed.
+                iface.AuthorizeGlobalStopRecovery(() => false);
+                await Task.Delay(300, ct);
+                Assert.DoesNotContain((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.Equal(TrackRuntimeState.Starting, runtime.State);
+
+                // Operator confirms the physical stop inputs are clear: recovery proceeds (112 only).
+                iface.AuthorizeGlobalStopRecovery(() => true);
+                await startTask;
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Contains((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.Contains((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
+            }, Groups(1, 2, 3));
+        }
+
+        [Fact]
         public Task Restart_UsesFreshTransportAndLeavesNoStalePendingWrites()
         {
             var factory = new SimulatorFactory(new TrackSimulatorConfig());
