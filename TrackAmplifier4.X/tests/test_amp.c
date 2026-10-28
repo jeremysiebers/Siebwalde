@@ -268,6 +268,21 @@ int main(void)
     CHECK(!led_run()); /* hard fault -> brake active + bridge cut -> OFF */
     print("PASS: LED_RUN bridge-drive truth table\n");
 
+    /* Fault-B regression: a DISABLE control write must reflect enable-active
+     * cleared + inhibited set in the HR8 mirror immediately, without waiting for
+     * the regulator tick. Before the fix, enable-active stayed 1 in the mirror
+     * until the next AmpCore_Update(), so the C# DISABLE verify read a stale
+     * enable-active=1 (HR8=0xD100) and failed. */
+    reset(); configure(); run(799u);
+    CHECK(peripheral_enable);
+    CHECK((PetitHoldingRegisters[HR_STATE].ActValue & 0x0100u) != 0); /* enable-active set after ENABLE */
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_DISABLE) == 0);
+    /* No tick() here: the write itself must already clear the mirror bit. */
+    CHECK(!amp_model.command.enable);
+    CHECK((PetitHoldingRegisters[HR_STATE].ActValue & 0x0100u) == 0); /* enable-active cleared synchronously */
+    CHECK((PetitHoldingRegisters[HR_STATE].ActValue & 0x8000u) != 0); /* inhibited set synchronously */
+    print("PASS: fault-B DISABLE reflects enable-active/inhibited synchronously\n");
+
     CHECK(test_transport() == 0);
     print("PASS: production FC03/06/16 handlers, broadcast/range/readonly/malformed frames\n");
     CHECK(checks > 260000u);
