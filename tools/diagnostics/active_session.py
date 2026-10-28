@@ -931,7 +931,7 @@ def _map_apply_config_amplifier(line: dict, observed_at: str) -> dict:
         "inhibited": line.get("inhibited"),
         "applied_pwm": line.get("appliedPwm"),
         "pwm_command": line.get("pwmCommand"),
-        "pwm3_enabled": line.get("pwm3Enabled"),
+        "pwm3_enabled": line.get("enableActiveReported"),
         "brake_active": line.get("brakeActive"),
         "failure_command": line.get("failureCommand"),
         "failure_response": line.get("failureResponse"),

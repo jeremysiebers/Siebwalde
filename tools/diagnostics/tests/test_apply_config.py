@@ -110,7 +110,7 @@ _AMP_LINE = {
     "inhibited": True,
     "appliedPwm": 399,
     "pwmCommand": 0,
-    "pwm3Enabled": False,
+    "enableActiveReported": False,
     "brakeActive": False,
     "failureCommand": None,
     "failureResponse": None,
