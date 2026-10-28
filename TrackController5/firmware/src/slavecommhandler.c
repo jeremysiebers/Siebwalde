@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include "slavecommhandler.h"
 #include "slavestartup.h"
+#include "log.h"
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExSTARTUP(SLAVE_INFO *location)
@@ -78,6 +79,12 @@ void SLAVExCOMMUNICATIONxHANDLER(){
     if (Data.Direction == WRITE && Data.SlaveAddress > 0 &&
         Data.SlaveAddress <= NUMBER_OF_AMPLIFIERS &&
         !ISxAMPLIFIERxCOMPATIBLE(Data.SlaveAddress)) {
+        /* P2-C fault-B instrumentation: a command-108 write that was enqueued
+         * (DONE ack) can still be dropped here at dispatch if the amplifier is
+         * no longer compatible. */
+        LOG_Printf("Mbus handler\t: 108 GATE-DROP slave=%u reg=%u val=0x%04X",
+                   (unsigned)Data.SlaveAddress, (unsigned)Data.StartRegister,
+                   (unsigned)Data.RegData0);
         MASTER_SLAVE_DATA[Data.SlaveAddress].MbCommError = SLAVE_DATA_NOK;
         return;
     }
@@ -102,7 +109,17 @@ void SLAVExCOMMUNICATIONxHANDLER(){
             WriteData[8] = Data.RegData1;       // Register Value Lo
             length += 2;
         }          
-        SENDxPETITxMODBUS(Data.SlaveAddress, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, WriteData, length);
+        {
+            unsigned char rv = SENDxPETITxMODBUS(Data.SlaveAddress, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, WriteData, length);
+            /* P2-C fault-B instrumentation: log the actual FC16 write dispatch
+             * (rv = 0 means busy/rejected, non-zero means accepted). Skip the
+             * periodic lease broadcast (address 0) to keep the ring buffer usable. */
+            if (Data.SlaveAddress > 0) {
+                LOG_Printf("Mbus handler\t: 108 FC16-SENT slave=%u reg=%u val=0x%04X rv=%u",
+                           (unsigned)Data.SlaveAddress, (unsigned)Data.StartRegister,
+                           (unsigned)Data.RegData0, (unsigned)rv);
+            }
+        }
     }
     else if(Data.Direction == READ && Data.NoOfRegisters > 0){
         if(Data.NoOfRegisters > 0){
