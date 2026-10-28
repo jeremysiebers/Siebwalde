@@ -58,8 +58,15 @@ namespace SiebwaldeApp.Core
         public int AppliedPwm { get; set; }
         public int PwmCommand { get; set; }
 
-        /// <summary>Effective PWM3-enable state (HR8 EnableActiveBit).</summary>
-        public bool Pwm3Enabled { get; set; }
+        /// <summary>
+        /// HR8 EnableActiveBit (0x0100) — the amplifier's REPORTED logical enable-active state.
+        /// This is NOT the physical H-bridge/PWM3EN hardware state: the actual bridge is
+        /// <c>AmpHw_Enable(config_ok &amp;&amp; ((enable &amp;&amp; !inhibited) || stopping_active) &amp;&amp; !hard)</c>
+        /// (TrackAmplifier4.X/amp_core.c AmpCore_Update), which stays off while inhibited or
+        /// unconfigured even when this bit is set. Never interpret this as proof of electrical
+        /// output de-energization.
+        /// </summary>
+        public bool EnableActiveReported { get; set; }
 
         /// <summary>Brake state (HR8 BrakeActiveBit).</summary>
         public bool BrakeActive { get; set; }
@@ -395,7 +402,6 @@ namespace SiebwaldeApp.Core
             }
 
             // --- DISABLE safety gate: HR1=0x0400, then verify enable=0 + inhibited BEFORE APPLY.
-            long sequence = item.ProtocolReadbackSequence;
             bool disableAccepted = true;
             string? disableFailure = null;
             string? disableFailureResponse = null;
@@ -418,24 +424,26 @@ namespace SiebwaldeApp.Core
             int stateAfterDisable = regs[TrackAmplifierRegisters.State];
             if (disableAccepted)
             {
-                disableVerified = await WaitForSequenceAsync(item, sequence, _disableVerifyTimeout, ct)
+                // Verify the requested STATE, not merely the arrival of the next SLAVEINFO frame:
+                // keep observing the target amplifier's HR8 within the bounded deadline until
+                // enable-active is actually cleared AND the output is inhibited. A periodic poll
+                // that read HR8 before the DISABLE was dispatched still reports enable-active=1,
+                // so a single fresh frame is never treated as a definitive success or failure.
+                (bool reached, TimeSpan elapsed) = await WaitForDisableStateAsync(item, ct)
                     .ConfigureAwait(false);
-                if (disableVerified)
+                stateAfterDisable = item.HoldingReg[TrackAmplifierRegisters.State];
+                if (reached)
                 {
-                    stateAfterDisable = regs[TrackAmplifierRegisters.State];
-                    bool enableActive = (stateAfterDisable & TrackAmplifierRegisters.EnableActiveBit) != 0;
-                    bool inhibited = (stateAfterDisable & TrackAmplifierRegisters.InhibitedBit) != 0;
-                    disableVerified = !enableActive && inhibited;
-                    if (!disableVerified)
-                    {
-                        disableFailure = "DISABLE not verified: enable still active or output not inhibited";
-                        disableFailureResponse =
-                            $"HR8=0x{stateAfterDisable:X4} enableActive={enableActive} inhibited={inhibited}";
-                    }
+                    disableVerified = true;
                 }
                 else
                 {
-                    disableFailure = "DISABLE verification timed out (no fresh readback)";
+                    bool enableActive = (stateAfterDisable & TrackAmplifierRegisters.EnableActiveBit) != 0;
+                    bool inhibited = (stateAfterDisable & TrackAmplifierRegisters.InhibitedBit) != 0;
+                    disableFailure = "DISABLE not verified: enable still active or output not inhibited";
+                    disableFailureResponse =
+                        $"HR8=0x{stateAfterDisable:X4} enableActive={enableActive} inhibited={inhibited} " +
+                        $"elapsedMs={(int)elapsed.TotalMilliseconds}";
                 }
             }
 
@@ -490,7 +498,7 @@ namespace SiebwaldeApp.Core
             result.Inhibited = (state & TrackAmplifierRegisters.InhibitedBit) != 0;
             result.AppliedPwm = regs[TrackAmplifierRegisters.AppliedPwm] & TrackAmplifierRegisters.PwmMask;
             result.PwmCommand = regs[TrackAmplifierRegisters.PwmCommand] & TrackAmplifierRegisters.PwmMask;
-            result.Pwm3Enabled = (state & TrackAmplifierRegisters.EnableActiveBit) != 0;
+            result.EnableActiveReported = (state & TrackAmplifierRegisters.EnableActiveBit) != 0;
             result.BrakeActive = (state & TrackAmplifierRegisters.BrakeActiveBit) != 0;
             result.InitDoneConfigOk =
                 (state & (TrackAmplifierRegisters.InitDoneBit | TrackAmplifierRegisters.ConfigOkBit)) ==
@@ -562,24 +570,40 @@ namespace SiebwaldeApp.Core
             }
         }
 
-        private static async Task<bool> WaitForSequenceAsync(
-            TrackAmplifierItem item, long sequence, TimeSpan timeout, CancellationToken ct)
+        /// <summary>
+        /// Waits, within <see cref="_disableVerifyTimeout"/>, until the target amplifier's HR8
+        /// actually reports enable-active cleared AND output inhibited. Returns the elapsed time and
+        /// whether the state was reached; on timeout/cancellation the caller reads the last observed
+        /// HR8 for diagnostics. This deliberately does NOT return on the first fresh SLAVEINFO frame:
+        /// a periodic poll that read HR8 before the DISABLE was dispatched still shows enable-active=1.
+        /// </summary>
+        private async Task<(bool Reached, TimeSpan Elapsed)> WaitForDisableStateAsync(
+            TrackAmplifierItem item, CancellationToken ct)
         {
+            DateTimeOffset started = _clock();
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            cts.CancelAfter(timeout);
+            cts.CancelAfter(_disableVerifyTimeout);
             try
             {
-                while (item.ProtocolReadbackSequence <= sequence)
+                while (!cts.IsCancellationRequested)
                 {
+                    int state = item.HoldingReg[TrackAmplifierRegisters.State];
+                    bool enableActive = (state & TrackAmplifierRegisters.EnableActiveBit) != 0;
+                    bool inhibited = (state & TrackAmplifierRegisters.InhibitedBit) != 0;
+                    if (!enableActive && inhibited)
+                    {
+                        return (true, _clock() - started);
+                    }
+
                     await Task.Delay(10, cts.Token).ConfigureAwait(false);
                 }
-
-                return true;
             }
-            catch (OperationCanceledException) when (cts.IsCancellationRequested && !ct.IsCancellationRequested)
+            catch (OperationCanceledException)
             {
-                return false; // verification timeout
+                // timeout (CancelAfter) or external cancellation — fall through to report the last state
             }
+
+            return (false, _clock() - started);
         }
 
         private AmplifierConfigApplyInitReport BuildInitReport(string? overrideReadiness)

@@ -631,7 +631,7 @@ namespace SiebwaldeApp.Koploper.Validation.Host
             inhibited = amp.Inhibited,
             appliedPwm = amp.AppliedPwm,
             pwmCommand = amp.PwmCommand,
-            pwm3Enabled = amp.Pwm3Enabled,
+            enableActiveReported = amp.EnableActiveReported,
             brakeActive = amp.BrakeActive,
             failureCommand = amp.FailureCommand,
             failureResponse = amp.FailureResponse,

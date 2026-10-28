@@ -67,7 +67,7 @@ namespace SiebwaldeApp.Core.Tests
             Assert.True(amp.ConfigDownloaded);
             Assert.True(amp.ConfigVerified);
             Assert.True(amp.InitDoneConfigOk);
-            Assert.False(amp.Pwm3Enabled);                // bridge never (re-)enabled
+            Assert.False(amp.EnableActiveReported);      // logical enable-active never re-set; NOT proof of H-bridge de-energization
             Assert.False(amp.BrakeActive);
             Assert.True(amp.Inhibited);                   // still inhibited after APPLY
             Assert.Equal(AmplifierSpeedMapper.NeutralPwm, amp.AppliedPwm);
@@ -505,6 +505,84 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         // ---------------------------------------------------------------------
+        // DISABLE verification: verify the requested STATE, not the first frame
+        // ---------------------------------------------------------------------
+
+        [Fact]
+        public async Task DisableVerify_StaleFrameThenClear_WaitsForState()
+        {
+            // The first post-DISABLE SLAVEINFO still reports enable-active=1 (a periodic poll that
+            // read HR8 before the DISABLE was dispatched); a later frame reports enable-active=0.
+            // The corrected verification must keep observing until the requested state is reached,
+            // not fail on the first stale frame.
+            var transport = new DisableVerifyTransport(slave: 1, initialHr8: 0xD100, clearsOnDisable: true);
+            await using var orchestrator = CreateOrchestrator(
+                transport, disableVerifyTimeout: TimeSpan.FromSeconds(2));
+
+            AmplifierConfigApplyResult result = await orchestrator.RunAsync(new byte[] { 1 });
+
+            Assert.Equal("PASS", result.Status);
+            AmplifierConfigApplyAmplifierResult amp = Assert.Single(result.Amplifiers);
+            Assert.True(amp.DisableAccepted);
+            Assert.True(amp.DisableVerified);
+            Assert.False(amp.EnableActiveAfterDisable);
+            Assert.True(amp.InhibitedAfterDisable);
+            Assert.True(amp.ConfigDownloaded); // DISABLE verified -> CONFIG/APPLY proceeded
+        }
+
+        [Fact]
+        public async Task DisableVerify_DesiredStateImmediatelyVisible_Passes()
+        {
+            var transport = new DisableVerifyTransport(slave: 1, initialHr8: 0xD000, clearsOnDisable: true);
+            await using var orchestrator = CreateOrchestrator(
+                transport, disableVerifyTimeout: TimeSpan.FromSeconds(2));
+
+            AmplifierConfigApplyResult result = await orchestrator.RunAsync(new byte[] { 1 });
+
+            Assert.Equal("PASS", result.Status);
+            Assert.True(Assert.Single(result.Amplifiers).DisableVerified);
+        }
+
+        [Fact]
+        public async Task DisableVerify_StateNeverReached_TimesOutAndFails_NoConfigApplied()
+        {
+            // The DISABLE write is accepted but enable-active never clears: the verification must
+            // time out bounded, fail closed, and report the last observed HR8 — and CONFIG/APPLY must
+            // never follow a failed DISABLE.
+            var transport = new DisableVerifyTransport(slave: 1, initialHr8: 0xD100, clearsOnDisable: false);
+            await using var orchestrator = CreateOrchestrator(
+                transport, disableVerifyTimeout: TimeSpan.FromMilliseconds(300));
+
+            AmplifierConfigApplyResult result = await orchestrator.RunAsync(new byte[] { 1 });
+
+            Assert.Equal("FAILED", result.Status);
+            AmplifierConfigApplyAmplifierResult amp = Assert.Single(result.Amplifiers);
+            Assert.True(amp.DisableAccepted);   // the DISABLE write was transmitted
+            Assert.False(amp.DisableVerified);  // the requested state was never observed
+            Assert.False(amp.ConfigDownloaded); // no premature CONFIG/APPLY
+            Assert.False(amp.ConfigVerified);
+            Assert.NotNull(amp.Failure);
+            Assert.Contains("HR8=", amp.FailureResponse); // reports the last observed HR8
+        }
+
+        [Fact]
+        public async Task DisableVerify_Cancelled_StopsObservingAndFailsClosed()
+        {
+            var transport = new DisableVerifyTransport(slave: 1, initialHr8: 0xD100, clearsOnDisable: false);
+            await using var orchestrator = CreateOrchestrator(transport);
+            using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(600));
+
+            // Cancel mid-session: the verification must stop observing and report failure (fail-closed),
+            // never hang and never proceed to CONFIG.
+            AmplifierConfigApplyResult result = await orchestrator.RunAsync(new byte[] { 1 }, null, cts.Token);
+
+            Assert.Equal("FAILED", result.Status);
+            AmplifierConfigApplyAmplifierResult amp = Assert.Single(result.Amplifiers);
+            Assert.False(amp.DisableVerified);
+            Assert.False(amp.ConfigDownloaded);
+        }
+
+        // ---------------------------------------------------------------------
         // Cleanup
         // ---------------------------------------------------------------------
 
@@ -519,6 +597,160 @@ namespace SiebwaldeApp.Core.Tests
             await orchestrator.DisposeAsync();
 
             Assert.True(transport.CloseCallCount >= 1);
+        }
+
+        // ---------------------------------------------------------------------
+        // Disable-verify transport: emits SLAVEINFO with a controllable HR8 that models the
+        // periodic-poll race (a stale enable-active=1 frame can arrive after the DISABLE write,
+        // before the DISABLE is applied).
+        // ---------------------------------------------------------------------
+
+        private sealed class DisableVerifyTransport : ITrackTransport
+        {
+            private readonly Channel<byte[]> _frames = Channel.CreateUnbounded<byte[]>();
+            private readonly byte _slave;
+            private readonly bool _clearsOnDisable;
+            private readonly CancellationTokenSource _cts = new();
+            private readonly object _sync = new();
+            private readonly ushort[] _regs = new ushort[TrackAmplifierRegisters.Count];
+
+            public DisableVerifyTransport(byte slave, ushort initialHr8, bool clearsOnDisable)
+            {
+                _slave = slave;
+                _clearsOnDisable = clearsOnDisable;
+                _regs[TrackAmplifierRegisters.Identity] = SimulatedTrackAmplifier.Phase1Identity;
+                _regs[TrackAmplifierRegisters.FwVersionPatchProtocol] = 0x0001;
+                _regs[TrackAmplifierRegisters.State] = initialHr8;
+            }
+
+            public Task OpenAsync(CancellationToken cancellationToken = default)
+            {
+                _ = Task.Run(() => PeriodicEmitLoopAsync(_cts.Token));
+                return Task.CompletedTask;
+            }
+
+            public Task CloseAsync(CancellationToken cancellationToken = default)
+            {
+                _cts.Cancel();
+                _frames.Writer.TryComplete();
+                return Task.CompletedTask;
+            }
+
+            public Task SendAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken = default)
+            {
+                if (count < 2)
+                {
+                    return Task.CompletedTask;
+                }
+
+                byte command = buffer[offset + 1];
+
+                if (KoploperSessionCommandAllowlist.TryGetExpectedAcknowledgement(
+                        command, out ushort taskId, out ushort taskCommand, out ushort taskState))
+                {
+                    _frames.Writer.TryWrite(
+                        new byte[] { 0xAA, (byte)taskId, (byte)taskCommand, (byte)taskState, 0x00 });
+                }
+
+                if (command == TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT)
+                {
+                    EmitSlaveInfo();
+                }
+                else if (command == TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH && count >= 8)
+                {
+                    // frame: [0]=HEADER [1]=108 [2]=slave [3]=direction [4]=regCount [5]=startReg [6..]=value
+                    byte direction = buffer[offset + 3];
+                    byte startReg = buffer[offset + 5];
+                    ushort value = (ushort)(buffer[offset + 6] | (buffer[offset + 7] << 8));
+
+                    if (direction == 0xAA) // write
+                    {
+                        ApplyWrite(startReg, value);
+                    }
+
+                    EmitSlaveInfo();
+                }
+
+                return Task.CompletedTask;
+            }
+
+            private void ApplyWrite(byte startReg, ushort value)
+            {
+                lock (_sync)
+                {
+                    if (startReg == TrackAmplifierRegisters.Control)
+                    {
+                        if (value == TrackAmplifierRegisters.DisableBit && _clearsOnDisable)
+                        {
+                            // The DISABLE is applied a moment later (mailbox dispatch latency); a
+                            // periodic poll can still read the pre-DISABLE HR8 in the meantime.
+                            _ = Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    await Task.Delay(50, _cts.Token).ConfigureAwait(false);
+                                }
+                                catch (OperationCanceledException)
+                                {
+                                    return;
+                                }
+
+                                lock (_sync) { _regs[TrackAmplifierRegisters.State] &= 0xFEFF; } // clear enable-active
+                                EmitSlaveInfo();
+                            });
+                        }
+                        else if (value == TrackAmplifierRegisters.ApplyConfigBit)
+                        {
+                            // APPLY: config becomes active -> INIT_DONE | CONFIG_OK (0x0600).
+                            _regs[TrackAmplifierRegisters.State] |=
+                                (ushort)(TrackAmplifierRegisters.InitDoneBit | TrackAmplifierRegisters.ConfigOkBit);
+                        }
+                        // HR1=0 (re-arm APPLY) and ENABLE (0x8000) are intentionally not modelled.
+                    }
+                    else if (startReg >= TrackAmplifierRegisters.ConfigRamp &&
+                             startReg <= TrackAmplifierRegisters.ConfigTag)
+                    {
+                        _regs[startReg] = value; // config echo
+                    }
+                }
+            }
+
+            private async Task PeriodicEmitLoopAsync(CancellationToken ct)
+            {
+                try
+                {
+                    while (!ct.IsCancellationRequested)
+                    {
+                        await Task.Delay(20, ct).ConfigureAwait(false);
+                        EmitSlaveInfo();
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // shutdown
+                }
+            }
+
+            private void EmitSlaveInfo()
+            {
+                ushort[] snapshot;
+                lock (_sync) { snapshot = (ushort[])_regs.Clone(); }
+                _frames.Writer.TryWrite(TrackSlaveInfoFrame.Encode(_slave, 1, snapshot));
+            }
+
+            public async IAsyncEnumerable<byte[]> ReceiveAsync(
+                [EnumeratorCancellation] CancellationToken cancellationToken = default)
+            {
+                while (await _frames.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    while (_frames.Reader.TryRead(out byte[]? frame))
+                    {
+                        yield return frame;
+                    }
+                }
+            }
+
+            public ValueTask DisposeAsync() => default;
         }
 
         // ---------------------------------------------------------------------
