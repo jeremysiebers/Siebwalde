@@ -4,7 +4,7 @@ Verify the five provenance-aware K8 records (firewall observation, command
 250-timeout / 113-success observation, the firewall hypothesis, the
 protocol-mismatch alternative hypothesis, and the next-validation observation)
 plus the minimal provenance-linkage schema extension. Also verify the K6/K7/K8
-records are preserved (208 nodes / 154 relationships) and that the two competing
+records are preserved (216 nodes / 161 relationships) and that the two competing
 hypotheses have been resolved (firewall CONFIRMED / protocol-mismatch CONTRADICTED).
 
 All assertions go through the read-only Knowledge MCP surface (or a fresh
@@ -180,14 +180,14 @@ def test_hypotheses_supported_by_observations():
 # Base preserved: K6/K7/K8 intact, MCP-retrievable.
 # ---------------------------------------------------------------------------
 
-def test_base_unchanged_total_208_nodes_154_rels():
-    assert len(knowledge_seed.NODES) == 208
-    assert len(knowledge_seed.RELS) == 154
+def test_base_unchanged_total_216_nodes_161_rels():
+    assert len(knowledge_seed.NODES) == 216
+    assert len(knowledge_seed.RELS) == 161
     # per-table node/relationship counts in the built graph match the seed exactly
     from tools.knowledge import _runtime
     counts = _runtime.count_tables(_KNOWLEDGE / "db" / "siebwalde-knowledge.lbdb")
-    assert sum(counts["nodes"].values()) == 208
-    assert sum(counts["rels"].values()) == 154
+    assert sum(counts["nodes"].values()) == 216
+    assert sum(counts["rels"].values()) == 161
 
 
 def test_existing_k6_k7_k8_records_preserved():
