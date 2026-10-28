@@ -479,6 +479,7 @@ namespace SiebwaldeApp.Integration
                     _trackCommClient,
                     operatorPermitRecovery: () => _operatorRecoveryAuthorized,
                     physicalStopInputsClear: () => _physicalStopInputsClear(),
+                    onRearmConfirmed: () => GlobalStop.ReArm(),
                     loggerInstance: _loggerInstance),
                 new ResetAllSlavesStep(_trackCommClient, _trackVariables, _loggerInstance),
                 new DataUploadStep(_trackCommClient, _trackVariables, _loggerInstance),

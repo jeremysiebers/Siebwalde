@@ -52,5 +52,25 @@ namespace SiebwaldeApp.Core
                 return true;
             }
         }
+
+        /// <summary>
+        /// C# mirror of the physical <c>REARM_GLOBAL_STOP</c> (112): transitions Latched -&gt; Armed.
+        /// Invoked ONLY by the operator-controlled recovery path once the post-re-arm 111 confirms the
+        /// PIC32 left the latched state — never by passive observation (which must stay sticky, see
+        /// <see cref="Arm"/>). Re-arm grants no movement authority (movement permission is a separate
+        /// gate), so it deliberately does NOT raise <see cref="Latched"/>. It also clears the latch
+        /// reason and resets the stop-notification claim so a future latch is observable/claimable again.
+        /// </summary>
+        public bool ReArm()
+        {
+            lock (SyncRoot)
+            {
+                if (_state != GlobalStopState.Latched) return false;
+                _state = GlobalStopState.Armed;
+                _reason = null;
+                _stopNotificationClaimed = false;
+                return true;
+            }
+        }
     }
 }

@@ -246,6 +246,10 @@ namespace SiebwaldeApp.Core.Tests
                 Assert.Contains((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
                 Assert.Contains((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
 
+                // The C# controller must mirror the confirmed physical re-arm: Armed, no latch reason.
+                Assert.Equal(GlobalStopState.Armed, runtime.GlobalStop.State);
+                Assert.Null(runtime.GlobalStop.Reason);
+
                 await runtime.StopAsync(ct);
                 Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
             }, Groups(1, 2, 3));
