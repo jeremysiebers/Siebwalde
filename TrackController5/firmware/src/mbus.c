@@ -63,6 +63,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "ethernet.h"
 #include "enums.h"
 #include "controller.h"
+#include "mbus_event.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -199,6 +200,10 @@ void MBUS_Initialize ( void )
 void MBUS_Tasks ( void )
 {
     uint32_t    task_id     = MBUS;
+    /* P2-C fault-B instrumentation: deferred, shallow report of the bounded
+     * MBUS event ring (events are captured in the communication path with a
+     * struct copy, no printf). */
+    MBUS_EVENT_REPORT();
     /* A latch must service the stop mailbox even if ordinary control was waiting
      * or configuring. Keep later enable/reset/config commands from undoing it. */
     if (ISxGLOBALxSTOPxLATCHED() && mbusData.state != MBUS_STATE_INIT) {
