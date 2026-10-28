@@ -114,6 +114,21 @@ namespace SiebwaldeApp.Core.Koploper
         }
 
         /// <summary>
+        /// Switches to the apply-config mode: the seven-command sequence
+        /// (250 → 107 → 100 → 106 → 101 → 104 → 105) must be sent in order, including
+        /// 107 EXEC_MBUS_STATE_RESET. Counters/event history are cumulative.
+        /// </summary>
+        public void BeginApplyConfigSession()
+        {
+            lock (_sync)
+            {
+                _mode = KoploperSessionCommandMode.ApplyConfig;
+                _coldStartIndex = 0;
+                _stopped = false;
+            }
+        }
+
+        /// <summary>
         /// Forwards <paramref name="message"/> only when its <see cref="SendMessage.Command"/> is in
         /// <see cref="KoploperSessionCommandAllowlist"/> AND satisfies the session mode/order, then
         /// waits (bounded) for the expected acknowledgement. A non-permitted command raises
@@ -136,8 +151,9 @@ namespace SiebwaldeApp.Core.Koploper
                 sequence = _sequence + 1;
                 _sequence = sequence;
 
-                // 1. Structural allowlist boundary: 108/107/arbitrary never pass, regardless of state.
-                if (!KoploperSessionCommandAllowlist.IsPermitted(command))
+                // 1. Structural allowlist boundary: 108/107/arbitrary never pass in the read-only
+                // cold-start or warm-reconnect modes; in apply-config mode 107 (RESET) is permitted.
+                if (!IsPermittedForMode(_mode, command))
                 {
                     _rejectedCommandCount++;
                     _events.Add(new KoploperSessionCommandEvent(
@@ -175,7 +191,8 @@ namespace SiebwaldeApp.Core.Koploper
                 }
                 else
                 {
-                    if (_coldStartIndex >= KoploperSessionCommandAllowlist.ColdStartOrder.Count)
+                    IReadOnlyList<byte> order = OrderForMode(_mode);
+                    if (_coldStartIndex >= order.Count)
                     {
                         _stopped = true;
                         _orderViolationCount++;
@@ -186,7 +203,7 @@ namespace SiebwaldeApp.Core.Koploper
                             command, KoploperSessionCommandOrderViolationReason.ColdSequenceComplete, null, _mode);
                     }
 
-                    byte expected = KoploperSessionCommandAllowlist.ColdStartOrder[_coldStartIndex];
+                    byte expected = order[_coldStartIndex];
                     if (command != expected)
                     {
                         _stopped = true;
@@ -337,12 +354,13 @@ namespace SiebwaldeApp.Core.Koploper
                         return KoploperSessionCommandAllowlist.ClientConnectionRequest;
                     }
 
-                    if (_coldStartIndex >= KoploperSessionCommandAllowlist.ColdStartOrder.Count)
+                    IReadOnlyList<byte> order = OrderForMode(_mode);
+                    if (_coldStartIndex >= order.Count)
                     {
                         return null;
                     }
 
-                    return KoploperSessionCommandAllowlist.ColdStartOrder[_coldStartIndex];
+                    return order[_coldStartIndex];
                 }
             }
         }
@@ -482,6 +500,8 @@ namespace SiebwaldeApp.Core.Koploper
                 return new KoploperSessionCommandCounters(
                     ClientConnectionRequestTransmitted: CountOf(_transmittedByCommand, KoploperSessionCommandAllowlist.ClientConnectionRequest),
                     ClientConnectionRequestAcknowledged: CountOf(_acknowledgedByCommand, KoploperSessionCommandAllowlist.ClientConnectionRequest),
+                    ExecMbusStateResetTransmitted: CountOf(_transmittedByCommand, KoploperSessionCommandAllowlist.ExecMbusStateReset),
+                    ExecMbusStateResetAcknowledged: CountOf(_acknowledgedByCommand, KoploperSessionCommandAllowlist.ExecMbusStateReset),
                     ExecMbusStateSlavesOnTransmitted: CountOf(_transmittedByCommand, KoploperSessionCommandAllowlist.ExecMbusStateSlavesOn),
                     ExecMbusStateSlavesOnAcknowledged: CountOf(_acknowledgedByCommand, KoploperSessionCommandAllowlist.ExecMbusStateSlavesOn),
                     ExecMbusStateSlaveDetectTransmitted: CountOf(_transmittedByCommand, KoploperSessionCommandAllowlist.ExecMbusStateSlaveDetect),
@@ -508,6 +528,16 @@ namespace SiebwaldeApp.Core.Koploper
 
         private static long CountOf(IReadOnlyDictionary<byte, long> source, byte command)
             => source.TryGetValue(command, out long count) ? count : 0;
+
+        private static bool IsPermittedForMode(KoploperSessionCommandMode mode, byte command)
+            => mode == KoploperSessionCommandMode.ApplyConfig
+                ? KoploperSessionCommandApplyAllowlist.IsPermitted(command)
+                : KoploperSessionCommandAllowlist.IsPermitted(command);
+
+        private static IReadOnlyList<byte> OrderForMode(KoploperSessionCommandMode mode)
+            => mode == KoploperSessionCommandMode.ApplyConfig
+                ? KoploperSessionCommandApplyAllowlist.ApplyConfigOrder
+                : KoploperSessionCommandAllowlist.ColdStartOrder;
 
         private sealed class PendingAcknowledgement
         {

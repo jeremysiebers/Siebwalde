@@ -1202,6 +1202,98 @@ NODES: list[tuple[str, dict]] = [
         "source_path": "TrackAmplifier4.X/main.c",
         "source_location": "Amplifier_ServiceTick LED_RUN_LAT", "source_revision": "fb67387a", "evidence_status": "OBSERVED", "observed_date": "2026-10-27",
     }),
+    # ==================================================================
+    # P2-C: reusable C# harness + init/telemetry/safety command contract
+    # ==================================================================
+    ("ProtocolCommand", {
+        "id": "command:107", "command": 107, "command_name": "EXEC_MBUS_STATE_RESET",
+        "direction": "HOST_TO_PIC32", "destructive": False,
+        "status": "PROVEN_HARDWARE",
+        "summary": "Asserts Slaves_Disable_On() (RD1 HIGH): ALL amplifiers held in reset/power-cycle (the ONLY firmware reset). Ack MBUS/MBUS_STATE_RESET/DONE after ~1s (mbus.c RESET_WAIT). On the subsequent 100 power-up every PIC18 boots via AmpCore_Init to config_ok=0.",
+        "source_path": "TrackController5/firmware/src/mbus.c",
+        "source_location": "MBUS_STATE_RESET / MBUS_STATE_RESET_WAIT (377-396)", "source_revision": "c61c7617", "evidence_status": "OBSERVED",
+    }),
+    ("ProtocolCommand", {
+        "id": "command:100", "command": 100, "command_name": "EXEC_MBUS_STATE_SLAVES_ON",
+        "direction": "HOST_TO_PIC32", "destructive": False,
+        "status": "PROVEN_HARDWARE",
+        "summary": "De-asserts Slaves_Disable_Off() (RD1 LOW): amplifiers power up and boot to 0xAA (AmpCore_Init -> config_ok=0, enable=0, inhibited=0). Ack MBUS/MBUS_STATE_SLAVES_ON/DONE after ~0.79s boot-wait.",
+        "source_path": "TrackController5/firmware/src/mbus.c",
+        "source_location": "MBUS_STATE_SLAVES_ON / SLAVES_BOOT_WAIT (289-303)", "source_revision": "c61c7617", "evidence_status": "OBSERVED",
+    }),
+    ("ProtocolCommand", {
+        "id": "command:108", "command": 108, "command_name": "EXEC_MBUS_SLAVE_DATA_EXCH",
+        "direction": "HOST_TO_PIC32", "destructive": False,
+        "status": "PROVEN_SOURCE",
+        "summary": "Per-amplifier register write/read (payload [slave, 0xAA/0x55, count, startReg, lo, hi]). GATED by ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX: rejected unless ISxAMPLIFIERxCOMPATIBLE(slave) AND !ISxGLOBALxSTOPxLATCHED(). The only HR0/PWM write vector.",
+        "source_path": "TrackController5/firmware/src/slavehandler.c",
+        "source_location": "ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX (504-552)", "source_revision": "c61c7617", "evidence_status": "SOURCE_REF",
+    }),
+    ("ProtocolCommand", {
+        "id": "command:110", "command": 110, "command_name": "HOST_HEARTBEAT",
+        "direction": "HOST_TO_PIC32", "destructive": False,
+        "status": "PROVEN_SOURCE",
+        "summary": "Host authority heartbeat. Sets LastHostHeartbeat and arms the latch if DISARMED; does NOT clear a LATCHED latch (only REARM 112 does). 500ms reference / 2s host-authority watchdog.",
+        "source_path": "TrackController5/firmware/src/controller.c",
+        "source_location": "CONTROLLERxHANDLExSAFETYxCOMMAND HOST_HEARTBEAT (164-178)", "source_revision": "c61c7617", "evidence_status": "SOURCE_REF",
+    }),
+    ("ProtocolCommand", {
+        "id": "command:112", "command": 112, "command_name": "REARM_GLOBAL_STOP",
+        "direction": "HOST_TO_PIC32", "destructive": False,
+        "status": "PROVEN_HARDWARE",
+        "summary": "Transitions the PIC32 global-stop latch LATCHED->ARMED and re-arms the host watchdog. AMPLIFIER-NEUTRAL: issues NO MBUS slave write, so it never energizes a bridge. Required before 107 RESET because a latched stop forces the MBUS handler into SERVICE_TASKS (mbus.c:202-210), swallowing the 107 DONE ack. Idempotent (no-op when not latched).",
+        "source_path": "TrackController5/firmware/src/controller.c",
+        "source_location": "REARM_GLOBAL_STOP (182-189)", "source_revision": "c61c7617", "evidence_status": "OBSERVED",
+    }),
+    ("SafetyInvariant", {
+        "id": "safety:rearm-amp-neutral", "label": "REARM (112) is amplifier-neutral and non-energizing",
+        "statement": "REARM_GLOBAL_STOP (112) only transitions the PIC32 latch LATCHED->ARMED and refreshes LastHostHeartbeat; it performs no MBUS slave write and never changes config_ok/enable/PWM, so it cannot energize an H-bridge. Bridge-enable is AmpHw_Enable(config_ok && ((enable && !inhibited) || stopping_active) && !hard), and config_ok is only set by an explicit CONFIG/APPLY after a verified DISABLE.",
+        "applies_to": "C# apply-config harness re-arm step; PIC32 global-stop latch",
+        "requires_authorization": False,
+        "status": "PROVEN_SOURCE",
+        "summary": "The harness re-arms (112) safely before init; the 107 RESET (RD1 power-cycle) is what forces config_ok=0 on every run, so the sequence is safe even after a previous successful config, retained ENABLE, or partial success.",
+        "source_path": "TrackController5/firmware/src/controller.c",
+        "source_location": "controller.c:182-189 + amp_core.c:111-113", "source_revision": "c61c7617", "evidence_status": "SOURCE_REF",
+    }),
+    ("SafetyInvariant", {
+        "id": "safety:config-volatile", "label": "PIC18 configuration is volatile (RAM) and cleared by reset",
+        "statement": "Amplifier configuration (config_ok, active ramp/watchdog/tag, init_done) is held in RAM only. AmpCore_Init memset()s it on boot, and 107 RESET (RD1) power-cycles the amplifiers to config_ok=0 with AMP_FAULT_CONFIG set. A momentary CONFIG_OK is NOT persistent readiness; configuration must be re-applied each session.",
+        "applies_to": "PIC18 amplifier config_ok / init_done lifecycle",
+        "requires_authorization": False,
+        "status": "PROVEN_SOURCE",
+        "summary": "config_ok is RAM-only and cleared by any power-cycle/reset; the final ConfigInvalid fault after session end is the expected post-reset state, not a regression.",
+        "source_path": "TrackAmplifier4.X/amp_core.c",
+        "source_location": "AmpCore_Init (12-27)", "source_revision": "c61c7617", "evidence_status": "SOURCE_REF",
+    }),
+    ("SafetyInvariant", {
+        "id": "safety:lease-gated-on-latch", "label": "Motion-lease renewal stops while the global stop is latched",
+        "statement": "The PIC32 broadcasts the motion lease HR1=0x4000 (address 0) every 100ms ONLY while !ISxGLOBALxSTOPxLATCHED() (slavehandler.c:274-284). On host-loss latch the renewal stops and each amplifier self-inhibits + sets AMP_FAULT_LEASE when its 500ms lease expires (amp_core.c:65-68).",
+        "applies_to": "PIC32 lease broadcast; PIC18 lease_fresh / AMP_FAULT_LEASE",
+        "requires_authorization": False,
+        "status": "PROVEN_SOURCE",
+        "summary": "Lease expiry (LeaseExpired 0x0080) after session end is the source-defined fail-closed consequence of stopping the heartbeat; it is not a defect.",
+        "source_path": "TrackController5/firmware/src/slavehandler.c",
+        "source_location": "SendNextMessage lease broadcast (274-284)", "source_revision": "c61c7617", "evidence_status": "SOURCE_REF",
+    }),
+    ("Observation", {
+        "id": "obs:p2c-harness-validation", "label": "P2-C reusable C# harness non-loaded validation",
+        "what": "C# apply-config harness (fix/p2c-csharp-compatibility @ c61c7617) against real PIC32 1.0.1 + PIC18 1.0.2: init 250->112->107->100->106->101->104->105 all ACKED, global stop ARMED. Amps 1/3/4 reached CONFIG_OK (identity 0xF101 -> DISABLE -> CONFIG/APPLY -> INIT_DONE|CONFIG_OK, PWM3EN=0). Amp 6 FAILED reproducibly on the WRITE path (config timeout when 4th; DISABLE verification enable_active=1 when alone) while its READ path (cyclic poll) is healthy (identical msg growth to 1/3/4). All H-bridges remained OFF (PWM3EN=0, appliedPWM=399 neutral) throughout.",
+        "date": "2026-10-27", "method": "C# Validation.Host apply-config mode (Debug) + read-only SLAVEINFO readback",
+        "status": "PROVEN_HARDWARE",
+        "summary": "3 of 4 amplifiers configure end-to-end via the reusable harness; amp 6 has a reproducible WRITE-path failure (hypothesis: marginal RS-422, unconfirmed) that needs physical-layer measurement.",
+        "source_path": "SiebwaldeApp/SiebwaldeApp.Core/Model/TrackApplication/Control/AmplifierConfigApply.cs",
+        "source_location": "AmplifierConfigApplyOrchestrator.RunAsync", "source_revision": "c61c7617", "evidence_status": "OBSERVED", "observed_date": "2026-10-27",
+    }),
+    ("Hypothesis", {
+        "id": "hyp:amp6-marginal-write", "label": "Amplifier 6 has a marginal RS-422 write path (unconfirmed)",
+        "hypothesis": "Amplifier 6 config/APPLY fails reproducibly on the WRITE path (DISABLE write not clearing enable; config writes timing out) while its READ path (cyclic poll) is healthy. Candidate cause: marginal RS-422 signal on the amplifier-6 drop (wiring/termination/driver), causing intermittent write loss. NOT CONFIRMED; requires a PicoScope differential-signal measurement on the amp-6 RS-422 pair.",
+        "evidence_for": "amp 6 READ path healthy (identical cyclic-poll msg growth to 1/3/4); amp 6 identity 0xF101 correct.",
+        "evidence_against": "same code path succeeds on amps 1/3/4; msgsRx/msgsTx delta only ~10 lower (not conclusive).",
+        "status": "HYPOTHESIS",
+        "summary": "Unconfirmed hypothesis; do not treat as a confirmed wiring defect without physical-layer evidence.",
+        "source_path": "C:/Localdata/Siebwalde-Bewaarmap/04_HARDWARE_EVIDENCE/P2-C/p2c-harness-results.txt",
+        "source_location": "PER-AMPLIFIER CONFIG/APPLY RESULT", "source_revision": "c61c7617", "evidence_status": "UNVERIFIED", "observed_date": "2026-10-27",
+    }),
 ]
 
 
@@ -1320,6 +1412,16 @@ RELS: list[tuple[str, str, str, dict]] = [
     ("OBSERVES_FIRMWARE", "obs:p2-b2-ffc2-deployed", "firmware:pic18-0xFFC2", {"note": "all four amps read back HR11=0xFFC2 after deploy"}),
     ("RELATED_TO", "obs:p2-b2-a2-107-100-reset-required", "obs:p2-b2-a1-amps-4-6-default-wakeup", {"note": "the 107+100 reset resolves the post-131 default-wakeup / sub-step-7 failure"}),
     ("RELATED_TO", "obs:p2-b2-a2-all-four-phase1", "obs:p2-b2-a2-107-100-reset-required", {"note": "the 107+100 reset preceded each of the three additional amp migrations"}),
+
+    # P2-C: reusable C# harness + init/telemetry/safety command contract
+    ("OBSERVES_FIRMWARE", "obs:p2c-harness-validation", "firmware:pic18-0xFFC2", {"note": "amps 1/3/4/6 all read HR11=0xFFC2 during the harness validation"}),
+    ("OBSERVES_COMMAND", "obs:p2c-harness-validation", "command:107", {"note": "init 250->112->107->100->106->101->104->105 ACKED"}),
+    ("OBSERVES_COMMAND", "obs:p2c-harness-validation", "command:112", {"note": "re-arm (112) cleared the latched host-loss stop; verified state 1->3"}),
+    ("OBSERVES_COMMAND", "obs:p2c-harness-validation", "command:108", {"note": "CONFIG/APPLY via 108; DISABLE before APPLY; amp 6 WRITE path failed"}),
+    ("GUARDED_BY", "command:108", "safety:lease-gated-on-latch", {"note": "108 register writes rejected while the global stop is latched"}),
+    ("GUARDED_BY", "command:112", "safety:rearm-amp-neutral", {"note": "re-arm is non-energizing; safe before init"}),
+    ("SUPPORTED_BY", "hyp:amp6-marginal-write", "obs:p2c-harness-validation", {"note": "amp 6 WRITE-path failure observed; READ path healthy"}),
+    ("RELATED_TO", "obs:p2c-harness-validation", "obs:p2-b2-ffc2-deployed", {"note": "P2-C harness validated against the 1.0.2 (0xFFC2) deployment"}),
 ]
 
 

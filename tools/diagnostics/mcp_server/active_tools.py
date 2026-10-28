@@ -21,6 +21,7 @@ ACTIVE_TOOL_NAMES = (
     "diagnostics_controller_preflight",
     "diagnostics_probe_controller_version",
     "diagnostics_run_controller_session",
+    "diagnostics_apply_config",
     "diagnostics_abort_active_session",
 )
 
@@ -28,6 +29,7 @@ ACTIVE_EFFECT_CLASSES = {
     "diagnostics_controller_preflight": observe.LIVE_READ_ONLY_HARDWARE_VALIDATED,
     "diagnostics_probe_controller_version": observe.LIVE_READ_ONLY_HARDWARE_VALIDATED,
     "diagnostics_run_controller_session": observe.STATE_CHANGING,
+    "diagnostics_apply_config": observe.STATE_CHANGING,
     "diagnostics_abort_active_session": observe.STATE_CHANGING,
 }
 
@@ -170,9 +172,47 @@ def diagnostics_abort_active_session(session_id=None) -> dict:
     return active_session.abort_session(session_id)
 
 
+def diagnostics_apply_config(
+    authorization,
+    purpose,
+    wait_ms=None,
+    target_endpoint=None,
+) -> dict:
+    """Grant-gated safe CONFIG/APPLY diagnostic (STATE_CHANGING).
+
+    Runs the C# host in ``apply-config`` mode as a bounded child: the seven-command
+    init (250->107->100->106->101->104->105) + HOST_HEARTBEAT (110) + the re-arm
+    (112, raw comm, before 107), per-amplifier identity/compatibility verification,
+    the DISABLE safety gate (HR1=0x0400, verified enable=0 + inhibited) BEFORE any
+    CONFIG/APPLY, then the echo-verified config download (HR3..6 + APPLY). Never
+    writes HR0, never writes ENABLE (0x8000) after DISABLE. Requires a distinct
+    scoped ``apply_config`` grant (single-use, consumed before any I/O); the
+    combined command set is {250,107,100,106,101,104,105,108,110,112}.
+    """
+    err = _guard_grant_id(authorization, "authorization")
+    if err is not None:
+        return err
+    err = _guard_text(purpose, "purpose")
+    if err is not None:
+        return err
+    err = _guard_optional_int(wait_ms, "wait_ms")
+    if err is not None:
+        return err
+    err = _guard_optional_text(target_endpoint, "target_endpoint")
+    if err is not None:
+        return err
+    return active_session.apply_config_session(
+        authorization,
+        purpose,
+        wait_ms=wait_ms if wait_ms is not None else active_session.DEFAULT_WAIT_MS,
+        target_endpoint=target_endpoint,
+    )
+
+
 def register(mcp) -> None:
-    """Register the four active tools on the shared FastMCP instance."""
+    """Register the active tools on the shared FastMCP instance."""
     mcp.tool()(diagnostics_controller_preflight)
     mcp.tool()(diagnostics_probe_controller_version)
     mcp.tool()(diagnostics_run_controller_session)
+    mcp.tool()(diagnostics_apply_config)
     mcp.tool()(diagnostics_abort_active_session)

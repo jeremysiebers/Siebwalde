@@ -38,13 +38,17 @@ _DEFAULT_ROOT = Path(__file__).resolve().parents[2] / "Logging" / "diagnostics-m
 CONSUMED_SUFFIX = ".consumed"
 
 # The two scoped modes a grant may authorise. ``session`` covers the six-command
-# state-changing init; ``read_only`` covers the single command-113 identity probe.
+# state-changing init; ``read_only`` covers the single command-113 identity probe;
+# ``apply_config`` covers the state-changing safe CONFIG/APPLY path (the seven
+# init commands — including 107 RESET — + HOST_HEARTBEAT 110 +
+# EXEC_MBUS_SLAVE_DATA_EXCH 108).
 MODE_SESSION = "session"
 MODE_READ_ONLY = "read_only"
+MODE_APPLY_CONFIG = "apply_config"
 
 # Any new command that appears on the wire would first have to pass these scoped
 # mode names; a grant that does not name a mode can never authorise an action.
-KNOWN_MODES = frozenset({MODE_SESSION, MODE_READ_ONLY})
+KNOWN_MODES = frozenset({MODE_SESSION, MODE_READ_ONLY, MODE_APPLY_CONFIG})
 
 
 class GrantError(Exception):

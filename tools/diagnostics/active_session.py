@@ -858,6 +858,310 @@ def _build_session_result(
 
 
 # --------------------------------------------------------------------------- #
+# apply-config — the single bounded safe CONFIG/APPLY session
+# --------------------------------------------------------------------------- #
+
+
+def _resolve_apply_config_command(repo_root=None) -> dict:
+    root = Path(repo_root) if repo_root is not None else _REPO_ROOT
+    exe = root / HOST_EXE_REL
+    if not exe.exists():
+        return {"error": "host_exe_missing", "command": None, "exe": str(exe)}
+    # The C# apply-config mode establishes the six-command session + heartbeat,
+    # verifies identity/compatibility, DISABLEs each compatible amp and verifies
+    # enable=0 + inhibited BEFORE APPLY, then runs the echo-verified config
+    # download. It emits amplifierConfigApply + applyConfigSummary JSON lines.
+    command = [str(exe), "apply-config"]
+    return {"error": None, "command": command, "exe": str(exe)}
+
+
+def _parse_apply_config_output(stdout) -> dict:
+    """Parse the C# apply-config host's JSON lines (no decode of frames)."""
+    amplifiers = []
+    summary = None
+    conflict = None
+    init_failure = None
+    for line in (stdout or "").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            obj = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(obj, dict):
+            continue
+        kind = obj.get("type")
+        if kind == "amplifierConfigApply":
+            amplifiers.append(obj)
+        elif kind == "applyConfigSummary":
+            summary = obj
+        elif kind == "sessionConflict":
+            conflict = obj
+        elif kind == "initFailure":
+            init_failure = obj
+    return {
+        "amplifiers": amplifiers,
+        "summary": summary,
+        "sessionConflict": conflict,
+        "initFailure": init_failure,
+    }
+
+
+def _map_apply_config_amplifier(line: dict, observed_at: str) -> dict:
+    return {
+        "slave_number": line.get("slaveNumber"),
+        "detected": line.get("detected"),
+        "compatible": line.get("compatible"),
+        "incompatibility_reason": line.get("incompatibilityReason"),
+        "identity_raw": line.get("identityRaw"),
+        "identity_raw_hex": line.get("identityRawHex"),
+        "protocol_version": line.get("protocolVersion"),
+        "identity_verified": line.get("identityVerified"),
+        "disable_accepted": line.get("disableAccepted"),
+        "disable_verified": line.get("disableVerified"),
+        "state_after_disable": line.get("stateAfterDisable"),
+        "enable_active_after_disable": line.get("enableActiveAfterDisable"),
+        "inhibited_after_disable": line.get("inhibitedAfterDisable"),
+        "config_downloaded": line.get("configDownloaded"),
+        "config_verified": line.get("configVerified"),
+        "init_done_config_ok": line.get("initDoneConfigOk"),
+        "state_after_apply": line.get("stateAfterApply"),
+        "fault_raw": line.get("faultRaw"),
+        "inhibited": line.get("inhibited"),
+        "applied_pwm": line.get("appliedPwm"),
+        "pwm_command": line.get("pwmCommand"),
+        "pwm3_enabled": line.get("enableActiveReported"),
+        "brake_active": line.get("brakeActive"),
+        "failure_command": line.get("failureCommand"),
+        "failure_response": line.get("failureResponse"),
+        "failure": line.get("failure"),
+        "observed_at_utc": observed_at,
+    }
+
+
+def _build_apply_config_init(summary, classification: str) -> dict:
+    summary_init = summary.get("init") if isinstance(summary, dict) else None
+    if isinstance(summary_init, dict):
+        return {
+            "sequence": list(summary_init.get("sequence", list(active_guard.APPLY_CONFIG_ORDER))),
+            "commands": list(summary_init.get("commands", [])),
+            "rejected_commands": summary_init.get("rejected_commands", 0),
+            "order_violations": summary_init.get("order_violations", 0),
+            "acknowledgement_timeouts": summary_init.get("acknowledgement_timeouts", 0),
+            "movement_writes": summary_init.get("movement_writes", dict(_ZERO_MOVEMENT_WRITES)),
+            "readiness": summary_init.get("readiness", "INCOMPLETE"),
+        }
+
+    commands = [
+        {
+            "command": cmd,
+            "name": active_guard.COMMAND_NAMES.get(cmd, "0x%02X" % cmd),
+            "transmitted": 0,
+            "acknowledged": 0,
+            "state": "NOT_SENT",
+        }
+        for cmd in active_guard.APPLY_CONFIG_ORDER
+    ]
+    readiness = "FAILED" if classification == active_guard.ACK_TIMEOUT else "INCOMPLETE"
+    ack_timeouts = 1 if classification == active_guard.ACK_TIMEOUT else 0
+    return {
+        "sequence": list(active_guard.APPLY_CONFIG_ORDER),
+        "commands": commands,
+        "rejected_commands": 0,
+        "order_violations": 0,
+        "acknowledgement_timeouts": ack_timeouts,
+        "movement_writes": dict(_ZERO_MOVEMENT_WRITES),
+        "readiness": readiness,
+    }
+
+
+def _build_apply_config_heartbeat(summary) -> dict:
+    hb = summary.get("heartbeat") if isinstance(summary, dict) else None
+    if not isinstance(hb, dict):
+        return {
+            "supervised": False,
+            "heartbeat_sent": 0,
+            "global_stop_sent": 0,
+            "global_stop_state": None,
+            "global_stop_reason": None,
+            "last_observed_pic32_status": None,
+            "latched": None,
+        }
+    return {
+        "supervised": bool(hb.get("supervised", False)),
+        "heartbeat_sent": hb.get("heartbeat_sent", 0),
+        "global_stop_sent": hb.get("global_stop_sent", 0),
+        "global_stop_state": hb.get("global_stop_state"),
+        "global_stop_reason": hb.get("global_stop_reason"),
+        "last_observed_pic32_status": hb.get("last_observed_pic32_status"),
+        "latched": hb.get("latched"),
+    }
+
+
+def _status_for_apply_config(classification: str, summary) -> str:
+    if classification == active_guard.CLEAN_SHUTDOWN:
+        status = summary.get("status") if isinstance(summary, dict) else None
+        return status if status in (STATUS_PASS, STATUS_FAILED) else STATUS_UNKNOWN
+    if classification in (
+        active_guard.ACK_TIMEOUT,
+        active_guard.CONTROLLER_UNAVAILABLE,
+        active_guard.SESSION_CONFLICT,
+    ):
+        return STATUS_FAILED
+    return STATUS_UNKNOWN
+
+
+def apply_config_session(
+    grant_id,
+    purpose,
+    wait_ms: int = DEFAULT_WAIT_MS,
+    target_endpoint=None,
+    directory=None,
+    registry=None,
+    lock_dir=None,
+    repo_root=None,
+    socket_factory=None,
+    subprocess_runner=None,
+    clock=None,
+    audit_dir=None,
+) -> dict:
+    """Run the safe CONFIG/APPLY session as one bounded child process.
+
+    Mirrors :func:`run_controller_session` (same grant/ownership/registry/lock/
+    subprocess lifecycle) but authorises the distinct ``apply_config`` grant mode
+    and command set, invokes the C# host in ``apply-config`` mode, and maps the
+    per-amplifier DISABLE/CONFIG/APPLY result to the structured return shape.
+    """
+    reg = registry or _DEFAULT_REGISTRY
+
+    if grant_id is None or (isinstance(grant_id, str) and not grant_id.strip()):
+        return _run_refusal(AUTHORIZATION_ABSENT, detail="grant_absent")
+
+    try:
+        wait_ms = _clamp_wait_ms(wait_ms)
+    except ValueError as exc:
+        return _run_refusal("invalid_wait_ms", detail=str(exc))
+
+    try:
+        endpoint = _resolve_endpoint(target_endpoint)
+    except ValueError as exc:
+        return _run_refusal("invalid_endpoint", detail=str(exc))
+
+    # 1. grant (no I/O).
+    try:
+        grant = load_grant(grant_id, directory)
+    except GrantAbsent as exc:
+        return _run_refusal(AUTHORIZATION_ABSENT, detail=str(exc))
+    except GrantConsumed as exc:
+        return _run_refusal(AUTHORIZATION_ABSENT, detail=str(exc))
+    try:
+        validate_grant(grant, session_authority.MODE_APPLY_CONFIG, endpoint, active_guard.APPLY_CONFIG_COMMANDS)
+    except GrantExpired as exc:
+        return _run_refusal(AUTHORIZATION_ABSENT, detail=str(exc))
+    except GrantScopeMismatch as exc:
+        return _run_refusal(AUTHORIZATION_ABSENT, detail=str(exc))
+
+    session_id = "apply-config-%s-%s" % (grant.grant_id, _run_id(clock))
+
+    # 2. in-process registry.
+    if not reg.try_begin(session_id):
+        return _run_refusal(SESSION_CONFLICT, session_id=None, detail="another_session_active")
+
+    acquired_lock = False
+    try:
+        # 3. ownership bind pre-flight.
+        recv = _check_recv_port(DEFAULT_RECV_PORT, socket_factory)
+        if not recv["bound"]:
+            return _run_refusal(SESSION_CONFLICT, session_id=session_id, detail=recv["recv_port_bind"])
+
+        # 4. advisory session lock (with stale reclamation).
+        lock = _acquire_session_lock(lock_dir, session_id=session_id, endpoint=endpoint, clock=clock)
+        if not lock["acquired"] and _stale_lock(lock_dir):
+            _reclaim_stale_lock(lock_dir, note="stale_lock_reclaimed")
+            lock = _acquire_session_lock(lock_dir, session_id=session_id, endpoint=endpoint, clock=clock)
+        if not lock["acquired"]:
+            return _run_refusal(SESSION_CONFLICT, session_id=session_id, detail="session_lock_held")
+        acquired_lock = True
+
+        # 5. consume the grant BEFORE live I/O.
+        try:
+            consume_grant(grant, directory)
+        except GrantConsumed:
+            return _run_refusal(AUTHORIZATION_ABSENT, session_id=session_id, detail="grant_consumed")
+        except GrantAbsent:
+            return _run_refusal(AUTHORIZATION_ABSENT, session_id=session_id, detail="grant_absent")
+
+        # 6. resolve the host command.
+        host = _resolve_apply_config_command(repo_root)
+        if host["error"] is not None:
+            return _run_refusal(CONTROLLER_UNAVAILABLE, session_id=session_id, detail=host["error"])
+
+        # 7. run the bounded child process (the ONLY apply-config path).
+        proc = _run_host(host["command"], _ms_to_seconds(wait_ms), subprocess_runner)
+        parsed = _parse_apply_config_output(proc["stdout"])
+        aborted = reg.was_aborted(session_id)
+        classification = active_guard.classify_apply_config_shutdown(
+            proc["returncode"], proc["stdout"], proc["timed_out"], aborted
+        )
+
+        # 8. build the result + audit trail.
+        return _build_apply_config_result(
+            session_id, grant, endpoint, purpose, wait_ms, parsed, classification, proc,
+            audit_dir, clock,
+        )
+    finally:
+        if acquired_lock:
+            _release_session_lock(lock_dir, session_id)
+        reg.end(session_id)
+
+
+def _build_apply_config_result(
+    session_id, grant, endpoint, purpose, wait_ms, parsed, classification, proc,
+    audit_dir, clock,
+) -> dict:
+    now = clock() if clock is not None else datetime.now(timezone.utc)
+    observed_at = now.isoformat()
+    summary = parsed["summary"]
+    init = _build_apply_config_init(summary, classification)
+    heartbeat = _build_apply_config_heartbeat(summary)
+    amplifiers = [
+        _map_apply_config_amplifier(line, observed_at) for line in parsed["amplifiers"]
+    ]
+    status = _status_for_apply_config(classification, summary)
+    reason = None if classification == active_guard.CLEAN_SHUTDOWN else classification
+    if classification == active_guard.CLEAN_SHUTDOWN and status == STATUS_FAILED:
+        reason = summary.get("failure") if isinstance(summary, dict) else None
+
+    audit_file = _write_audit(audit_dir, session_id, {
+        "type": "apply_config_session",
+        "session_id": session_id,
+        "grant_id": grant.grant_id,
+        "purpose": purpose,
+        "endpoint": endpoint,
+        "wait_ms": wait_ms,
+        "started_at": observed_at,
+        "status": status,
+        "shutdown": classification,
+        "amplifier_count": len(amplifiers),
+        "stdout_sha256": hashlib.sha256((proc.get("stdout") or "").encode("utf-8")).hexdigest(),
+    })
+
+    return {
+        "status": status,
+        "reason": reason,
+        "session_id": session_id,
+        "authorization": {"grant_id": grant.grant_id, "consumed": True},
+        "init": init,
+        "heartbeat": heartbeat,
+        "amplifiers": amplifiers,
+        "shutdown": {"classification": classification, "reason": _reason_for_classification(classification)},
+        "audit_trail_file": audit_file,
+        "evidence": {"reason": None},
+    }
+
+
+# --------------------------------------------------------------------------- #
 # B5 — explicit safety stop
 # --------------------------------------------------------------------------- #
 

@@ -21,6 +21,8 @@ from tools.diagnostics.active_guard import (  # noqa: E402
     ACK_TIMEOUT,
     ACTIVE_ALLOWLIST,
     ACTIVE_COMMANDS,
+    APPLY_CONFIG_COMMANDS,
+    APPLY_CONFIG_ORDER,
     CLEAN_SHUTDOWN,
     COLD_START_ORDER,
     CONTROLLER_UNAVAILABLE,
@@ -59,6 +61,19 @@ def test_destructive_and_flash_commands_are_unreachable():
     # 113 is the only read-only addition; 108/107 are never present.
     assert 108 not in ACTIVE_COMMANDS
     assert 107 not in ACTIVE_COMMANDS
+
+
+def test_apply_config_order_is_exact():
+    assert APPLY_CONFIG_ORDER == (250, 107, 100, 106, 101, 104, 105)
+    # 107 RESET precedes 100 SLAVES_ON.
+    assert APPLY_CONFIG_ORDER.index(107) < APPLY_CONFIG_ORDER.index(100)
+
+
+def test_apply_config_commands_include_107_not_readonly():
+    assert APPLY_CONFIG_COMMANDS == {250, 107, 100, 106, 101, 104, 105, 108, 110, 112}
+    assert 107 in APPLY_CONFIG_COMMANDS
+    assert 107 not in ACTIVE_COMMANDS
+    assert 107 not in ACTIVE_ALLOWLIST
 
 
 def test_shutdown_classifications_are_exactly_eight():

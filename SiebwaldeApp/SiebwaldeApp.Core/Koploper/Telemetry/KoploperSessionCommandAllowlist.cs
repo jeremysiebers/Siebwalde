@@ -20,6 +20,13 @@ namespace SiebwaldeApp.Core.Koploper
     /// write vector), 107 (EXEC_MBUS_STATE_RESET), and every firmware/recovery/control-stack command —
     /// is a hard stop and is never transmitted.
     /// </summary>
+    /// <remarks>
+    /// 107 (<see cref="ExecMbusStateReset"/>) is declared here ONLY as a named constant for the
+    /// shared acknowledgement/display mapping. It is deliberately NOT a member of
+    /// <see cref="ColdStartOrder"/> or <see cref="IsPermitted"/>: the read-only telemetry session
+    /// never sends RESET. The state-changing apply-config session uses
+    /// <see cref="KoploperSessionCommandApplyAllowlist"/> instead.
+    /// </remarks>
     public static class KoploperSessionCommandAllowlist
     {
         /// <summary>Establish the Ethernet-target connection. Command byte 250.</summary>
@@ -39,6 +46,9 @@ namespace SiebwaldeApp.Core.Koploper
 
         /// <summary>Enable the MBUS slaves (only path into SERVICE_TASKS). Command byte 105.</summary>
         public const byte ExecMbusStateSlaveEnable = TrackCommand.EXEC_MBUS_STATE_SLAVE_ENABLE;
+
+        /// <summary>Reset the MBUS slaves to 0xAA. Command byte 107. NOT in the read-only allowlist.</summary>
+        public const byte ExecMbusStateReset = TrackCommand.EXEC_MBUS_STATE_RESET;
 
         /// <summary>The mandatory cold-start sequence, in the exact required order.</summary>
         public static readonly IReadOnlyList<byte> ColdStartOrder = new byte[]
@@ -69,6 +79,7 @@ namespace SiebwaldeApp.Core.Koploper
             ExecMbusStateSlaveInit => nameof(TrackCommand.EXEC_MBUS_STATE_SLAVE_INIT),
             ExecMbusStateStartDataUpload => nameof(TrackCommand.EXEC_MBUS_STATE_START_DATA_UPLOAD),
             ExecMbusStateSlaveEnable => nameof(TrackCommand.EXEC_MBUS_STATE_SLAVE_ENABLE),
+            ExecMbusStateReset => nameof(TrackCommand.EXEC_MBUS_STATE_RESET),
             _ => $"0x{command:X2}"
         };
 
@@ -123,6 +134,12 @@ namespace SiebwaldeApp.Core.Koploper
                     taskState = TaskStates.DONE;
                     return true;
 
+                case ExecMbusStateReset:
+                    taskId = TaskId.MBUS;
+                    taskCommand = EnumMbusStatus.MBUS_STATE_RESET;
+                    taskState = TaskStates.DONE;
+                    return true;
+
                 default:
                     taskId = 0;
                     taskCommand = 0;
@@ -147,6 +164,12 @@ namespace SiebwaldeApp.Core.Koploper
         WarmReconnect = 1,
 
         /// <summary>No outbound session (a passive observer has no PIC32 client).</summary>
-        None = 2
+        None = 2,
+
+        /// <summary>
+        /// Safe CONFIG/APPLY: the seven-command init sequence
+        /// (250 → 107 → 100 → 106 → 101 → 104 → 105) must be sent in order, including 107 RESET.
+        /// </summary>
+        ApplyConfig = 3
     }
 }
