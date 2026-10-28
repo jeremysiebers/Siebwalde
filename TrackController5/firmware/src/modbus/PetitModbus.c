@@ -1,6 +1,7 @@
 #include "PetitModbus.h"
 #include "PetitModbusPort.h"
 #include "../TrackController5.X/../../mbus.h"
+#include "mbus_event.h"
 
 #define PETIT_FALSE_FUNCTION                    0
 #define PETIT_FALSE_SLAVE_ADDRESS               1
@@ -429,6 +430,11 @@ void Petit_TxRTU(void)
     }
     else{
         Petit_Tx_State    =PETIT_RXTX_WAIT_ANSWER;                              // Else Master must wait for answer (see ModBus protocol implementation)
+
+        /* P2-C fault-B instrumentation: bytes physically sent (TX -> WAIT_ANSWER). */
+        MBUS_EVENT_PUSH(MBUS_EV_TX_DONE, (uint8_t)Petit_Tx_Data.Address,
+                        Petit_Tx_Data.DataBuf[1],
+                        (uint16_t)(((uint16_t)Petit_Tx_Data.DataBuf[5] << 8) | Petit_Tx_Data.DataBuf[6]), 0u);
         
         /* Reset and enable slave answer timeout timer */
         DRV_TMR_Stop(mbusData.ModbusReceiveTimeoutHandle);
@@ -459,6 +465,9 @@ void PROCESSxPETITxMODBUS(void)
             }
             else{
                 MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_TIMEOUT;}
+            /* P2-C fault-B instrumentation: no echo within the answer timeout. */
+            MBUS_EVENT_PUSH(MBUS_EV_TIMEOUT, (uint8_t)Petit_Tx_Data.Address,
+                            Petit_Tx_Data.DataBuf[1], 0u, 0u);
             Petit_Tx_State = PETIT_RXTX_IDLE;                        
         }
     }
@@ -868,7 +877,10 @@ void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
                 }
                 else{                
                     MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
-                    MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;}
+                    MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+                    /* P2-C fault-B instrumentation: valid FC16 echo received. */
+                    MBUS_EVENT_PUSH(MBUS_EV_ACK, (uint8_t)Petit_Rx_Data.Address,
+                                    Petit_Tx_Data.DataBuf[1], 0u, 0u);}
             }
         }
     }

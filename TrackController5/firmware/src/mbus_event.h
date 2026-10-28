@@ -20,7 +20,10 @@ typedef enum {
     MBUS_EV_ENQUEUE   = 1,   /* command-108 accepted into mailbox            */
     MBUS_EV_GATE_DROP = 2,   /* write rejected by the compatibility gate      */
     MBUS_EV_FC16_SENT = 3,   /* FC16 write dispatched (rv = SEND result)      */
-    MBUS_EV_PURGE     = 4    /* mailbox purged by a global-stop latch         */
+    MBUS_EV_PURGE     = 4,   /* mailbox purged by a global-stop latch         */
+    MBUS_EV_TX_DONE   = 5,   /* FC16 bytes physically sent (TX -> WAIT_ANSWER) */
+    MBUS_EV_ACK       = 6,   /* valid FC16 echo received (MbCommError=OK)     */
+    MBUS_EV_TIMEOUT   = 7    /* no echo (MbCommError=TIMEOUT)                 */
 } MBUS_EVENT_TYPE;
 
 void MBUS_EVENT_PUSH(uint8_t type, uint8_t slave, uint8_t reg, uint16_t val, uint8_t rv);
