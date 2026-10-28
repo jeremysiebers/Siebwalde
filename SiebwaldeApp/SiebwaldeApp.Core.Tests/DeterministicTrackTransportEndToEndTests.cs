@@ -80,7 +80,7 @@ namespace SiebwaldeApp.Core.Tests
             }
         }
 
-        private static readonly byte[] ExpectedInitCommands = { 250, 113, 107, 100, 106, 101, 104, 105 };
+        private static readonly byte[] ExpectedInitCommands = { 250, 113, 111, 107, 100, 106, 101, 104, 105 };
 
         private static async Task RunWithRuntimeAsync(
             SimulatorFactory factory,
@@ -206,6 +206,45 @@ namespace SiebwaldeApp.Core.Tests
                     () => simulator.GetRegisters(1)[0] == 0x01F4
                           && runtime.TrackAmplifiers[1].HoldingReg[0] == 0x01F4,
                     TimeSpan.FromSeconds(5));
+
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
+            }, Groups(1, 2, 3));
+        }
+
+        [Fact]
+        public Task RealMode_LatchedGlobalStop_GatesInitUntilOperatorRecovery()
+        {
+            // The simulated controller starts with its global-stop latch already set (host-authority
+            // loss survived a previous session): the 111 query reports latched (1), so init must gate.
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                initialGlobalStopState: GlobalStopStatusMessage.LatchedHostLoss));
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                var startTask = runtime.StartAsync(TrackControlMode.Real, ct);
+
+                // The transport is composed synchronously within StartAsync; wait for it, then wait
+                // until the precondition 111 query has been sent (after 250 CONNECT and 113 version).
+                await WaitUntilAsync(() => factory.Created.Count == 1, TimeSpan.FromSeconds(5));
+                var simulator = factory.Created[0];
+
+                await WaitUntilAsync(
+                    () => simulator.SentCommands.Contains(TrackCommand.GLOBAL_STOP_STATE),
+                    TimeSpan.FromSeconds(10));
+
+                // Latched: 107 must NOT have been emitted yet (gated), and the runtime is still Starting.
+                Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+                Assert.Equal(TrackRuntimeState.Starting, runtime.State);
+
+                // Explicit operator recovery: authorize + physical-clear evidence.
+                runtime.AuthorizeGlobalStopRecovery(() => true);
+
+                await startTask;
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Contains((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.Contains((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
 
                 await runtime.StopAsync(ct);
                 Assert.Equal(TrackRuntimeState.Stopped, runtime.State);

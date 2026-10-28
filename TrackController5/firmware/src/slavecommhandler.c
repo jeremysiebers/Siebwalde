@@ -13,6 +13,55 @@
 #include <stdlib.h>
 #include "slavecommhandler.h"
 #include "slavestartup.h"
+#include "mbus_event.h"
+#include "log.h"
+
+/* ---- P2-C fault-B instrumentation: bounded command-108 event ring ------- */
+/* Lightweight capture in the communication path (struct copy, no printf).
+ * MBUS_EVENT_REPORT is deferred to MBUS_Tasks' shallow top and formats via
+ * LOG_Printf there, avoiding the deep-chain vsnprintf stack overflow of the
+ * prior instrumentation. */
+#define MBUS_EV_RING 64
+
+typedef struct {
+    uint8_t  type;
+    uint8_t  slave;
+    uint8_t  reg;
+    uint8_t  rv;
+    uint16_t val;
+    uint32_t seq;
+} MBUS_EVENT;
+
+static MBUS_EVENT mbusEvRing[MBUS_EV_RING];
+static volatile uint8_t mbusEvHead, mbusEvTail;
+static volatile uint32_t mbusEvSeq;
+
+void MBUS_EVENT_PUSH(uint8_t type, uint8_t slave, uint8_t reg, uint16_t val, uint8_t rv)
+{
+    uint8_t next = (uint8_t)((mbusEvHead + 1u) % MBUS_EV_RING);
+    if (next == mbusEvTail) {
+        return;             /* ring full: drop the newest event */
+    }
+    mbusEvRing[mbusEvHead].type  = type;
+    mbusEvRing[mbusEvHead].slave = slave;
+    mbusEvRing[mbusEvHead].reg   = reg;
+    mbusEvRing[mbusEvHead].rv    = rv;
+    mbusEvRing[mbusEvHead].val   = val;
+    mbusEvRing[mbusEvHead].seq   = mbusEvSeq++;
+    mbusEvHead = next;
+}
+
+void MBUS_EVENT_REPORT(void)
+{
+    while (mbusEvTail != mbusEvHead) {
+        const MBUS_EVENT *e = &mbusEvRing[mbusEvTail];
+        LOG_Printf("Mbus event: type=%u slave=%u reg=%u val=%u rv=%u seq=%u",
+                   (unsigned)e->type, (unsigned)e->slave, (unsigned)e->reg,
+                   (unsigned)e->val, (unsigned)e->rv, (unsigned)e->seq);
+        mbusEvTail = (uint8_t)((mbusEvTail + 1u) % MBUS_EV_RING);
+    }
+}
+
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExSTARTUP(SLAVE_INFO *location)
@@ -78,6 +127,11 @@ void SLAVExCOMMUNICATIONxHANDLER(){
     if (Data.Direction == WRITE && Data.SlaveAddress > 0 &&
         Data.SlaveAddress <= NUMBER_OF_AMPLIFIERS &&
         !ISxAMPLIFIERxCOMPATIBLE(Data.SlaveAddress)) {
+        /* P2-C fault-B instrumentation: a command-108 write that was enqueued
+         * (DONE ack) can still be dropped here at dispatch if the amplifier is
+         * no longer compatible. */
+        MBUS_EVENT_PUSH(MBUS_EV_GATE_DROP, Data.SlaveAddress, Data.StartRegister,
+                        Data.RegData0, 0u);
         MASTER_SLAVE_DATA[Data.SlaveAddress].MbCommError = SLAVE_DATA_NOK;
         return;
     }
@@ -102,7 +156,16 @@ void SLAVExCOMMUNICATIONxHANDLER(){
             WriteData[8] = Data.RegData1;       // Register Value Lo
             length += 2;
         }          
-        SENDxPETITxMODBUS(Data.SlaveAddress, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, WriteData, length);
+        {
+            unsigned char rv = SENDxPETITxMODBUS(Data.SlaveAddress, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, WriteData, length);
+            /* P2-C fault-B instrumentation: capture the FC16 write dispatch
+             * result (rv = 0 means busy/rejected, non-zero means accepted).
+             * Skip the periodic lease broadcast (address 0). */
+            if (Data.SlaveAddress > 0) {
+                MBUS_EVENT_PUSH(MBUS_EV_FC16_SENT, Data.SlaveAddress, Data.StartRegister,
+                                Data.RegData0, rv);
+            }
+        }
     }
     else if(Data.Direction == READ && Data.NoOfRegisters > 0){
         if(Data.NoOfRegisters > 0){

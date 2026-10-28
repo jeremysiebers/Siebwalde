@@ -150,7 +150,15 @@ uint8_t AmpAdapter_OnWrite(uint16_t addr, uint16_t v, bool broadcast)
     case HR_CFG_TAG: m->pending.tag = v; break;
     default: break;
     }
-    AmpAdapter_EncodeWritable();
+    /* Fault B: keep the derived enable-active status and the HR8 state mirror in
+     * lockstep with the write. `command.enable` flips synchronously here, but
+     * `status.enable_active` is otherwise only recomputed by AmpCore_Update() at
+     * the ~1.7 ms regulator tick; a post-write FC03 read could therefore return a
+     * stale enable-active=1 and fail the C# DISABLE verify. Rebuild the mirror now
+     * so the write is visible immediately (state-enum low bits self-correct at the
+     * next tick). */
+    m->status.enable_active = m->command.enable;
+    AmpAdapter_Refresh();
     return AmpAdapter_Result(addr, result);
 }
 

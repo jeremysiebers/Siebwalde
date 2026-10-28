@@ -102,7 +102,7 @@ namespace SiebwaldeApp.Core
                     "State.QueryControllerVersion => version reply received.",
                     _loggerInstance);
 
-                return InitStepResult.Next("ResetAllSlaves");
+                return InitStepResult.Next("GlobalStopPrecondition");
             }
 
             return InitStepResult.Continue();
