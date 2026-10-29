@@ -529,6 +529,17 @@ namespace SiebwaldeApp.Core
             await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
+                // Defense-in-depth (R2): Stage 6 may only energize once Stage 5 (GlobalReady) has
+                // Passed — the whole required amplifier set is group-READY. This adds a precondition
+                // on top of the operator-authorization gate, so a manual operator can never energize
+                // after a Stage 5 failure.
+                if (_status[TrackInitStage.GlobalReady].State != TrackInitStageState.Passed)
+                {
+                    SetStageState(TrackInitStage.AmpPowerEnable, TrackInitStageState.Blocked,
+                        "Track power requires Stage 5 (GlobalReady) to be Passed first.");
+                    return false;
+                }
+
                 if (!_trackPowerAuthorized)
                 {
                     SetStageState(TrackInitStage.AmpPowerEnable, TrackInitStageState.Blocked,

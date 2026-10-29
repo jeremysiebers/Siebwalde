@@ -736,7 +736,11 @@ namespace SiebwaldeApp
             TrackPowerStatus = _runtime.TrackPowerOn
                 ? "Trackspanning: aan"
                 : "Trackspanning: uit";
-            CanEnableTrackPower = !_runtime.TrackPowerOn;
+            // Defense-in-depth (R2): the enable button is only offered once Stage 5 (GlobalReady)
+            // has Passed; the state machine enforces the same precondition on the write path.
+            var globalReadyPassed = _runtime.InitStages.Any(
+                s => s.Stage == TrackInitStage.GlobalReady && s.State == TrackInitStageState.Passed);
+            CanEnableTrackPower = !_runtime.TrackPowerOn && globalReadyPassed;
             CanDisableTrackPower = _runtime.TrackPowerOn;
             OnPropertyChanged(nameof(TrackPowerStatus));
             OnPropertyChanged(nameof(CanEnableTrackPower));

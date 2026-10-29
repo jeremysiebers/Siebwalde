@@ -228,6 +228,8 @@ namespace SiebwaldeApp.Core.Tests
                 HappyChain(),
                 requiredAmps: () => new byte[] { 1, 3, 4, 6 });
 
+            // Stage 5 (GlobalReady) must be Passed before track power is authorized/energized.
+            machine.MarkStagePassed(TrackInitStage.GlobalReady);
             machine.AuthorizeTrackPowerEnable();
             var enabled = await machine.EnableTrackPowerAsync(CancellationToken.None);
 
@@ -307,6 +309,46 @@ namespace SiebwaldeApp.Core.Tests
             Assert.Equal(TrackInitStageState.Passed, stage5.State);
             Assert.Equal(4, stage5.Amps.Count);
             Assert.All(stage5.Amps, a => Assert.True(a.Ok));
+        }
+
+        [Fact]
+        public async Task TrackPower_RequiresGlobalReadyPassed_EvenWhenAuthorized()
+        {
+            var comm = new FakeTrackCommClient();
+            var variables = new TrackApplicationVariables();
+            foreach (var amp in new byte[] { 1, 3, 4, 6 })
+            {
+                variables.trackAmpItems[amp].HoldingReg[TrackAmplifierRegisters.State] =
+                    (ushort)(TrackAmplifierRegisters.EnableActiveBit | TrackAmplifierRegisters.ConfigOkBit);
+                variables.trackAmpItems[amp].HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol] =
+                    TrackAmplifierRegisters.TrackPowerProtocolVersion;
+            }
+
+            var machine = new TrackInitStateMachine(
+                comm,
+                variables,
+                HappyChain(),
+                requiredAmps: () => new byte[] { 1, 3, 4, 6 });
+
+            await machine.RunAutomaticAsync(CancellationToken.None);
+
+            // Stage 5 failed (host-finalized): even with operator authorization, track power is
+            // refused (defense-in-depth R2 precondition on GlobalReady Passed).
+            machine.MarkStageFailed(TrackInitStage.GlobalReady, "GROUP_READY rejected by amplifier 3.");
+            machine.AuthorizeTrackPowerEnable();
+
+            var enabled = await machine.EnableTrackPowerAsync(CancellationToken.None);
+            Assert.False(enabled);
+            Assert.False(machine.TrackPowerOn);
+            Assert.Equal(TrackInitStageState.Blocked, StageOf(machine, TrackInitStage.AmpPowerEnable).State);
+            Assert.Empty(comm.Sent); // no HR_TRACK_POWER bit-0 write issued
+
+            // After Stage 5 Passed, track power proceeds.
+            machine.MarkStagePassed(TrackInitStage.GlobalReady);
+            enabled = await machine.EnableTrackPowerAsync(CancellationToken.None);
+            Assert.True(enabled);
+            Assert.True(machine.TrackPowerOn);
+            Assert.NotEmpty(comm.Sent);
         }
     }
 }
