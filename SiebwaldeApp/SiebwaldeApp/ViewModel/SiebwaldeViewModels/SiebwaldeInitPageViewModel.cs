@@ -797,8 +797,10 @@ namespace SiebwaldeApp
 
         private async Task DisableTrackPowerAsync()
         {
-            await _runtime.DisableTrackPowerAsync();
-            Log("Trackspanning uitgeschakeld (bruggen gede-energiseerd).");
+            var allDeenergized = await _runtime.DisableTrackPowerAsync();
+            Log(allDeenergized
+                ? "Trackspanning uitgeschakeld (alle bruggen gede-energiseerd en bevestigd)."
+                : "Trackspanning uitgeschakeld, maar de-energisatie kon niet voor alle amplifiers worden bevestigd.");
             UpdateTrackPowerSurface();
         }
     }

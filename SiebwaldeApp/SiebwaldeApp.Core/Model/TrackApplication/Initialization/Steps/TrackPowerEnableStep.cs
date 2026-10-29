@@ -145,6 +145,22 @@ namespace SiebwaldeApp.Core
             return !inhibited && enableActive && configOk;
         }
 
+        /// <summary>
+        /// True when HR_STATE reports inhibited==1 (the H-bridge is de-energized; inhibit re-latched).
+        /// This is the inverted form of <see cref="IsTrackPowerOn"/>: de-energization is confirmed by
+        /// the inhibit bit being SET, independent of enable/config state. Used by
+        /// <see cref="TrackInitStateMachine.DisableTrackPowerAsync"/> to verify a group clear.
+        /// </summary>
+        public static bool IsInhibited(TrackAmplifierItem item)
+        {
+            if (item is null || item.HoldingReg is null || item.HoldingReg.Length <= TrackAmplifierRegisters.State)
+            {
+                return false;
+            }
+
+            return (item.HoldingReg[TrackAmplifierRegisters.State] & TrackAmplifierRegisters.InhibitedBit) != 0;
+        }
+
         /// <summary>True when the given amplifier advertises track-power support (PROTOCOL_VERSION &gt;= 0x02).</summary>
         private bool SupportsTrackPowerOnAmp(byte amp)
         {

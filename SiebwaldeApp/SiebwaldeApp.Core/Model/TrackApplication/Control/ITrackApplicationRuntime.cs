@@ -158,8 +158,12 @@ namespace SiebwaldeApp.Core
         /// <summary>Runs the gated Stage 6 track-power action (write HR_TRACK_POWER + verify HR_STATE per amplifier).</summary>
         Task<bool> EnableTrackPowerAsync(CancellationToken ct = default);
 
-        /// <summary>Clears HR_TRACK_POWER on every required amplifier, de-energizing the bridges.</summary>
-        Task DisableTrackPowerAsync(CancellationToken ct = default);
+        /// <summary>
+        /// Clears HR_TRACK_POWER on every required amplifier, de-energizing the bridges, and verifies
+        /// de-energization (inhibited==1) per amplifier. Returns true when every required amplifier
+        /// is confirmed de-energized; false (fail-closed) otherwise.
+        /// </summary>
+        Task<bool> DisableTrackPowerAsync(CancellationToken ct = default);
 
         /// <summary>Manual initialization: run exactly one stage (step).</summary>
         Task<TrackInitStageState> StepInitAsync(CancellationToken ct = default);

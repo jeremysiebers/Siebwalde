@@ -263,8 +263,8 @@ namespace SiebwaldeApp.Integration
             => _trackInitStateMachine?.EnableTrackPowerAsync(ct) ?? Task.FromResult(false);
 
         /// <inheritdoc />
-        public Task DisableTrackPowerAsync(CancellationToken ct = default)
-            => _trackInitStateMachine?.DisableTrackPowerAsync(ct) ?? Task.CompletedTask;
+        public Task<bool> DisableTrackPowerAsync(CancellationToken ct = default)
+            => _trackInitStateMachine?.DisableTrackPowerAsync(ct) ?? Task.FromResult(true);
 
         /// <inheritdoc />
         public Task<TrackInitStageState> StepInitAsync(CancellationToken ct = default)

@@ -170,5 +170,25 @@ namespace SiebwaldeApp.Core.Tests
             item.HoldingReg[TrackAmplifierRegisters.State] |= TrackAmplifierRegisters.InhibitedBit;
             Assert.False(TrackPowerEnableStep.IsTrackPowerOn(item));
         }
+
+        [Fact]
+        public void IsInhibited_TrueOnlyWhenInhibitBitSet()
+        {
+            var item = new TrackAmplifierItem
+            {
+                HoldingReg = new ushort[TrackAmplifierRegisters.Count]
+            };
+
+            item.HoldingReg[TrackAmplifierRegisters.State] = 0;
+            Assert.False(TrackPowerEnableStep.IsInhibited(item));
+
+            // Energized state (inhibited==0) is NOT de-energized.
+            item.HoldingReg[TrackAmplifierRegisters.State] =
+                (ushort)(TrackAmplifierRegisters.EnableActiveBit | TrackAmplifierRegisters.ConfigOkBit);
+            Assert.False(TrackPowerEnableStep.IsInhibited(item));
+
+            item.HoldingReg[TrackAmplifierRegisters.State] |= TrackAmplifierRegisters.InhibitedBit;
+            Assert.True(TrackPowerEnableStep.IsInhibited(item));
+        }
     }
 }

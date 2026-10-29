@@ -90,6 +90,17 @@ namespace SiebwaldeApp.Core.Tests
         private static TrackInitStageStatus StageOf(TrackInitStateMachine machine, TrackInitStage stage)
             => machine.Stages.First(s => s.Stage == stage);
 
+        /// <summary>Returns the HR_TRACK_POWER (register 23) bit-0=0 clear writes issued so far.</summary>
+        private static SendMessage[] ClearTrackPowerWrites(FakeTrackCommClient comm)
+            => comm.Sent
+                .Where(m => m.Command == TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH
+                            && m.Data.Length >= 4
+                            && m.Data[3] == TrackAmplifierRegisters.TrackPower
+                            && m.Data[1] == (byte)0xAA
+                            && m.Data[4] == 0
+                            && m.Data[5] == 0)
+                .ToArray();
+
         [Fact]
         public async Task Automatic_RunsStepStages_AndCompletes()
         {
@@ -349,6 +360,135 @@ namespace SiebwaldeApp.Core.Tests
             Assert.True(enabled);
             Assert.True(machine.TrackPowerOn);
             Assert.NotEmpty(comm.Sent);
+        }
+
+        [Fact]
+        public async Task EnableTrackPower_PartialFailure_DeenergizesWholeGroup()
+        {
+            var comm = new FakeTrackCommClient();
+            var variables = new TrackApplicationVariables();
+            foreach (var amp in new byte[] { 1, 3, 4, 6 })
+            {
+                variables.trackAmpItems[amp].HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol] =
+                    TrackAmplifierRegisters.TrackPowerProtocolVersion;
+                // Amps 1/3/4 reach TRACK_POWER_ON; amp 6 stays inhibited and therefore fails.
+                variables.trackAmpItems[amp].HoldingReg[TrackAmplifierRegisters.State] =
+                    (ushort)(TrackAmplifierRegisters.EnableActiveBit | TrackAmplifierRegisters.ConfigOkBit);
+            }
+
+            variables.trackAmpItems[6].HoldingReg[TrackAmplifierRegisters.State] |=
+                TrackAmplifierRegisters.InhibitedBit;
+
+            var machine = new TrackInitStateMachine(
+                comm,
+                variables,
+                HappyChain(),
+                requiredAmps: () => new byte[] { 1, 3, 4, 6 },
+                trackPowerVerifyWindow: TimeSpan.FromMilliseconds(50));
+            machine.MarkStagePassed(TrackInitStage.GlobalReady);
+            machine.AuthorizeTrackPowerEnable();
+
+            var enabled = await machine.EnableTrackPowerAsync(CancellationToken.None);
+
+            Assert.False(enabled);
+            Assert.False(machine.TrackPowerOn);
+
+            // Gap A: all 4 amplifiers received a bit-0=0 clear write (none left energized).
+            Assert.Equal(4, ClearTrackPowerWrites(comm).Length);
+        }
+
+        [Fact]
+        public async Task Backtrack_FromStage6_WhileTrackPowerOn_DeenergizesGroup()
+        {
+            var comm = new FakeTrackCommClient();
+            var variables = new TrackApplicationVariables();
+            foreach (var amp in new byte[] { 1, 3, 4, 6 })
+            {
+                variables.trackAmpItems[amp].HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol] =
+                    TrackAmplifierRegisters.TrackPowerProtocolVersion;
+                variables.trackAmpItems[amp].HoldingReg[TrackAmplifierRegisters.State] =
+                    (ushort)(TrackAmplifierRegisters.EnableActiveBit | TrackAmplifierRegisters.ConfigOkBit);
+            }
+
+            var machine = new TrackInitStateMachine(
+                comm,
+                variables,
+                HappyChain(),
+                requiredAmps: () => new byte[] { 1, 3, 4, 6 });
+            machine.MarkStagePassed(TrackInitStage.GlobalReady);
+            machine.AuthorizeTrackPowerEnable();
+
+            var enabled = await machine.EnableTrackPowerAsync(CancellationToken.None);
+            Assert.True(enabled);
+            Assert.True(machine.TrackPowerOn);
+            Assert.Equal(TrackInitStage.AmpPowerEnable, machine.CurrentStage);
+
+            machine.Backtrack();
+
+            Assert.Equal(TrackInitStage.GlobalReady, machine.CurrentStage);
+            Assert.False(machine.TrackPowerOn);
+            Assert.False(machine.TrackPowerAuthorized);
+
+            // Gap B: all 4 amplifiers received a clear write (de-energized).
+            Assert.Equal(4, ClearTrackPowerWrites(comm).Length);
+        }
+
+        [Fact]
+        public async Task DisableTrackPower_VerifiesPerAmpDeenergized_AllConfirmed_ReturnsTrue()
+        {
+            var comm = new FakeTrackCommClient();
+            var variables = new TrackApplicationVariables();
+            foreach (var amp in new byte[] { 1, 3, 4, 6 })
+            {
+                variables.trackAmpItems[amp].HoldingReg[TrackAmplifierRegisters.State] =
+                    TrackAmplifierRegisters.InhibitedBit;
+            }
+
+            var machine = new TrackInitStateMachine(
+                comm,
+                variables,
+                HappyChain(),
+                requiredAmps: () => new byte[] { 1, 3, 4, 6 });
+
+            var allDeenergized = await machine.DisableTrackPowerAsync(CancellationToken.None);
+
+            Assert.True(allDeenergized);
+            Assert.False(machine.TrackPowerOn);
+            Assert.Equal(4, ClearTrackPowerWrites(comm).Length);
+
+            // Gap C: per-amp de-energized status is recorded and exposed.
+            Assert.Equal(4, machine.TrackPowerDeenergizeStatus.Count);
+            Assert.All(machine.TrackPowerDeenergizeStatus, s => Assert.True(s.Ok));
+        }
+
+        [Fact]
+        public async Task DisableTrackPower_ReportsFailure_WhenAmpCannotBeConfirmedDeenergized()
+        {
+            var comm = new FakeTrackCommClient();
+            var variables = new TrackApplicationVariables();
+            foreach (var amp in new byte[] { 1, 3, 4, 6 })
+            {
+                variables.trackAmpItems[amp].HoldingReg[TrackAmplifierRegisters.State] =
+                    TrackAmplifierRegisters.InhibitedBit;
+            }
+
+            // Amp 6 does not report inhibited (still energized): de-energization cannot be confirmed.
+            variables.trackAmpItems[6].HoldingReg[TrackAmplifierRegisters.State] = 0;
+
+            var machine = new TrackInitStateMachine(
+                comm,
+                variables,
+                HappyChain(),
+                requiredAmps: () => new byte[] { 1, 3, 4, 6 });
+
+            var allDeenergized = await machine.DisableTrackPowerAsync(CancellationToken.None);
+
+            Assert.False(allDeenergized);
+            Assert.False(machine.TrackPowerOn);
+            Assert.Equal(4, ClearTrackPowerWrites(comm).Length);
+
+            Assert.Contains(machine.TrackPowerDeenergizeStatus, s => s.SlaveNumber == 1 && s.Ok);
+            Assert.Contains(machine.TrackPowerDeenergizeStatus, s => s.SlaveNumber == 6 && !s.Ok);
         }
     }
 }
