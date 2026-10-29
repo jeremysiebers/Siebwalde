@@ -2,6 +2,7 @@ using SiebwaldeApp.Core;
 using SiebwaldeApp.Core.TrackApplication.Topology;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -34,6 +35,12 @@ namespace SiebwaldeApp
         private readonly RelayCommand _initEcosSimulatorCommand;
         private readonly RelayCommand _initFullSimulationCommand;
         private readonly RelayCommand _recoverGlobalStopCommand;
+
+        private readonly RelayCommand _stepInitCommand;
+        private readonly RelayCommand _retryInitCommand;
+        private readonly RelayCommand _backtrackInitCommand;
+        private readonly RelayCommand _enableTrackPowerCommand;
+        private readonly RelayCommand _disableTrackPowerCommand;
 
         #endregion
 
@@ -112,6 +119,21 @@ namespace SiebwaldeApp
         /// <summary>Distinct failure line shown when the runtime enters the Failed state.</summary>
         public string FailureText { get; set; } = "";
 
+        /// <summary>Operator-visible initialization stage tree (7 stages with state + per-amp + recovery).</summary>
+        public ObservableCollection<TrackInitStageRow> InitStages { get; } = new();
+
+        /// <summary>Dutch operator log of state-machine events (timestamp + session + stage + amp).</summary>
+        public ObservableCollection<string> OperatorLog { get; } = new();
+
+        /// <summary>Human-readable track-power state ("Trackspanning: uit/aan").</summary>
+        public string TrackPowerStatus { get; set; } = "Trackspanning: uit";
+
+        /// <summary>True when the operator may enable track power (authorized + global ready).</summary>
+        public bool CanEnableTrackPower { get; set; }
+
+        /// <summary>True when track power is ON and may be disabled.</summary>
+        public bool CanDisableTrackPower { get; set; }
+
         #endregion
 
         #region Public commands
@@ -156,6 +178,21 @@ namespace SiebwaldeApp
         /// <summary>Restart the track-control runtime.</summary>
         public ICommand RestartRuntime => _restartRuntimeCommand;
 
+        /// <summary>Manual initialization: run exactly one stage (step).</summary>
+        public ICommand StepInit => _stepInitCommand;
+
+        /// <summary>Manual initialization: re-run the current stage (retry).</summary>
+        public ICommand RetryInit => _retryInitCommand;
+
+        /// <summary>Manual initialization: move back one stage (backtrack).</summary>
+        public ICommand BacktrackInit => _backtrackInitCommand;
+
+        /// <summary>Authorize + run the gated Stage 6 track-power transition.</summary>
+        public ICommand EnableTrackPower => _enableTrackPowerCommand;
+
+        /// <summary>Clear HR_TRACK_POWER (de-energize the bridges).</summary>
+        public ICommand DisableTrackPower => _disableTrackPowerCommand;
+
         #endregion
 
         #region Constructor
@@ -172,6 +209,7 @@ namespace SiebwaldeApp
             });
             _runtime.StateChanged += HandleRuntimeStateChanged;
             _runtime.Faulted += HandleRuntimeFaulted;
+            _runtime.InitStageStatusChanged += HandleInitStageStatusChanged;
 
             UpdatePhysicalBindingStatus();
             UpdateKoploperMappingStatus();
@@ -223,6 +261,12 @@ namespace SiebwaldeApp
             _initFullSimulationCommand = new RelayCommand(
                 async () => await StartFullSimulationAsync(),
                 () => TrackRuntimeControlPolicy.CanStart(_runtime.State));
+
+            _stepInitCommand = new RelayCommand(async () => await StepInitAsync());
+            _retryInitCommand = new RelayCommand(async () => await RetryInitAsync());
+            _backtrackInitCommand = new RelayCommand(BacktrackInitNow);
+            _enableTrackPowerCommand = new RelayCommand(async () => await EnableTrackPowerAsync(), () => CanEnableTrackPower);
+            _disableTrackPowerCommand = new RelayCommand(async () => await DisableTrackPowerAsync(), () => CanDisableTrackPower);
 
             Log("Init page ready. Press 'Detect hosts' to scan for FiddleYard, TrackController and Koploper.");
 
@@ -591,6 +635,167 @@ namespace SiebwaldeApp
         private void Log(string message)
         {
             Log2.Add($"{DateTime.Now:HH:mm:ss} {message}");
+        }
+
+        // ---------------------------------------------------------------------------------
+        // Initialization stage tree + Dutch operator log
+        // ---------------------------------------------------------------------------------
+
+        /// <summary>One row of the operator-visible stage tree.</summary>
+        public sealed class TrackInitStageRow
+        {
+            public string Name { get; set; } = "";
+            public string State { get; set; } = "";
+            public string Detail { get; set; } = "";
+        }
+
+        /// <summary>Marshals a stage-status change to the UI thread and rebuilds the stage tree + Dutch log.</summary>
+        private void HandleInitStageStatusChanged(object? sender, TrackInitStageStatusChangedEventArgs e)
+        {
+            _detectionTimer.Dispatcher.BeginInvoke(() =>
+            {
+                RefreshInitStages();
+                LogOperatorEvent(e.Status);
+            });
+        }
+
+        /// <summary>Rebuilds the seven-stage tree from the runtime's current stage statuses.</summary>
+        private void RefreshInitStages()
+        {
+            InitStages.Clear();
+            foreach (var status in _runtime.InitStages)
+            {
+                var detail = BuildStageDetail(status);
+                InitStages.Add(new TrackInitStageRow
+                {
+                    Name = $"{StageNameDutch(status.Stage)}",
+                    State = StageStateDutch(status.State),
+                    Detail = detail
+                });
+            }
+
+            UpdateTrackPowerSurface();
+        }
+
+        private static string BuildStageDetail(TrackInitStageStatus status)
+        {
+            if (status.FailureReason is { Length: > 0 })
+            {
+                return $"Mislukt: {status.FailureReason}" +
+                       (status.RecoveryAction is { Length: > 0 } ? $" — Herstel: {status.RecoveryAction}" : "");
+            }
+
+            if (status.Amps.Count > 0)
+            {
+                var amps = string.Join(", ", status.Amps.Select(a => $"amp {a.SlaveNumber}: {(a.Ok ? "ok" : "niet ok")} ({a.Detail})"));
+                return amps;
+            }
+
+            return "";
+        }
+
+        private void LogOperatorEvent(TrackInitStageStatus status)
+        {
+            var line = $"{DateTime.Now:HH:mm:ss} — Stage {status.Stage}: {StageNameDutch(status.Stage)} — {StageStateDutch(status.State)}";
+            if (status.FailureReason is { Length: > 0 })
+            {
+                line += $" — {status.FailureReason}";
+            }
+
+            OperatorLog.Insert(0, line);
+            while (OperatorLog.Count > 500)
+            {
+                OperatorLog.RemoveAt(OperatorLog.Count - 1);
+            }
+        }
+
+        private static string StageNameDutch(TrackInitStage stage) => stage switch
+        {
+            TrackInitStage.ControllerConnection => "Controllerverbinding",
+            TrackInitStage.FirmwareAddress => "Firmware-/adresverificatie",
+            TrackInitStage.AmplifierStandby => "Amplifier STANDBY",
+            TrackInitStage.ConfigureValidate => "Configureren en valideren",
+            TrackInitStage.GlobalReady => "Globaal gereed",
+            TrackInitStage.AmpPowerEnable => "Trackspanning inschakelen",
+            TrackInitStage.NormalOperation => "Normaal bedrijf",
+            _ => stage.ToString()
+        };
+
+        private static string StageStateDutch(TrackInitStageState state) => state switch
+        {
+            TrackInitStageState.Pending => "In afwachting",
+            TrackInitStageState.Running => "Bezig",
+            TrackInitStageState.Passed => "Geslaagd",
+            TrackInitStageState.Failed => "Mislukt",
+            TrackInitStageState.Blocked => "Geblokkeerd",
+            _ => state.ToString()
+        };
+
+        private void UpdateTrackPowerSurface()
+        {
+            TrackPowerStatus = _runtime.TrackPowerOn
+                ? "Trackspanning: aan"
+                : "Trackspanning: uit";
+            CanEnableTrackPower = !_runtime.TrackPowerOn;
+            CanDisableTrackPower = _runtime.TrackPowerOn;
+            OnPropertyChanged(nameof(TrackPowerStatus));
+            OnPropertyChanged(nameof(CanEnableTrackPower));
+            OnPropertyChanged(nameof(CanDisableTrackPower));
+            _enableTrackPowerCommand.RaiseCanExecuteChanged();
+            _disableTrackPowerCommand.RaiseCanExecuteChanged();
+        }
+
+        private async Task StepInitAsync()
+        {
+            var outcome = await _runtime.StepInitAsync();
+            Log($"Init stap uitgevoerd: {StageStateDutch(outcome)}.");
+        }
+
+        private async Task RetryInitAsync()
+        {
+            var outcome = await _runtime.RetryInitAsync();
+            Log($"Init opnieuw geprobeerd: {StageStateDutch(outcome)}.");
+        }
+
+        private void BacktrackInitNow()
+        {
+            _runtime.BacktrackInit();
+            Log("Init een stap teruggezet (backtrack).");
+        }
+
+        /// <summary>
+        /// Explicit operator-gated track-power enable: prompts for confirmation before energizing
+        /// the H-bridges at neutral (never silently energized), then authorizes and runs Stage 6.
+        /// </summary>
+        private async Task EnableTrackPowerAsync()
+        {
+            var confirmed = System.Windows.MessageBox.Show(
+                "Trackspanning inschakelen bekrachtigt de H-bruggen op neutraal PWM (399) " +
+                "voor bezetmeldingsdetectie.\n\nEr wordt GEEN rijspanning (niet-neutraal PWM) afgegeven. " +
+                "Bevestig dat de baan veilig is voordat u doorgaat.",
+                "Trackspanning inschakelen bevestigen",
+                System.Windows.MessageBoxButton.OKCancel,
+                System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.OK;
+
+            if (!confirmed)
+            {
+                Log("Trackspanning inschakelen geannuleerd door operator.");
+                return;
+            }
+
+            _runtime.AuthorizeTrackPowerEnable();
+            var ok = await _runtime.EnableTrackPowerAsync();
+            Log(ok
+                ? "Trackspanning ingeschakeld (TRACK_POWER_ON)."
+                : "Trackspanning NIET ingeschakeld: niet alle amplifiers zijn veilig bekrachtigd.");
+            UpdateTrackPowerSurface();
+        }
+
+        private async Task DisableTrackPowerAsync()
+        {
+            await _runtime.DisableTrackPowerAsync();
+            Log("Trackspanning uitgeschakeld (bruggen gede-energiseerd).");
+            UpdateTrackPowerSurface();
         }
     }
 }

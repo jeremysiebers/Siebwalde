@@ -34,6 +34,11 @@ void AmpCore_Inhibit(void)
     }
     amp_model.command.pwm = AMP_NEUTRAL; /* never replay retained movement */
     amp_model.fast_stopping = true;
+    /* F5: any safety inhibit (lease expiry / comm loss / hard fault / EMO /
+     * STOP_REQUEST / DISABLE) also drops the track-power request, so a transient
+     * fault that later clears can never re-energize the H-bridge at neutral
+     * without a fresh operator HR_TRACK_POWER=1 write. */
+    amp_model.status.track_power_requested = false;
 }
 
 uint16_t AmpCore_StepRamp(uint16_t current, uint16_t target, uint8_t step)
@@ -104,6 +109,18 @@ void AmpCore_Update(void)
     /* Retained EMO semantics: latch brake immediately, do not load PWM. */
     if (!m->command.emo) AmpHw_SetDuty(m->ramp_current);
     m->status.dir_active = m->status.applied_pwm > AMP_NEUTRAL;
+    /* Track-power energize (HR_TRACK_POWER). A dedicated, safety-gated clear of the
+     * inhibit latch at NEUTRAL PWM only, for occupancy detection: it never supplies a
+     * non-neutral command and never bypasses a safety override. It runs AFTER the
+     * fault/inhibit/state logic above, so hard / EMO / STOP_REQUEST / lease-expiry /
+     * comm-loss / DISABLE have already inhibited; the guard below must therefore also
+     * exclude EMO and STOP_REQUEST explicitly (they do not set a fault cause). */
+    if (m->status.track_power_requested && m->command.enable &&
+        m->status.config_ok && !m->fault.causes && m->status.lease_fresh &&
+        !m->command.emo && !m->command.stop_request &&
+        m->ramp_current == AMP_NEUTRAL && m->status.applied_pwm == AMP_NEUTRAL) {
+        m->status.inhibited = false;
+    }
     /* De-energize the bridge once neutral is reached after any inhibit
      * (comm-loss / lease-expiry / STOP_REQUEST / DISABLE): keep the PWM stage
      * switching only while actively ramping down, then drop PWM3EN.

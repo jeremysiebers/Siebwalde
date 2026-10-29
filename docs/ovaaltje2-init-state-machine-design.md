@@ -31,6 +31,7 @@ The normal startup (ENABLE 105 + CONFIG/APPLY + PWM 399) leaves every amplifier 
 Add a dedicated, safety-gated "track power" request, distinct from ENABLE and movement:
 
 - New register `HR_TRACK_POWER` (23), bit 0 = `TRACK_POWER_ENABLE` (0x0001). Bits 1..15 reserved (must be 0).
+- **Wire-contract amendment (requires PO GO for deployment):** register 23 is additive to the frozen R8 map (`NUMBER_OF_HOLDING_PETITREGISTERS` 23→24) and is addressed only via the 108 EXEC_MBUS_SLAVE_DATA_EXCH point path (it is NOT in the 23-register SLAVEINFO poll, so the SLAVEINFO frame is unchanged). `AMP_PROTOCOL_VERSION` is bumped 0x01→0x02 so a track-power-capable firmware advertises 0x02; C# `SupportsTrackPower(hr22) == protocol >= 0x02` gates Stage 6 fail-closed (0x01 stays Phase-1-compatible for config but lacks HR_TRACK_POWER).
 - New model flag `track_power_requested`.
 - `AmpAdapter_OnWrite(HR_TRACK_POWER)`: set → `track_power_requested = true`; clear → `track_power_requested = false; AmpCore_Inhibit()`.
 - `AmpCore_Update`, after the existing fault/inhibit logic, add a guarded energize: when `track_power_requested && command.enable && config_ok && !fault.causes && lease_fresh && ramp_current == AMP_NEUTRAL && applied_pwm == AMP_NEUTRAL` → `inhibited = false` (energize at neutral). Safety overrides (hard fault / EMO / STOP_REQUEST / lease expiry / comm loss / DISABLE) remain unchanged and still `AmpCore_Inhibit()` (they take precedence; track power does NOT bypass a hard fault).

@@ -24,6 +24,7 @@ typedef struct {
     AmpState state;
     bool init_done, config_ok, id_set, enable_active, brake_active,
          dir_active, stopping_active, inhibited, lease_fresh;
+    bool track_power_requested;
     uint16_t requested_pwm, target_pwm, applied_pwm;
 } AmpStatus;
 typedef struct { uint16_t causes, validity; } AmpFault;

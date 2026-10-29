@@ -74,7 +74,7 @@ namespace SiebwaldeApp.Integration
         private TrackCommClientAsync? _trackCommClient;
         private TrackAmplifierBootloaderHelpers? _bootloaderHelpers;
         private SendNextFwDataPacket? _sendNextFwDataPacket;
-        private TrackAmplifierInitializationServiceAsync? _trackInitService;
+        private TrackInitStateMachine? _trackInitStateMachine;
         private TrackControlMain? _trackControlMain;
         private string _loggerInstance = "TrackAppLog";
         private ILogger? _trackApplicationLogging;
@@ -242,6 +242,41 @@ namespace SiebwaldeApp.Integration
         /// </summary>
         public TrackApplicationVariables? TrackVariables => _trackVariables;
 
+        /// <inheritdoc />
+        public IReadOnlyList<TrackInitStageStatus> InitStages
+            => _trackInitStateMachine?.Stages ?? Array.Empty<TrackInitStageStatus>();
+
+        /// <inheritdoc />
+        public event EventHandler<TrackInitStageStatusChangedEventArgs>? InitStageStatusChanged;
+
+        /// <inheritdoc />
+        public bool TrackPowerAuthorized => _trackInitStateMachine?.TrackPowerAuthorized ?? false;
+
+        /// <inheritdoc />
+        public bool TrackPowerOn => _trackInitStateMachine?.TrackPowerOn ?? false;
+
+        /// <inheritdoc />
+        public void AuthorizeTrackPowerEnable() => _trackInitStateMachine?.AuthorizeTrackPowerEnable();
+
+        /// <inheritdoc />
+        public Task<bool> EnableTrackPowerAsync(CancellationToken ct = default)
+            => _trackInitStateMachine?.EnableTrackPowerAsync(ct) ?? Task.FromResult(false);
+
+        /// <inheritdoc />
+        public Task DisableTrackPowerAsync(CancellationToken ct = default)
+            => _trackInitStateMachine?.DisableTrackPowerAsync(ct) ?? Task.CompletedTask;
+
+        /// <inheritdoc />
+        public Task<TrackInitStageState> StepInitAsync(CancellationToken ct = default)
+            => _trackInitStateMachine?.StepAsync(ct) ?? Task.FromResult(TrackInitStageState.Pending);
+
+        /// <inheritdoc />
+        public Task<TrackInitStageState> RetryInitAsync(CancellationToken ct = default)
+            => _trackInitStateMachine?.RetryAsync(ct) ?? Task.FromResult(TrackInitStageState.Pending);
+
+        /// <inheritdoc />
+        public void BacktrackInit() => _trackInitStateMachine?.Backtrack();
+
         /// <summary>The passive KIS-09 observer (KIS-07 shadow + KIS-08 reconciliation over the production variables), or null.</summary>
         public Kis09PassiveObserver? Kis09PassiveObserver => _kis09PassiveObserver;
 
@@ -296,6 +331,21 @@ namespace SiebwaldeApp.Integration
                         {
                             await InitializePhase1AmplifiersAsync(_cts.Token).ConfigureAwait(false);
                             await EstablishObservedNeutralAsync(_cts.Token).ConfigureAwait(false);
+
+                            // Stage 4 (configure + validate) is host-verified: every required
+                            // amplifier must have completed config download + APPLY + readback.
+                            var domain = EffectiveDomain();
+                            if (AllDomainAmplifiersConfigured(domain))
+                            {
+                                _trackInitStateMachine?.MarkStagePassed(TrackInitStage.ConfigureValidate);
+                            }
+                            else
+                            {
+                                _trackInitStateMachine?.MarkStageFailed(
+                                    TrackInitStage.ConfigureValidate,
+                                    "One or more required amplifiers did not complete configuration.",
+                                    "Re-run the startup or check the affected amplifier's identity/config.");
+                            }
                         }
 
                         // Phase 3: feed the ownership-aware carrier from the KIS-09 passive observer
@@ -491,15 +541,22 @@ namespace SiebwaldeApp.Integration
                 new EnableTrackamplifiersStep(_trackCommClient, _loggerInstance),
             };
 
-            _trackInitService = new TrackAmplifierInitializationServiceAsync(
+            _trackInitStateMachine = new TrackInitStateMachine(
                 _trackCommClient,
                 _trackVariables,
                 steps,
+                requiredAmps: () => EffectiveDomain(),
                 _loggerInstance);
 
-            _trackInitService.ProgressChanged += (_, e) =>
+            _trackInitStateMachine.LogEvent += (_, e) =>
             {
-                SiebwaldeApp.Core.IoC.Logger.Log($"Track init: {e.StepName} - {e.Message}", _loggerInstance);
+                SiebwaldeApp.Core.IoC.Logger.Log(
+                    $"TrackInit[{e.Stage}] {e.Message}", _loggerInstance);
+            };
+
+            _trackInitStateMachine.StageStatusChanged += (_, e) =>
+            {
+                InitStageStatusChanged?.Invoke(this, e);
             };
 
             // 6b) Carrier timing trace: a non-blocking JSONL diagnostic for the carrier-chain
@@ -508,7 +565,7 @@ namespace SiebwaldeApp.Integration
             _carrierTimingTrace = new CarrierTimingTrace(
                 Path.Combine(CoreConfiguration.LogDirectory, "carrier-timing.jsonl"));
 
-            // 7) Create TrackControlMain and hook StatusChanged to start the runtime loop.
+            // 7) Create TrackControlMain and hook RunStatusChanged to start the runtime loop.
             _trackControlMain = new TrackControlMain(
                 _loggerInstance,
                 _trackCommClient,
@@ -516,11 +573,11 @@ namespace SiebwaldeApp.Integration
                 _controlTrace,
                 onAmplifierWrite: _carrierTimingTrace.RecordWrite);
 
-            _trackInitService.StatusChanged += (_, status) =>
+            _trackInitStateMachine.RunStatusChanged += (_, status) =>
             {
-                SiebwaldeApp.Core.IoC.Logger.Log($"Track init status: {status}", _loggerInstance);
+                SiebwaldeApp.Core.IoC.Logger.Log($"Track init status: {status.Status}", _loggerInstance);
 
-                if (status == InitializationStatus.Completed &&
+                if (status.Status == InitializationStatus.Completed &&
                     _trackControlMain != null &&
                     _cts != null)
                 {
@@ -528,17 +585,17 @@ namespace SiebwaldeApp.Integration
                 }
             };
 
-            // 8) Start communication and run the initialization pipeline.
+            // 8) Start communication and run the initialization state machine (automatic mode).
             await _trackCommClient.StartAsync(true, ct).ConfigureAwait(false);
             _globalStopTask = MonitorGlobalStopAsync(ct);
-            await _trackInitService.InitializeAsync(ct).ConfigureAwait(false);
+            await _trackInitStateMachine.RunAutomaticAsync(ct).ConfigureAwait(false);
 
-            // A genuine init failure/cancellation never throws from InitializeAsync; observe the
+            // A genuine init failure/cancellation never throws from RunAutomaticAsync; observe the
             // status instead so a failed real-mode start is never masked as Running.
-            if (_trackInitService.Status != InitializationStatus.Completed)
+            if (!_trackInitStateMachine.IsCompleted)
             {
                 throw new InvalidOperationException(
-                    $"Track initialization did not complete: {_trackInitService.Status}.");
+                    $"Track initialization did not complete: {_trackInitStateMachine.RunStatus}.");
             }
 
             // 9) Passive KIS-09 observer: KIS-07 shadow + KIS-08 reconciliation reading the SAME
@@ -1072,7 +1129,7 @@ namespace SiebwaldeApp.Integration
             _stopConfirmation?.Dispose();
             _stopConfirmation = null;
             _trackCommClient = null;
-            _trackInitService = null;
+            _trackInitStateMachine = null;
             _kis09PassiveConsumer = null;
             _kis09CarrierFeeder = null;
             _carrierTimingTrace = null;

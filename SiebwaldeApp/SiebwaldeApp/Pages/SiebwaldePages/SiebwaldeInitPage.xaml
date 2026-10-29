@@ -388,6 +388,95 @@
                     Foreground="{StaticResource WordOrangeBrush}"
                     Text="{Binding FailureText, Mode=OneWay}" />
 
+                <!-- Operator-visible initialization stage tree (7 stages). -->
+                <TextBlock
+                    Margin="0 10 0 4"
+                    FontSize="{StaticResource FontSizeRegular}"
+                    Foreground="{StaticResource ForegroundLightBrush}">
+                    <Run Text="Initialisatiestappen"
+                         FontFamily="{StaticResource FontAwesome}" />
+                </TextBlock>
+
+                <ListBox
+                    Height="180"
+                    Margin="0 0 0 6"
+                    ItemsSource="{Binding InitStages}"
+                    Background="{StaticResource TextBoxBackgroundBrush}"
+                    Foreground="{StaticResource BackgroundLightBrush}"
+                    FontSize="{StaticResource FontSizeRegular}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="0 1 0 1">
+                                <TextBlock MinWidth="150"
+                                           Foreground="{StaticResource BackgroundLightBrush}"
+                                           Text="{Binding Name}" />
+                                <TextBlock MinWidth="90"
+                                           Foreground="{StaticResource WordOrangeBrush}"
+                                           Text="{Binding State}" />
+                                <TextBlock Foreground="{StaticResource ForegroundLightBrush}"
+                                           Text="{Binding Detail}"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- Manual initialization controls (step / retry / backtrack). -->
+                <Grid Margin="0 4 0 4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        Grid.Column="0"
+                        MinWidth="170"
+                        FontSize="{StaticResource FontSizeRegular}"
+                        VerticalAlignment="Center"
+                        Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Init handmatig"
+                             FontFamily="{StaticResource FontAwesome}" />
+                    </TextBlock>
+
+                    <Button Grid.Column="1" MinWidth="90" Height="36" Padding="12 4"
+                            Margin="10 0 0 0" FontSize="{StaticResource FontSizeSmall}"
+                            Command="{Binding StepInit}" Foreground="White" Content="Stap" />
+                    <Button Grid.Column="2" MinWidth="90" Height="36" Padding="12 4"
+                            Margin="10 0 0 0" FontSize="{StaticResource FontSizeSmall}"
+                            Command="{Binding RetryInit}" Foreground="White" Content="Opnieuw" />
+                    <Button Grid.Column="3" MinWidth="90" Height="36" Padding="12 4"
+                            Margin="10 0 0 0" FontSize="{StaticResource FontSizeSmall}"
+                            Command="{Binding BacktrackInit}" Foreground="White" Content="Terug" />
+                </Grid>
+
+                <!-- Track-power controls (explicit, operator-gated Stage 6). -->
+                <TextBlock
+                    Margin="0 6 0 0"
+                    FontSize="{StaticResource FontSizeRegular}"
+                    Foreground="{StaticResource WordOrangeBrush}"
+                    Text="{Binding TrackPowerStatus, Mode=OneWay}" />
+
+                <Grid Margin="0 4 0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" MinWidth="170" Height="40" Padding="12 4"
+                            Margin="0 6 0 0" FontSize="{StaticResource FontSizeSmall}"
+                            Command="{Binding EnableTrackPower}"
+                            IsEnabled="{Binding CanEnableTrackPower}"
+                            Foreground="White" Content="Trackspanning inschakelen" />
+
+                    <Button Grid.Column="1" MinWidth="170" Height="40" Padding="12 4"
+                            Margin="10 6 0 0" FontSize="{StaticResource FontSizeSmall}"
+                            Command="{Binding DisableTrackPower}"
+                            IsEnabled="{Binding CanDisableTrackPower}"
+                            Foreground="White" Content="Trackspanning uitschakelen" />
+                </Grid>
+
             </StackPanel>
         </GroupBox>
 
@@ -400,14 +489,39 @@
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="100"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+
+            <!-- Dutch operator log (state-machine events translated for the operator). -->
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="1"
+                Margin="50 10 0 0"
+                FontSize="{StaticResource FontSizeXXLarge}">
+                <Run Text="Operatorlog (Nederlands)"
+                     FontFamily="{StaticResource FontAwesome}"
+                     Foreground="{StaticResource BackgroundLightBrush}" />
+            </TextBlock>
+
+            <ListBox
+                Grid.Row="1"
+                Grid.Column="1"
+                Margin="50 6 50 6"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                FontSize="{StaticResource FontSizeRegular}"
+                Background="{StaticResource TextBoxBackgroundBrush}"
+                Foreground="{StaticResource BackgroundLightBrush}"
+                ItemsSource="{Binding Path=OperatorLog}" />
 
             <ListBox
                 x:Name="TextBoxLogging"
+                Grid.Row="3"
                 Grid.Column="1"
-                Margin="50 50 50 10"
+                Margin="50 0 50 10"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 TextElement.FontFamily="{StaticResource FontAwesome}"
@@ -419,7 +533,7 @@
                 />
 
             <TextBlock
-                Grid.Row="1"
+                Grid.Row="2"
                 Grid.Column="1"
                 FontSize="{StaticResource FontSizeXXLarge}"
                 Margin="50 0 0 0 ">

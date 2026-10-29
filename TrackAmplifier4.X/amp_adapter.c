@@ -18,6 +18,8 @@ static void AmpAdapter_EncodeWritable(void)
     PetitHoldingRegisters[HR_CFG_FAST_STOP].ActValue = m->pending.fast_stop_step;
     PetitHoldingRegisters[HR_CFG_WATCHDOG].ActValue = m->pending.watchdog_ms;
     PetitHoldingRegisters[HR_CFG_TAG].ActValue = m->pending.tag;
+    PetitHoldingRegisters[HR_TRACK_POWER].ActValue =
+        m->status.track_power_requested ? TRACK_POWER_ENABLE : 0u;
 }
 
 static uint8_t AmpAdapter_Result(uint16_t addr, uint8_t result)
@@ -54,8 +56,8 @@ void AmpAdapter_AddressAssigned(void)
 
 uint8_t AmpAdapter_ValidateWrite(uint16_t addr, uint16_t v)
 {
-    if (addr >= 23u) return AMP_WRITE_RANGE;
-    if (addr >= HR_IDENTITY) return AMP_WRITE_READ_ONLY;
+    if (addr >= 24u) return AMP_WRITE_RANGE;
+    if (addr >= HR_IDENTITY && addr != HR_TRACK_POWER) return AMP_WRITE_READ_ONLY;
     switch (addr) {
     case HR_COMMAND:
         if ((v & 0x6000u) || (v & HR_PWM_SETPOINT_MASK) > 799u) return AMP_WRITE_RANGE;
@@ -66,6 +68,9 @@ uint8_t AmpAdapter_ValidateWrite(uint16_t addr, uint16_t v)
     case HR_CONTROL:
         if (v & 0x03FFu) return AMP_WRITE_RANGE;
         if ((v & 0x8400u) == 0x8400u) return AMP_WRITE_RELATIONSHIP;
+        break;
+    case HR_TRACK_POWER:
+        if (v & 0xFFFEu) return AMP_WRITE_RANGE;
         break;
     case HR_ADDRESS:
         if ((v & 0xFFC0u) || !(v & 0x003Fu)) return AMP_WRITE_RANGE;
@@ -144,6 +149,12 @@ uint8_t AmpAdapter_OnWrite(uint16_t addr, uint16_t v, bool broadcast)
         if (edges & HR_CONTROL_RESET) m->msgs_rx = m->msgs_tx = 0;
         break;
     case HR_ADDRESS: m->address = (uint8_t)v; break;
+    case HR_TRACK_POWER:
+        m->status.track_power_requested = (v & TRACK_POWER_ENABLE) != 0;
+        /* Clearing the request always re-latches inhibit, so a de-energize is
+         * never silently skipped even if the neutral energize was pending. */
+        if (!m->status.track_power_requested) AmpCore_Inhibit();
+        break;
     case HR_CFG_RAMP: m->pending.accel_step = (uint8_t)v; m->pending.decel_step = (uint8_t)(v >> 8); break;
     case HR_CFG_FAST_STOP: m->pending.fast_stop_step = (uint8_t)v; break;
     case HR_CFG_WATCHDOG: m->pending.watchdog_ms = v; break;

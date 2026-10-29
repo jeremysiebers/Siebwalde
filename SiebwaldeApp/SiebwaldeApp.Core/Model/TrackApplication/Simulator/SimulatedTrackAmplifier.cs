@@ -45,6 +45,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private bool _inhibited;
         private bool _stoppingActive;
         private bool _fastStopping;
+        private bool _trackPowerRequested;
         private int _state;                 // HR_STATE enum 0..7
         private bool _configApplied;
 
@@ -97,7 +98,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             for (int i = 0; i < values.Length; i++)
             {
                 int address = startRegister + i;
-                if (address >= TrackAmplifierRegisters.Count)
+                if (address >= TrackAmplifierRegisters.Count && address != TrackAmplifierRegisters.TrackPower)
                 {
                     SetWriteResult((byte)(address & 0xFF), 2, retained: true);
                     continue;
@@ -110,6 +111,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                         break;
                     case TrackAmplifierRegisters.Control:   // HR1
                         WriteControl(values[i]);
+                        break;
+                    case TrackAmplifierRegisters.TrackPower: // HR23 (outside the SLAVEINFO frame)
+                        WriteTrackPower(values[i]);
                         break;
                     case TrackAmplifierRegisters.Address:   // HR2
                         _registers[address] = values[i];
@@ -135,6 +139,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         {
             StepRamp();
             StepLease();
+            StepTrackPower();
             RefreshState();
         }
 
@@ -287,6 +292,44 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
         private static bool Edge(ushort value, ushort prev, ushort bit)
             => (value & bit) != 0 && (prev & bit) == 0;
+
+        private void WriteTrackPower(ushort value)
+        {
+            // Only bit 0 (TRACK_POWER_ENABLE) is legal; bits 1..15 are reserved (rejected, retained).
+            if ((value & ~TrackAmplifierRegisters.TrackPowerEnableBit) != 0)
+            {
+                SetWriteResult(TrackAmplifierRegisters.TrackPower, 1, retained: true);
+                return;
+            }
+
+            _trackPowerRequested = (value & TrackAmplifierRegisters.TrackPowerEnableBit) != 0;
+            if (!_trackPowerRequested)
+            {
+                // Clearing the request always re-latches inhibit, so a de-energize is never skipped.
+                _inhibited = true;
+            }
+
+            SetWriteResult(TrackAmplifierRegisters.TrackPower, 0, retained: false);
+            RefreshState();
+        }
+
+        /// <summary>
+        /// Mirrors the PIC18 <c>AmpCore_Update</c> guarded neutral energize: a track-power request
+        /// clears the inhibit latch only when enabled + configured + fault-free + lease-fresh and the
+        /// bridge is at neutral. Safety overrides (hard/lease/comm/EMO/DISABLE) set <c>_inhibited</c>
+        /// in their own handlers and are never bypassed by this path.
+        /// </summary>
+        private void StepTrackPower()
+        {
+            bool faultFree = _registers[TrackAmplifierRegisters.Fault] == 0;
+            bool neutral = _appliedDuty == Neutral && _targetDuty == Neutral;
+
+            if (_trackPowerRequested && _enableActive && _configApplied && faultFree &&
+                LeaseFresh() && neutral && !_fastStopping && !_stoppingActive)
+            {
+                _inhibited = false;
+            }
+        }
 
         private bool ApplyConfig()
         {
