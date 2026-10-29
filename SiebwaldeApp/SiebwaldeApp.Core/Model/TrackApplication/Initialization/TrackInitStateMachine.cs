@@ -63,6 +63,9 @@ namespace SiebwaldeApp.Core
         private volatile bool _trackPowerAuthorized;
         private volatile bool _trackPowerOn;
         private TrackPowerEnableStep? _trackPowerStep;
+        private readonly TimeSpan? _trackPowerVerifyWindow;
+        private readonly TimeSpan _trackPowerDisableVerifyTimeout;
+        private volatile IReadOnlyList<TrackInitAmpStatus> _trackPowerDeenergizeStatus = Array.Empty<TrackInitAmpStatus>();
 
         public event EventHandler<TrackInitStageStatusChangedEventArgs>? StageStatusChanged;
         public event EventHandler<TrackInitRunStatusChangedEventArgs>? RunStatusChanged;
@@ -76,13 +79,17 @@ namespace SiebwaldeApp.Core
             TrackApplicationVariables variables,
             IEnumerable<IInitializationStep> steps,
             Func<IReadOnlyCollection<byte>> requiredAmps,
-            string loggerInstance = "Track")
+            string loggerInstance = "Track",
+            TimeSpan? trackPowerVerifyWindow = null,
+            TimeSpan? trackPowerDisableVerifyTimeout = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             _variables = variables ?? throw new ArgumentNullException(nameof(variables));
             _loggerInstance = loggerInstance ?? "Track";
             _requiredAmps = requiredAmps ?? throw new ArgumentNullException(nameof(requiredAmps));
             _sessionId = Guid.NewGuid().ToString("N");
+            _trackPowerVerifyWindow = trackPowerVerifyWindow;
+            _trackPowerDisableVerifyTimeout = trackPowerDisableVerifyTimeout ?? TimeSpan.FromSeconds(1);
 
             _steps = new Dictionary<string, IInitializationStep>();
             foreach (var step in steps)
@@ -132,6 +139,13 @@ namespace SiebwaldeApp.Core
 
         /// <summary>True when track power is currently ON (TRACK_POWER_ON verified).</summary>
         public bool TrackPowerOn => _trackPowerOn;
+
+        /// <summary>
+        /// Per-amplifier de-energization confirmation from the most recent group de-energize
+        /// (disable or backtrack). An entry's <see cref="TrackInitAmpStatus.Ok"/> is true when that
+        /// amplifier was confirmed inhibited==1 (de-energized). Empty before the first de-energize.
+        /// </summary>
+        public IReadOnlyList<TrackInitAmpStatus> TrackPowerDeenergizeStatus => _trackPowerDeenergizeStatus;
 
         // ---------------------------------------------------------------------------------
         // Step -> stage mapping
@@ -378,6 +392,8 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Moves the current-stage pointer back one stage and marks it Pending for re-execution.
         /// Irreversible flash is never auto-undone: the operator must re-authorize the flash stage.
+        /// Leaving Stage 6 (track power) while the H-bridges are energized de-energizes the whole
+        /// group first, so backtracking never leaves the track energized.
         /// </summary>
         public void Backtrack()
         {
@@ -387,6 +403,25 @@ namespace SiebwaldeApp.Core
                 if (index <= 0)
                 {
                     return;
+                }
+
+                // Gap B: leaving Stage 6 while track power is ON must de-energize the group
+                // (fail-closed) so the H-bridge is never left energized by a backtrack.
+                if (_currentStage == TrackInitStage.AmpPowerEnable && _trackPowerOn)
+                {
+                    _trackPowerOn = false;
+                    _trackPowerAuthorized = false;
+                    try
+                    {
+                        // Backtrack() is synchronous; run the same clear-write helper to completion.
+                        DeEnergizeGroupAsync(verify: false, CancellationToken.None).GetAwaiter().GetResult();
+                        Log(TrackInitStage.AmpPowerEnable,
+                            "Backtrack de-energized the group (HR_TRACK_POWER bit 0 cleared on every required amplifier).");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log(TrackInitStage.AmpPowerEnable, $"Backtrack could not de-energize the group: {ex.Message}");
+                    }
                 }
 
                 var previous = TrackInitStageInfo.All[index - 1];
@@ -548,7 +583,7 @@ namespace SiebwaldeApp.Core
                 }
 
                 var required = _requiredAmps().ToArray();
-                _trackPowerStep = new TrackPowerEnableStep(_commClient, _variables, required, _loggerInstance);
+                _trackPowerStep = new TrackPowerEnableStep(_commClient, _variables, required, _loggerInstance, _trackPowerVerifyWindow);
 
                 _currentStage = TrackInitStage.AmpPowerEnable;
                 SetStageState(TrackInitStage.AmpPowerEnable, TrackInitStageState.Running);
@@ -574,6 +609,11 @@ namespace SiebwaldeApp.Core
                 }
 
                 _trackPowerOn = false;
+                // Gap A: a partial or failed group activation must de-energize the WHOLE group
+                // (fail-closed). Clear bit 0 on every required amplifier so no amp that already
+                // energized is left energized. Idempotent and independent of cancellation: use
+                // CancellationToken.None so the clear is never skipped.
+                await DeEnergizeGroupOrLogAsync(CancellationToken.None).ConfigureAwait(false);
                 MarkStageFailed(TrackInitStage.AmpPowerEnable, result.ErrorMessage ?? "unknown error");
                 return false;
             }
@@ -581,6 +621,8 @@ namespace SiebwaldeApp.Core
             {
                 MarkStageFailed(TrackInitStage.AmpPowerEnable, ex.Message);
                 _trackPowerOn = false;
+                // Same fail-closed de-energize for the exception path (e.g. a write threw midway).
+                await DeEnergizeGroupOrLogAsync(CancellationToken.None).ConfigureAwait(false);
                 return false;
             }
             finally
@@ -590,32 +632,155 @@ namespace SiebwaldeApp.Core
         }
 
         /// <summary>
-        /// Clears HR_TRACK_POWER (bit 0 = 0) on every required amplifier, de-energizing the bridge.
-        /// Mirrors the firmware: clearing the request re-latches inhibit.
+        /// Clears HR_TRACK_POWER (bit 0 = 0) on every required amplifier, de-energizing the bridge,
+        /// then reads back HR_STATE per amplifier and verifies each reports inhibited==1
+        /// (de-energized). Mirrors the firmware: clearing the request re-latches inhibit.
+        /// Returns true when every required amplifier is confirmed de-energized; false (fail-closed)
+        /// when any amplifier cannot be confirmed, with per-amplifier detail in
+        /// <see cref="TrackPowerDeenergizeStatus"/>.
         /// </summary>
-        public async Task DisableTrackPowerAsync(CancellationToken cancellationToken = default)
+        public async Task<bool> DisableTrackPowerAsync(CancellationToken cancellationToken = default)
         {
             await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                foreach (var amp in _requiredAmps())
-                {
-                    await _commClient.SendAsync(
-                        AmplifierConfigurationDownloader.Exchange(
-                            amp,
-                            (byte)TrackAmplifierRegisters.TrackPower,
-                            0),
-                        cancellationToken).ConfigureAwait(false);
-                }
+                var allDeenergized = await DeEnergizeGroupAsync(verify: true, cancellationToken).ConfigureAwait(false);
 
                 _trackPowerOn = false;
                 _trackPowerAuthorized = false;
                 SetStageState(TrackInitStage.AmpPowerEnable, TrackInitStageState.Pending);
-                Log(TrackInitStage.AmpPowerEnable, "Track power disabled: HR_TRACK_POWER cleared, bridges de-energized.");
+
+                if (allDeenergized)
+                {
+                    Log(TrackInitStage.AmpPowerEnable,
+                        "Track power disabled: HR_TRACK_POWER cleared, every bridge verified de-energized.");
+                }
+                else
+                {
+                    var unconfirmed = _trackPowerDeenergizeStatus.Where(s => !s.Ok).Select(s => s.SlaveNumber).ToArray();
+                    Log(TrackInitStage.AmpPowerEnable,
+                        $"Track power disabled, but de-energization NOT confirmed for amplifier(s) {string.Join(",", unconfirmed)}.");
+                }
+
+                return allDeenergized;
             }
             finally
             {
                 _gate.Release();
+            }
+        }
+
+        /// <summary>
+        /// De-energizes the group: clears HR_TRACK_POWER (bit 0 = 0) on every required amplifier.
+        /// When <paramref name="verify"/> is true, also issues an HR_STATE read per amplifier and waits
+        /// (bounded by the disable-verify timeout, fail-closed) until a FRESH readback reports
+        /// inhibited==1, recording the per-amplifier status in <see cref="TrackPowerDeenergizeStatus"/>.
+        /// The caller must hold the gate. Returns true when verification is disabled, or when every
+        /// amplifier is confirmed de-energized by a fresh readback.
+        /// </summary>
+        private async Task<bool> DeEnergizeGroupAsync(bool verify, CancellationToken ct)
+        {
+            var required = _requiredAmps().ToArray();
+
+            foreach (var amp in required)
+            {
+                await _commClient.SendAsync(
+                    AmplifierConfigurationDownloader.Exchange(
+                        amp,
+                        (byte)TrackAmplifierRegisters.TrackPower,
+                        0),
+                    ct).ConfigureAwait(false);
+            }
+
+            if (!verify)
+            {
+                return true;
+            }
+
+            // Capture the readback sequence BEFORE issuing the HR_STATE read, so "confirmed" requires
+            // a FRESH readback rather than stale HoldingReg state that happened to already be inhibited.
+            var sequenceBefore = required.ToDictionary(
+                amp => amp,
+                amp => _variables.trackAmpItems[amp].ProtocolReadbackSequence);
+
+            foreach (var amp in required)
+            {
+                await _commClient.SendAsync(
+                    AmplifierConfigurationDownloader.Exchange(
+                        amp,
+                        (byte)TrackAmplifierRegisters.State,
+                        0,
+                        read: true),
+                    ct).ConfigureAwait(false);
+            }
+
+            // Wait (bounded, fail-closed) for each amplifier's fresh HR_STATE readback to report
+            // inhibited==1. The comm client updates HoldingReg (and ProtocolReadbackSequence)
+            // asynchronously in its receive loop, so evaluating IsInhibited immediately would read
+            // stale state; poll instead, mirroring TrackPowerEnableStep/GroupReadyStep.
+            var deadline = DateTimeOffset.UtcNow + _trackPowerDisableVerifyTimeout;
+            while (DateTimeOffset.UtcNow < deadline && !ct.IsCancellationRequested)
+            {
+                var allConfirmed = required.All(amp =>
+                {
+                    var item = _variables.trackAmpItems[amp];
+                    return item.ProtocolReadbackSequence > sequenceBefore[amp] &&
+                           TrackPowerEnableStep.IsInhibited(item);
+                });
+
+                if (allConfirmed)
+                {
+                    break;
+                }
+
+                try
+                {
+                    await Task.Delay(10, ct).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    break; // external cancellation — fail closed (never claim confirmed).
+                }
+            }
+
+            var statuses = new List<TrackInitAmpStatus>(required.Length);
+            var allConfirmedResult = true;
+            foreach (var amp in required)
+            {
+                var item = _variables.trackAmpItems[amp];
+                var confirmed = item.ProtocolReadbackSequence > sequenceBefore[amp] &&
+                                TrackPowerEnableStep.IsInhibited(item);
+                if (!confirmed)
+                {
+                    allConfirmedResult = false;
+                }
+
+                statuses.Add(new TrackInitAmpStatus(
+                    amp,
+                    confirmed ? "de-energized (inhibited, fresh readback)" : "de-energization not confirmed",
+                    confirmed));
+            }
+
+            _trackPowerDeenergizeStatus = statuses;
+            return allConfirmedResult;
+        }
+
+        /// <summary>
+        /// Best-effort, fail-closed de-energize for the failure paths: clears bit 0 on every
+        /// required amplifier without verification, and logs (rather than throws) if the clear
+        /// itself fails, so a de-energize problem never masks the original failure.
+        /// </summary>
+        private async Task DeEnergizeGroupOrLogAsync(CancellationToken ct)
+        {
+            try
+            {
+                await DeEnergizeGroupAsync(verify: false, ct).ConfigureAwait(false);
+                Log(TrackInitStage.AmpPowerEnable,
+                    "Group de-energized (HR_TRACK_POWER bit 0 cleared on every required amplifier).");
+            }
+            catch (Exception ex)
+            {
+                Log(TrackInitStage.AmpPowerEnable, $"Group de-energize FAILED: {ex.Message}");
             }
         }
 
