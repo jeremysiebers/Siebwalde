@@ -64,6 +64,24 @@ namespace SiebwaldeApp.Core
         /// <summary>Explicit recovery for a latched safety fault. A latched fault never clears itself.</summary>
         bool ResetControlSafety();
 
+        /// <summary>
+        /// Explicit operator action that authorizes a global-stop re-arm during startup recovery.
+        /// Without this call the startup precondition keeps blocking and never emits
+        /// <c>REARM_GLOBAL_STOP</c> (112). The physical-stop-clear evidence source must be supplied;
+        /// when null it defaults to fail-closed (never clear), so recovery cannot proceed without
+        /// positive physical evidence. Never auto-releases a latched controller.
+        /// </summary>
+        void AuthorizeGlobalStopRecovery(Func<bool>? physicalStopInputsClear = null);
+
+        /// <summary>
+        /// Read-only view of the process-lifetime global-stop controller for presentation surfaces
+        /// (WPF). The UI can observe the disarmed/armed/latched state and the latch reason and
+        /// request operator recovery via <see cref="AuthorizeGlobalStopRecovery"/>, but cannot arm
+        /// or latch the controller itself (the mutating <c>Arm</c>/<c>Latch</c> authority is not
+        /// exposed through this surface).
+        /// </summary>
+        GlobalStopStateView GlobalStopState { get; }
+
         /// <summary>Raised when an amplifier data frame has been parsed and applied.</summary>
         event EventHandler<AmplifierDataEventArgs>? AmplifierDataReceived;
 

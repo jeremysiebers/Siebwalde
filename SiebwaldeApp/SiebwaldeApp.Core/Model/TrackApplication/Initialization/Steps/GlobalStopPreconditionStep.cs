@@ -27,6 +27,7 @@ namespace SiebwaldeApp.Core
         private readonly string _loggerInstance;
         private readonly TrackAmplifierReleaseAuthority _releaseAuthority;
         private readonly Func<bool> _operatorPermitRecovery;
+        private readonly Action? _onRearmConfirmed;
 
         // 0 = send 111 query, 1 = await initial reply, 2 = await operator recovery, 3 = send
         // post-re-arm 111 query, 4 = await post-re-arm reply.
@@ -47,16 +48,24 @@ namespace SiebwaldeApp.Core
         /// Physical stop-inputs-clear evidence, injected by the caller (the V4 physical evidence
         /// boundary is not crossed here). Defaults to fail-closed (never clear).
         /// </param>
+        /// <param name="onRearmConfirmed">
+        /// Invoked exactly once, when the post-re-arm 111 confirms the PIC32 is no longer latched.
+        /// The runtime host uses this to mirror the physical re-arm into the C#
+        /// <see cref="GlobalStopController"/> (<see cref="GlobalStopController.ReArm"/>). Defaults to
+        /// null (no mirror) so callers without a controller are unaffected.
+        /// </param>
         /// <param name="loggerInstance">Logger instance for progress messages.</param>
         public GlobalStopPreconditionStep(
             ITrackCommClient commClient,
             Func<bool>? operatorPermitRecovery = null,
             Func<bool>? physicalStopInputsClear = null,
+            Action? onRearmConfirmed = null,
             string loggerInstance = "Track")
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             _loggerInstance = loggerInstance ?? "Track";
             _operatorPermitRecovery = operatorPermitRecovery ?? (() => false);
+            _onRearmConfirmed = onRearmConfirmed;
             _releaseAuthority = new TrackAmplifierReleaseAuthority(
                 commClient,
                 physicalStopInputsClear ?? (() => false));
@@ -194,6 +203,9 @@ namespace SiebwaldeApp.Core
 
             if (state == GlobalStopStatusMessage.Disarmed || state == GlobalStopStatusMessage.Armed)
             {
+                // The PIC32 confirmed it left the latched state: mirror the physical re-arm into the
+                // C# controller before advancing, so the in-memory state stays consistent.
+                _onRearmConfirmed?.Invoke();
                 _subState = 0;
                 return InitStepResult.Next("ResetAllSlaves");
             }

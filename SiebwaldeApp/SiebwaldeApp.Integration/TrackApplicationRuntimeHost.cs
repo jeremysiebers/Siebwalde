@@ -479,6 +479,7 @@ namespace SiebwaldeApp.Integration
                     _trackCommClient,
                     operatorPermitRecovery: () => _operatorRecoveryAuthorized,
                     physicalStopInputsClear: () => _physicalStopInputsClear(),
+                    onRearmConfirmed: () => GlobalStop.ReArm(),
                     loggerInstance: _loggerInstance),
                 new ResetAllSlavesStep(_trackCommClient, _trackVariables, _loggerInstance),
                 new DataUploadStep(_trackCommClient, _trackVariables, _loggerInstance),
@@ -1176,6 +1177,10 @@ namespace SiebwaldeApp.Integration
             _physicalStopInputsClear = physicalStopInputsClear ?? (() => false);
             _operatorRecoveryAuthorized = true;
         }
+
+        /// <inheritdoc />
+        public GlobalStopStateView GlobalStopState
+            => new(GlobalStop.State, GlobalStop.Reason, _operatorRecoveryAuthorized && GlobalStop.IsLatched);
 
         private async Task MonitorGlobalStopAsync(CancellationToken ct)
         {

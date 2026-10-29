@@ -33,6 +33,7 @@ namespace SiebwaldeApp
         private readonly RelayCommand _initTrackControllerCommand;
         private readonly RelayCommand _initEcosSimulatorCommand;
         private readonly RelayCommand _initFullSimulationCommand;
+        private readonly RelayCommand _recoverGlobalStopCommand;
 
         #endregion
 
@@ -94,6 +95,17 @@ namespace SiebwaldeApp
         /// <summary>True when the control path is latched unsafe, so a reset is meaningful.</summary>
         public bool CanResetControlSafety { get; set; }
 
+        /// <summary>
+        /// Human-readable global-stop state (Disarmed/Armed/Latched + reason) shown to the operator.
+        /// </summary>
+        public string GlobalStopStatus { get; set; } = "Global stop: disarmed";
+
+        /// <summary>
+        /// True when the global stop is latched and an operator recovery is meaningful, so the
+        /// "Recover global stop" command is enabled.
+        /// </summary>
+        public bool CanRecoverGlobalStop { get; set; }
+
         /// <summary>Human-readable lifecycle state of the track-control runtime.</summary>
         public string RuntimeStateText { get; set; } = "Runtime: stopped";
 
@@ -129,6 +141,12 @@ namespace SiebwaldeApp
         public ICommand ResetControlSafety { get; set; }
         public ICommand GlobalEmergencyStop { get; }
 
+        /// <summary>
+        /// Operator-initiated global-stop recovery: prompts to confirm the physical stop inputs are
+        /// clear, then authorizes the startup re-arm. Enabled only while the global stop is latched.
+        /// </summary>
+        public ICommand RecoverGlobalStop => _recoverGlobalStopCommand;
+
         /// <summary>Start the track-control runtime in the last used mode (defaults to simulator when none).</summary>
         public ICommand StartRuntime => _startRuntimeCommand;
 
@@ -157,6 +175,7 @@ namespace SiebwaldeApp
 
             UpdatePhysicalBindingStatus();
             UpdateKoploperMappingStatus();
+            UpdateGlobalStopStatus();
 
             DetectHosts = new RelayCommand(async () => await DetectHostsAsync(logAlways: true));
 
@@ -178,6 +197,12 @@ namespace SiebwaldeApp
             InitFiddleYardController = new RelayCommand(async () => await StartFiddleYardAsync(false));
             InitFiddleYardSimulator = new RelayCommand(async () => await StartFiddleYardAsync(true));
             ResetControlSafety = new RelayCommand(ResetControlSafetyNow);
+
+            // Operator-initiated global-stop recovery. The button is enabled only while the
+            // global stop is latched (CanRecoverGlobalStop); the physical-stop-clear evidence is
+            // the operator's explicit confirmation (the physical EMO/stop buttons are hardware and
+            // not software-readable). The command itself also re-checks the latched state.
+            _recoverGlobalStopCommand = new RelayCommand(RecoverGlobalStopNow);
 
             _startRuntimeCommand = new RelayCommand(
                 async () => await StartRuntimeAsync(),
@@ -239,6 +264,10 @@ namespace SiebwaldeApp
             {
                 return;
             }
+
+            // Refresh the global-stop surface on every detection pass so the recover command
+            // enables promptly once the startup precondition observes a latched controller.
+            UpdateGlobalStopStatus();
 
             IsDetecting = true;
             if (logAlways)
@@ -423,6 +452,7 @@ namespace SiebwaldeApp
                 _initTrackControllerCommand.RaiseCanExecuteChanged();
                 _initEcosSimulatorCommand.RaiseCanExecuteChanged();
                 _initFullSimulationCommand.RaiseCanExecuteChanged();
+                UpdateGlobalStopStatus();
             });
         }
 
@@ -506,6 +536,54 @@ namespace SiebwaldeApp
             Log(applied
                 ? "Control safety reset applied."
                 : "Control safety reset refused: the underlying condition is still present.");
+        }
+
+        /// <summary>
+        /// Operator-initiated global-stop recovery. Prompts the operator to confirm the physical
+        /// stop inputs (EMO / stop buttons) are released; only on explicit confirmation does it
+        /// authorize the startup re-arm. The operator confirmation is the physical-stop-clear
+        /// evidence source per the frozen architecture (R8-2 / Amendment A2): the physical buttons
+        /// are hardware and not software-readable, so no sensor is consulted.
+        /// </summary>
+        private void RecoverGlobalStopNow()
+        {
+            if (!_runtime.GlobalStopState.IsLatched)
+            {
+                Log("Global stop is not latched; recovery is not required.");
+                return;
+            }
+
+            var confirmed = System.Windows.MessageBox.Show(
+                "Re-arming the global stop lets the track amplifiers be re-energized.\n\n" +
+                "Confirm that ALL physical stop inputs (EMO / stop buttons) are released before continuing.",
+                "Confirm physical stop inputs clear",
+                System.Windows.MessageBoxButton.OKCancel,
+                System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.OK;
+
+            if (!confirmed)
+            {
+                Log("Global stop recovery cancelled: physical stop inputs were not confirmed clear.");
+                return;
+            }
+
+            _runtime.AuthorizeGlobalStopRecovery(() => true);
+            Log("Global stop recovery authorized (operator confirmed physical stop inputs clear).");
+            UpdateGlobalStopStatus();
+        }
+
+        /// <summary>
+        /// Refreshes <see cref="GlobalStopStatus"/> and <see cref="CanRecoverGlobalStop"/> from the
+        /// runtime's read-only global-stop projection and updates the recover command's enabled state.
+        /// </summary>
+        private void UpdateGlobalStopStatus()
+        {
+            var view = _runtime.GlobalStopState;
+            GlobalStopStatus = view.IsLatched
+                ? $"Global stop: LATCHED ({(view.Reason?.ToString() ?? "unknown")})"
+                : $"Global stop: {view.State.ToString().ToLowerInvariant()}";
+            CanRecoverGlobalStop = view.IsLatched;
+            OnPropertyChanged(nameof(GlobalStopStatus));
+            OnPropertyChanged(nameof(CanRecoverGlobalStop));
         }
 
         #endregion

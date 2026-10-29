@@ -1,5 +1,15 @@
 # Handoff
 
+## Ovaaltje2 readiness (2026-10-28/29) — software done, AWAITING PO physical acceptance + merge
+
+Branch `feat/ovaaltje2-readiness` (base master `185cd10b`), commits `dd7afa57` (recovery UI surface) + `14159dd5` (consistency fix), PR **#64** (CI green `Build and test (Release)` 5m48s, NOT merged). Objective: restore the normal WPF application startup + operator-controlled global-stop recovery for Ovaaltje2.
+
+- **Recovery surface:** `ITrackApplicationRuntime.AuthorizeGlobalStopRecovery(Func<bool>?)` + read-only `GlobalStopStateView` (State/Reason/IsLatched/RecoveryPending; no Arm/Latch). WPF init page presents the state + a "Recover global stop" button (enabled only when latched) that prompts the operator to confirm physical stop inputs clear, then calls `AuthorizeGlobalStopRecovery(() => true)`.
+- **Consistency fix (review-flagged):** `GlobalStopController.ReArm()` (`Latched→Armed` mirror of 112, clears reason + notification claim, no event, no movement authority) + `GlobalStopPreconditionStep.onRearmConfirmed` callback + `GlobalStopMonitor` 109 on the latch rising edge (`_stopWasLatched` replaces once-per-lifetime `_stopSent`). After an operator REARM, the C# controller now mirrors `Armed` (heartbeat resumes, no spurious 109).
+- **Physical-stop-clear evidence = operator confirmation** (frozen R8-2/A2, `docs/amplifier-system-architecture.md` §853). **There is NO software-readable physical EMO/stop sensor**; the physical "observed" boundary is V4. The fail-closed default `() => false` is preserved except the explicit operator path.
+- **Verification:** Core suite **1105 passed** (Developer clean run); WPF 0 errors; Integrator re-review **PASS** (both commits). Pre-existing flaky Real-mode tests (`MovementPermissionState.Granted` asserted immediately after `StartAsync`, no `WaitUntil`) are unrelated and pass in isolation.
+- **Remaining:** PO physical non-loaded verification (cold startup / latched global stop / interrupted session / recovery / no unintended H-bridge); supervised locomotive acceptance procedure; PO merge authorization. **No firmware flashing, no locomotive operation performed.**
+
 ## KIS-10 closure (2026-10-14) — MERGED / CLOSED
 
 Branch `feature/koploper-multi-section-kis10`, final PR head `5944cb6b87de687683f77d31662691b1fb3b82bb`, merged into `master` via PR #38 with a normal merge commit `a8b3b5622884a358745b759febe38c3cd165d4e7` (post-merge CI PASS, run `38539465965`). **KIS-10 — DONE / TERMINAL.**

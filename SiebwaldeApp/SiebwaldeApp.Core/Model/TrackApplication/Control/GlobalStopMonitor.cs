@@ -15,7 +15,7 @@ namespace SiebwaldeApp.Core
         private DateTimeOffset? _lastStatus;
         private DateTimeOffset? _lastHeartbeat;
         private ushort _sequence;
-        private bool _stopSent;
+        private bool _stopWasLatched;
         private bool _linkEstablished;
         public byte? LastObservedPic32Status { get; private set; }
 
@@ -76,20 +76,26 @@ namespace SiebwaldeApp.Core
                 }
                 if (_stop.IsLatched)
                 {
-                    if (!_stopSent && !_stop.SuppressSlaveWrites)
+                    // 109 (EXEC_GLOBAL_STOP) on the latch rising edge, not once-per-lifetime: after an
+                    // authorized re-arm clears the latch, a subsequent latch must re-assert the stop.
+                    if (!_stopWasLatched && !_stop.SuppressSlaveWrites)
                     {
-                        _stopSent = true;
                         send = _comm.SendAsync(new SendMessage(TrackCommand.EXEC_GLOBAL_STOP, new byte[] { 0, 0 }), ct);
                     }
+                    _stopWasLatched = true;
                 }
-                else if (_linkEstablished &&
-                    (_lastHeartbeat is null || now - _lastHeartbeat >= HeartbeatInterval))
+                else
                 {
-                    _lastHeartbeat = now;
-                    // Wire counter is monotonic modulo 65536, scoped to this transport session.
-                    var sequence = _sequence++;
-                    send = _comm.SendAsync(new SendMessage(TrackCommand.HOST_HEARTBEAT,
-                        new byte[] { (byte)sequence, (byte)(sequence >> 8) }), ct);
+                    _stopWasLatched = false;
+                    if (_linkEstablished &&
+                        (_lastHeartbeat is null || now - _lastHeartbeat >= HeartbeatInterval))
+                    {
+                        _lastHeartbeat = now;
+                        // Wire counter is monotonic modulo 65536, scoped to this transport session.
+                        var sequence = _sequence++;
+                        send = _comm.SendAsync(new SendMessage(TrackCommand.HOST_HEARTBEAT,
+                            new byte[] { (byte)sequence, (byte)(sequence >> 8) }), ct);
+                    }
                 }
             }
             if (send is not null) await send.ConfigureAwait(false);
