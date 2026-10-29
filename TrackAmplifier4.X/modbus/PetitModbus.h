@@ -8,7 +8,7 @@
 #ifndef __PETITMODBUS__H
 #define __PETITMODBUS__H
                                                                                 // 1 register is 16 bits. The largest register is used to determine receive and transmit buffer size!
-#define NUMBER_OF_HOLDING_PETITREGISTERS                 23                     // Frozen R8 holding-register map (21->23 additive; MAP_VERSION 0x01)
+#define NUMBER_OF_HOLDING_PETITREGISTERS                 24                     // Frozen R8 holding-register map (21->23 additive, +HR_TRACK_POWER 23; MAP_VERSION 0x01)
 #define NUMBER_OF_INPUT_PETITREGISTERS                   0                      // Number of (read only) input registers)
 #define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              0                      // Number of diagnostic registers (send/receive counters)
 

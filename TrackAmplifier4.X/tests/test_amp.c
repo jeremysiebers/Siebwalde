@@ -3,7 +3,7 @@
 #include "amp_core.h"
 #include "modbus/General.h"
 #include "petit_shim.h"
-PetitRegStructure PetitHoldingRegisters[23];
+PetitRegStructure PetitHoldingRegisters[24];
 static uint16_t peripheral_duty;
 static bool peripheral_brake, peripheral_enable;
 static unsigned checks;
@@ -44,13 +44,43 @@ static void configure(void) {
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_APPLY) == 0);
     CHECK(amp_model.status.init_done && amp_model.status.config_ok);
 }
-static void run(uint16_t pwm) {
+/* Enable + lease + GROUP_READY: the amp leaves STANDBY and becomes READY. */
+static void group_ready_on(void) {
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
+    CHECK(write_reg(HR_TRACK_POWER, GROUP_READY) == 0);
+    CHECK(amp_model.status.group_ready);
+}
+static void run(uint16_t pwm) {
+    group_ready_on();
     CHECK(write_reg(HR_COMMAND, pwm) == 0);
     tick();
     CHECK(amp_model.status.state == AMP_ST_RUN);
 }
-
+/* Establish the normal startup end-state the track-power mechanism targets:
+ * configured + enabled, lease expired -> inhibit latched, ramp at neutral,
+ * bridge de-energized, lease fault present. */
+static void inhibit_at_neutral(void) {
+    unsigned i;
+    reset(); configure(); run(799u);
+    for (i = 0u; i < 200u; i++) { AmpAdapter_OnFrame(1u, 3u); tick(); }
+    for (i = 0u; i < 100u; i++) { AmpAdapter_OnFrame(1u, 3u); tick(); }
+    for (i = 0u; i < 50u; i++) { AmpAdapter_OnFrame(1u, 3u); tick(); }
+    CHECK(amp_model.status.inhibited);
+    CHECK(amp_model.fault.causes == AMP_FAULT_LEASE);
+    CHECK(peripheral_duty == 399u && !amp_model.status.stopping_active);
+    CHECK(!peripheral_enable);
+}
+/* From inhibited-at-neutral, renew the lease (clears the lease fault) and request
+ * track power, then advance one tick: the bridge must energize at neutral. */
+static void track_power_on(void) {
+    inhibit_at_neutral();
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_LEASE) == 0);
+    CHECK(write_reg(HR_TRACK_POWER, TRACK_POWER_ENABLE) == 0);
+    tick();
+    CHECK(!amp_model.status.inhibited);
+    CHECK(peripheral_enable);
+    CHECK(peripheral_duty == 399u);
+}
 int main(void)
 {
     unsigned i, j;
@@ -61,7 +91,7 @@ int main(void)
     CHECK(peripheral_duty == 399u && amp_model.status.applied_pwm == 399u);
     CHECK(PetitHoldingRegisters[HR_IDENTITY].ActValue == 0xF101u);
     CHECK(PetitHoldingRegisters[HR_FW_VERSION].ActValue == 0x0100u);
-    CHECK(PetitHoldingRegisters[HR_FW_VERSION_PATCH_PROTO].ActValue == 0x0201u);
+    CHECK(PetitHoldingRegisters[HR_FW_VERSION_PATCH_PROTO].ActValue == 0x0202u);
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
     CHECK(write_reg(HR_COMMAND, 799u) == 0);
     tick();
@@ -155,6 +185,7 @@ int main(void)
     CHECK(AmpCore_StepRamp(799u, 1023u, 255u) == 799u);
     reset(); configure();
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
+    CHECK(write_reg(HR_TRACK_POWER, GROUP_READY) == 0);
     CHECK(write_reg(HR_COMMAND, 0u) == AMP_WRITE_SATURATED);
     for (i = 0; i < 200u; i++) { AmpAdapter_OnFrame(1u, 3u); tick(); }
     CHECK(peripheral_duty == 1u && amp_model.status.requested_pwm == 0u);
@@ -187,6 +218,7 @@ int main(void)
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_LEASE) == 0); tick();
     CHECK(amp_model.status.inhibited && peripheral_duty == 399u);
     CHECK(!peripheral_enable); /* still inhibited at neutral: bridge stays de-energized */
+    CHECK(write_reg(HR_TRACK_POWER, GROUP_READY) == 0); /* re-declare ready after lease recovery */
     CHECK(write_reg(HR_COMMAND, 799u) == 0); tick();
     CHECK(!amp_model.status.inhibited && peripheral_duty == 401u);
     /* Default-config bound measured in logical ticks from the last renewal. */
@@ -218,6 +250,7 @@ int main(void)
     CHECK(amp_model.fault.causes & AMP_FAULT_COMMS); /* communication alone doesn't clear latch */
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_CLEAR | HR_CONTROL_LEASE) == 0);
     CHECK(!amp_model.fault.causes && amp_model.status.inhibited);
+    CHECK(write_reg(HR_TRACK_POWER, GROUP_READY) == 0); /* re-declare ready after comm-loss recovery */
     CHECK(write_reg(HR_COMMAND, 700u) == 0); tick();
     CHECK(peripheral_duty == 401u);
     CHECK(write_reg(HR_COMMAND, 399u | HR_PWM_STOP_BIT) == 0); tick();
@@ -225,6 +258,7 @@ int main(void)
     CHECK(write_reg(HR_COMMAND, 700u) == 0); tick();
     CHECK(peripheral_duty == 399u); /* renewal must follow stop latch */
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_LEASE) == 0);
+    CHECK(write_reg(HR_TRACK_POWER, GROUP_READY) == 0); /* re-declare ready after stop latch */
     CHECK(write_reg(HR_COMMAND, 700u) == 0); tick();
     CHECK(peripheral_duty == 401u);
     CHECK(write_reg(HR_COMMAND, HR_PWM_EMO_BIT) == 0); tick();
@@ -242,6 +276,7 @@ int main(void)
      * (peripheral_enable && !peripheral_brake). */
     reset(); configure();
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
+    CHECK(write_reg(HR_TRACK_POWER, GROUP_READY) == 0);
     CHECK(write_reg(HR_COMMAND, 399u) == 0);
     tick();
     CHECK(led_run()); /* enable + neutral -> ON (bridge actively switching) */
@@ -282,6 +317,165 @@ int main(void)
     CHECK((PetitHoldingRegisters[HR_STATE].ActValue & 0x0100u) == 0); /* enable-active cleared synchronously */
     CHECK((PetitHoldingRegisters[HR_STATE].ActValue & 0x8000u) != 0); /* inhibited set synchronously */
     print("PASS: fault-B DISABLE reflects enable-active/inhibited synchronously\n");
+
+    /* ---- HR_TRACK_POWER: dedicated, safety-gated neutral energize ---- */
+    inhibit_at_neutral();
+    /* Without track power, a plain lease renewal must NOT energize at neutral. */
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_LEASE) == 0);
+    tick();
+    CHECK(amp_model.status.inhibited && !peripheral_enable);
+
+    /* (a) track-power request energizes at neutral only once every gate is met. */
+    track_power_on();
+    CHECK((PetitHoldingRegisters[HR_STATE].ActValue & 0x8000u) == 0u); /* inhibited==0 */
+    CHECK(PetitHoldingRegisters[HR_TRACK_POWER].ActValue == TRACK_POWER_ENABLE);
+    CHECK(led_run()); /* enable + neutral + !brake -> bridge switching */
+
+    /* Validation: only bits 0..1 allowed; rejected writes do not change the request. */
+    CHECK(write_reg(HR_TRACK_POWER, 0x0004u) == AMP_WRITE_RANGE); /* bit 2 reserved */
+    CHECK(write_reg(HR_TRACK_POWER, 0x8000u) == AMP_WRITE_RANGE); /* bit 15 reserved */
+    CHECK(write_reg(HR_TRACK_POWER, 0xFFFCu) == AMP_WRITE_RANGE); /* bits 2..15 reserved */
+    CHECK(amp_model.status.track_power_requested);
+
+    /* (c) clearing the bit de-energizes (re-latch inhibit). */
+    CHECK(write_reg(HR_TRACK_POWER, 0u) == 0);
+    CHECK(!amp_model.status.track_power_requested);
+    CHECK(amp_model.status.inhibited); /* synchronous re-latch in OnWrite */
+    tick();
+    CHECK(amp_model.status.inhibited && !peripheral_enable);
+    CHECK(PetitHoldingRegisters[HR_TRACK_POWER].ActValue == 0u);
+
+    /* Not ready: no APPLY -> track power cannot energize (config_ok gate). */
+    reset();
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
+    CHECK(write_reg(HR_TRACK_POWER, TRACK_POWER_ENABLE) == 0);
+    tick();
+    CHECK(!peripheral_enable);
+
+    /* (b) hard fault still inhibits even when track power requested. */
+    track_power_on();
+    amp_model.fault.causes |= AMP_FAULT_HARD;
+    tick();
+    CHECK(amp_model.status.inhibited && !peripheral_enable);
+
+    /* (b) EMO still inhibits even when track power requested. */
+    track_power_on();
+    CHECK(write_reg(HR_COMMAND, HR_PWM_EMO_BIT) == 0);
+    tick();
+    CHECK(amp_model.status.state == AMP_ST_ESTOP);
+    CHECK(amp_model.status.inhibited && !peripheral_enable);
+
+    /* (b) DISABLE still inhibits even when track power requested. */
+    track_power_on();
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_DISABLE) == 0);
+    CHECK(!amp_model.command.enable && amp_model.status.inhibited);
+    tick();
+    CHECK(amp_model.status.inhibited && !peripheral_enable);
+
+    /* (b) comm loss still inhibits even when track power requested. */
+    track_power_on();
+    for (i = 0u; i < 147u; i++) tick();
+    CHECK(amp_model.status.inhibited && (amp_model.fault.causes & AMP_FAULT_COMMS));
+    CHECK(!peripheral_enable);
+
+    /* (b) lease expiry still inhibits even when track power requested. */
+    track_power_on();
+    for (i = 0u; i < AMP_LEASE_TICKS + 2u; i++) { AmpAdapter_OnFrame(1u, 3u); tick(); }
+    CHECK(amp_model.status.inhibited && (amp_model.fault.causes & AMP_FAULT_LEASE));
+    CHECK(!peripheral_enable);
+    print("PASS: HR_TRACK_POWER neutral energize / safety overrides / de-energize\n");
+
+    /* F5: a safety inhibit drops the track-power request; recovery does NOT
+     * re-energize the bridge until a fresh HR_TRACK_POWER=1 write. */
+    track_power_on(); /* energized at neutral, track_power_requested == true */
+    CHECK(amp_model.status.track_power_requested);
+    /* EMO inhibits and drops the request. */
+    CHECK(write_reg(HR_COMMAND, HR_PWM_EMO_BIT) == 0);
+    tick();
+    CHECK(amp_model.status.state == AMP_ST_ESTOP);
+    CHECK(amp_model.status.inhibited && !peripheral_enable);
+    CHECK(!amp_model.status.track_power_requested); /* F5: request dropped */
+    /* Release EMO and renew the lease: the bridge must STAY de-energized. */
+    CHECK(write_reg(HR_COMMAND, 399u) == 0);
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_LEASE) == 0);
+    tick();
+    CHECK(!amp_model.command.emo);
+    CHECK(amp_model.status.inhibited && !peripheral_enable);
+    CHECK(!amp_model.status.track_power_requested); /* still dropped after recovery */
+    /* A fresh HR_TRACK_POWER=1 write re-energizes. */
+    CHECK(write_reg(HR_TRACK_POWER, TRACK_POWER_ENABLE) == 0);
+    tick();
+    CHECK(amp_model.status.track_power_requested);
+    CHECK(!amp_model.status.inhibited && peripheral_enable);
+    CHECK(peripheral_duty == 399u);
+    print("PASS: HR_TRACK_POWER auto-clear on safety inhibit (F5)\n");
+
+    /* ---- GROUP_READY: C#-issued STANDBY -> READY transition + LED modes ---- */
+
+    /* GROUP_READY reject: config not ok. */
+    reset();
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
+    CHECK(write_reg(HR_TRACK_POWER, GROUP_READY) == AMP_WRITE_RELATIONSHIP);
+    CHECK(!amp_model.status.group_ready);
+
+    /* GROUP_READY reject: fault present. */
+    reset(); configure();
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
+    amp_model.fault.causes |= AMP_FAULT_HARD;
+    CHECK(write_reg(HR_TRACK_POWER, GROUP_READY) == AMP_WRITE_RELATIONSHIP);
+    CHECK(!amp_model.status.group_ready);
+
+    /* STANDBY (configured, inhibited by lease expiry, not group-ready): de-energized,
+     * WAR blink, RUN off. */
+    inhibit_at_neutral();
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_LEASE) == 0);
+    tick();
+    CHECK(amp_model.status.state == AMP_ST_STANDBY);
+    CHECK(!amp_model.status.group_ready && !peripheral_enable);
+    {
+        AmpLedMode rm, wm, em;
+        AmpLed_Modes(peripheral_enable, &rm, &wm, &em);
+        CHECK(rm == AMP_LED_OFF && wm == AMP_LED_BLINK && em == AMP_LED_OFF);
+    }
+
+    /* GROUP_READY accepted -> READY (still de-energized; GROUP_READY never energizes). */
+    CHECK(write_reg(HR_TRACK_POWER, GROUP_READY) == 0);
+    CHECK(amp_model.status.group_ready);
+    tick();
+    CHECK(amp_model.status.state == AMP_ST_READY);
+    CHECK(!peripheral_enable);
+    {
+        AmpLedMode rm, wm, em;
+        AmpLed_Modes(peripheral_enable, &rm, &wm, &em);
+        CHECK(rm == AMP_LED_BLINK && wm == AMP_LED_OFF && em == AMP_LED_OFF); /* READY: RUN slow blink */
+    }
+
+    /* Clearing GROUP_READY returns to STANDBY. */
+    CHECK(write_reg(HR_TRACK_POWER, 0u) == 0);
+    CHECK(!amp_model.status.group_ready);
+    tick();
+    CHECK(amp_model.status.state == AMP_ST_STANDBY);
+
+    /* Energize (track power + keep group ready) -> RUN LED continuous. */
+    CHECK(write_reg(HR_TRACK_POWER, GROUP_READY | TRACK_POWER_ENABLE) == 0);
+    tick();
+    CHECK(peripheral_enable);
+    {
+        AmpLedMode rm, wm, em;
+        AmpLed_Modes(peripheral_enable, &rm, &wm, &em);
+        CHECK(rm == AMP_LED_ON && wm == AMP_LED_OFF && em == AMP_LED_OFF);
+    }
+
+    /* Fault overrides the normal LED (ERR on, RUN off, WAR blink). */
+    amp_model.fault.causes |= AMP_FAULT_HARD;
+    tick();
+    {
+        AmpLedMode rm, wm, em;
+        AmpLed_Modes(peripheral_enable, &rm, &wm, &em);
+        CHECK(rm == AMP_LED_OFF && wm == AMP_LED_BLINK && em == AMP_LED_ON);
+    }
+
+    print("PASS: GROUP_READY STANDBY/READY/RUN + LED modes\n");
 
     CHECK(test_transport() == 0);
     print("PASS: production FC03/06/16 handlers, broadcast/range/readonly/malformed frames\n");

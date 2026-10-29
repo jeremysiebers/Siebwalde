@@ -6,7 +6,7 @@
 #define AMP_FW_MAJOR 1u
 #define AMP_FW_MINOR 0u
 #define AMP_FW_PATCH 2u
-#define AMP_PROTOCOL_VERSION 0x01u
+#define AMP_PROTOCOL_VERSION 0x02u
 #define AMP_MAP_VERSION 0x01u
 #define AMP_DEVICE_CLASS 1u
 #define AMP_CAPABILITY 0xFu

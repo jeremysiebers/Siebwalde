@@ -10,7 +10,11 @@
 #define AMP_FAULT_HARD 0x004Fu /* electrical causes + internal invariant */
 typedef enum {
     AMP_ST_NOT_INITIALIZED, AMP_ST_READY, AMP_ST_RUN, AMP_ST_STOPPING,
-    AMP_ST_FAULT, AMP_ST_ESTOP, AMP_ST_COMMS_LOST, AMP_ST_LEASE_EXPIRED
+    AMP_ST_FAULT, AMP_ST_ESTOP, AMP_ST_COMMS_LOST, AMP_ST_LEASE_EXPIRED,
+    /* Group-ready STANDBY: config applied but C# has not yet issued GROUP_READY.
+     * Kept at the END of the enum (value 8) to preserve the frozen 0..7 HR_STATE
+     * wire contract for the existing states. */
+    AMP_ST_STANDBY
 } AmpState;
 typedef struct {
     uint8_t accel_step, decel_step, fast_stop_step;
@@ -24,6 +28,8 @@ typedef struct {
     AmpState state;
     bool init_done, config_ok, id_set, enable_active, brake_active,
          dir_active, stopping_active, inhibited, lease_fresh;
+    bool track_power_requested;
+    bool group_ready;
     uint16_t requested_pwm, target_pwm, applied_pwm;
 } AmpStatus;
 typedef struct { uint16_t causes, validity; } AmpFault;

@@ -51,6 +51,13 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         public IReadOnlyDictionary<byte, ushort> ProtocolVersionOverrides { get; }
 
         /// <summary>
+        /// Detected slave addresses whose GROUP_READY write is rejected (local conditions not met),
+        /// used to model an amplifier that is configured but rejects the C#-issued group-ready
+        /// transition. Empty by default.
+        /// </summary>
+        public IReadOnlyCollection<byte> GroupReadyRejectSlaves { get; }
+
+        /// <summary>
         /// When set, the transport emits a fresh SLAVEINFO frame for every detected slave on this
         /// interval (modelling the real master's cyclic FC03 refresh). When null, the transport
         /// stays fully deterministic with no timer (the pre-existing contract).
@@ -76,7 +83,8 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             IReadOnlyDictionary<byte, ushort>? protocolVersionOverrides = null,
             TimeSpan? periodicSlaveInfoInterval = null,
             bool emitGlobalStopArmedStatus = false,
-            byte initialGlobalStopState = 0)
+            byte initialGlobalStopState = 0,
+            IReadOnlyCollection<byte>? groupReadyRejectSlaves = null)
         {
             FirmwareChecksum = firmwareChecksum;
             DetectedSlaves = detectedSlaves is null
@@ -94,6 +102,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             ProtocolVersionOverrides = protocolVersionOverrides is null
                 ? new Dictionary<byte, ushort>()
                 : new Dictionary<byte, ushort>(protocolVersionOverrides);
+            GroupReadyRejectSlaves = groupReadyRejectSlaves is null
+                ? Array.Empty<byte>()
+                : new List<byte>(groupReadyRejectSlaves);
             PeriodicSlaveInfoInterval = periodicSlaveInfoInterval;
             EmitGlobalStopArmedStatus = emitGlobalStopArmedStatus;
             InitialGlobalStopState = initialGlobalStopState;
@@ -153,7 +164,8 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                     ? overrideProtocol
                     : TrackAmplifierRegisters.Phase1ProtocolVersion;
                 _amplifiers[slave] = new SimulatedTrackAmplifier(slave, firmwareChecksum: _config.FirmwareChecksum,
-                    protocolVersion: protocolVersion);
+                    protocolVersion: protocolVersion,
+                    rejectGroupReady: _config.GroupReadyRejectSlaves.Contains(slave));
                 _detected.Add(slave);
             }
 
@@ -407,6 +419,12 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
                         foreach (var slave in _config.DetectedSlaves)
                         {
+                            // Model the PIC32's periodic motion-permission lease renewal broadcast:
+                            // keep each slave's lease fresh so a long FullSimulation session (or a
+                            // slow group-ready readback poll) cannot expire the lease.
+                            GetOrCreateAmplifier(slave).ApplyWrite(
+                                (byte)TrackAmplifierRegisters.Control,
+                                new[] { TrackAmplifierRegisters.MotionPermissionBit });
                             writer.TryWrite(BuildSlaveInfoFrame(slave));
                         }
                     }
@@ -464,6 +482,14 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
                 case TrackCommand.EXEC_MBUS_STATE_SLAVE_ENABLE: // 105
                     writer.TryWrite(BuildControlFrame(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVE_ENABLE, TaskStates.DONE));
+                    // Model the PIC32 ENABLExAMPLIFIER(): ENABLE + motion-permission lease renewal
+                    // per detected slave, so a GROUP_READY write is accepted (enable + lease fresh).
+                    foreach (var slave in _config.DetectedSlaves)
+                    {
+                        GetOrCreateAmplifier(slave).ApplyWrite(
+                            (byte)TrackAmplifierRegisters.Control,
+                            new[] { (ushort)(TrackAmplifierRegisters.EnableBit | TrackAmplifierRegisters.MotionPermissionBit) });
+                    }
                     break;
 
                 case TrackCommand.HOST_HEARTBEAT:

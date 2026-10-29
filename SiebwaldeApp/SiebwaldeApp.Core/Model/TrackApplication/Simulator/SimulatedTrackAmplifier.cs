@@ -45,7 +45,10 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private bool _inhibited;
         private bool _stoppingActive;
         private bool _fastStopping;
-        private int _state;                 // HR_STATE enum 0..7
+        private bool _trackPowerRequested;
+        private bool _groupReady;
+        private bool _rejectGroupReady;
+        private int _state;                 // HR_STATE enum 0..7 (+8 STANDBY)
         private bool _configApplied;
 
         private int _leaseTicks;
@@ -55,9 +58,11 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
         public SimulatedTrackAmplifier(byte slaveNumber, ushort identity = Phase1Identity,
             ushort firmwareChecksum = TrackSimulatorConfig.DefaultFirmwareChecksum,
-            ushort protocolVersion = TrackAmplifierRegisters.Phase1ProtocolVersion)
+            ushort protocolVersion = TrackAmplifierRegisters.Phase1ProtocolVersion,
+            bool rejectGroupReady = false)
         {
             SlaveNumber = slaveNumber;
+            _rejectGroupReady = rejectGroupReady;
             _registers[TrackAmplifierRegisters.Identity] = identity;
             _registers[TrackAmplifierRegisters.SwChecksum] = firmwareChecksum;
             // Firmware semantic version (mirrors PIC18 AmpAdapter_Init): 1.0.0, protocol from the
@@ -97,7 +102,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             for (int i = 0; i < values.Length; i++)
             {
                 int address = startRegister + i;
-                if (address >= TrackAmplifierRegisters.Count)
+                if (address >= TrackAmplifierRegisters.Count && address != TrackAmplifierRegisters.TrackPower)
                 {
                     SetWriteResult((byte)(address & 0xFF), 2, retained: true);
                     continue;
@@ -110,6 +115,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                         break;
                     case TrackAmplifierRegisters.Control:   // HR1
                         WriteControl(values[i]);
+                        break;
+                    case TrackAmplifierRegisters.TrackPower: // HR23 (outside the SLAVEINFO frame)
+                        WriteTrackPower(values[i]);
                         break;
                     case TrackAmplifierRegisters.Address:   // HR2
                         _registers[address] = values[i];
@@ -135,8 +143,36 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         {
             StepRamp();
             StepLease();
+            StepTrackPower();
+            ApplyStandbyState();
             RefreshState();
         }
+
+        /// <summary>
+        /// Mirrors the firmware state machine: a configured amplifier without a C#-issued GROUP_READY
+        /// is STANDBY (state 8), unless a fault/estop/lease state overrides it. When GROUP_READY is
+        /// (re)issued, a STANDBY amplifier returns to READY (state 1).
+        /// </summary>
+        private void ApplyStandbyState()
+        {
+            if (!_configApplied)
+            {
+                return;
+            }
+
+            if (!_groupReady && _state is not (5 or 7)) // 5=ESTOP, 7=LEASE_EXPIRED override
+            {
+                _state = TrackAmplifierRegisters.StandbyState; // STANDBY
+            }
+            else if (_groupReady && _state == TrackAmplifierRegisters.StandbyState)
+            {
+                _state = TrackAmplifierRegisters.ReadyState; // READY
+            }
+        }
+
+        /// <summary>The "at rest" state (READY or STANDBY) reflecting the current group-ready flag.</summary>
+        private int ReadyStateValue()
+            => _groupReady ? TrackAmplifierRegisters.ReadyState : TrackAmplifierRegisters.StandbyState;
 
         /// <summary>Writes the current model state back into the HR_STATE / HR_REQUESTED/TARGET/APPLIED registers.</summary>
         public void RefreshState()
@@ -157,6 +193,19 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         // Write handlers
         // --------------------------------------------------------------------
 
+        /// <summary>
+        /// Mirrors the PIC18 <c>AmpCore_Inhibit()</c> (F5): every safety inhibit (EMO, STOP_REQUEST,
+        /// lease expiry, DISABLE — and the explicit HR_TRACK_POWER clear) latches <c>_inhibited</c>
+        /// AND drops the track-power request, so a transient inhibit that later clears can never
+        /// auto re-energize the bridge without a fresh HR_TRACK_POWER=1 write.
+        /// </summary>
+        private void Inhibit()
+        {
+            _inhibited = true;
+            _trackPowerRequested = false;
+            _groupReady = false; // safety inhibit drops the C#-issued group-ready decision
+        }
+
         private void WriteCommand(ushort value)
         {
             int pwm = value & TrackAmplifierRegisters.PwmMask;
@@ -176,7 +225,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             {
                 _stoppingActive = true;
                 _fastStopping = true;
-                _inhibited = true;
+                Inhibit();
                 _state = 5; // ESTOP
                 _targetDuty = Neutral;
             }
@@ -184,7 +233,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             {
                 _stoppingActive = true;
                 _fastStopping = true;
-                _inhibited = true;
+                Inhibit();
                 _state = 3; // STOPPING
                 _targetDuty = Neutral;
             }
@@ -206,7 +255,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                     // Normal zero: normal decel to neutral, no INHIBITED, no latch.
                     _stoppingActive = _appliedDuty != Neutral;
                     _fastStopping = false;
-                    _state = _stoppingActive ? 3 : (_configApplied ? 1 : 0);
+                    _state = _stoppingActive ? 3 : (_configApplied ? ReadyStateValue() : 0);
                 }
             }
 
@@ -240,7 +289,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                 _enableActive = false;
                 _stoppingActive = true;
                 _fastStopping = true;
-                _inhibited = true;
+                Inhibit();
                 _state = 3; // STOPPING (disable ramps to neutral)
                 _targetDuty = Neutral;
             }
@@ -288,6 +337,70 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private static bool Edge(ushort value, ushort prev, ushort bit)
             => (value & bit) != 0 && (prev & bit) == 0;
 
+        private void WriteTrackPower(ushort value)
+        {
+            // Only bits 0..1 (TRACK_POWER_ENABLE, GROUP_READY) are legal; bits 2..15 reserved.
+            ushort legalMask = (ushort)(TrackAmplifierRegisters.TrackPowerEnableBit | TrackAmplifierRegisters.GroupReadyBit);
+            if ((value & ~legalMask) != 0)
+            {
+                SetWriteResult(TrackAmplifierRegisters.TrackPower, 1, retained: true);
+                return;
+            }
+
+            bool prevTrackPower = _trackPowerRequested;
+            _trackPowerRequested = (value & TrackAmplifierRegisters.TrackPowerEnableBit) != 0;
+
+            byte result = 0;
+            if ((value & TrackAmplifierRegisters.GroupReadyBit) != 0)
+            {
+                // GROUP_READY accepted only when local conditions are valid; otherwise reject so
+                // the C# init master can read it back via HR_WRITE_RESULT.
+                if (!_rejectGroupReady && _enableActive && _configApplied &&
+                    _registers[TrackAmplifierRegisters.Fault] == 0 && LeaseFresh())
+                {
+                    _groupReady = true;
+                }
+                else
+                {
+                    _groupReady = false;
+                    result = 3; // AMP_WRITE_RELATIONSHIP
+                }
+            }
+            else
+            {
+                _groupReady = false; // clearing GROUP_READY returns the amp to STANDBY
+            }
+
+            // Clearing the track-power request (1 -> 0) re-latches inhibit.
+            if (prevTrackPower && !_trackPowerRequested)
+            {
+                Inhibit();
+            }
+
+            SetWriteResult(TrackAmplifierRegisters.TrackPower, result, retained: result != 0);
+            RefreshState();
+        }
+
+        /// <summary>
+        /// Mirrors the PIC18 <c>AmpCore_Update</c> guarded neutral energize: a track-power request
+        /// clears the inhibit latch only when enabled + configured + fault-free + lease-fresh and the
+        /// bridge output is at neutral (the firmware checks <c>ramp_current == AMP_NEUTRAL</c> AND
+        /// <c>applied_pwm == AMP_NEUTRAL</c>, i.e. the applied output is neutral). Safety overrides
+        /// (hard/lease/comm/EMO/DISABLE) drop the request via <see cref="Inhibit"/> and are never
+        /// bypassed by this path. It does NOT additionally gate on the fast-stop/stopping flags, to
+        /// match the firmware exactly.
+        /// </summary>
+        private void StepTrackPower()
+        {
+            bool faultFree = _registers[TrackAmplifierRegisters.Fault] == 0;
+
+            if (_trackPowerRequested && _enableActive && _configApplied && faultFree &&
+                LeaseFresh() && _appliedDuty == Neutral && _targetDuty == Neutral)
+            {
+                _inhibited = false;
+            }
+        }
+
         private bool ApplyConfig()
         {
             int accel = _registers[TrackAmplifierRegisters.ConfigRamp] & 0xFF;
@@ -313,7 +426,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             _configApplied = true;
             _registers[TrackAmplifierRegisters.Fault] =
                 (ushort)(_registers[TrackAmplifierRegisters.Fault] & ~TrackAmplifierRegisters.ConfigInvalidFaultBit);
-            _state = 1; // READY
+            _state = ReadyStateValue(); // READY or STANDBY
             return true;
         }
 
@@ -341,7 +454,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                     _fastStopping = false;
                     if (!_inhibited)
                     {
-                        _state = _configApplied ? 1 : 0; // READY / NOT_INITIALIZED
+                        _state = _configApplied ? ReadyStateValue() : 0; // READY / STANDBY / NOT_INITIALIZED
                     }
                 }
                 else if (_enableActive && _configApplied && !_inhibited)
@@ -362,7 +475,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             if (_leaseTicks >= LeaseTimeoutTicks && !_inhibited)
             {
                 // Movement-permission lease expired: local fast ramp to neutral + latched INHIBITED.
-                _inhibited = true;
+                Inhibit();
                 _state = 7; // LEASE_EXPIRED
                 _stoppingActive = true;
                 _fastStopping = true;

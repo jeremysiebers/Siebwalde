@@ -12,6 +12,19 @@ namespace SiebwaldeApp.Core
         public const int MessagesReceived = 19, MessagesSent = 20;
         public const int FwVersionMajorMinor = 21, FwVersionPatchProtocol = 22;
 
+        /// <summary>
+        /// HR_TRACK_POWER (register 23): the dedicated, safety-gated neutral track-power request.
+        /// This register is OUTSIDE the 23-register SLAVEINFO frame (it is only addressed via the
+        /// point 108 EXEC_MBUS_SLAVE_DATA_EXCH write/read path), so <see cref="Count"/> stays 23.
+        /// </summary>
+        public const int TrackPower = 23;
+
+        /// <summary>HR_TRACK_POWER bit 0 = TRACK_POWER_ENABLE (energize).</summary>
+        public const ushort TrackPowerEnableBit = 0x0001;
+
+        /// <summary>HR_TRACK_POWER bit 1 = GROUP_READY (C#-issued STANDBY -> READY transition).</summary>
+        public const ushort GroupReadyBit = 0x0002;
+
         // Existing consumer names now refer to the clean-sheet map, not the legacy addresses.
         public const int BemfControl = Control, Status = Validity, AmplifierStatus = State;
         public const int ConfigIdPwm = Address, AccelParams = ConfigRamp;
@@ -32,6 +45,10 @@ namespace SiebwaldeApp.Core
         public const ushort WatchdogCapability = 1 << 14, TwoPhaseConfigCapability = 1 << 15;
         public const ushort WriteRetainedBit = 1 << 15;
         public const int LeaseExpiredState = 7;
+        /// <summary>HR_STATE low nibble for the READY state (group-ready, no movement).</summary>
+        public const int ReadyState = 1;
+        /// <summary>HR_STATE low nibble for the group-ready STANDBY state (config applied, no GROUP_READY).</summary>
+        public const int StandbyState = 8;
 
         /// <summary>Shape check only. NOT identity authorization: requires PIC32 fresh-read evidence.</summary>
         public static bool HasCompatibleIdentityFields(ushort identity)
@@ -49,17 +66,35 @@ namespace SiebwaldeApp.Core
         /// <summary>Wire PROTOCOL_VERSION from the HR22 (patch&lt;&lt;8 | protocolVersion) register.</summary>
         public static int FwProtocolVersion(ushort fwVersionPatchProtocol) => fwVersionPatchProtocol & 0xFF;
 
-        /// <summary>Frozen Phase-1 wire PROTOCOL_VERSION. The only value a Phase-1 host accepts.</summary>
+        /// <summary>Frozen Phase-1 wire PROTOCOL_VERSION (0x01): the base protocol without track power.</summary>
         public const ushort Phase1ProtocolVersion = 0x01;
 
         /// <summary>
-        /// True when HR22 reports the frozen Phase-1 PROTOCOL_VERSION. This is a SECONDARY
-        /// compatibility check, meaningful only after the HR7 identity check has passed: a legacy
-        /// 12-register device never reaches HR22 (it already fails HR7), and an absent/exception
-        /// HR22 read (0x00) is UNKNOWN/INCOMPATIBLE, never "compatible by default".
+        /// Wire PROTOCOL_VERSION (0x02) that a track-power-capable firmware advertises: it adds the
+        /// HR_TRACK_POWER register (23). Any firmware at 0x01 is Phase-1 compatible but does NOT
+        /// support track power, so Stage 6 must fail closed against it.
+        /// </summary>
+        public const ushort TrackPowerProtocolVersion = 0x02;
+
+        /// <summary>
+        /// True when HR22 reports a compatible Phase-1 PROTOCOL_VERSION (0x01 or 0x02). This is a
+        /// SECONDARY compatibility check, meaningful only after the HR7 identity check has passed:
+        /// a legacy 12-register device never reaches HR22 (it already fails HR7), and an
+        /// absent/exception HR22 read (0x00) is UNKNOWN/INCOMPATIBLE, never "compatible by default".
         /// </summary>
         public static bool HasCompatibleProtocolVersion(ushort fwVersionPatchProtocol)
-            => FwProtocolVersion(fwVersionPatchProtocol) == Phase1ProtocolVersion;
+        {
+            var protocol = FwProtocolVersion(fwVersionPatchProtocol);
+            return protocol == Phase1ProtocolVersion || protocol == TrackPowerProtocolVersion;
+        }
+
+        /// <summary>
+        /// True when the firmware advertises track-power support (PROTOCOL_VERSION &gt;= 0x02). A
+        /// firmware at 0x01 (or an absent 0x00) does NOT support HR_TRACK_POWER and must be blocked
+        /// from the Stage 6 track-power transition (fail-closed).
+        /// </summary>
+        public static bool SupportsTrackPower(ushort fwVersionPatchProtocol)
+            => FwProtocolVersion(fwVersionPatchProtocol) >= TrackPowerProtocolVersion;
 
         /// <summary>True when the identity reports the applied-readback capability (HR7 bit 12).</summary>
         public static bool HasAppliedReadbackCapability(ushort identity)

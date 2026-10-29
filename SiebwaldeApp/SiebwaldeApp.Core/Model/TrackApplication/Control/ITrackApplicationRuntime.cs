@@ -136,5 +136,38 @@ namespace SiebwaldeApp.Core
         /// The values are queued and sent by the runtime write loop, not immediately.
         /// </summary>
         void SetAmplifierControl(ushort slaveNumber, int pwmSetpoint, bool emoStop);
+
+        /// <summary>
+        /// Read-only snapshot of the seven controlled-initialization stages, ordered by stage id.
+        /// Empty until the track part has been composed.
+        /// </summary>
+        IReadOnlyList<TrackInitStageStatus> InitStages { get; }
+
+        /// <summary>Raised when an initialization stage's status changes.</summary>
+        event EventHandler<TrackInitStageStatusChangedEventArgs>? InitStageStatusChanged;
+
+        /// <summary>True when the operator has authorized the Stage 6 track-power transition.</summary>
+        bool TrackPowerAuthorized { get; }
+
+        /// <summary>True when track power is ON (TRACK_POWER_ON verified on every required amplifier).</summary>
+        bool TrackPowerOn { get; }
+
+        /// <summary>Explicit operator authorization for the Stage 6 track-power transition (never auto-energized).</summary>
+        void AuthorizeTrackPowerEnable();
+
+        /// <summary>Runs the gated Stage 6 track-power action (write HR_TRACK_POWER + verify HR_STATE per amplifier).</summary>
+        Task<bool> EnableTrackPowerAsync(CancellationToken ct = default);
+
+        /// <summary>Clears HR_TRACK_POWER on every required amplifier, de-energizing the bridges.</summary>
+        Task DisableTrackPowerAsync(CancellationToken ct = default);
+
+        /// <summary>Manual initialization: run exactly one stage (step).</summary>
+        Task<TrackInitStageState> StepInitAsync(CancellationToken ct = default);
+
+        /// <summary>Manual initialization: re-run the current stage (retry).</summary>
+        Task<TrackInitStageState> RetryInitAsync(CancellationToken ct = default);
+
+        /// <summary>Manual initialization: move back one stage and mark it Pending for re-execution.</summary>
+        void BacktrackInit();
     }
 }

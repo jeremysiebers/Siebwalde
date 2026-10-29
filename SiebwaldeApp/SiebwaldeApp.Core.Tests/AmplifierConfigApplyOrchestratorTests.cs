@@ -428,7 +428,7 @@ namespace SiebwaldeApp.Core.Tests
         {
             var config = new TrackSimulatorConfig(
                 detectedSlaves: new byte[] { 1 },
-                protocolVersionOverrides: new Dictionary<byte, ushort> { { 1, 0x02 } });
+                protocolVersionOverrides: new Dictionary<byte, ushort> { { 1, 0x00 } });
             var transport = new DeterministicTrackTransport(config);
             await using var orchestrator = CreateOrchestrator(transport);
 

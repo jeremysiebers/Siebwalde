@@ -19,8 +19,10 @@
 
 static uint8_t MODBUS_ADDRESS = 0;
 static uint8_t LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
+static uint8_t LED_RUN_prev = 0;
 static uint8_t LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
-static uint8_t LED_ERR, LED_WAR = 0;
+static uint8_t LED_RUN_STATE = 0;
+static uint8_t LED_ERR, LED_WAR, LED_RUN = 0;
 static uint8_t Config = 1;
 static uint8_t Startup_Machine = 0;
 static uint8_t Sequencer = 0;
@@ -44,6 +46,35 @@ bool Amplifier_TryBootloaderWrite(uint8_t frame_address, uint16_t addr, uint16_t
     return true;
 }
 
+static void Update_Leds(void)
+{
+    AmpLedMode run_mode, war_mode, err_mode;
+    AmpLed_Modes(PWM3EN, &run_mode, &war_mode, &err_mode);
+
+    LED_ERR_LAT = (err_mode == AMP_LED_ON);
+
+    switch (run_mode) {
+    case AMP_LED_ON:
+        LED_RUN_LAT = 1;   /* energized: continuous */
+        LED_RUN = 0;       /* no blink */
+        break;
+    case AMP_LED_BLINK:
+        LED_RUN++;         /* group-ready, not energized: Led_Blink toggles LED_RUN_LAT */
+        break;
+    default: /* AMP_LED_OFF */
+        LED_RUN_LAT = 0;
+        LED_RUN = 0;
+        break;
+    }
+
+    if (war_mode == AMP_LED_BLINK) {
+        LED_WAR++;
+    } else {
+        LED_WAR = 0;
+        LED_WAR_LAT = 0;
+    }
+}
+
 static void Amplifier_ServiceTick(void)
 {
     /* Atomic byte read, modulo-256 counter retained. Never clear the ISR counter. */
@@ -52,11 +83,7 @@ static void Amplifier_ServiceTick(void)
         LastAmplifierTick++; /* bounded catch-up, one tick per super-loop pass */
         REGULATORxUPDATE();
         AmpAdapter_Refresh();
-        LED_RUN_LAT = PWM3EN && !amp_model.status.brake_active;
-        LED_ERR_LAT = amp_model.status.state == AMP_ST_FAULT || amp_model.command.emo ||
-            (amp_model.fault.causes & AMP_FAULT_COMMS) != 0;
-        if (LED_RUN_LAT) { LED_WAR = 0; LED_WAR_LAT = 0; }
-        else { LED_WAR++; }
+        Update_Leds();
     }
 }
 
@@ -259,6 +286,29 @@ void Led_Blink (){
 
             default :
                 LED_WAR_STATE = 0;
+                break;                       
+        }
+        
+        switch(LED_RUN_STATE){
+            case 0 : 
+                if (LED_RUN > 0){
+                    LED_RUN_LAT = 1;
+                    LED_RUN_prev = LED_RUN;
+                    LED_RUN_STATE = 1;                        
+                }
+                break;
+
+            case 1 :
+                if (LED_RUN == LED_RUN_prev || LED_RUN != LED_RUN_prev){
+                    LED_RUN_LAT = 0;
+                    LED_RUN_prev = 0;
+                    LED_RUN = 0;
+                    LED_RUN_STATE = 0;                        
+                }
+                break;
+
+            default :
+                LED_RUN_STATE = 0;
                 break;                       
         }
         

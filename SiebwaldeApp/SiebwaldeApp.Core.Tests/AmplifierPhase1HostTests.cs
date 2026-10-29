@@ -106,7 +106,7 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
-        public async Task ProtocolVersion02_Incompatible_BlocksConfigDownload()
+        public async Task ProtocolVersion02_Compatible_AndSupportsTrackPower_AllowsConfigDownload()
         {
             var config = new TrackSimulatorConfig(
                 detectedSlaves: new byte[] { 1 },
@@ -120,23 +120,37 @@ namespace SiebwaldeApp.Core.Tests
             await WaitUntilAsync(() => variables.trackAmpItems[1].ProtocolReadbackObserved, TimeSpan.FromSeconds(2));
 
             var item = variables.trackAmpItems[1];
-            // HR7 identity is Phase-1 compatible, but HR22 protocol is not.
+            // HR7 identity is Phase-1 compatible, and HR22 protocol 0x02 is now the track-power
+            // protocol: compatible AND track-power capable.
             Assert.True(TrackAmplifierRegisters.HasCompatibleIdentityFields(
                 item.HoldingReg[TrackAmplifierRegisters.Identity]));
-            Assert.False(TrackAmplifierRegisters.HasCompatibleProtocolVersion(
+            Assert.Equal(0x02, TrackAmplifierRegisters.FwProtocolVersion(
                 item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]));
-            Assert.False(AmplifierPhase1Safety.Compatible(item));
-            Assert.Equal(AmplifierPhase1Safety.IncompatibleProtocolVersion,
-                AmplifierPhase1Safety.IncompatibilityReason(item));
-            Assert.Equal(AmplifierPhase1Safety.IncompatibleProtocolVersion, item.Phase1Failure);
+            Assert.True(TrackAmplifierRegisters.HasCompatibleProtocolVersion(
+                item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]));
+            Assert.True(TrackAmplifierRegisters.SupportsTrackPower(
+                item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]));
+            Assert.True(AmplifierPhase1Safety.Compatible(item));
+            Assert.Null(AmplifierPhase1Safety.IncompatibilityReason(item));
 
             var downloader = new AmplifierConfigurationDownloader(client);
             var ok = await downloader.DownloadAsync(item, new AmplifierConfiguration(), CancellationToken.None);
-            Assert.False(ok);
-            Assert.False(item.ConfigurationVerified);
-            Assert.Equal(AmplifierPhase1Safety.IncompatibleProtocolVersion, item.Phase1Failure);
+            Assert.True(ok);
+            Assert.True(item.ConfigurationVerified);
+            Assert.Null(item.Phase1Failure);
 
             await client.DisposeAsync();
+        }
+
+        [Fact]
+        public void ProtocolVersion01_Compatible_ButDoesNotSupportTrackPower()
+        {
+            // A Phase-1 firmware at 0x01 is compatible for config download but does NOT support
+            // HR_TRACK_POWER, so Stage 6 must fail closed against it.
+            Assert.True(TrackAmplifierRegisters.HasCompatibleProtocolVersion(
+                TrackAmplifierRegisters.Phase1ProtocolVersion));
+            Assert.False(TrackAmplifierRegisters.SupportsTrackPower(
+                TrackAmplifierRegisters.Phase1ProtocolVersion));
         }
 
         [Fact]
@@ -200,7 +214,7 @@ namespace SiebwaldeApp.Core.Tests
         {
             var config = new TrackSimulatorConfig(
                 detectedSlaves: new byte[] { 1 },
-                protocolVersionOverrides: new Dictionary<byte, ushort> { { 1, 0x02 } });
+                protocolVersionOverrides: new Dictionary<byte, ushort> { { 1, 0x00 } });
             var variables = new TrackApplicationVariables();
             var transport = new DeterministicTrackTransport(config);
             var client = new TrackCommClientAsync(transport, variables);
@@ -210,12 +224,12 @@ namespace SiebwaldeApp.Core.Tests
             await WaitUntilAsync(() => variables.trackAmpItems[1].ProtocolReadbackObserved, TimeSpan.FromSeconds(2));
 
             var item = variables.trackAmpItems[1];
-            Assert.False(AmplifierPhase1Safety.Compatible(item)); // write/control authority denied
+            Assert.False(AmplifierPhase1Safety.Compatible(item)); // absent/legacy protocol -> write/control authority denied
 
             // Version/protocol reporting (HR21/HR22) remains readable.
             Assert.Equal(1, TrackAmplifierRegisters.FwMajor(item.HoldingReg[TrackAmplifierRegisters.FwVersionMajorMinor]));
             Assert.Equal(0, TrackAmplifierRegisters.FwMinor(item.HoldingReg[TrackAmplifierRegisters.FwVersionMajorMinor]));
-            Assert.Equal(0x02, TrackAmplifierRegisters.FwProtocolVersion(
+            Assert.Equal(0x00, TrackAmplifierRegisters.FwProtocolVersion(
                 item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol]));
 
             // The read-only PIC32 controller version (113) round-trip is unaffected (no gating).

@@ -34,6 +34,39 @@ void AmpCore_Inhibit(void)
     }
     amp_model.command.pwm = AMP_NEUTRAL; /* never replay retained movement */
     amp_model.fast_stopping = true;
+    /* F5: any safety inhibit (lease expiry / comm loss / hard fault / EMO /
+     * STOP_REQUEST / DISABLE) also drops the track-power request, so a transient
+     * fault that later clears can never re-energize the H-bridge at neutral
+     * without a fresh operator HR_TRACK_POWER=1 write. */
+    amp_model.status.track_power_requested = false;
+    /* Group-ready is a C#-issued global decision; a local safety inhibit means the
+     * amplifier is no longer "ready", so drop group_ready too and return to STANDBY.
+     * C# must re-issue GROUP_READY after recovery. */
+    amp_model.status.group_ready = false;
+}
+
+void AmpLed_Modes(bool pwm3en, AmpLedMode *run_mode, AmpLedMode *war_mode, AmpLedMode *err_mode)
+{
+    const AmpModel *m = &amp_model;
+    bool fault_display = m->status.state == AMP_ST_FAULT || m->command.emo ||
+                         (m->fault.causes & AMP_FAULT_COMMS) != 0;
+
+    /* ERR LED: continuous on for a hard fault / EMO / comm loss (existing priority). */
+    *err_mode = fault_display ? AMP_LED_ON : AMP_LED_OFF;
+
+    if (pwm3en && !m->status.brake_active) {
+        /* Energized (RUN, or a fast-stop/stop ramp still switching): RUN continuous, WAR off. */
+        *run_mode = AMP_LED_ON;
+        *war_mode = AMP_LED_OFF;
+    } else if (m->status.state == AMP_ST_READY) {
+        /* Group-ready but not energized: RUN slow blink, WAR off. */
+        *run_mode = AMP_LED_BLINK;
+        *war_mode = AMP_LED_OFF;
+    } else {
+        /* STANDBY / not-init / fault / lease / stopped: RUN off, WAR slow blink. */
+        *run_mode = AMP_LED_OFF;
+        *war_mode = AMP_LED_BLINK;
+    }
 }
 
 uint16_t AmpCore_StepRamp(uint16_t current, uint16_t target, uint8_t step)
@@ -81,6 +114,7 @@ void AmpCore_Update(void)
     else if (comm) m->status.state = AMP_ST_COMMS_LOST;
     else if (lease) m->status.state = AMP_ST_LEASE_EXPIRED;
     else if (!m->status.init_done || !m->status.config_ok) m->status.state = AMP_ST_NOT_INITIALIZED;
+    else if (m->status.config_ok && !m->status.group_ready) m->status.state = AMP_ST_STANDBY;
     else if (m->fast_stopping || (!m->command.enable && m->ramp_current != AMP_NEUTRAL) ||
              (m->command.pwm == AMP_NEUTRAL && m->ramp_current != AMP_NEUTRAL)) m->status.state = AMP_ST_STOPPING;
     else if (m->command.enable && !m->status.inhibited && m->status.lease_fresh &&
@@ -104,6 +138,18 @@ void AmpCore_Update(void)
     /* Retained EMO semantics: latch brake immediately, do not load PWM. */
     if (!m->command.emo) AmpHw_SetDuty(m->ramp_current);
     m->status.dir_active = m->status.applied_pwm > AMP_NEUTRAL;
+    /* Track-power energize (HR_TRACK_POWER). A dedicated, safety-gated clear of the
+     * inhibit latch at NEUTRAL PWM only, for occupancy detection: it never supplies a
+     * non-neutral command and never bypasses a safety override. It runs AFTER the
+     * fault/inhibit/state logic above, so hard / EMO / STOP_REQUEST / lease-expiry /
+     * comm-loss / DISABLE have already inhibited; the guard below must therefore also
+     * exclude EMO and STOP_REQUEST explicitly (they do not set a fault cause). */
+    if (m->status.track_power_requested && m->command.enable &&
+        m->status.config_ok && !m->fault.causes && m->status.lease_fresh &&
+        !m->command.emo && !m->command.stop_request &&
+        m->ramp_current == AMP_NEUTRAL && m->status.applied_pwm == AMP_NEUTRAL) {
+        m->status.inhibited = false;
+    }
     /* De-energize the bridge once neutral is reached after any inhibit
      * (comm-loss / lease-expiry / STOP_REQUEST / DISABLE): keep the PWM stage
      * switching only while actively ramping down, then drop PWM3EN.
