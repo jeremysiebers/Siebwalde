@@ -287,6 +287,10 @@ namespace SiebwaldeApp.Core.Tests
             foreach (var amp in new byte[] { 1, 3, 4, 6 })
             {
                 variables.trackAmpItems[amp].ConfigurationVerified = true;
+                // HR_STATE reflects READY (group-ready accepted).
+                variables.trackAmpItems[amp].HoldingReg[TrackAmplifierRegisters.State] =
+                    (ushort)(TrackAmplifierRegisters.ReadyState | TrackAmplifierRegisters.EnableActiveBit
+                             | TrackAmplifierRegisters.InitDoneBit | TrackAmplifierRegisters.ConfigOkBit);
             }
 
             var machine = new TrackInitStateMachine(

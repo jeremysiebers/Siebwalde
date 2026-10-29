@@ -342,7 +342,22 @@ namespace SiebwaldeApp.Integration
                             if (allReady)
                             {
                                 _trackInitStateMachine?.MarkStagePassed(TrackInitStage.ConfigureValidate);
-                                _trackInitStateMachine?.MarkStagePassed(TrackInitStage.GlobalReady);
+
+                                // Stage 5: issue the C#-decided GROUP_READY transition and verify
+                                // every required amplifier accepted it. GROUP_READY never energizes.
+                                var groupReadyOk = await WriteGroupReadyAsync(domain, _cts.Token)
+                                    .ConfigureAwait(false);
+                                if (groupReadyOk)
+                                {
+                                    _trackInitStateMachine?.MarkStagePassed(TrackInitStage.GlobalReady);
+                                }
+                                else
+                                {
+                                    _trackInitStateMachine?.MarkStageFailed(
+                                        TrackInitStage.GlobalReady,
+                                        "GROUP_READY rejected by one or more required amplifiers.",
+                                        "Check the rejecting amplifier's local conditions (enable/config/fault/lease) and re-run.");
+                                }
                             }
                             else
                             {
@@ -761,6 +776,40 @@ namespace SiebwaldeApp.Integration
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Issues the C#-decided GROUP_READY transition (HR_TRACK_POWER bit 1) to every required
+        /// amplifier and verifies each accepted it (its HR_STATE left STANDBY). GROUP_READY never
+        /// energizes; TRACK_POWER_ENABLE (bit 0, Stage 6) is the only energize path. Returns false
+        /// (fail-closed) when any amplifier rejects, so Stage 6 stays blocked.
+        /// </summary>
+        private async Task<bool> WriteGroupReadyAsync(IReadOnlyCollection<byte> domain, CancellationToken ct)
+        {
+            if (_trackCommClient is null || _trackVariables is null)
+            {
+                return false;
+            }
+
+            var step = new GroupReadyStep(_trackCommClient, _trackVariables, domain.ToArray(), _loggerInstance);
+
+            while (true)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                var result = await step.ExecuteAsync(null, ct).ConfigureAwait(false);
+                if (result.Kind == InitStepResultKind.Completed)
+                {
+                    return true;
+                }
+
+                if (result.Kind == InitStepResultKind.Error)
+                {
+                    return false;
+                }
+
+                await Task.Delay(10, ct).ConfigureAwait(false);
+            }
         }
 
         /// <summary>

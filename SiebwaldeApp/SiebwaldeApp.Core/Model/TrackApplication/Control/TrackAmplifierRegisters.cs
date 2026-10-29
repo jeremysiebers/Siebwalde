@@ -19,8 +19,11 @@ namespace SiebwaldeApp.Core
         /// </summary>
         public const int TrackPower = 23;
 
-        /// <summary>HR_TRACK_POWER bit 0 = TRACK_POWER_ENABLE. Bits 1..15 are reserved (must be 0).</summary>
+        /// <summary>HR_TRACK_POWER bit 0 = TRACK_POWER_ENABLE (energize).</summary>
         public const ushort TrackPowerEnableBit = 0x0001;
+
+        /// <summary>HR_TRACK_POWER bit 1 = GROUP_READY (C#-issued STANDBY -> READY transition).</summary>
+        public const ushort GroupReadyBit = 0x0002;
 
         // Existing consumer names now refer to the clean-sheet map, not the legacy addresses.
         public const int BemfControl = Control, Status = Validity, AmplifierStatus = State;
@@ -42,6 +45,10 @@ namespace SiebwaldeApp.Core
         public const ushort WatchdogCapability = 1 << 14, TwoPhaseConfigCapability = 1 << 15;
         public const ushort WriteRetainedBit = 1 << 15;
         public const int LeaseExpiredState = 7;
+        /// <summary>HR_STATE low nibble for the READY state (group-ready, no movement).</summary>
+        public const int ReadyState = 1;
+        /// <summary>HR_STATE low nibble for the group-ready STANDBY state (config applied, no GROUP_READY).</summary>
+        public const int StandbyState = 8;
 
         /// <summary>Shape check only. NOT identity authorization: requires PIC32 fresh-read evidence.</summary>
         public static bool HasCompatibleIdentityFields(ushort identity)

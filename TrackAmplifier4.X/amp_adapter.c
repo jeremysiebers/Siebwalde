@@ -19,7 +19,8 @@ static void AmpAdapter_EncodeWritable(void)
     PetitHoldingRegisters[HR_CFG_WATCHDOG].ActValue = m->pending.watchdog_ms;
     PetitHoldingRegisters[HR_CFG_TAG].ActValue = m->pending.tag;
     PetitHoldingRegisters[HR_TRACK_POWER].ActValue =
-        m->status.track_power_requested ? TRACK_POWER_ENABLE : 0u;
+        (m->status.track_power_requested ? TRACK_POWER_ENABLE : 0u) |
+        (m->status.group_ready ? GROUP_READY : 0u);
 }
 
 static uint8_t AmpAdapter_Result(uint16_t addr, uint8_t result)
@@ -70,7 +71,7 @@ uint8_t AmpAdapter_ValidateWrite(uint16_t addr, uint16_t v)
         if ((v & 0x8400u) == 0x8400u) return AMP_WRITE_RELATIONSHIP;
         break;
     case HR_TRACK_POWER:
-        if (v & 0xFFFEu) return AMP_WRITE_RANGE;
+        if (v & 0xFFFCu) return AMP_WRITE_RANGE; /* only bits 0..1 legal */
         break;
     case HR_ADDRESS:
         if ((v & 0xFFC0u) || !(v & 0x003Fu)) return AMP_WRITE_RANGE;
@@ -150,11 +151,31 @@ uint8_t AmpAdapter_OnWrite(uint16_t addr, uint16_t v, bool broadcast)
         break;
     case HR_ADDRESS: m->address = (uint8_t)v; break;
     case HR_TRACK_POWER:
+    {
+        bool prev_track_power = m->status.track_power_requested;
         m->status.track_power_requested = (v & TRACK_POWER_ENABLE) != 0;
-        /* Clearing the request always re-latches inhibit, so a de-energize is
-         * never silently skipped even if the neutral energize was pending. */
-        if (!m->status.track_power_requested) AmpCore_Inhibit();
+        /* Bit 1 = GROUP_READY: C# (init master) signals this amplifier is part of a
+         * globally-ready group. Accepted only when local conditions are valid
+         * (enabled + configured + fault-free + lease-fresh); otherwise REJECT so C#
+         * reads it back via HR_WRITE_RESULT. Clearing bit 1 drops group_ready and
+         * returns the amp to STANDBY. */
+        if (v & GROUP_READY) {
+            if (m->command.enable && m->status.config_ok && !m->fault.causes &&
+                m->status.lease_fresh) {
+                m->status.group_ready = true;
+            } else {
+                m->status.group_ready = false;
+                result = AMP_WRITE_RELATIONSHIP;
+            }
+        } else {
+            m->status.group_ready = false;
+        }
+        /* Clearing the track-power request (1 -> 0) always re-latches inhibit, so a
+         * de-energize is never silently skipped. A GROUP_READY-only write (bit 0 == 0
+         * while it was already clear) must NOT inhibit. */
+        if (prev_track_power && !m->status.track_power_requested) AmpCore_Inhibit();
         break;
+    }
     case HR_CFG_RAMP: m->pending.accel_step = (uint8_t)v; m->pending.decel_step = (uint8_t)(v >> 8); break;
     case HR_CFG_FAST_STOP: m->pending.fast_stop_step = (uint8_t)v; break;
     case HR_CFG_WATCHDOG: m->pending.watchdog_ms = v; break;

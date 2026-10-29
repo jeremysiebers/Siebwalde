@@ -46,7 +46,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private bool _stoppingActive;
         private bool _fastStopping;
         private bool _trackPowerRequested;
-        private int _state;                 // HR_STATE enum 0..7
+        private bool _groupReady;
+        private bool _rejectGroupReady;
+        private int _state;                 // HR_STATE enum 0..7 (+8 STANDBY)
         private bool _configApplied;
 
         private int _leaseTicks;
@@ -56,9 +58,11 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
         public SimulatedTrackAmplifier(byte slaveNumber, ushort identity = Phase1Identity,
             ushort firmwareChecksum = TrackSimulatorConfig.DefaultFirmwareChecksum,
-            ushort protocolVersion = TrackAmplifierRegisters.Phase1ProtocolVersion)
+            ushort protocolVersion = TrackAmplifierRegisters.Phase1ProtocolVersion,
+            bool rejectGroupReady = false)
         {
             SlaveNumber = slaveNumber;
+            _rejectGroupReady = rejectGroupReady;
             _registers[TrackAmplifierRegisters.Identity] = identity;
             _registers[TrackAmplifierRegisters.SwChecksum] = firmwareChecksum;
             // Firmware semantic version (mirrors PIC18 AmpAdapter_Init): 1.0.0, protocol from the
@@ -140,8 +144,35 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             StepRamp();
             StepLease();
             StepTrackPower();
+            ApplyStandbyState();
             RefreshState();
         }
+
+        /// <summary>
+        /// Mirrors the firmware state machine: a configured amplifier without a C#-issued GROUP_READY
+        /// is STANDBY (state 8), unless a fault/estop/lease state overrides it. When GROUP_READY is
+        /// (re)issued, a STANDBY amplifier returns to READY (state 1).
+        /// </summary>
+        private void ApplyStandbyState()
+        {
+            if (!_configApplied)
+            {
+                return;
+            }
+
+            if (!_groupReady && _state is not (5 or 7)) // 5=ESTOP, 7=LEASE_EXPIRED override
+            {
+                _state = TrackAmplifierRegisters.StandbyState; // STANDBY
+            }
+            else if (_groupReady && _state == TrackAmplifierRegisters.StandbyState)
+            {
+                _state = TrackAmplifierRegisters.ReadyState; // READY
+            }
+        }
+
+        /// <summary>The "at rest" state (READY or STANDBY) reflecting the current group-ready flag.</summary>
+        private int ReadyStateValue()
+            => _groupReady ? TrackAmplifierRegisters.ReadyState : TrackAmplifierRegisters.StandbyState;
 
         /// <summary>Writes the current model state back into the HR_STATE / HR_REQUESTED/TARGET/APPLIED registers.</summary>
         public void RefreshState()
@@ -172,6 +203,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         {
             _inhibited = true;
             _trackPowerRequested = false;
+            _groupReady = false; // safety inhibit drops the C#-issued group-ready decision
         }
 
         private void WriteCommand(ushort value)
@@ -223,7 +255,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                     // Normal zero: normal decel to neutral, no INHIBITED, no latch.
                     _stoppingActive = _appliedDuty != Neutral;
                     _fastStopping = false;
-                    _state = _stoppingActive ? 3 : (_configApplied ? 1 : 0);
+                    _state = _stoppingActive ? 3 : (_configApplied ? ReadyStateValue() : 0);
                 }
             }
 
@@ -307,21 +339,45 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
         private void WriteTrackPower(ushort value)
         {
-            // Only bit 0 (TRACK_POWER_ENABLE) is legal; bits 1..15 are reserved (rejected, retained).
-            if ((value & ~TrackAmplifierRegisters.TrackPowerEnableBit) != 0)
+            // Only bits 0..1 (TRACK_POWER_ENABLE, GROUP_READY) are legal; bits 2..15 reserved.
+            ushort legalMask = (ushort)(TrackAmplifierRegisters.TrackPowerEnableBit | TrackAmplifierRegisters.GroupReadyBit);
+            if ((value & ~legalMask) != 0)
             {
                 SetWriteResult(TrackAmplifierRegisters.TrackPower, 1, retained: true);
                 return;
             }
 
+            bool prevTrackPower = _trackPowerRequested;
             _trackPowerRequested = (value & TrackAmplifierRegisters.TrackPowerEnableBit) != 0;
-            if (!_trackPowerRequested)
+
+            byte result = 0;
+            if ((value & TrackAmplifierRegisters.GroupReadyBit) != 0)
             {
-                // Clearing the request always re-latches inhibit, so a de-energize is never skipped.
+                // GROUP_READY accepted only when local conditions are valid; otherwise reject so
+                // the C# init master can read it back via HR_WRITE_RESULT.
+                if (!_rejectGroupReady && _enableActive && _configApplied &&
+                    _registers[TrackAmplifierRegisters.Fault] == 0 && LeaseFresh())
+                {
+                    _groupReady = true;
+                }
+                else
+                {
+                    _groupReady = false;
+                    result = 3; // AMP_WRITE_RELATIONSHIP
+                }
+            }
+            else
+            {
+                _groupReady = false; // clearing GROUP_READY returns the amp to STANDBY
+            }
+
+            // Clearing the track-power request (1 -> 0) re-latches inhibit.
+            if (prevTrackPower && !_trackPowerRequested)
+            {
                 Inhibit();
             }
 
-            SetWriteResult(TrackAmplifierRegisters.TrackPower, 0, retained: false);
+            SetWriteResult(TrackAmplifierRegisters.TrackPower, result, retained: result != 0);
             RefreshState();
         }
 
@@ -370,7 +426,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             _configApplied = true;
             _registers[TrackAmplifierRegisters.Fault] =
                 (ushort)(_registers[TrackAmplifierRegisters.Fault] & ~TrackAmplifierRegisters.ConfigInvalidFaultBit);
-            _state = 1; // READY
+            _state = ReadyStateValue(); // READY or STANDBY
             return true;
         }
 
@@ -398,7 +454,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                     _fastStopping = false;
                     if (!_inhibited)
                     {
-                        _state = _configApplied ? 1 : 0; // READY / NOT_INITIALIZED
+                        _state = _configApplied ? ReadyStateValue() : 0; // READY / STANDBY / NOT_INITIALIZED
                     }
                 }
                 else if (_enableActive && _configApplied && !_inhibited)

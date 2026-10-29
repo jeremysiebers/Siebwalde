@@ -655,9 +655,13 @@ namespace SiebwaldeApp.Core
             foreach (var amp in _requiredAmps())
             {
                 var item = _variables.trackAmpItems[amp];
-                var ok = stage == TrackInitStage.AmpPowerEnable
-                    ? TrackPowerEnableStep.IsTrackPowerOn(item)
-                    : item.ConfigurationVerified && item.Phase1Failure is null;
+                var ok = stage switch
+                {
+                    TrackInitStage.AmpPowerEnable => TrackPowerEnableStep.IsTrackPowerOn(item),
+                    TrackInitStage.GlobalReady =>
+                        item.ConfigurationVerified && item.Phase1Failure is null && GroupReadyStep.IsGroupReady(item),
+                    _ => item.ConfigurationVerified && item.Phase1Failure is null
+                };
                 list.Add(new TrackInitAmpStatus(amp, DescribeAmp(item, stage), ok));
             }
 
@@ -679,6 +683,11 @@ namespace SiebwaldeApp.Core
             if (!item.ConfigurationVerified)
             {
                 return "not configured";
+            }
+
+            if (stage == TrackInitStage.GlobalReady && !GroupReadyStep.IsGroupReady(item))
+            {
+                return "not group-ready (STANDBY)";
             }
 
             var state = item.HoldingReg[TrackAmplifierRegisters.State];

@@ -39,6 +39,34 @@ void AmpCore_Inhibit(void)
      * fault that later clears can never re-energize the H-bridge at neutral
      * without a fresh operator HR_TRACK_POWER=1 write. */
     amp_model.status.track_power_requested = false;
+    /* Group-ready is a C#-issued global decision; a local safety inhibit means the
+     * amplifier is no longer "ready", so drop group_ready too and return to STANDBY.
+     * C# must re-issue GROUP_READY after recovery. */
+    amp_model.status.group_ready = false;
+}
+
+void AmpLed_Modes(bool pwm3en, AmpLedMode *run_mode, AmpLedMode *war_mode, AmpLedMode *err_mode)
+{
+    const AmpModel *m = &amp_model;
+    bool fault_display = m->status.state == AMP_ST_FAULT || m->command.emo ||
+                         (m->fault.causes & AMP_FAULT_COMMS) != 0;
+
+    /* ERR LED: continuous on for a hard fault / EMO / comm loss (existing priority). */
+    *err_mode = fault_display ? AMP_LED_ON : AMP_LED_OFF;
+
+    if (pwm3en && !m->status.brake_active) {
+        /* Energized (RUN, or a fast-stop/stop ramp still switching): RUN continuous, WAR off. */
+        *run_mode = AMP_LED_ON;
+        *war_mode = AMP_LED_OFF;
+    } else if (m->status.state == AMP_ST_READY) {
+        /* Group-ready but not energized: RUN slow blink, WAR off. */
+        *run_mode = AMP_LED_BLINK;
+        *war_mode = AMP_LED_OFF;
+    } else {
+        /* STANDBY / not-init / fault / lease / stopped: RUN off, WAR slow blink. */
+        *run_mode = AMP_LED_OFF;
+        *war_mode = AMP_LED_BLINK;
+    }
 }
 
 uint16_t AmpCore_StepRamp(uint16_t current, uint16_t target, uint8_t step)
@@ -86,6 +114,7 @@ void AmpCore_Update(void)
     else if (comm) m->status.state = AMP_ST_COMMS_LOST;
     else if (lease) m->status.state = AMP_ST_LEASE_EXPIRED;
     else if (!m->status.init_done || !m->status.config_ok) m->status.state = AMP_ST_NOT_INITIALIZED;
+    else if (m->status.config_ok && !m->status.group_ready) m->status.state = AMP_ST_STANDBY;
     else if (m->fast_stopping || (!m->command.enable && m->ramp_current != AMP_NEUTRAL) ||
              (m->command.pwm == AMP_NEUTRAL && m->ramp_current != AMP_NEUTRAL)) m->status.state = AMP_ST_STOPPING;
     else if (m->command.enable && !m->status.inhibited && m->status.lease_fresh &&

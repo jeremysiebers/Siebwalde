@@ -315,6 +315,31 @@ namespace SiebwaldeApp.Core.Tests
             }, config);
         }
 
+        [Fact]
+        public async Task FullSimulation_Amp3RejectsGroupReady_GlobalReadyStageFailed()
+        {
+            var groups = TrackAmplifierGroups.Create(new[] { 1, 3, 4, 6 }, null, null);
+            // Amp 3 is configured but rejects the C#-issued GROUP_READY transition.
+            var config = new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1, 3, 4, 6 },
+                groupReadyRejectSlaves: new byte[] { 3 });
+
+            await RunAsync(TrackControlMode.FullSimulation, groups, (runtime, _, _, _) =>
+            {
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                var stage5 = runtime.InitStages.First(s => s.Stage == TrackInitStage.GlobalReady);
+                Assert.True(stage5.State == TrackInitStageState.Failed,
+                    $"stage5.State={stage5.State}; amps=[{string.Join("; ", stage5.Amps.Select(a => $"{a.SlaveNumber}:{(a.Ok ? "ok" : "NOT-ok")}:{a.Detail}"))}]");
+                Assert.Contains(stage5.Amps, a => a.SlaveNumber == 3 && !a.Ok);
+
+                // Track power is never energized when Stage 5 failed.
+                Assert.False(runtime.TrackPowerOn);
+
+                return Task.CompletedTask;
+            }, config);
+        }
+
         // ---------------------------------------------------------------------------------
         // Harness
         // ---------------------------------------------------------------------------------
