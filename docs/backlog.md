@@ -2,6 +2,24 @@
 
 This backlog records proposed improvements discovered during analysis. None of these items are approved for implementation yet.
 
+## Ovaaltje2 — traction-power readiness (investigation/design candidate, NOT approved)
+
+Recorded 2026-10-29 from the Ovaaltje2 physical acceptance (PO Addendum 03). Status: **investigation candidate only** — no firmware change, no C# implementation, no Koploper integration approved.
+
+**Proposed requirement:** "Explicit operator-visible traction-power readiness and controlled H-bridge energization."
+
+**Observed problem:** after the normal startup the amplifiers are enabled (`command.enable`) + configured (`config_ok`) but the H-bridge stays de-energized (`PWM3EN = 0`) because `inhibited` remains latched; the only existing clear of `inhibited` is the non-neutral movement command path (`amp_adapter.c` HR_COMMAND write, `requested_pwm != AMP_NEUTRAL`). There is therefore no way to energize the H-bridge for occupancy detection without also commanding movement.
+
+**Requirements to investigate (from PO directive):**
+- Separate logical ENABLE (`command.enable`), inhibit (`status.inhibited`), movement authority (lease) and the actual H-bridge state (`PWM3EN`).
+- Distinguish reported/expected output state from physically verified output state (V4 boundary).
+- Never imply that neutral PWM (399) guarantees a de-energized output.
+- Preserve the existing safety and emergency-stop semantics.
+- Do not implement Koploper integration without first verifying its operational and safety implications.
+- Do not automatically energize outputs after startup/recovery without explicit approved safety behavior.
+
+**Key firmware facts (for the design):** H-bridge enable is `AmpHw_Enable(config_ok && ((command.enable && !inhibited) || stopping_active) && !hard)` (`amp_core.c`); `inhibited` is set by `AmpCore_Inhibit()` (lease expiry / comm loss / EMO / STOP_REQUEST / DISABLE) and cleared only by the non-neutral HR_COMMAND write when `renewal_after_inhibit && lease fresh && enabled && config_ok && !fault && neutral ramp && requested_pwm != NEUTRAL` (`amp_adapter.c`).
+
 ## K8B residual findings (Integrator R2 review, non-blocking)
 
 Recorded from the K8B independent R2 review (branch `fix/k8b-legacy-12-register-slaveryinfo`, 2026-10-25). None blocked the K8B merge.
