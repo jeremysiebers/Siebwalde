@@ -1,8 +1,14 @@
 # Handoff
 
-## Ovaaltje2 readiness (2026-10-28/29) — software done, AWAITING PO physical acceptance + merge
+## Ovaaltje2 readiness (2026-10-28/29) — MERGED (PR #64, merge `1e266497`); physical validation PENDING
 
-Branch `feat/ovaaltje2-readiness` (base master `185cd10b`), commits `dd7afa57` (recovery UI surface) + `14159dd5` (consistency fix), PR **#64** (CI green `Build and test (Release)` 5m48s, NOT merged). Objective: restore the normal WPF application startup + operator-controlled global-stop recovery for Ovaaltje2.
+Branch `feat/ovaaltje2-readiness` (base master `185cd10b`), commits `dd7afa57` (recovery UI surface) + `14159dd5` (consistency fix) + `d8212031` (docs), PR **#64** merged into `master` as `1e266497141c32c694b8ae78aa54e2ebc6e61075` (PO Addendum 01 merge GO, CI green). Objective: restore the normal WPF application startup + operator-controlled global-stop recovery for Ovaaltje2.
+
+**Hardware status (read-only, 2026-10-29):** PIC32 reachable at `192.168.1.193`; command-113 probe PASS → firmware **1.0.1** / protocol 0x01 / build 2026-10-26 (matches P2-C baseline). No competing controller session (no active session locks; all prior grants `.consumed`). Grant `OVA-A-probe-20261029` issued + consumed for the read-only probe.
+
+**Acceptance procedure prepared:** `docs/ovaaltje2-locomotive-acceptance-procedure.md` (non-loaded parts A–D + loaded part E requiring separate PO GO).
+
+**Remaining physical dependencies (require a human operator on-site):** (1) confirm no locomotive + verified de-energized outputs; (2) operator physical-stop-clear confirmation during recovery. These cannot be established remotely. Active startup/recovery tests (§3 A–D) remain STATE_CHANGING and are gated on those operator conditions.
 
 - **Recovery surface:** `ITrackApplicationRuntime.AuthorizeGlobalStopRecovery(Func<bool>?)` + read-only `GlobalStopStateView` (State/Reason/IsLatched/RecoveryPending; no Arm/Latch). WPF init page presents the state + a "Recover global stop" button (enabled only when latched) that prompts the operator to confirm physical stop inputs clear, then calls `AuthorizeGlobalStopRecovery(() => true)`.
 - **Consistency fix (review-flagged):** `GlobalStopController.ReArm()` (`Latched→Armed` mirror of 112, clears reason + notification claim, no event, no movement authority) + `GlobalStopPreconditionStep.onRearmConfirmed` callback + `GlobalStopMonitor` 109 on the latch rising edge (`_stopWasLatched` replaces once-per-lifetime `_stopSent`). After an operator REARM, the C# controller now mirrors `Armed` (heartbeat resumes, no spurious 109).
