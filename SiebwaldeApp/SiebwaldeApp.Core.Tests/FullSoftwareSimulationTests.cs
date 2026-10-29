@@ -268,6 +268,54 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         // ---------------------------------------------------------------------------------
+        // F1: Stage 5 (GlobalReady) requires the WHOLE required amp set
+        // ---------------------------------------------------------------------------------
+
+        [Fact]
+        public async Task FullSimulation_AmpNotReady_GlobalReadyStageFailed_TrackPowerBlocked()
+        {
+            var groups = TrackAmplifierGroups.Create(new[] { 1, 3, 4, 6 }, null, null);
+            // Amp 3 advertises protocol 0x00 (absent/legacy) -> incompatible -> Phase1Failure.
+            var config = new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1, 3, 4, 6 },
+                protocolVersionOverrides: new Dictionary<byte, ushort> { { 3, 0x00 } });
+
+            await RunAsync(TrackControlMode.FullSimulation, groups, (runtime, _, _, _) =>
+            {
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                var stage5 = runtime.InitStages.First(s => s.Stage == TrackInitStage.GlobalReady);
+                Assert.Equal(TrackInitStageState.Failed, stage5.State);
+                Assert.Contains(stage5.Amps, a => a.SlaveNumber == 3 && !a.Ok);
+
+                // Stage 6 (track power) is not energized: never auto-on, no authorization.
+                Assert.False(runtime.TrackPowerOn);
+                Assert.False(runtime.TrackPowerAuthorized);
+
+                return Task.CompletedTask;
+            }, config);
+        }
+
+        [Fact]
+        public async Task FullSimulation_AllRequiredAmpsReady_GlobalReadyStagePassed()
+        {
+            var groups = TrackAmplifierGroups.Create(new[] { 1, 3, 4, 6 }, null, null);
+            var config = new TrackSimulatorConfig(detectedSlaves: new byte[] { 1, 3, 4, 6 });
+
+            await RunAsync(TrackControlMode.FullSimulation, groups, (runtime, _, _, _) =>
+            {
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                var stage5 = runtime.InitStages.First(s => s.Stage == TrackInitStage.GlobalReady);
+                Assert.Equal(TrackInitStageState.Passed, stage5.State);
+                Assert.Equal(4, stage5.Amps.Count);
+                Assert.All(stage5.Amps, a => Assert.True(a.Ok));
+
+                return Task.CompletedTask;
+            }, config);
+        }
+
+        // ---------------------------------------------------------------------------------
         // Harness
         // ---------------------------------------------------------------------------------
 

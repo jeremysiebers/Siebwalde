@@ -155,6 +155,15 @@ namespace SiebwaldeApp.Core
             _ => TrackInitStage.ConfigureValidate
         };
 
+        /// <summary>
+        /// True for stages whose Passed/Failed status is finalized by the host (after its own
+        /// amplifier-level verification) rather than by the step-runner transition. Stage 4
+        /// (configure + validate) and Stage 5 (global ready) require the WHOLE required amplifier
+        /// set to be ready, which the step runner alone cannot establish.
+        /// </summary>
+        private static bool IsHostFinalized(TrackInitStage stage)
+            => stage is TrackInitStage.ConfigureValidate or TrackInitStage.GlobalReady;
+
         // ---------------------------------------------------------------------------------
         // Message channel (single mechanism, shared by both modes)
         // ---------------------------------------------------------------------------------
@@ -455,7 +464,11 @@ namespace SiebwaldeApp.Core
 
                         if (nextStage != _currentStage)
                         {
-                            MarkStagePassed(_currentStage);
+                            if (!IsHostFinalized(_currentStage))
+                            {
+                                MarkStagePassed(_currentStage);
+                            }
+
                             _currentStage = nextStage;
                             _currentStep = next;
                             return TrackInitStageState.Passed;
@@ -466,7 +479,11 @@ namespace SiebwaldeApp.Core
                     }
 
                     case InitStepResultKind.Completed:
-                        MarkStagePassed(_currentStage);
+                        if (!IsHostFinalized(_currentStage))
+                        {
+                            MarkStagePassed(_currentStage);
+                        }
+
                         if (_currentStage != TrackInitStage.NormalOperation)
                         {
                             _currentStage = TrackInitStage.NormalOperation;
@@ -652,6 +669,16 @@ namespace SiebwaldeApp.Core
             if (item is null || item.HoldingReg is null || item.HoldingReg.Length <= TrackAmplifierRegisters.State)
             {
                 return "no data";
+            }
+
+            if (item.Phase1Failure is { Length: > 0 })
+            {
+                return $"not ready: {item.Phase1Failure}";
+            }
+
+            if (!item.ConfigurationVerified)
+            {
+                return "not configured";
             }
 
             var state = item.HoldingReg[TrackAmplifierRegisters.State];

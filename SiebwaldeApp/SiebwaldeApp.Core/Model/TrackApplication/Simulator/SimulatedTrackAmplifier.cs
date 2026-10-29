@@ -162,6 +162,18 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         // Write handlers
         // --------------------------------------------------------------------
 
+        /// <summary>
+        /// Mirrors the PIC18 <c>AmpCore_Inhibit()</c> (F5): every safety inhibit (EMO, STOP_REQUEST,
+        /// lease expiry, DISABLE — and the explicit HR_TRACK_POWER clear) latches <c>_inhibited</c>
+        /// AND drops the track-power request, so a transient inhibit that later clears can never
+        /// auto re-energize the bridge without a fresh HR_TRACK_POWER=1 write.
+        /// </summary>
+        private void Inhibit()
+        {
+            _inhibited = true;
+            _trackPowerRequested = false;
+        }
+
         private void WriteCommand(ushort value)
         {
             int pwm = value & TrackAmplifierRegisters.PwmMask;
@@ -181,7 +193,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             {
                 _stoppingActive = true;
                 _fastStopping = true;
-                _inhibited = true;
+                Inhibit();
                 _state = 5; // ESTOP
                 _targetDuty = Neutral;
             }
@@ -189,7 +201,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             {
                 _stoppingActive = true;
                 _fastStopping = true;
-                _inhibited = true;
+                Inhibit();
                 _state = 3; // STOPPING
                 _targetDuty = Neutral;
             }
@@ -245,7 +257,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                 _enableActive = false;
                 _stoppingActive = true;
                 _fastStopping = true;
-                _inhibited = true;
+                Inhibit();
                 _state = 3; // STOPPING (disable ramps to neutral)
                 _targetDuty = Neutral;
             }
@@ -306,7 +318,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             if (!_trackPowerRequested)
             {
                 // Clearing the request always re-latches inhibit, so a de-energize is never skipped.
-                _inhibited = true;
+                Inhibit();
             }
 
             SetWriteResult(TrackAmplifierRegisters.TrackPower, 0, retained: false);
@@ -316,16 +328,18 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         /// <summary>
         /// Mirrors the PIC18 <c>AmpCore_Update</c> guarded neutral energize: a track-power request
         /// clears the inhibit latch only when enabled + configured + fault-free + lease-fresh and the
-        /// bridge is at neutral. Safety overrides (hard/lease/comm/EMO/DISABLE) set <c>_inhibited</c>
-        /// in their own handlers and are never bypassed by this path.
+        /// bridge output is at neutral (the firmware checks <c>ramp_current == AMP_NEUTRAL</c> AND
+        /// <c>applied_pwm == AMP_NEUTRAL</c>, i.e. the applied output is neutral). Safety overrides
+        /// (hard/lease/comm/EMO/DISABLE) drop the request via <see cref="Inhibit"/> and are never
+        /// bypassed by this path. It does NOT additionally gate on the fast-stop/stopping flags, to
+        /// match the firmware exactly.
         /// </summary>
         private void StepTrackPower()
         {
             bool faultFree = _registers[TrackAmplifierRegisters.Fault] == 0;
-            bool neutral = _appliedDuty == Neutral && _targetDuty == Neutral;
 
             if (_trackPowerRequested && _enableActive && _configApplied && faultFree &&
-                LeaseFresh() && neutral && !_fastStopping && !_stoppingActive)
+                LeaseFresh() && _appliedDuty == Neutral && _targetDuty == Neutral)
             {
                 _inhibited = false;
             }
@@ -405,7 +419,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             if (_leaseTicks >= LeaseTimeoutTicks && !_inhibited)
             {
                 // Movement-permission lease expired: local fast ramp to neutral + latched INHIBITED.
-                _inhibited = true;
+                Inhibit();
                 _state = 7; // LEASE_EXPIRED
                 _stoppingActive = true;
                 _fastStopping = true;

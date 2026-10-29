@@ -102,9 +102,10 @@ namespace SiebwaldeApp.Core.Tests
             Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.ControllerConnection).State);
             Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.FirmwareAddress).State);
             Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.AmplifierStandby).State);
-            Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.GlobalReady).State);
+            // Stage 5 (global ready) and Stage 4 (configure + validate) are host-finalized: the
+            // step runner never auto-passes them (they require the whole required amp set).
+            Assert.Equal(TrackInitStageState.Running, StageOf(machine, TrackInitStage.GlobalReady).State);
             Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.NormalOperation).State);
-            // Host-verified and gated stages are never auto-run.
             Assert.Equal(TrackInitStageState.Pending, StageOf(machine, TrackInitStage.ConfigureValidate).State);
             Assert.Equal(TrackInitStageState.Pending, StageOf(machine, TrackInitStage.AmpPowerEnable).State);
         }
@@ -241,6 +242,67 @@ namespace SiebwaldeApp.Core.Tests
                 .ToArray();
             Assert.Equal(4, trackPowerWrites.Length);
             Assert.All(trackPowerWrites, m => Assert.Equal((byte)0xAA, m.Data[1]));
+        }
+
+        [Fact]
+        public async Task GlobalReady_NotAutoPassed_AndHostFailedPerAmpReadiness_BlocksTrackPower()
+        {
+            // Amp 3 is not ready (Phase1Failure); amps 1/4/6 are ready.
+            var variables = new TrackApplicationVariables();
+            foreach (var amp in new byte[] { 1, 4, 6 })
+            {
+                variables.trackAmpItems[amp].ConfigurationVerified = true;
+            }
+
+            variables.trackAmpItems[3].Phase1Failure = "incompatible firmware";
+
+            var machine = new TrackInitStateMachine(
+                new FakeTrackCommClient(),
+                variables,
+                HappyChain(),
+                requiredAmps: () => new byte[] { 1, 3, 4, 6 });
+
+            await machine.RunAutomaticAsync(CancellationToken.None);
+
+            // Stage 5 is host-finalized: the step runner must NOT auto-pass it.
+            Assert.Equal(TrackInitStageState.Running, StageOf(machine, TrackInitStage.GlobalReady).State);
+
+            // The host marks Stage 5 failed because amp 3 is not ready, with a per-amp reason.
+            machine.MarkStageFailed(TrackInitStage.GlobalReady, "Not all required amplifiers are ready.");
+            var stage5 = StageOf(machine, TrackInitStage.GlobalReady);
+            Assert.Equal(TrackInitStageState.Failed, stage5.State);
+            Assert.Contains(stage5.Amps, a => a.SlaveNumber == 3 && !a.Ok);
+            Assert.Contains(stage5.Amps, a => a.SlaveNumber == 3 && a.Detail.Contains("incompatible"));
+
+            // Stage 6 remains blocked (track power is gated and never auto-energized).
+            var enabled = await machine.EnableTrackPowerAsync(CancellationToken.None);
+            Assert.False(enabled);
+            Assert.Equal(TrackInitStageState.Blocked, StageOf(machine, TrackInitStage.AmpPowerEnable).State);
+        }
+
+        [Fact]
+        public async Task GlobalReady_HostPassed_WhenAllRequiredAmpsReady()
+        {
+            var variables = new TrackApplicationVariables();
+            foreach (var amp in new byte[] { 1, 3, 4, 6 })
+            {
+                variables.trackAmpItems[amp].ConfigurationVerified = true;
+            }
+
+            var machine = new TrackInitStateMachine(
+                new FakeTrackCommClient(),
+                variables,
+                HappyChain(),
+                requiredAmps: () => new byte[] { 1, 3, 4, 6 });
+
+            await machine.RunAutomaticAsync(CancellationToken.None);
+            Assert.Equal(TrackInitStageState.Running, StageOf(machine, TrackInitStage.GlobalReady).State);
+
+            machine.MarkStagePassed(TrackInitStage.GlobalReady);
+            var stage5 = StageOf(machine, TrackInitStage.GlobalReady);
+            Assert.Equal(TrackInitStageState.Passed, stage5.State);
+            Assert.Equal(4, stage5.Amps.Count);
+            Assert.All(stage5.Amps, a => Assert.True(a.Ok));
         }
     }
 }

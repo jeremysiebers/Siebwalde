@@ -332,19 +332,30 @@ namespace SiebwaldeApp.Integration
                             await InitializePhase1AmplifiersAsync(_cts.Token).ConfigureAwait(false);
                             await EstablishObservedNeutralAsync(_cts.Token).ConfigureAwait(false);
 
-                            // Stage 4 (configure + validate) is host-verified: every required
-                            // amplifier must have completed config download + APPLY + readback.
+                            // Stages 4 (configure + validate) and 5 (global ready) are host-verified
+                            // against the SAME readiness source: every required amplifier must have
+                            // completed config download + APPLY + readback (ConfigurationVerified)
+                            // with no Phase1Failure (identity/protocol compatibility verified). The
+                            // step runner never auto-passes these two stages.
                             var domain = EffectiveDomain();
-                            if (AllDomainAmplifiersConfigured(domain))
+                            var allReady = AllDomainAmplifiersConfigured(domain);
+                            if (allReady)
                             {
                                 _trackInitStateMachine?.MarkStagePassed(TrackInitStage.ConfigureValidate);
+                                _trackInitStateMachine?.MarkStagePassed(TrackInitStage.GlobalReady);
                             }
                             else
                             {
+                                const string recovery =
+                                    "Re-run the startup or check the affected amplifier's identity/config.";
                                 _trackInitStateMachine?.MarkStageFailed(
                                     TrackInitStage.ConfigureValidate,
                                     "One or more required amplifiers did not complete configuration.",
-                                    "Re-run the startup or check the affected amplifier's identity/config.");
+                                    recovery);
+                                _trackInitStateMachine?.MarkStageFailed(
+                                    TrackInitStage.GlobalReady,
+                                    "Not all required amplifiers are ready (config_ok + no Phase1Failure + identity/compatibility verified).",
+                                    recovery);
                             }
                         }
 
