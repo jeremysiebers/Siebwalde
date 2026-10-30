@@ -59,6 +59,8 @@ namespace SiebwaldeApp.Integration
         private readonly TrackSimulatorConfig? _simulatorConfig;
         private readonly LayoutProfile? _fullSimulationProfile;
         private readonly TimeSpan _neutralObserveWindow;
+        private readonly FirmwareDeploymentSession? _deploymentSession;
+        private readonly DeploymentEventLog? _deploymentEventLog;
         private readonly SemaphoreSlim _gate = new(1, 1);
 
         private CancellationTokenSource? _cts;
@@ -130,6 +132,14 @@ namespace SiebwaldeApp.Integration
         /// detected slaves) the simulator transport config. When null, FullSimulation runs without
         /// the deterministic movement simulator (the pre-existing config-driven transport only).
         /// </param>
+        /// <param name="deploymentSession">
+        /// Optional explicit firmware-deployment session. When null (the default) the flash step is
+        /// fail-closed and never auto-flashes a checksum-mismatching amplifier on normal startup.
+        /// </param>
+        /// <param name="deploymentEventLog">
+        /// Optional audit log for deployment/rollback events. When null, deployment events are only
+        /// surfaced through the operational logger.
+        /// </param>
         public TrackApplicationRuntimeHost(
             IEcosHostService ecosHost,
             IControlTrace? controlTrace = null,
@@ -137,7 +147,9 @@ namespace SiebwaldeApp.Integration
             TrackAmplifierGroups? amplifierGroups = null,
             TimeSpan? neutralObserveWindow = null,
             TrackSimulatorConfig? simulatorConfig = null,
-            LayoutProfile? fullSimulationProfile = null)
+            LayoutProfile? fullSimulationProfile = null,
+            FirmwareDeploymentSession? deploymentSession = null,
+            DeploymentEventLog? deploymentEventLog = null)
         {
             _ecosHost = ecosHost ?? throw new ArgumentNullException(nameof(ecosHost));
             if (ecosHost is TrackControlHost controlHost) controlHost.GlobalStop = GlobalStop;
@@ -148,6 +160,8 @@ namespace SiebwaldeApp.Integration
             _neutralObserveWindow = neutralObserveWindow ?? DefaultNeutralObserveWindow;
             _simulatorConfig = simulatorConfig;
             _fullSimulationProfile = fullSimulationProfile;
+            _deploymentSession = deploymentSession;
+            _deploymentEventLog = deploymentEventLog;
 
             // Surface an unexpected background fault from the host while the runtime is Running.
             _ecosHost.Faulted += OnEcosHostFaulted;
@@ -194,6 +208,15 @@ namespace SiebwaldeApp.Integration
 
         /// <inheritdoc />
         public ISimulatedTrackIo? SimulatedTrackIo => _simulatedTrackIo;
+
+        /// <summary>The firmware-deployment audit log (null when none was supplied).</summary>
+        public DeploymentEventLog? DeploymentEventLog => _deploymentEventLog;
+
+        /// <summary>
+        /// The active firmware-deployment session, or null. Null is the fail-closed default: the
+        /// flash step never auto-flashes a checksum-mismatching amplifier without an active session.
+        /// </summary>
+        public FirmwareDeploymentSession? DeploymentSession => _deploymentSession;
 
         /// <inheritdoc />
         public IMovementSimulation? MovementSimulation => _movementSimulator;
@@ -561,7 +584,7 @@ namespace SiebwaldeApp.Integration
                 new DataUploadStep(_trackCommClient, _trackVariables, _loggerInstance),
                 new DetectSlavesStep(_trackCommClient, _trackVariables, _loggerInstance),
                 new RecoverSlavesStep(_trackCommClient, _trackVariables, _sendNextFwDataPacket, _bootloaderHelpers, _loggerInstance),
-                new FlashFwTrackamplifiersStep(_trackCommClient, _trackVariables, _sendNextFwDataPacket, _bootloaderHelpers, _loggerInstance),
+                new FlashFwTrackamplifiersStep(_trackCommClient, _trackVariables, _sendNextFwDataPacket, _bootloaderHelpers, _loggerInstance, _deploymentSession, _deploymentEventLog),
                 new InitTrackamplifiersStep(_trackCommClient, _loggerInstance),
                 new SetDefaultPwmSetpointsStep(_trackVariables, _loggerInstance),
                 new EnableTrackamplifiersStep(_trackCommClient, _loggerInstance),
