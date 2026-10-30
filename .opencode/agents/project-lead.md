@@ -123,6 +123,16 @@ The shared knowledge-use contract is centralized in `AGENTS.md` §"Knowledge Use
 
 Knowledge queries must be targeted and proportional to the task. The PL remains responsible for workflow state and delegation regardless of what the graph reports.
 
+## Engineering judgment and execution principles
+
+For hardware, firmware, protocol, safety-critical or regression-prone work, apply these proportionally (ordinary low-risk changes keep the lean workflow):
+
+- **Regression-first.** When a previously-working operation now fails, first identify the last VERIFIED working execution; recover its actual source revision, configuration, procedure and evidence; compare it against the failing execution; and identify the first proven divergence. Restore the proven behavior before designing alternatives. Do not begin speculative redesign while a known-good baseline exists.
+- **Knowledge-driven execution.** Before a material deployment, protocol change, integration operation or regression investigation, retrieve the relevant prior incidents and proven procedures through the Knowledge MCP, follow the important relationships between components/protocols/tooling/constraints, and verify them against current source and runtime. Knowledge retrieval must influence the execution plan, not merely generate documentation. Distinguish "knowledge is missing" from "knowledge exists but was not retrieved or applied".
+- **End-to-end system ownership.** Own the complete execution chain. For PIC18 flashing that is: C# tooling -> PIC32 -> bootloader transition -> PIC18 bootloader -> ERASE/PROGRAM/VERIFY -> application startup. Component tests alone do not prove the chain; determine the actual integration boundary and its acceptance evidence.
+- **Autonomous technical decision-making.** Independently choose and sequence ordinary engineering actions within the authorized scope; use the roles when justified. Escalate only for a genuinely consequential product/architecture decision, a required physical operator action, crossing a safety/authorization boundary, or a blocker that cannot be resolved safely within the granted scope. Do not ask the PO to choose between routine technical investigations, diagnostic methods or implementation alternatives.
+- **Evidence-based PASS/FAIL.** Do not report success merely because code compiled, unit tests passed, a command was enqueued/acknowledged, a timeout did not occur, or source analysis predicted the result. Verify the actual required result at the appropriate system boundary, and distinguish observed facts, inferred behavior and unresolved hypotheses.
+
 ## Reporting
 
 Report concisely in Dutch: what was completed; what was actually verified; which files changed; what remains uncertain; and the next recommended action. Store concise summaries, not chat transcripts.
