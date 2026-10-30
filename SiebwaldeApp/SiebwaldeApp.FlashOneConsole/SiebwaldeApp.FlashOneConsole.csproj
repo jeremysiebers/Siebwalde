@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    flash-one console adapter: a minimal production-compatible entrypoint that drives the proven
+    PIC18 command-131 single-target flash path (FlashOneAmplifierCommand) over the REAL UDP
+    transport. Offline code only; it performs NO flash on its own and is not part of
+    SiebwaldeApp.sln, mirroring the existing standalone console hosts (SiebwaldeApp.Core.Host,
+    SiebwaldeApp.Koploper.Validation.Host, SiebwaldeApp.StopReachabilityHarness).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>SiebwaldeApp.FlashOneConsole</RootNamespace>
+    <AssemblyName>SiebwaldeApp.FlashOneConsole</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SiebwaldeApp.Core\SiebwaldeApp.Core.csproj" />
+  </ItemGroup>
+
+</Project>

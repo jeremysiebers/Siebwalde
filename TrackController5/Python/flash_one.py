@@ -139,12 +139,12 @@ gate between 123 (SELECT_SLAVE) and 125:
   3. 125->126->127->128->129->130 then run exactly as normal, followed by the
      100/106/101 readback.
 
-There is NO read-only bootloader-version probe: command 124
-(EXEC_FW_STATE_GET_BOOTLOADER_VERSION) is intentionally NOT emitted.  The
-legacy PIC32 bootloader never replies to 124 even when a PIC18 is genuinely in
-bootloader mode (a non-functional probe), so a previous version of this gate
-produced a FALSE "none" and wrongly aborted before 125.  The gate never emits
-122/131/132.
+A read-only bootloader-version readiness probe IS emitted: command 124
+(EXEC_FW_STATE_GET_BOOTLOADER_VERSION) is sent after 123 (SELECT_SLAVE) and before
+125 (ERASE), restoring the proven fleet-path FlashSequencer case 10 round-trip
+(see docs/P2-B2-A1-DELTA-ANALYSIS-WORKING-VS-FAILING.md).  It requires
+GET_BOOTLOADER_VERSION_OK before ERASE, so ERASE is only attempted once the amp is
+confirmed in Run_Bootloader answering on 8-bit.  The gate never emits 122/131/132.
 
 Without the flag the driver is byte-for-byte identical to the flag-less
 baseline: nothing blocks on stdin.
@@ -716,6 +716,21 @@ class FlashOneDriver(object):
         # LOG_Push) -> bounded delay.
         self._send_simple(EnumCommand.EXEC_FW_STATE_SELECT_SLAVE, self.slave_id)
         self._sleep(self.delays["select"])
+
+        # 124 GET_BOOTLOADER_VERSION: explicit 8-bit readiness round-trip, restored
+        # per the P2-C delta-analysis (docs/P2-B2-A1-DELTA-ANALYSIS-WORKING-VS-FAILING.md).
+        # The proven fleet path (FlashSequencer case 10) performs this exact probe before
+        # ERASE to confirm the amp reached Run_Bootloader and answers on 8-bit. The earlier
+        # "124 never replies" observation was a context artifact (124 was exercised on a
+        # RUNNING amp, not one in bootloader mode). This replaces the blind select-delay
+        # readiness assumption, so ERASE is only attempted once the 8-bit link is proven.
+        self._send_simple(EnumCommand.EXEC_FW_STATE_GET_BOOTLOADER_VERSION)
+        self._wait_feedback(
+            lambda f: (f[0] == EnumCommand.GET_BOOTLOADER_VERSION
+                       and f[1] == EnumCommand.GET_BOOTLOADER_VERSION_OK
+                       and f[2] == EnumTaskStates.DONE),
+            "GET_BOOTLOADER_VERSION readiness",
+            timeout=self.bootloader_ack_timeout)
 
         if self.pause_before_erase:
             self._pre_erase_gate()

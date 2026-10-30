@@ -69,6 +69,10 @@ namespace SiebwaldeApp.Integration
         private DeterministicMovementSimulator? _movementSimulator;
         private MovementSimulationAdapter? _movementSimulationAdapter;
 
+        // Cross-process controller-session ownership: the exclusive lease held while the
+        // REAL-hardware track part is composed. Null when not running / in FullSimulation.
+        private TrackControllerSessionLease? _controllerSessionLease;
+
         // Track-part fields (moved verbatim from SiebwaldeApplicationModel).
         private TrackApplicationVariables? _trackVariables;
         private TrackCommClientAsync? _trackCommClient;
@@ -519,6 +523,21 @@ namespace SiebwaldeApp.Integration
             // after observed neutral. Set BEFORE comm/host start so both paths see the same state.
             _movementPermission = new MovementPermissionController();
             _trackVariables.MovementPermission = _movementPermission;
+
+            // 2b) Cross-process controller-session ownership. The WPF runtime owns the controller
+            //     session exclusively for the REAL-hardware path (the primary authority, closing the
+            //     preflight-to-bind race). FullSimulation uses a software transport with no controller
+            //     to own, and the lightweight Simulator never composes a track transport. A failed
+            //     acquisition (another session owns the controller) throws, which StartAsync surfaces
+            //     as an init fault and a Failed state — the start fails safely before any bind/send.
+            if (mode != TrackControlMode.FullSimulation)
+            {
+                _controllerSessionLease = TrackControllerSessionLease.TryAcquire(
+                    TrackControllerSessionLease.WpfOwnerName, out var blockingOwner)
+                    ?? throw new InvalidOperationException(
+                        $"The track-controller session is owned by {(blockingOwner ?? "another process")}. " +
+                        "Close it before starting the SiebwaldeApp control application.");
+            }
 
             // 3) Build low-level Ethernet / Modbus transport.
             var transport = _transportFactory?.Invoke()
@@ -1204,6 +1223,11 @@ namespace SiebwaldeApp.Integration
             _simulatedTrackIo = null;
             _movementSimulator = null;
             _movementSimulationAdapter = null;
+
+            // Release the cross-process controller-session lease exactly once (the lease's Dispose
+            // is itself idempotent; nulling here also makes any later stop a no-op).
+            _controllerSessionLease?.Dispose();
+            _controllerSessionLease = null;
 
             if (_cts is not null)
             {

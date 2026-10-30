@@ -72,9 +72,13 @@ RESET_SLAVE_DATA_TIMEOUT = 241
 RESET_SLAVE_OK = 242
 RESET_SLAVE_NOK = 243
 
-# Bootloader-version probe (124) is intentionally NEVER emitted (the legacy
-# PIC32 bootloader never replies to it).  Kept only to assert its absence.
+# Bootloader-version readiness probe (124): emitted after 123 (SELECT_SLAVE) and
+# before 125 (ERASE), per the P2-C delta-analysis; requires GET_BOOTLOADER_VERSION_OK.
 GET_BOOTLOADER_VERSION_CMD = 124
+GET_BOOTLOADER_VERSION = 192
+GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT = 193
+GET_BOOTLOADER_VERSION_OK = 194
+GET_BOOTLOADER_VERSION_NOK = 195
 
 CONNECT = 250
 SLAVE_FW_FLASH = 103
@@ -201,6 +205,15 @@ class MockTransport(object):
         elif cmd == SLAVE_DETECT:
             if cmd not in self._no_ack_cmds:
                 self._queue.append((MBUS, MBUS_STATE_SLAVE_DETECT, DONE, NONE))
+        elif cmd == GET_BOOTLOADER_VERSION_CMD:
+            if cmd in self._no_ack_cmds:
+                pass  # no reply -> the driver must time out and abort
+            elif cmd in self._timeout_cmds:
+                self._queue.append((GET_BOOTLOADER_VERSION,
+                                    GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT,
+                                    ERROR, NONE))
+            else:
+                self._queue.append((GET_BOOTLOADER_VERSION, GET_BOOTLOADER_VERSION_OK, DONE, NONE))
         # 123 (SELECT_SLAVE) / 130 (EXIT): no host ack by design.
 
     def poll(self):
@@ -224,7 +237,8 @@ def expected_sequence(n):
              RECEIVE_FW_FILE] +
             [FW_DATA] * n +
             [RECEIVE_CONFIG_WORD, CFG_DATA] +
-            [SELECT_SLAVE, ERASE, WRITE, WRITE_CONFIG, CHECK, RESET, EXIT] +
+            [SELECT_SLAVE, GET_BOOTLOADER_VERSION_CMD, ERASE, WRITE, WRITE_CONFIG,
+             CHECK, RESET, EXIT] +
             [SLAVES_ON, START_DATA_UPLOAD, SLAVE_DETECT])
 
 
@@ -345,11 +359,11 @@ class TestCommandSequence(unittest.TestCase):
         self.assertLess(emitted.index(SLAVE_DETECT), emitted.index(MBUS_RESET))
         self.assertLess(emitted.index(MBUS_RESET), emitted.index(SLAVES_ON))
         self.assertLess(emitted.index(SLAVES_ON), emitted.index(SLAVE_FW_FLASH))
-        # 123 carries data=slave_id, then 125..130 in order.
+        # 123 carries data=slave_id, then 124 readiness, then 125..130 in order.
         self.assertEqual(emitted[emitted.index(SELECT_SLAVE):
                                  emitted.index(EXIT) + 1],
-                         [SELECT_SLAVE, ERASE, WRITE, WRITE_CONFIG, CHECK,
-                          RESET, EXIT])
+                         [SELECT_SLAVE, GET_BOOTLOADER_VERSION_CMD, ERASE, WRITE,
+                          WRITE_CONFIG, CHECK, RESET, EXIT])
         select_pkts = [p for p in transport.sent if p[1] == SELECT_SLAVE]
         self.assertEqual(select_pkts[0], bytes([0xAA, SELECT_SLAVE, 7, 0x55]))
         # Readback tail is 100/106/101.
@@ -381,7 +395,8 @@ class TestCommandSequence(unittest.TestCase):
                          [CONNECT, SLAVE_DETECT, MBUS_RESET, SLAVES_ON,
                           SLAVE_FW_FLASH,
                           RECEIVE_FW_FILE, RECEIVE_CONFIG_WORD, SELECT_SLAVE,
-                          ERASE, WRITE, WRITE_CONFIG, CHECK, RESET, EXIT,
+                          GET_BOOTLOADER_VERSION_CMD, ERASE, WRITE, WRITE_CONFIG,
+                          CHECK, RESET, EXIT,
                           SLAVES_ON, START_DATA_UPLOAD, SLAVE_DETECT])
 
     def test_forbidden_commands_never_emitted(self):
@@ -587,6 +602,14 @@ class TestFailClosed(unittest.TestCase):
         self.assertIn(ERASE, emitted)
         self.assertNotIn(WRITE, emitted)
 
+    def test_get_bootloader_version_readiness_required_before_erase(self):
+        # The 124 readiness probe must succeed BEFORE any destructive command:
+        # a timeout on 124 aborts the driver and ERASE is never emitted.
+        transport = MockTransport(self.n, timeout_cmds=(GET_BOOTLOADER_VERSION_CMD,))
+        driver, emitted = self._run_expect_abort(transport)
+        self.assertIn(GET_BOOTLOADER_VERSION_CMD, emitted)
+        self.assertNotIn(ERASE, emitted)
+
     def test_timeout_during_write_aborts(self):
         transport = MockTransport(self.n, timeout_cmds=(WRITE,))
         driver, emitted = self._run_expect_abort(transport)
@@ -698,7 +721,8 @@ class TestFailClosed(unittest.TestCase):
         self.assertEqual(emitted, [CONNECT, SLAVE_DETECT, MBUS_RESET, SLAVES_ON,
                                    SLAVE_FW_FLASH, RECEIVE_FW_FILE] +
                          [FW_DATA] * self.n +
-                         [RECEIVE_CONFIG_WORD, CFG_DATA, SELECT_SLAVE, ERASE])
+                         [RECEIVE_CONFIG_WORD, CFG_DATA, SELECT_SLAVE,
+                          GET_BOOTLOADER_VERSION_CMD, ERASE])
         for bad in FORBIDDEN:
             self.assertNotIn(bad, emitted)
 
@@ -796,9 +820,9 @@ class TestGlobalResetFailClosed(unittest.TestCase):
 class TestPreEraseGate(unittest.TestCase):
     """--pause-before-erase: explicit ERASE confirmation between 123 and 125.
 
-    (a) with the flag the driver stops after 123 and does not emit 125 until
-        the exact token is supplied; 124 (bootloader-version probe) is never
-        emitted;
+    (a) with the flag the driver stops after 123+124 and does not emit 125 until
+        the exact token is supplied; 124 (bootloader-version readiness probe) is
+        emitted before the gate;
     (b) a wrong token or EOF aborts before 125;
     (c) without the flag the sequence is unchanged.
     """
@@ -815,11 +839,11 @@ class TestPreEraseGate(unittest.TestCase):
 
         def fake_input():
             # At the moment the driver blocks, 125 must NOT be emitted yet,
-            # but 123 must already be on the wire; 124 must NOT be emitted.
+            # but 123 and 124 (readiness) must already be on the wire.
             emitted_now = commands_of(transport)
             self.assertNotIn(ERASE, emitted_now)
             self.assertIn(SELECT_SLAVE, emitted_now)
-            self.assertNotIn(GET_BOOTLOADER_VERSION_CMD, emitted_now)
+            self.assertIn(GET_BOOTLOADER_VERSION_CMD, emitted_now)
             calls.append(1)
             return "ERASE\n"
 
@@ -830,12 +854,14 @@ class TestPreEraseGate(unittest.TestCase):
 
         emitted = commands_of(transport)
         self.assertEqual(calls, [1], "confirmation must be read exactly once")
-        self.assertNotIn(GET_BOOTLOADER_VERSION_CMD, emitted)
+        self.assertIn(GET_BOOTLOADER_VERSION_CMD, emitted)
         idx123 = emitted.index(SELECT_SLAVE)
+        idx124 = emitted.index(GET_BOOTLOADER_VERSION_CMD)
         idx125 = emitted.index(ERASE)
-        self.assertLess(idx123, idx125, "125 must follow 123 (after confirmation)")
+        self.assertLess(idx123, idx124, "124 must follow 123")
+        self.assertLess(idx124, idx125, "125 must follow 124 (after confirmation)")
 
-        # Status line carries slave id, checksum and waiting text (no probe).
+        # Status line carries slave id, checksum and waiting text.
         status = next(m for m in logs if "waiting for ERASE confirmation" in m)
         self.assertIn("slave=7", status)
         self.assertIn("0x7907", status)          # known production checksum
@@ -863,7 +889,6 @@ class TestPreEraseGate(unittest.TestCase):
         transport = MockTransport(self.n)
         make_driver(transport, self.image, slave_id=7).run()
         emitted = commands_of(transport)
-        self.assertNotIn(GET_BOOTLOADER_VERSION_CMD, emitted)
         self.assertEqual(emitted, expected_sequence(self.n))
 
 

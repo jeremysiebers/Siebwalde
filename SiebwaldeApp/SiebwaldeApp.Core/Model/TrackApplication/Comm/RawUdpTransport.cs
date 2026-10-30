@@ -71,7 +71,18 @@ namespace SiebwaldeApp.Core
             // IMPORTANT:
             // Bind the local socket to the *same* local port you used in your
             // Python test. The PIC32 will send responses to this port.
-            _socket = new UdpClient(localPort);
+            _socket = new UdpClient(AddressFamily.InterNetwork);
+
+            // Hard transport-level backstop beneath the cooperative cross-process ownership mutex
+            // (TrackControllerSessionLease): force exclusive address use so a second bind to the
+            // same local port cannot silently coexist even if the mutex were somehow bypassed.
+            // ExclusiveAddressUse must be set BEFORE the socket is bound.
+            _socket.Client.ExclusiveAddressUse = true;
+
+            if (localPort > 0)
+            {
+                _socket.Client.Bind(new IPEndPoint(IPAddress.Any, localPort));
+            }
         }
 
         /// <summary>

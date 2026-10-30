@@ -18,6 +18,7 @@ namespace SiebwaldeApp.Core.Tests
     /// and forces a fast, deterministic init failure, while the fake host records the fresh
     /// <see cref="TrackApplicationVariables"/> handed to it each start.
     /// </summary>
+    [Collection("RealModeEndToEnd")]
     public class TrackApplicationRuntimeHostRealCompositionTests
     {
         private sealed class RecordingTrackTransport : ITrackTransport
@@ -162,6 +163,40 @@ namespace SiebwaldeApp.Core.Tests
             Assert.True(transport.OpenCallCount >= 1);
             Assert.NotEmpty(transport.SentCommands);
             Assert.Equal(EnumClientCommands.CLIENT_CONNECTION_REQUEST, transport.SentCommands[0]);
+        }
+
+        [Fact]
+        public async Task RealModeStart_WhileAnotherSessionOwnsController_FailsSafely()
+        {
+            // Simulate the command-131 CLI already owning the exclusive controller session.
+            using var cliLease = TrackControllerSessionLease.TryAcquire(
+                TrackControllerSessionLease.FlashOneConsoleOwnerName, out _);
+            Assert.NotNull(cliLease);
+
+            var transport = new RecordingTrackTransport();
+            var host = new RecordingEcosHostService();
+            var runtime = CreateRuntime(transport, host);
+
+            string? failure = null;
+            runtime.StateChanged += (_, e) =>
+            {
+                if (e.FailureReason is not null)
+                {
+                    failure = e.FailureReason;
+                }
+            };
+
+            await runtime.StartAsync(TrackControlMode.Real);
+
+            // The start fails safely (Failed, never Running) and names the blocking session.
+            Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+            Assert.NotNull(failure);
+            Assert.Contains("owned by", failure);
+            Assert.Contains(TrackControllerSessionLease.FlashOneConsoleOwnerName, failure);
+
+            // Composition aborted before the bind/send: no transport was opened and nothing sent.
+            Assert.Equal(0, transport.OpenCallCount);
+            Assert.Empty(transport.SentCommands);
         }
 
         [Fact]
