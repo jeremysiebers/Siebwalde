@@ -11,6 +11,7 @@ namespace SiebwaldeApp.Core.Tests;
 /// <see cref="FlashOneHeartbeat"/>, <see cref="FlashOneOwnershipPreflight"/>). All tests run
 /// against a scripted in-memory transport; no UDP socket is opened and no hardware is touched.
 /// </summary>
+[Collection("RealModeEndToEnd")]
 public class FlashOneConsoleTests
 {
     // -------------------------------------------------------------------------

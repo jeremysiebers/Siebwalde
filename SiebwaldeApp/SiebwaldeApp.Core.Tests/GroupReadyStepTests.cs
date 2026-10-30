@@ -124,5 +124,20 @@ namespace SiebwaldeApp.Core.Tests
             item.HoldingReg[TrackAmplifierRegisters.State] = 0; // NOT_INITIALIZED
             Assert.False(GroupReadyStep.IsGroupReady(item));
         }
+
+        [Fact]
+        public void IsGroupReady_NullOrIncompleteHoldingReg_ReturnsFalse()
+        {
+            // A null item can never prove readiness: stale/incomplete amplifier evidence is
+            // fail-closed, so GlobalReady cannot be claimed from it.
+            Assert.False(GroupReadyStep.IsGroupReady(null!));
+
+            // A HoldingReg too short to carry HR_STATE cannot be trusted as group-ready.
+            var shortItem = new TrackAmplifierItem
+            {
+                HoldingReg = new ushort[TrackAmplifierRegisters.State],
+            };
+            Assert.False(GroupReadyStep.IsGroupReady(shortItem));
+        }
     }
 }

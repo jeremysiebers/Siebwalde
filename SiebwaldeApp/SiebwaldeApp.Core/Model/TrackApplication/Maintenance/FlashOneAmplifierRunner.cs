@@ -43,11 +43,14 @@ namespace SiebwaldeApp.Core
     /// + <see cref="SendNextFwDataPacket"/> exactly as the production host does.
     ///
     /// Order of operations (all before any write):
-    /// 1. read-only ownership preflight (fail-closed);
-    /// 2. firmware HEX validation (SHA-256 + embedded checksum) via
+    /// 1. cross-process controller-session lease (<see cref="TrackControllerSessionLease"/>),
+    ///    the PRIMARY ownership authority — fail-closed when another session owns it;
+    /// 2. read-only ownership preflight (secondary heuristic, fail-closed);
+    /// 3. firmware HEX validation (SHA-256 + embedded checksum) via
     ///    <see cref="FirmwareArtifactVerifier.Validate"/>;
-    /// 3. transport/comm composition, bounded heartbeat start, then
+    /// 4. transport/comm composition, bounded heartbeat start, then
     ///    <see cref="FlashOneAmplifierCommand.ExecuteAsync"/>.
+    /// The lease is held for the entire run and released in a finally even on exception/cancel.
     /// The heartbeat runs only while the flash command is in flight and is never an auto-retry.
     /// </summary>
     public sealed class FlashOneAmplifierRunner
@@ -84,82 +87,104 @@ namespace SiebwaldeApp.Core
             byte amplifier,
             CancellationToken ct = default)
         {
-            // 1. Ownership preflight before any send/bind. Fail closed.
-            var preflight = _preflight.Check();
-            if (!preflight.Ok)
-                return FlashOneRunResult.Fail(
-                    preflight.Error ?? "Ownership preflight failed.", amplifier);
-
-            // 2. Validate the HEX (SHA-256 + embedded checksum) before any write. A failed
-            //    validation yields no artifact, so no command can be composed and nothing is sent.
-            var validation = FirmwareArtifactVerifier.Validate(hexPath, expectedSha256Hex, LoggerInstance);
-            if (!validation.Success)
-                return FlashOneRunResult.Fail(
-                    validation.Error ?? "Firmware validation failed.", amplifier);
-
-            var artifact = validation.Artifact!;
-
-            // 3. Compose the REAL production transport + comm client. The transport factory is
-            //    supplied only by offline tests; the production default is the real UDP transport
-            //    (192.168.1.193, ports 10000/10001). A bind failure here fails closed.
-            ITrackTransport transport;
-            try
+            // 0. Cross-process controller-session ownership. Acquire the exclusive lease FIRST,
+            //    before the heuristic preflight: this closes the time-of-check/time-of-use race
+            //    between the read-only preflight and the UDP bind. Fail closed with an
+            //    operator-facing message naming the blocking session when another process holds it.
+            var lease = TrackControllerSessionLease.TryAcquire(
+                TrackControllerSessionLease.FlashOneConsoleOwnerName, out var blockingOwner);
+            if (lease is null)
             {
-                transport = _transportFactory?.Invoke() ?? CreateRealTransport();
-            }
-            catch (Exception ex)
-            {
+                var blocker = blockingOwner ?? "another process";
                 return FlashOneRunResult.Fail(
-                    $"Could not open the track-controller transport: {ex.Message}", amplifier);
+                    $"The track-controller session is owned by {blocker}. Close it before flashing.",
+                    amplifier);
             }
-
-            var variables = new TrackApplicationVariables();
-            var comm = new TrackCommClientAsync(transport, variables);
-            var sendNext = new SendNextFwDataPacket(comm, artifact.Helpers);
-            var command = new FlashOneAmplifierCommand(
-                comm, variables, artifact.Helpers, sendNext,
-                messageTimeout: _messageTimeout,
-                flashTimeout: _flashTimeout,
-                onProgress: _onProgress);
 
             try
             {
-                await comm.StartAsync(realHardwareMode: true, ct).ConfigureAwait(false);
+                // 1. Ownership preflight (secondary heuristic) before any send/bind. Fail closed.
+                var preflight = _preflight.Check();
+                if (!preflight.Ok)
+                    return FlashOneRunResult.Fail(
+                        preflight.Error ?? "Ownership preflight failed.", amplifier);
 
-                // 4. Bounded heartbeat for the whole flash. Started only here and cancelled +
-                //    awaited in the inner finally, so it cannot outlive the flash or leak into a
-                //    later session. It shares the comm path (send-only) and is isolated from the
-                //    flash command's response channel (see FlashOneHeartbeat).
-                var heartbeat = new FlashOneHeartbeat(comm);
-                heartbeat.Start(ct);
+                // 2. Validate the HEX (SHA-256 + embedded checksum) before any write. A failed
+                //    validation yields no artifact, so no command can be composed and nothing is sent.
+                var validation = FirmwareArtifactVerifier.Validate(hexPath, expectedSha256Hex, LoggerInstance);
+                if (!validation.Success)
+                    return FlashOneRunResult.Fail(
+                        validation.Error ?? "Firmware validation failed.", amplifier);
+
+                var artifact = validation.Artifact!;
+
+                // 3. Compose the REAL production transport + comm client. The transport factory is
+                //    supplied only by offline tests; the production default is the real UDP transport
+                //    (192.168.1.193, ports 10000/10001). A bind failure here fails closed.
+                ITrackTransport transport;
                 try
                 {
-                    var result = await command.ExecuteAsync(amplifier, ct).ConfigureAwait(false);
-                    return result.Success
-                        ? FlashOneRunResult.Ok(result.TargetAmplifier)
-                        : FlashOneRunResult.Fail(
-                            result.Error ?? "Flash failed.",
-                            result.TargetAmplifier,
-                            result.FailedSubStep);
+                    transport = _transportFactory?.Invoke() ?? CreateRealTransport();
+                }
+                catch (Exception ex)
+                {
+                    return FlashOneRunResult.Fail(
+                        $"Could not open the track-controller transport: {ex.Message}", amplifier);
+                }
+
+                var variables = new TrackApplicationVariables();
+                var comm = new TrackCommClientAsync(transport, variables);
+                var sendNext = new SendNextFwDataPacket(comm, artifact.Helpers);
+                var command = new FlashOneAmplifierCommand(
+                    comm, variables, artifact.Helpers, sendNext,
+                    messageTimeout: _messageTimeout,
+                    flashTimeout: _flashTimeout,
+                    onProgress: _onProgress);
+
+                try
+                {
+                    await comm.StartAsync(realHardwareMode: true, ct).ConfigureAwait(false);
+
+                    // 4. Bounded heartbeat for the whole flash. Started only here and cancelled +
+                    //    awaited in the inner finally, so it cannot outlive the flash or leak into a
+                    //    later session. It shares the comm path (send-only) and is isolated from the
+                    //    flash command's response channel (see FlashOneHeartbeat).
+                    var heartbeat = new FlashOneHeartbeat(comm);
+                    heartbeat.Start(ct);
+                    try
+                    {
+                        var result = await command.ExecuteAsync(amplifier, ct).ConfigureAwait(false);
+                        return result.Success
+                            ? FlashOneRunResult.Ok(result.TargetAmplifier)
+                            : FlashOneRunResult.Fail(
+                                result.Error ?? "Flash failed.",
+                                result.TargetAmplifier,
+                                result.FailedSubStep);
+                    }
+                    finally
+                    {
+                        await heartbeat.DisposeAsync().ConfigureAwait(false);
+                    }
+                }
+                catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+                {
+                    return FlashOneRunResult.Fail(
+                        "Timed out waiting for the PIC32 acknowledgement.", amplifier);
+                }
+                catch (Exception ex)
+                {
+                    return FlashOneRunResult.Fail(ex.Message, amplifier);
                 }
                 finally
                 {
-                    await heartbeat.DisposeAsync().ConfigureAwait(false);
+                    try { await comm.StopAsync().ConfigureAwait(false); } catch { /* best-effort */ }
+                    try { await comm.DisposeAsync().ConfigureAwait(false); } catch { /* best-effort */ }
                 }
-            }
-            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
-            {
-                return FlashOneRunResult.Fail(
-                    "Timed out waiting for the PIC32 acknowledgement.", amplifier);
-            }
-            catch (Exception ex)
-            {
-                return FlashOneRunResult.Fail(ex.Message, amplifier);
             }
             finally
             {
-                try { await comm.StopAsync().ConfigureAwait(false); } catch { /* best-effort */ }
-                try { await comm.DisposeAsync().ConfigureAwait(false); } catch { /* best-effort */ }
+                // Release the lease even on exception/cancel so the controller session is never wedged.
+                lease.Dispose();
             }
         }
 
