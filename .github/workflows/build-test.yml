@@ -33,3 +33,43 @@ jobs:
       # Runs every test project in the solution. A failing test fails the workflow.
       - name: Test (Release)
         run: dotnet test SiebwaldeApp/SiebwaldeApp.sln -c Release --no-build
+
+      # The system-regression host is deliberately NOT part of the solution (it composes the real
+      # production init pipeline against a deterministic offline simulator). Build it separately.
+      - name: Build SystemRegressionHost (Release)
+        run: dotnet build SiebwaldeApp/SiebwaldeApp.SystemRegressionHost/SiebwaldeApp.SystemRegressionHost.csproj -c Release
+
+      # Run all six headless OFFLINE scenarios A-F. Each writes machine-readable JSONL evidence;
+      # any non-zero exit code fails the workflow (and therefore the PR check). No flash, no live
+      # hardware, no WPF UI, no interactive session and no path to a real controller.
+      - name: Run system-regression scenarios (A-F)
+        shell: pwsh
+        run: |
+          $exe = "SiebwaldeApp/SiebwaldeApp.SystemRegressionHost/bin/Release/net8.0-windows7.0/SiebwaldeApp.SystemRegressionHost.exe"
+          $evidence = Join-Path $env:GITHUB_WORKSPACE "system-regression-evidence"
+          New-Item -ItemType Directory -Force -Path $evidence | Out-Null
+          $failed = @()
+          foreach ($scenario in 'A','B','C','D','E','F') {
+            Write-Host "Running system-regression scenario $scenario ..."
+            $jsonl = Join-Path $evidence "scenario-$scenario.jsonl"
+            & $exe --scenario $scenario --jsonl $jsonl
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "::error::Scenario $scenario failed with exit code $LASTEXITCODE"
+              $failed += $scenario
+            }
+          }
+          if ($failed.Count -gt 0) {
+            Write-Host "::error::System-regression scenarios failed: $($failed -join ', ')"
+            exit 1
+          }
+          Write-Host "All six system-regression scenarios passed (exit 0)."
+
+      # Preserve the machine-readable evidence (JSONL per scenario) as a build artifact, even on
+      # failure, so results and diagnostics survive the run.
+      - name: Upload system-regression evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-regression-evidence
+          path: system-regression-evidence/
+          if-no-files-found: warn

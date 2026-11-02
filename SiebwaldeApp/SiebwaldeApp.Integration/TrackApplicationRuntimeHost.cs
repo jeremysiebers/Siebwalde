@@ -417,7 +417,13 @@ namespace SiebwaldeApp.Integration
 
                 TransitionTo(TrackRuntimeState.Starting);
                 _requestedMode = mode;
-                _cts = new CancellationTokenSource();
+
+                // Link the caller's cancellation token into the runtime CTS so a cancelled start
+                // (for example a bounded timeout while the controller is silent) tears the in-flight
+                // composition down deterministically instead of leaving the init machine stuck while
+                // holding the lifecycle gate. In production the caller passes CancellationToken.None,
+                // so only StopAsync cancels the runtime once it is running.
+                _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
                 string? failure = null;
                 Exception? fault = null;
