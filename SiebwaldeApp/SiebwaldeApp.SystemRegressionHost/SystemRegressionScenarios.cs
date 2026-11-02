@@ -316,22 +316,29 @@ namespace SiebwaldeApp.SystemRegressionHost
                     Stage(runtime, TrackInitStage.ConfigureValidate).ToString());
             });
 
-            // (ii) Comm failure via the controller mute: command 250 never completes, no false
-            // completion, no unauthorized recovery. The production init is legitimately stuck on a
-            // silent controller, so this part observes the live state and then lets the process exit
-            // (the simulated transport opens no socket and drives no hardware).
+            // (ii) Comm failure via the controller mute: command 250 is transmitted but never
+            // acknowledged (the silent controller emits no reply), so the production init is
+            // legitimately stuck on the silent controller: 250 sent, no 113, no false completion,
+            // connect stage not passed, no unauthorized recovery (112), state Starting. The run is
+            // cancelled deterministically via a bounded CTS (linked into the runtime) and the host is
+            // awaited and disposed in a finally, so nothing relies on process exit.
             var originalFwPath = CoreSettings.Default.TrackAmplifierFwPath;
             var muteFaults = new List<RuntimeFaultEventArgs>();
+            TrackApplicationRuntimeHost? muteRuntime = null;
             try
             {
                 CoreSettings.Default.TrackAmplifierFwPath = CommittedFirmwarePath();
 
                 var muteFactory = new SimulatorFactory(new TrackSimulatorConfig(controllerMute: true));
-                var runtime = new TrackApplicationRuntimeHost(
+                muteRuntime = new TrackApplicationRuntimeHost(
                     new NullEcosHostService(), controlTrace: null, transportFactory: muteFactory.Create, amplifierGroups: Groups());
-                runtime.Faulted += (_, e) => muteFaults.Add(e);
+                muteRuntime.Faulted += (_, e) => muteFaults.Add(e);
 
-                _ = runtime.StartAsync(TrackControlMode.FullSimulation, CancellationToken.None);
+                // Bounded cancellation: the runtime composition is linked to this token (see
+                // TrackApplicationRuntimeHost.StartAsync), so cancelling it deterministically aborts
+                // the stuck init with no unbounded hang and no reliance on process exit.
+                using var muteCts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+                var startTask = muteRuntime.StartAsync(TrackControlMode.FullSimulation, muteCts.Token);
 
                 // Wait until the connection request (250) has been sent, then confirm no progress.
                 await WaitUntilAsync(
@@ -347,27 +354,44 @@ namespace SiebwaldeApp.SystemRegressionHost
                     !sim.SentCommands.Contains(TrackCommand.GET_CONTROLLER_VERSION),
                     $"113 present: {sim.SentCommands.Contains(TrackCommand.GET_CONTROLLER_VERSION)}");
                 result.Check("c2-no-false-completion",
-                    runtime.RunStatus is not InitializationStatus.Completed and not InitializationStatus.StoppedAtGlobalReady,
-                    runtime.RunStatus.ToString());
+                    muteRuntime.RunStatus is not InitializationStatus.Completed and not InitializationStatus.StoppedAtGlobalReady,
+                    muteRuntime.RunStatus.ToString());
                 result.Check("c2-connect-stage-not-passed",
-                    Stage(runtime, TrackInitStage.ControllerConnection) != TrackInitStageState.Passed,
-                    Stage(runtime, TrackInitStage.ControllerConnection).ToString());
+                    Stage(muteRuntime, TrackInitStage.ControllerConnection) != TrackInitStageState.Passed,
+                    Stage(muteRuntime, TrackInitStage.ControllerConnection).ToString());
                 result.Check("c2-no-unauthorized-recovery",
                     !sim.SentCommands.Contains(TrackCommand.REARM_GLOBAL_STOP),
                     $"112 present: {sim.SentCommands.Contains(TrackCommand.REARM_GLOBAL_STOP)}");
                 result.Check("c2-runtime-still-starting",
-                    runtime.State == TrackRuntimeState.Starting,
-                    runtime.State.ToString());
+                    muteRuntime.State == TrackRuntimeState.Starting,
+                    muteRuntime.State.ToString());
+                result.Check("c2-transmitted-never-acknowledged",
+                    sim.SentCommands.Contains(EnumClientCommands.CLIENT_CONNECTION_REQUEST) &&
+                    !sim.SentCommands.Contains(TrackCommand.GET_CONTROLLER_VERSION),
+                    $"250 transmitted={sim.SentCommands.Contains(EnumClientCommands.CLIENT_CONNECTION_REQUEST)}; " +
+                    $"never acknowledged (no 113 issued)={!sim.SentCommands.Contains(TrackCommand.GET_CONTROLLER_VERSION)}");
 
-                result.RunStatus = runtime.RunStatus.ToString();
+                result.RunStatus = muteRuntime.RunStatus.ToString();
 
-                // Intentionally no StopAsync/DisposeAsync: the production init holds the lifecycle
-                // gate waiting on a controller that never replies. The process exits cleanly (no
-                // socket, no hardware); this is the fail-closed behavior under test.
+                // Deterministic teardown: cancel the start (the runtime transitions fail-closed to
+                // Failed), await it so no fire-and-forget task leaks, then dispose the host.
+                muteCts.Cancel();
+                try
+                {
+                    await startTask;
+                }
+                catch (OperationCanceledException)
+                {
+                    // The start was cancelled; the runtime ends fail-closed (Failed), never Running.
+                }
             }
             finally
             {
                 try { CoreSettings.Default.TrackAmplifierFwPath = originalFwPath; } catch { /* best-effort */ }
+                if (muteRuntime is not null)
+                {
+                    try { await muteRuntime.DisposeAsync(); } catch { /* best-effort teardown */ }
+                }
             }
 
             result.Faults = faults
