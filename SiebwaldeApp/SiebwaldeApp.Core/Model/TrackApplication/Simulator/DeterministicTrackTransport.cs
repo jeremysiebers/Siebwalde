@@ -12,8 +12,8 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
     /// </summary>
     public sealed class TrackSimulatorConfig
     {
-        /// <summary>Default firmware checksum reported by every detected slave (verified production hex).</summary>
-        public const ushort DefaultFirmwareChecksum = 0x251F;
+        /// <summary>Default firmware checksum reported by every detected slave (the intended 0x0E39 release).</summary>
+        public const ushort DefaultFirmwareChecksum = 0x0E39;
 
         /// <summary>Default set of detected ModBus slave addresses.</summary>
         public static readonly IReadOnlyList<byte> DefaultDetectedSlaves = new byte[] { 1, 2, 3 };
@@ -46,7 +46,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         /// <summary>
         /// Per-slave override for the HR22 PROTOCOL_VERSION byte reported by a detected slave, used
         /// to model a Phase-1-compatible identity carrying a mismatched (or absent) protocol
-        /// version. Defaults to <see cref="TrackAmplifierRegisters.Phase1ProtocolVersion"/>.
+        /// version. Defaults to <see cref="TrackAmplifierRegisters.TrackPowerProtocolVersion"/>.
         /// </summary>
         public IReadOnlyDictionary<byte, ushort> ProtocolVersionOverrides { get; }
 
@@ -162,7 +162,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             {
                 var protocolVersion = _config.ProtocolVersionOverrides.TryGetValue(slave, out var overrideProtocol)
                     ? overrideProtocol
-                    : TrackAmplifierRegisters.Phase1ProtocolVersion;
+                    : TrackAmplifierRegisters.TrackPowerProtocolVersion;
                 _amplifiers[slave] = new SimulatedTrackAmplifier(slave, firmwareChecksum: _config.FirmwareChecksum,
                     protocolVersion: protocolVersion,
                     rejectGroupReady: _config.GroupReadyRejectSlaves.Contains(slave));

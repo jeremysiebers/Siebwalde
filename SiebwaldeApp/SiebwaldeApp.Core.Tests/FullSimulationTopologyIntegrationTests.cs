@@ -112,6 +112,12 @@ namespace SiebwaldeApp.Core.Tests
 
                 // AC1: the profile drives the FullSimulation runtime (detected slaves + movement sim).
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                // Operator authorizes + executes Stage 6 (track power) after StartAsync: movement
+                // permission is granted only now.
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(timeout.Token));
+
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
                 Assert.Equal("Simple Loop", runtime.ActiveProfileName);
                 Assert.NotNull(runtime.MovementSimulation);
@@ -173,6 +179,8 @@ namespace SiebwaldeApp.Core.Tests
 
                 await runtime.StartAsync(TrackControlMode.FullSimulation, timeout.Token);
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(timeout.Token));
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
 
                 // Fresh start re-places the profile locomotives and does not carry stale occupancy:
@@ -364,7 +372,7 @@ namespace SiebwaldeApp.Core.Tests
             {
                 string address = (row * 16).ToString("X4");
                 string data = row == dataRows - 1
-                    ? "1F25" + new string('0', 28)
+                    ? "390E" + new string('0', 28)
                     : new string('0', 32);
 
                 sb.Append(':').Append("10").Append(address).Append("00").Append(data).Append("00").AppendLine();

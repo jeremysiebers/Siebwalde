@@ -10,7 +10,16 @@ namespace SiebwaldeApp.Core
         Running,
         Completed,
         Failed,
-        Cancelled
+        Cancelled,
+
+        /// <summary>
+        /// Stages 1..5 (ControllerConnection .. GlobalReady) are Passed and Stage 6 (track power,
+        /// <c>AmpPowerEnable</c>) was deliberately NOT performed: the automatic run stopped at
+        /// GlobalReady because track power is operator-gated. This is a SUCCESS of the requested
+        /// (non-energized) test scope, NOT completion of the full seven-stage operating sequence
+        /// and NOT a failure. The live runtime loop must NOT be started for this status.
+        /// </summary>
+        StoppedAtGlobalReady
     }
 
     public sealed class InitializationProgress

@@ -85,6 +85,12 @@ namespace SiebwaldeApp.Integration
         private string _loggerInstance = "TrackAppLog";
         private ILogger? _trackApplicationLogging;
         private MovementPermissionController? _movementPermission;
+
+        // Neutral prerequisite (concept 1): true once a safe neutral PWM state has been commanded
+        // AND observed (command echo AND applied PWM) on every configured amplifier. This is the
+        // separate, Stage-6-independent "neutral verified" fact; movement permission (concept 3) is
+        // granted only AFTER Stage 6 (track power) has also been authorized + executed. Reset per start.
+        private bool _neutralVerified;
         private Kis09PassiveObserver? _kis09PassiveObserver;
         private Kis09PassiveObserverConsumer? _kis09PassiveConsumer;
         private LocomotiveCarrierFeeder? _kis09CarrierFeeder;
@@ -264,11 +270,36 @@ namespace SiebwaldeApp.Integration
         public bool TrackPowerOn => _trackInitStateMachine?.TrackPowerOn ?? false;
 
         /// <inheritdoc />
+        public InitializationStatus RunStatus => _trackInitStateMachine?.RunStatus ?? InitializationStatus.Idle;
+
+        /// <inheritdoc />
         public void AuthorizeTrackPowerEnable() => _trackInitStateMachine?.AuthorizeTrackPowerEnable();
 
         /// <inheritdoc />
-        public Task<bool> EnableTrackPowerAsync(CancellationToken ct = default)
-            => _trackInitStateMachine?.EnableTrackPowerAsync(ct) ?? Task.FromResult(false);
+        public async Task<bool> EnableTrackPowerAsync(CancellationToken ct = default)
+        {
+            // Fail-closed: Stage 6 (track power) requires the initialization state machine AND the
+            // neutral prerequisite (concept 1) before it may energize. The grant (concept 3) happens
+            // only AFTER the state machine has confirmed track power ON — the state machine itself
+            // stays decoupled from the movement-permission grant.
+            if (_trackInitStateMachine is null)
+            {
+                return false;
+            }
+
+            if (!_neutralVerified)
+            {
+                return false;
+            }
+
+            var success = await _trackInitStateMachine.EnableTrackPowerAsync(ct).ConfigureAwait(false);
+            if (success)
+            {
+                _movementPermission?.Grant();
+            }
+
+            return success;
+        }
 
         /// <inheritdoc />
         public Task<bool> DisableTrackPowerAsync(CancellationToken ct = default)
@@ -463,10 +494,18 @@ namespace SiebwaldeApp.Integration
                                     recovery);
                             }
 
+                            // Start the runtime write loop now (idempotent), BEFORE commanding +
+                            // observing neutral. It must run in BOTH the non-energized
+                            // (StoppedAtGlobalReady) and energized paths so the neutral command is
+                            // actually written and echoed. The Completed -> StartRuntime handler
+                            // below remains for the (legacy/idempotent) completion path.
+                            _trackControlMain?.StartRuntime(_cts.Token);
+
                             // Command + observe neutral (command echo AND applied PWM) only AFTER
-                            // stages 1..5 are finalized and the init run completed (runtime write
-                            // loop started), so the neutral echo can be observed and movement
-                            // permission granted.
+                            // stages 1..5 are finalized and the init run stopped at GlobalReady.
+                            // Establishing observed neutral here sets the neutral-verified flag
+                            // (concept 1) but does NOT grant movement permission (concept 3) — that
+                            // happens only after Stage 6 is authorized + executed.
                             await EstablishObservedNeutralAsync(_cts.Token).ConfigureAwait(false);
                         }
 
@@ -612,9 +651,13 @@ namespace SiebwaldeApp.Integration
 
             // Fresh movement-permission controller, shared by the movement gate (on the variables)
             // and the safety interlock (via the ECoS host). Created NotGranted and only granted
-            // after observed neutral. Set BEFORE comm/host start so both paths see the same state.
+            // after observed neutral AND Stage 6 (track power) has been authorized + executed.
+            // Set BEFORE comm/host start so both paths see the same state.
             _movementPermission = new MovementPermissionController();
             _trackVariables.MovementPermission = _movementPermission;
+
+            // Fresh neutral-verified flag per start: never carried over from a previous run.
+            _neutralVerified = false;
 
             // 2b) Cross-process controller-session ownership. The WPF runtime owns the controller
             //     session exclusively for the REAL-hardware path (the primary authority, closing the
@@ -721,6 +764,17 @@ namespace SiebwaldeApp.Integration
             {
                 SiebwaldeApp.Core.IoC.Logger.Log($"Track init status: {status.Status}", _loggerInstance);
 
+                if (status.Status == InitializationStatus.StoppedAtGlobalReady)
+                {
+                    // The non-energized test scope (stages 1..5 through GlobalReady) succeeded, but
+                    // the operator-gated Stage 6 (track power) was deliberately not performed, so
+                    // the full seven-stage operating sequence has NOT run. Never start the live
+                    // runtime loop here and never treat this as a failure.
+                    SiebwaldeApp.Core.IoC.Logger.Log(
+                        "Track init stopped at GlobalReady (non-energized): test scope complete.", _loggerInstance);
+                    return;
+                }
+
                 if (status.Status == InitializationStatus.Completed &&
                     _trackControlMain != null &&
                     _cts != null)
@@ -736,9 +790,11 @@ namespace SiebwaldeApp.Integration
 
             // A genuine init failure/cancellation never throws from RunAutomaticAsync; observe the
             // status instead so a failed real-mode start is never masked as Running. A run that
-            // reached NormalOperation but is still awaiting host finalization of stages 4/5 is NOT
-            // a failure: it stays Running until InitializePhase1AmplifiersAsync marks stages 4/5
-            // passed (which completes it) or failed (which keeps it fail-closed).
+            // reached NormalOperation but is still awaiting host finalization of stages 4/5 (and the
+            // operator-gated Stage 6) is NOT a failure: it stays Running until the host finalizes
+            // stages 4/5, at which point it becomes Completed (if Stage 6 also passed) or
+            // StoppedAtGlobalReady (test scope complete, non-energized). Neither of those is a
+            // failure, so only Failed/Cancelled throw here.
             if (_trackInitStateMachine.IsFailed ||
                 _trackInitStateMachine.RunStatus == InitializationStatus.Cancelled)
             {
@@ -913,6 +969,14 @@ namespace SiebwaldeApp.Integration
                 return false;
             }
 
+            // Vacuously group-ready: an empty domain has no amplifiers to mark ready, so Stage 5
+            // passes (stages 4/5 are vacuous for an empty domain). Movement is still fail-closed
+            // separately in EstablishObservedNeutralAsync (an empty domain cannot observe neutral).
+            if (domain.Count == 0)
+            {
+                return true;
+            }
+
             var step = new GroupReadyStep(_trackCommClient, _trackVariables, domain.ToArray(), _loggerInstance);
 
             while (true)
@@ -936,11 +1000,14 @@ namespace SiebwaldeApp.Integration
 
         /// <summary>
         /// Commands neutral to every configured amplifier and waits (bounded) until every one of
-        /// them reports a fresh readback of the neutral PWM. On success the movement permission is
-        /// granted; on failure it stays NotGranted and a fault + a
+        /// them reports a fresh readback of the neutral PWM (command echo AND applied PWM). On
+        /// success it records the neutral-verified fact (<see cref="_neutralVerified"/> = true) —
+        /// the Stage-6-independent prerequisite (concept 1). It does NOT grant movement permission
+        /// (concept 3); that happens only after Stage 6 is authorized + executed. On failure it
+        /// stays fail-closed (no neutral-verified, no permission) and a fault + a
         /// <see cref="DiagnosticCode.NeutralNotEstablished"/> diagnostic are surfaced. This never
         /// throws: the caller always proceeds to <see cref="TrackRuntimeState.Running"/> and the
-        /// permission state carries the truth.
+        /// neutral-verified/permission state carries the truth.
         /// </summary>
         private async Task EstablishObservedNeutralAsync(CancellationToken ct)
         {
@@ -985,7 +1052,10 @@ namespace SiebwaldeApp.Integration
 
             if (observed && configured)
             {
-                _movementPermission?.Grant();
+                // Concept 1 (neutral verified) is now satisfied. Movement permission (concept 3) is
+                // NOT granted here: it is granted only after Stage 6 (track power) is authorized and
+                // executed. The fail-closed branch below is unchanged.
+                _neutralVerified = true;
                 return;
             }
 

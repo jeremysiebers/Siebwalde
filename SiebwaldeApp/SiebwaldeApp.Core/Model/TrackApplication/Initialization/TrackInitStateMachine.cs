@@ -62,7 +62,8 @@ namespace SiebwaldeApp.Core
         private InitializationStatus _runStatus = InitializationStatus.Idle;
 
         // Set once the final step (EnableTrackamplifiers, NormalOperation) has returned Completed.
-        // Completion of the whole run is then deferred until the host finalizes stages 4 and 5.
+        // Completion of the whole run is then deferred until the host finalizes stages 4 and 5 AND
+        // the operator-gated Stage 6 (track power) passes; see TryCompleteDeferredRun.
         private bool _normalOperationStepCompleted;
 
         private volatile bool _trackPowerAuthorized;
@@ -865,46 +866,50 @@ namespace SiebwaldeApp.Core
 
         /// <summary>
         /// True when every prerequisite stage of <see cref="TrackInitStage.NormalOperation"/> is
-        /// Passed (stages 1..5). Stage 6 (AmpPowerEnable) is operator-gated and never part of the
-        /// automatic-completion prerequisite set, so a deferred normal-operation run completes once
-        /// stages 4 (configure/validate) and 5 (global-ready) are host-finalized.
+        /// Passed (stages 1..6). Stage 6 (<see cref="TrackInitStage.AmpPowerEnable"/>) is a REAL
+        /// completion prerequisite: NormalOperation must not be marked Passed and the run must not
+        /// become <see cref="InitializationStatus.Completed"/> unless ALL of stages 1..6 are Passed.
+        /// A deferred normal-operation run therefore completes only after Stage 6 has passed.
         /// </summary>
         private bool AllCompletionPrerequisitesPassed()
+            => StagesPassedUpTo(TrackInitStage.AmpPowerEnable);
+
+        /// <summary>
+        /// True when every stage from Stage 1 through <paramref name="lastInclusive"/> (inclusive)
+        /// is Passed. Used both for the full completion prerequisite set (stages 1..6) and for
+        /// detecting a "stopped at GlobalReady" run (stages 1..5 Passed with Stage 6 not Passed).
+        /// </summary>
+        private bool StagesPassedUpTo(TrackInitStage lastInclusive)
         {
             foreach (var stage in TrackInitStageInfo.All)
             {
-                if (stage == TrackInitStage.NormalOperation)
-                {
-                    break;
-                }
-
-                if (stage == TrackInitStage.AmpPowerEnable)
-                {
-                    continue; // gated, not a completion prerequisite
-                }
-
                 if (_status[stage].State != TrackInitStageState.Passed)
                 {
                     return false;
                 }
+
+                if (stage == lastInclusive)
+                {
+                    return true;
+                }
             }
 
-            return true;
+            return false;
         }
 
         /// <summary>
         /// Completes a run that reached the NormalOperation step but was deferred until the host
-        /// finalized stages 4 and 5. Idempotent and fail-closed: never completes while any
-        /// prerequisite stage is not Passed, and never re-completes an already-completed/failed run.
+        /// finalized stages 4 and 5 and the operator-gated Stage 6 passed. Idempotent and
+        /// fail-closed: never completes while any prerequisite stage (1..6) is not Passed, and never
+        /// re-completes an already-completed/failed run. When stages 1..5 are Passed but Stage 6 is
+        /// NOT Passed, the run is reported as <see cref="InitializationStatus.StoppedAtGlobalReady"/>
+        /// (test scope complete, deliberately not energized) — a distinct SUCCESS status, never
+        /// <see cref="InitializationStatus.Completed"/> and never a failure. Marking Stage 6 Passed
+        /// afterwards re-triggers this method and completes the run in order.
         /// </summary>
         private void TryCompleteDeferredRun()
         {
             if (!_normalOperationStepCompleted)
-            {
-                return;
-            }
-
-            if (_runStatus != InitializationStatus.Running)
             {
                 return;
             }
@@ -914,13 +919,27 @@ namespace SiebwaldeApp.Core
                 return;
             }
 
-            if (!AllCompletionPrerequisitesPassed())
+            if (_runStatus is not (InitializationStatus.Running or InitializationStatus.StoppedAtGlobalReady))
             {
                 return;
             }
 
-            MarkStagePassed(TrackInitStage.NormalOperation);
-            SetRunStatus(InitializationStatus.Completed);
+            if (AllCompletionPrerequisitesPassed())
+            {
+                MarkStagePassed(TrackInitStage.NormalOperation);
+                SetRunStatus(InitializationStatus.Completed);
+                return;
+            }
+
+            // Stage 6 (track power) is now a real completion prerequisite. When stages 1..5 are all
+            // Passed and only the operator-gated Stage 6 remains (Pending/Blocked/Running), the
+            // automatic run has stopped at GlobalReady: the requested non-energized test scope is
+            // complete, but the full seven-stage operating sequence has NOT run.
+            if (StagesPassedUpTo(TrackInitStage.GlobalReady) &&
+                _status[TrackInitStage.AmpPowerEnable].State != TrackInitStageState.Passed)
+            {
+                SetRunStatus(InitializationStatus.StoppedAtGlobalReady);
+            }
         }
 
         private void SetStageState(TrackInitStage stage, TrackInitStageState state, string? reason = null, string? recovery = null)

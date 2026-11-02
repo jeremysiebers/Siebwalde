@@ -273,7 +273,46 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         // -----------------------------------------------------------------
-        // (9) stage dependency: no false downstream PASS / Completed
+        // (9) legacy configured artifact -> diagnosis-first Blocked, no flash
+        // -----------------------------------------------------------------
+
+        [Fact]
+        public async Task FlashStep_LegacyConfiguredArtifact_Blocks_NoFlash()
+        {
+            var hexPath = WriteHexWithChecksum(0x5784);
+            try
+            {
+                var helpers = new TrackAmplifierBootloaderHelpers(hexPath, "test");
+                helpers.Execute();
+                Assert.True(helpers.HexFileReadSuccessful);
+                Assert.Equal((ushort)0x5784, helpers.GetFileCheckSum);
+
+                var variables = new TrackApplicationVariables();
+                // The amplifier matches the configured (legacy) artifact checksum, so the legacy
+                // pre-diagnosis is the ONLY thing preventing a silent match + proceed.
+                variables.trackAmpItems[1].SlaveDetected = 1;
+                variables.trackAmpItems[1].HoldingReg[TrackAmplifierRegisters.SwChecksum] = 0x5784;
+
+                var comm = new RecordingCommClient();
+                var auth = new FirmwareDeploymentAuthorization();
+                var sendNext = new SendNextFwDataPacket(comm, helpers);
+                var step = new FlashFwTrackamplifiersStep(comm, variables, sendNext, helpers, "test", auth);
+
+                var result = await step.ExecuteAsync(null, CancellationToken.None);
+
+                Assert.Equal(InitStepResultKind.Blocked, result.Kind);
+                Assert.Contains("legacy 0x5784", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+                Assert.Contains("0x0E39", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+
+                // No flash command was sent and no implicit authorization.
+                Assert.Empty(comm.Sent);
+                Assert.False(auth.Authorized);
+            }
+            finally { TryDelete(hexPath); }
+        }
+
+        // -----------------------------------------------------------------
+        // (10) stage dependency: no false downstream PASS / Completed
         // -----------------------------------------------------------------
 
         [Fact]
@@ -289,17 +328,26 @@ namespace SiebwaldeApp.Core.Tests
             Assert.NotEqual(TrackInitStageState.Passed, machine.Stages.First(s => s.Stage == TrackInitStage.NormalOperation).State);
             Assert.NotEqual(TrackInitStageState.Passed, machine.Stages.First(s => s.Stage == TrackInitStage.ConfigureValidate).State);
 
-            // Once the host finalizes stages 4 and 5, the run completes.
+            // Once the host finalizes stages 4 and 5, Stage 6 (track power) is still required, so
+            // the run stops at GlobalReady (test scope complete) rather than completing.
             machine.MarkStagePassed(TrackInitStage.ConfigureValidate);
-            Assert.False(machine.IsCompleted); // still missing stage 5
+            Assert.False(machine.IsCompleted); // still missing stages 5 and 6
             machine.MarkStagePassed(TrackInitStage.GlobalReady);
+
+            Assert.False(machine.IsCompleted);
+            Assert.Equal(InitializationStatus.StoppedAtGlobalReady, machine.RunStatus);
+            Assert.NotEqual(TrackInitStageState.Passed, machine.Stages.First(s => s.Stage == TrackInitStage.NormalOperation).State);
+            Assert.NotEqual(TrackInitStageState.Passed, machine.Stages.First(s => s.Stage == TrackInitStage.AmpPowerEnable).State);
+
+            // Stage 6 passed completes the run in order.
+            machine.MarkStagePassed(TrackInitStage.AmpPowerEnable);
 
             Assert.True(machine.IsCompleted);
             Assert.Equal(TrackInitStageState.Passed, machine.Stages.First(s => s.Stage == TrackInitStage.NormalOperation).State);
         }
 
         // -----------------------------------------------------------------
-        // (10) the flash path requires BOTH authorization AND session lease
+        // (11) the flash path requires BOTH authorization AND session lease
         // -----------------------------------------------------------------
 
         [Fact]
@@ -606,6 +654,34 @@ namespace SiebwaldeApp.Core.Tests
             sb.Append(":00000001FF").AppendLine();
 
             var path = Path.Combine(Path.GetTempPath(), $"flash_safety_{Guid.NewGuid():N}.hex");
+            File.WriteAllText(path, sb.ToString());
+            return path;
+        }
+
+        /// <summary>
+        /// Writes a minimal Intel HEX whose <see cref="TrackAmplifierBootloaderHelpers.Execute"/>
+        /// computes <paramref name="checksum"/> (1920 zero data rows; the last row's first word
+        /// carries the checksum little-endian), followed by one config row. Used to model a legacy
+        /// configured artifact path.
+        /// </summary>
+        private static string WriteHexWithChecksum(ushort checksum)
+        {
+            const int dataRows = (0x8000 - 0x800) / 16; // 1920
+
+            var sb = new StringBuilder();
+            for (int row = 0; row < dataRows; row++)
+            {
+                string address = (row * 16).ToString("X4");
+                string data = row == dataRows - 1
+                    ? (checksum & 0xFF).ToString("X2") + ((checksum >> 8) & 0xFF).ToString("X2") + new string('0', 28)
+                    : new string('0', 32);
+
+                sb.Append(':').Append("10").Append(address).Append("00").Append(data).Append("00").AppendLine();
+            }
+
+            sb.Append(':').Append("0C").Append("0000").Append("00").Append(new string('F', 24)).Append("00").AppendLine();
+
+            var path = Path.Combine(Path.GetTempPath(), $"flash_legacy_{Guid.NewGuid():N}.hex");
             File.WriteAllText(path, sb.ToString());
             return path;
         }

@@ -83,7 +83,8 @@ namespace SiebwaldeApp.Core.Tests
         {
             var variables = new TrackApplicationVariables();
             var transport = new DeterministicTrackTransport(new TrackSimulatorConfig(
-                detectedSlaves: new byte[] { 1 }));
+                detectedSlaves: new byte[] { 1 },
+                protocolVersionOverrides: new Dictionary<byte, ushort> { { 1, 0x01 } }));
             var client = new TrackCommClientAsync(transport, variables);
             await client.StartAsync(false);
 

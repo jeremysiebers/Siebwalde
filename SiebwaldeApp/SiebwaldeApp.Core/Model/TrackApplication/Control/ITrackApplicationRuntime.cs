@@ -56,8 +56,10 @@ namespace SiebwaldeApp.Core
         bool IsControlPathUnsafe { get; }
 
         /// <summary>
-        /// The current movement-permission state (observed neutral). Not granted until neutral has
-        /// been commanded to and observed on every configured amplifier.
+        /// The current movement-permission state. Granted only after BOTH observed neutral has been
+        /// established (command echo AND applied PWM on every configured amplifier) AND Stage 6
+        /// (track power) has been authorized and executed — never merely because neutral was
+        /// observed, and never merely to start the write loop.
         /// </summary>
         MovementPermissionState MovementPermission { get; }
 
@@ -151,6 +153,14 @@ namespace SiebwaldeApp.Core
 
         /// <summary>True when track power is ON (TRACK_POWER_ON verified on every required amplifier).</summary>
         bool TrackPowerOn { get; }
+
+        /// <summary>
+        /// The current initialization run status, or <see cref="InitializationStatus.Idle"/> before
+        /// the track part has been composed. <see cref="InitializationStatus.Completed"/> is reached
+        /// only after Stage 6 (track power) completes; a non-energized run stops at
+        /// <see cref="InitializationStatus.StoppedAtGlobalReady"/>.
+        /// </summary>
+        InitializationStatus RunStatus { get; }
 
         /// <summary>Explicit operator authorization for the Stage 6 track-power transition (never auto-energized).</summary>
         void AuthorizeTrackPowerEnable();

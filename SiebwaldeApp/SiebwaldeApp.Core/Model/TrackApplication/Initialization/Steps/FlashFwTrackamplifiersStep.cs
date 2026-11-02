@@ -155,6 +155,21 @@ namespace SiebwaldeApp.Core
                 $"State.FlashFwTrackamplifiers => File checksum = 0x{_bootloaderHelpers.GetFileCheckSum:X}.",
                 _loggerInstance);
 
+            // Legacy-artifact diagnosis (0x5784 / 0x251F / 0xE906 / 0x5263 / 0xFFC2 -> 0x0E39):
+            // when the CONFIGURED artifact resolves to a KNOWN LEGACY checksum, it points at a
+            // legacy artifact rather than the intended 0x0E39 release. Detect + report + block;
+            // never silently match file<->amp checksum and proceed, never auto-migrate the path and
+            // never auto-flash.
+            if (IsLegacyFirmwareChecksum(checksum))
+            {
+                IoC.Logger.Log(
+                    $"State.FlashFwTrackamplifiers => configured TrackAmplifierFwPath points at legacy 0x{checksum:X4}, not the intended 0x0E39 release.",
+                    _loggerInstance);
+
+                return Task.FromResult(InitStepResult.Blocked(
+                    $"configured TrackAmplifierFwPath points at legacy 0x{checksum:X4}, not the intended 0x0E39 release."));
+            }
+
             var mismatches = new List<FirmwareAmpMismatch>();
             foreach (TrackAmplifierItem amplifier in _variables.trackAmpItems)
             {
@@ -218,6 +233,28 @@ namespace SiebwaldeApp.Core
             catch
             {
                 return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// True when the configured artifact checksum is a KNOWN LEGACY build (pre-0x0E39): the
+        /// legacy 12-register image (0x251F) and the intermediate/other release checksums
+        /// (0x5784, 0xE906, 0x5263, 0xFFC2). Used diagnosis-first to detect a mis-configured
+        /// <c>TrackAmplifierFwPath</c> that points at a legacy artifact rather than the intended
+        /// 0x0E39 release.
+        /// </summary>
+        private static bool IsLegacyFirmwareChecksum(ushort checksum)
+        {
+            switch (checksum)
+            {
+                case 0x5784:
+                case 0x251F:
+                case 0xE906:
+                case 0x5263:
+                case 0xFFC2:
+                    return true;
+                default:
+                    return false;
             }
         }
 
