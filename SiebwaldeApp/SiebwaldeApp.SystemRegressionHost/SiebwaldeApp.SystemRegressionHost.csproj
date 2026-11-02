@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Programmable, headless, OFFLINE system-regression host.
+
+    This console exercises the REAL production C# initialization pipeline (the same
+    TrackApplicationRuntimeHost.ComposeTrackPartAsync composition the WPF application uses),
+    driven by a simulated PIC32/PIC18 transport (DeterministicTrackTransport) injected through the
+    production transportFactory seam. There is NO flash, NO live hardware, NO UDP socket, NO
+    protocol reimplementation, and NO second init state machine: the host composes the real
+    transport/comm + TrackInitStateMachine + 9 production steps + TrackControlMain exactly once.
+
+    This project is intentionally NOT part of SiebwaldeApp.sln (mirroring SiebwaldeApp.StopReachabilityHarness)
+    so it never affects the production build or the existing test suite. It is built and run separately.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>SiebwaldeApp.SystemRegressionHost</RootNamespace>
+    <AssemblyName>SiebwaldeApp.SystemRegressionHost</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SiebwaldeApp.Core\SiebwaldeApp.Core.csproj" />
+    <ProjectReference Include="..\SiebwaldeApp.EcosEmu\SiebwaldeApp.EcosEmu.csproj" />
+    <ProjectReference Include="..\SiebwaldeApp.Integration\SiebwaldeApp.Integration.csproj" />
+  </ItemGroup>
+
+  <!--
+    Committed deterministic firmware fixture whose file checksum == 0x0E39 (the intended release).
+    Copied next to the exe so the harness NEVER depends on the untracked release/current/ path.
+  -->
+  <ItemGroup>
+    <None Include="Firmware-0x0E39.hex" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

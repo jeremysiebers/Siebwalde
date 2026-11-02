@@ -74,6 +74,17 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         /// </summary>
         public byte InitialGlobalStopState { get; }
 
+        /// <summary>
+        /// When true the simulated controller is completely silent: it acknowledges nothing
+        /// (250 CONNECT, 113 version, MBUS-state and global-stop control replies) and emits no
+        /// SLAVEINFO frame, modelling a controller that is unreachable / not responding (comm
+        /// failure). The host's <c>ConnectToEthernetTargetStep</c> (command 250) therefore never
+        /// completes. Requests are still recorded in <see cref="DeterministicTrackTransport.SentCommands"/>
+        /// (the write is "transmitted") but never acknowledged. Simulator-layer only; the
+        /// production init logic is unchanged. Defaults to false.
+        /// </summary>
+        public bool ControllerMute { get; }
+
         public TrackSimulatorConfig(
             ushort firmwareChecksum = DefaultFirmwareChecksum,
             IReadOnlyList<byte>? detectedSlaves = null,
@@ -84,7 +95,8 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             TimeSpan? periodicSlaveInfoInterval = null,
             bool emitGlobalStopArmedStatus = false,
             byte initialGlobalStopState = 0,
-            IReadOnlyCollection<byte>? groupReadyRejectSlaves = null)
+            IReadOnlyCollection<byte>? groupReadyRejectSlaves = null,
+            bool controllerMute = false)
         {
             FirmwareChecksum = firmwareChecksum;
             DetectedSlaves = detectedSlaves is null
@@ -108,6 +120,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             PeriodicSlaveInfoInterval = periodicSlaveInfoInterval;
             EmitGlobalStopArmedStatus = emitGlobalStopArmedStatus;
             InitialGlobalStopState = initialGlobalStopState;
+            ControllerMute = controllerMute;
         }
     }
 
@@ -445,6 +458,15 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             var writer = _frames?.Writer;
             if (writer == null)
                 return; // not opened yet; drop defensively
+
+            // Controller mute (comm-failure model): the simulated controller stays completely
+            // silent — it acknowledges nothing (250 CONNECT, 113 version, MBUS-state and
+            // global-stop control replies) and emits no SLAVEINFO frame — so the host's
+            // ConnectToEthernetTargetStep (command 250) never completes. The request is still
+            // recorded in SentCommands (by SendAsync) before Dispatch, so "transmitted but never
+            // acknowledged" is observable. Simulator-layer only; production init logic is unchanged.
+            if (_config.ControllerMute)
+                return;
 
             switch (command)
             {
