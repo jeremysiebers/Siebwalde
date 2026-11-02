@@ -1445,6 +1445,129 @@ NODES: list[tuple[str, dict]] = [
         "evidence_status": "SOURCE_REF",
         "observed_date": "2026-10-28",
     }),
+
+    # ==================================================================
+    # System-regression increment (fix/ovaaltje2-safe-group-shutdown @ 4f1bc83d):
+    # headless offline system-level init regression host (scenarios A-F) + safety
+    # invariants. Added as explicit literal tuples (NOT via the tool-registry
+    # loop): the host is not a registry tool, so its capability is recorded here.
+    # ==================================================================
+    ("Tool", {
+        "id": "tool:system-regression-host",
+        "label": "System regression host (SiebwaldeApp.SystemRegressionHost)",
+        "path": "SiebwaldeApp/SiebwaldeApp.SystemRegressionHost/",
+        "purpose": "Headless offline system-level init regression host; scenarios A-F exercise the WPF/system init state machine without hardware.",
+        "lifecycle": "ACTIVE",
+        "preservation_policy": "KEEP",
+        "language": "C#",
+        "entry_points": "SiebwaldeApp/SiebwaldeApp.SystemRegressionHost/SystemRegressionScenarios.cs",
+        "hardware": "none",
+        "side_effect": "NONE (offline init-regression host; no hardware)",
+        "offline_tested": True,
+        "physically_proven": False,
+        "mcp_service": None,
+        "migration_candidate": False,
+        "po_decision": "system-regression increment: recorded as a Tool providing system-level-init-regression (no PO preservation decision recorded)",
+        "status": "PROVEN_OFFLINE_TEST",
+        "summary": "SiebwaldeApp.SystemRegressionHost: headless offline system-level init regression host (scenarios A-F).",
+        "source_path": "SiebwaldeApp/SiebwaldeApp.SystemRegressionHost/SystemRegressionScenarios.cs",
+        "source_location": "SystemRegressionScenarios.cs (scenarios A-F)",
+        "source_revision": "4f1bc83d",
+        "evidence_status": "TEST_PASS",
+    }),
+    ("Capability", {
+        "id": "capability:system-level-init-regression",
+        "label": "system-level-init-regression",
+        "name": "system-level-init-regression",
+        "description": "Offline system-level init regression (scenarios A-F) provided by the SystemRegressionHost tool.",
+        "status": "PROVEN_SOURCE",
+        "summary": "Capability 'system-level-init-regression' of tool 'system-regression-host' (system-regression increment).",
+        "source_path": "SiebwaldeApp/SiebwaldeApp.SystemRegressionHost/SystemRegressionScenarios.cs",
+        "source_location": "SystemRegressionScenarios.cs (scenarios A-F)",
+        "source_revision": "4f1bc83d",
+        "evidence_status": "SOURCE_REF",
+    }),
+    ("TestExecution", {
+        "id": "test:system-regression-A", "label": "System regression A",
+        "test_name": "system-regression-A", "result": "PASS",
+        "date": "2026-11-03", "environment": "offline",
+        "status": "PROVEN_OFFLINE_TEST",
+        "summary": "successful non-energized init stopping at StoppedAtGlobalReady (HR7=0xF101/HR11=0x0E39, protocol 0x02, no non-neutral PWM)",
+        "source_path": "SiebwaldeApp/SiebwaldeApp.SystemRegressionHost/SystemRegressionScenarios.cs",
+        "source_location": "scenario A", "source_revision": "4f1bc83d", "evidence_status": "TEST_PASS",
+    }),
+    ("TestExecution", {
+        "id": "test:system-regression-B", "label": "System regression B",
+        "test_name": "system-regression-B", "result": "PASS",
+        "date": "2026-11-03", "environment": "offline",
+        "status": "PROVEN_OFFLINE_TEST",
+        "summary": "firmware mismatch => FirmwareAddress Blocked, no 103/120/121/122/125/126/127/131",
+        "source_path": "SiebwaldeApp/SiebwaldeApp.SystemRegressionHost/SystemRegressionScenarios.cs",
+        "source_location": "scenario B", "source_revision": "4f1bc83d", "evidence_status": "TEST_PASS",
+    }),
+    ("TestExecution", {
+        "id": "test:system-regression-C", "label": "System regression C",
+        "test_name": "system-regression-C", "result": "PASS",
+        "date": "2026-11-03", "environment": "offline",
+        "status": "PROVEN_OFFLINE_TEST",
+        "summary": "missing amp => ConfigureValidate Failed/NotGranted; controller mute => 250 sent, no 113, no false completion",
+        "source_path": "SiebwaldeApp/SiebwaldeApp.SystemRegressionHost/SystemRegressionScenarios.cs",
+        "source_location": "scenario C", "source_revision": "4f1bc83d", "evidence_status": "TEST_PASS",
+    }),
+    ("TestExecution", {
+        "id": "test:system-regression-D", "label": "System regression D",
+        "test_name": "system-regression-D", "result": "PASS",
+        "date": "2026-11-03", "environment": "offline",
+        "status": "PROVEN_OFFLINE_TEST",
+        "summary": "incorrect protocol => incompatible protocol version; stale readback => NotGranted + NeutralNotEstablished",
+        "source_path": "SiebwaldeApp/SiebwaldeApp.SystemRegressionHost/SystemRegressionScenarios.cs",
+        "source_location": "scenario D", "source_revision": "4f1bc83d", "evidence_status": "TEST_PASS",
+    }),
+    ("TestExecution", {
+        "id": "test:system-regression-E", "label": "System regression E",
+        "test_name": "system-regression-E", "result": "PASS",
+        "date": "2026-11-03", "environment": "offline",
+        "status": "PROVEN_OFFLINE_TEST",
+        "summary": "stage dependencies: Stage 6 gated on Stage 5 + operator auth; StoppedAtGlobalReady != Completed",
+        "source_path": "SiebwaldeApp/SiebwaldeApp.SystemRegressionHost/SystemRegressionScenarios.cs",
+        "source_location": "scenario E", "source_revision": "4f1bc83d", "evidence_status": "TEST_PASS",
+    }),
+    ("TestExecution", {
+        "id": "test:system-regression-F", "label": "System regression F",
+        "test_name": "system-regression-F", "result": "PASS",
+        "date": "2026-11-03", "environment": "offline",
+        "status": "PROVEN_OFFLINE_TEST",
+        "summary": "three-concept separation: neutral verified / Stage 6 / movement grant; grant only after Stage 6 + neutral",
+        "source_path": "SiebwaldeApp/SiebwaldeApp.SystemRegressionHost/SystemRegressionScenarios.cs",
+        "source_location": "scenario F", "source_revision": "4f1bc83d", "evidence_status": "TEST_PASS",
+    }),
+    ("SafetyInvariant", {
+        "id": "safety:no-auto-flash-on-mismatch", "label": "No auto-flash on firmware checksum mismatch",
+        "statement": "A PIC18 firmware checksum mismatch is detected and reported as a Blocked (authorization-required) init stage; it never auto-issues 103/120/121/122/ERASE/PROGRAM/131. Only an explicitly authorized command-131 deployment may flash.",
+        "applies_to": "WPF/system init firmware verification", "requires_authorization": True,
+        "status": "PROVEN_SOURCE",
+        "summary": "A PIC18 firmware checksum mismatch is a Blocked (authorization-required) init stage; only an explicitly authorized command-131 deployment may flash.",
+        "source_path": "SiebwaldeApp/SiebwaldeApp.Core/Model/TrackApplication/Initialization/Steps/FlashFwTrackamplifiersStep.cs",
+        "source_location": "State0_DetermineFlashRequirementAsync", "source_revision": "4f1bc83d", "evidence_status": "SOURCE_REF",
+    }),
+    ("SafetyInvariant", {
+        "id": "safety:no-downstream-complete-before-upstream-passed", "label": "No downstream completion before upstream stages pass",
+        "statement": "The init state machine defers NormalOperation (Stage 7) Passed and run-Completed until stages 1-6 are Passed; a deliberate stop at GlobalReady is reported as StoppedAtGlobalReady, not Completed.",
+        "applies_to": "init stage ordering", "requires_authorization": False,
+        "status": "PROVEN_SOURCE",
+        "summary": "NormalOperation (Stage 7) Passed / run-Completed is deferred until stages 1-6 Passed; a stop at GlobalReady is StoppedAtGlobalReady, not Completed.",
+        "source_path": "SiebwaldeApp/SiebwaldeApp.Core/Model/TrackApplication/Initialization/TrackInitStateMachine.cs",
+        "source_location": "AllCompletionPrerequisitesPassed / TryCompleteDeferredRun", "source_revision": "4f1bc83d", "evidence_status": "SOURCE_REF",
+    }),
+    ("SafetyInvariant", {
+        "id": "safety:three-concept-neutral-stage6-grant", "label": "Neutral / Stage-6 / movement-grant are three distinct concepts",
+        "statement": "Neutral establish/verify, Stage-6 track-power enable, and movement-permission grant are three distinct operations; grant requires both neutral verified AND Stage-6 success.",
+        "applies_to": "movement permission / track power", "requires_authorization": True,
+        "status": "PROVEN_SOURCE",
+        "summary": "Movement-permission grant requires both neutral verified AND Stage-6 success; neutral verify, Stage-6 track-power enable and grant are distinct operations.",
+        "source_path": "SiebwaldeApp/SiebwaldeApp.Integration/TrackApplicationRuntimeHost.cs",
+        "source_location": "EnableTrackPowerAsync (~279-302)", "source_revision": "4f1bc83d", "evidence_status": "SOURCE_REF",
+    }),
 ]
 
 
@@ -1599,6 +1722,11 @@ RELS: list[tuple[str, str, str, dict]] = [
     ("RELATED_TO", "obs:p2c-csharp-disable-verify-race", "obs:p2c-faultb-pic18-hr8-fix", {"note": "the synchronous PIC18 HR8 fix was NECESSARY but NOT SUFFICIENT; the residual failure was this C# sequence-vs-state race"}),
     ("RELATED_TO", "obs:p2c-csharp-disable-verify-fix", "obs:p2c-faultb-pic18-hr8-fix", {"note": "the C# state-predicate wait completes the PIC18 synchronous-HR8 fix"}),
     ("RELATED_TO", "obs:p2c-csharp-disable-verify-race", "obs:p2c-csharp-disable-verify-fix", {"note": "the WaitForDisableStateAsync correction resolves the WaitForSequenceAsync race"}),
+
+    # ==================================================================
+    # System-regression increment: tool capability (explicit; NOT via the registry loop)
+    # ==================================================================
+    ("PROVIDES_CAPABILITY", "tool:system-regression-host", "capability:system-level-init-regression", {}),
 ]
 
 

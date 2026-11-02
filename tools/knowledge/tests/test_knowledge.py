@@ -246,15 +246,17 @@ def test_mcp_exposes_only_readonly_tools():
 
 
 def test_knowledge_tools_lists_protected():
-    """knowledge_tools() lists the 10 registry tools; picoscope/knowledge are KEEP_ACTIVE_MCP."""
+    """knowledge_tools() lists the 10 registry tools plus the system-regression
+    host; picoscope/knowledge are KEEP_ACTIVE_MCP."""
     res = server.knowledge_tools()["results"]
-    assert len(res) == 10
+    assert len(res) == 11
     by_id = {r["id"]: r for r in res}
     assert set(by_id) == {
         "tool:picoscope-mcp", "tool:knowledge-foundation", "tool:firmware-tooling",
         "tool:hmo2024-tooling", "tool:flash-one-driver", "tool:legacy-python-cli",
         "tool:faller-car-bootload", "tool:integrator-checksum-helper",
         "tool:diagnostics-cold-start-capture", "tool:diagnostics-mcp-active-session",
+        "tool:system-regression-host",
     }
     assert by_id["tool:picoscope-mcp"]["preservation_policy"] == "KEEP_ACTIVE_MCP"
     assert by_id["tool:knowledge-foundation"]["preservation_policy"] == "KEEP_ACTIVE_MCP"

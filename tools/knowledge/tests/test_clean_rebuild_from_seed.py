@@ -1,6 +1,6 @@
 """Clean-rebuild tests for the Knowledge Foundation.
 
-Prove that a complete knowledge graph (219 nodes / 170 relationships, matching
+Prove that a complete knowledge graph (230 nodes / 171 relationships, matching
 the curated seed exactly) can be reconstructed from Git-only sources — i.e.
 ``schema.py`` + ``knowledge_seed.py`` via ``ingest/build_graph.py`` — with no
 dependence on the operational ``.lbdb``, any archive, or the NAS. Also prove
@@ -40,18 +40,18 @@ def _expected_counts() -> dict:
 
 
 def test_clean_rebuild_from_seed(tmp_path):
-    """Rebuilding from Git-only sources yields exactly the seed (219/170)."""
+    """Rebuilding from Git-only sources yields exactly the seed (230/171)."""
     db_path = tmp_path / "k.lbdb"
     stats = build_graph._build(db_path)
-    assert stats == {"node_count": 219, "rel_count": 170}
+    assert stats == {"node_count": 230, "rel_count": 171}
 
     counts = _runtime.count_tables(db_path)
     expected = _expected_counts()
 
-    assert sum(counts["nodes"].values()) == 219
-    assert sum(counts["rels"].values()) == 170
-    assert len(knowledge_seed.NODES) == 219
-    assert len(knowledge_seed.RELS) == 170
+    assert sum(counts["nodes"].values()) == 230
+    assert sum(counts["rels"].values()) == 171
+    assert len(knowledge_seed.NODES) == 230
+    assert len(knowledge_seed.RELS) == 171
 
     # Per-table node counts must match the seed exactly.
     assert counts["nodes"] == expected["nodes"], (
