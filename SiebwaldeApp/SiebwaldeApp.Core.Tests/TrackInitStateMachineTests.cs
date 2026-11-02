@@ -143,23 +143,113 @@ namespace SiebwaldeApp.Core.Tests
                 .ToArray();
 
         [Fact]
-        public async Task Automatic_RunsStepStages_AndCompletes()
+        public async Task Automatic_StopsAtGlobalReady_ThenCompletes_AfterStage6Passed()
         {
             var (machine, _) = Build(HappyChain());
 
             await machine.RunAutomaticAsync(CancellationToken.None);
 
-            Assert.True(machine.IsCompleted, $"RunStatus={machine.RunStatus}, CurrentStage={machine.CurrentStage}");
-            Assert.Equal(InitializationStatus.Completed, machine.RunStatus);
+            // Stages 1..3 passed; the final step reached NormalOperation but completion is DEFERRED
+            // until the host finalizes stage 4 (configure/validate), stage 5 (global ready) AND the
+            // operator-gated stage 6 (track power).
+            Assert.False(machine.IsCompleted, $"RunStatus={machine.RunStatus}, CurrentStage={machine.CurrentStage}");
+            Assert.Equal(InitializationStatus.Running, machine.RunStatus);
             Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.ControllerConnection).State);
             Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.FirmwareAddress).State);
             Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.AmplifierStandby).State);
             // Stage 5 (global ready) and Stage 4 (configure + validate) are host-finalized: the
             // step runner never auto-passes them (they require the whole required amp set).
             Assert.Equal(TrackInitStageState.Running, StageOf(machine, TrackInitStage.GlobalReady).State);
-            Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.NormalOperation).State);
+            // NormalOperation must NOT be Passed (and the run NOT Completed) while stages 4/5/6 are
+            // not yet Passed.
+            Assert.Equal(TrackInitStageState.Running, StageOf(machine, TrackInitStage.NormalOperation).State);
             Assert.Equal(TrackInitStageState.Pending, StageOf(machine, TrackInitStage.ConfigureValidate).State);
             Assert.Equal(TrackInitStageState.Pending, StageOf(machine, TrackInitStage.AmpPowerEnable).State);
+
+            // The host finalizes stages 4 and 5. Stage 6 (track power) is NOT Passed, so the run is
+            // reported as StoppedAtGlobalReady (test scope complete, non-energized) — NOT Completed.
+            machine.MarkStagePassed(TrackInitStage.ConfigureValidate);
+            machine.MarkStagePassed(TrackInitStage.GlobalReady);
+
+            Assert.False(machine.IsCompleted, $"RunStatus={machine.RunStatus}");
+            Assert.Equal(InitializationStatus.StoppedAtGlobalReady, machine.RunStatus);
+            Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.ConfigureValidate).State);
+            Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.GlobalReady).State);
+            Assert.NotEqual(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.NormalOperation).State);
+            Assert.NotEqual(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.AmpPowerEnable).State);
+
+            // Stage 6 passed (the EnableTrackPowerAsync path) -> the full seven-stage sequence
+            // completes: NormalOperation Passed THEN run Completed.
+            machine.MarkStagePassed(TrackInitStage.AmpPowerEnable);
+
+            Assert.True(machine.IsCompleted, $"RunStatus={machine.RunStatus}");
+            Assert.Equal(InitializationStatus.Completed, machine.RunStatus);
+            Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.NormalOperation).State);
+            Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.AmpPowerEnable).State);
+        }
+
+        [Fact]
+        public async Task Automatic_NonEnergizedRun_ReportsStoppedAtGlobalReady_NotCompleted()
+        {
+            var (machine, _) = Build(HappyChain());
+
+            await machine.RunAutomaticAsync(CancellationToken.None);
+
+            // The host finalizes stages 4 and 5, but Stage 6 (track power) is deliberately not
+            // performed (operator-gated). The run must be reported as the distinct SUCCESS status
+            // "stopped at GlobalReady" — NOT Completed and NOT a failure.
+            machine.MarkStagePassed(TrackInitStage.ConfigureValidate);
+            machine.MarkStagePassed(TrackInitStage.GlobalReady);
+
+            Assert.Equal(InitializationStatus.StoppedAtGlobalReady, machine.RunStatus);
+            Assert.False(machine.IsCompleted);
+            Assert.False(machine.IsFailed);
+
+            // NormalOperation and AmpPowerEnable are NOT Passed: the live runtime loop must not run.
+            Assert.NotEqual(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.NormalOperation).State);
+            Assert.NotEqual(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.AmpPowerEnable).State);
+
+            // Stage 6 remains gated/not-energized in a non-energized run.
+            Assert.False(machine.TrackPowerOn);
+            Assert.False(machine.TrackPowerAuthorized);
+        }
+
+        [Fact]
+        public async Task Automatic_FullSequence_ViaEnableTrackPowerAsync_CompletesNormalOperationInOrder()
+        {
+            var comm = new FakeTrackCommClient();
+            var variables = new TrackApplicationVariables();
+            foreach (var amp in new byte[] { 1, 3, 4, 6 })
+            {
+                // Amplifiers are configured + report TRACK_POWER_ON (inhibited==0 + enable + config_ok)
+                // and advertise track-power support (protocol 0x02) before the Stage 6 step polls.
+                variables.trackAmpItems[amp].ConfigurationVerified = true;
+                variables.trackAmpItems[amp].HoldingReg[TrackAmplifierRegisters.State] =
+                    (ushort)(TrackAmplifierRegisters.EnableActiveBit | TrackAmplifierRegisters.ConfigOkBit);
+                variables.trackAmpItems[amp].HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol] =
+                    TrackAmplifierRegisters.TrackPowerProtocolVersion;
+            }
+
+            var machine = new TrackInitStateMachine(
+                comm, variables, HappyChain(), requiredAmps: () => new byte[] { 1, 3, 4, 6 });
+
+            await machine.RunAutomaticAsync(CancellationToken.None);
+            machine.MarkStagePassed(TrackInitStage.ConfigureValidate);
+            machine.MarkStagePassed(TrackInitStage.GlobalReady);
+            Assert.Equal(InitializationStatus.StoppedAtGlobalReady, machine.RunStatus);
+
+            // The operator authorizes + enables track power (the real Stage 6 path). This must mark
+            // Stage 6 Passed and re-trigger deferred completion so NormalOperation passes and the
+            // run completes in order.
+            machine.AuthorizeTrackPowerEnable();
+            var enabled = await machine.EnableTrackPowerAsync(CancellationToken.None);
+
+            Assert.True(enabled);
+            Assert.True(machine.TrackPowerOn);
+            Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.AmpPowerEnable).State);
+            Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.NormalOperation).State);
+            Assert.Equal(InitializationStatus.Completed, machine.RunStatus);
+            Assert.True(machine.IsCompleted);
         }
 
         [Fact]

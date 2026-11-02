@@ -17,6 +17,7 @@ namespace SiebwaldeApp.Core
         private readonly SendNextFwDataPacket _sendNextFwDataPacket;
         private readonly TrackAmplifierBootloaderHelpers _bootloaderHelpers;
         private readonly string _loggerInstance;
+        private readonly FirmwareDeploymentAuthorization? _firmwareDeployment;
 
         private int _subState;
         private readonly SendMessage _sendMessageTemplate;
@@ -34,13 +35,15 @@ namespace SiebwaldeApp.Core
             TrackApplicationVariables variables,
             SendNextFwDataPacket sendNextFwDataPacket,
             TrackAmplifierBootloaderHelpers bootloaderHelpers,
-            string loggerInstance = "Track")
+            string loggerInstance = "Track",
+            FirmwareDeploymentAuthorization? firmwareDeployment = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             _variables = variables ?? throw new ArgumentNullException(nameof(variables));
             _sendNextFwDataPacket = sendNextFwDataPacket ?? throw new ArgumentNullException(nameof(sendNextFwDataPacket));
             _bootloaderHelpers = bootloaderHelpers ?? throw new ArgumentNullException(nameof(bootloaderHelpers));
             _loggerInstance = loggerInstance ?? "Track";
+            _firmwareDeployment = firmwareDeployment;
 
             _subState = 0;
 
@@ -55,6 +58,22 @@ namespace SiebwaldeApp.Core
             ReceivedMessage? lastMessage,
             CancellationToken cancellationToken)
         {
+            // Defense-in-depth: the destructive flash FSM (states 1..9) is reachable ONLY under an
+            // explicit, session-scoped deployment authorization. State 0 (detect/require) is the
+            // only state reachable through the automatic/manual init path and never enters the
+            // flash sequence; it reports a mismatch as Blocked instead. No 103/120/121/122/ERASE/
+            // PROGRAM can be emitted without authorization.
+            if (_subState >= 1 && _firmwareDeployment?.Authorized != true)
+            {
+                IoC.Logger.Log(
+                    "FlashFwTrackamplifiersStep: destructive flash sequence refused (not authorized).",
+                    _loggerInstance);
+
+                _subState = 0;
+                return InitStepResult.Blocked(
+                    "Firmware flash is not authorized: the destructive flash sequence requires an explicit operator authorization.");
+            }
+
             switch (_subState)
             {
                 // 0: determine how many slaves require flashing
@@ -117,7 +136,7 @@ namespace SiebwaldeApp.Core
 
         #region State 0: determine which slaves need flashing
 
-        private async Task<InitStepResult> State0_DetermineFlashRequirementAsync(CancellationToken cancellationToken)
+        private Task<InitStepResult> State0_DetermineFlashRequirementAsync(CancellationToken cancellationToken)
         {
             _fwFlashRequired = 0;
 
@@ -126,7 +145,7 @@ namespace SiebwaldeApp.Core
                 IoC.Logger.Log(
                     "State.FlashFwTrackamplifiers => HexFileReadSuccessful == False.",
                     _loggerInstance);
-                return InitStepResult.Error("Firmware file read unsuccessful.");
+                return Task.FromResult(InitStepResult.Error("Firmware file read unsuccessful."));
             }
 
             // Get checksum for comparison
@@ -136,6 +155,22 @@ namespace SiebwaldeApp.Core
                 $"State.FlashFwTrackamplifiers => File checksum = 0x{_bootloaderHelpers.GetFileCheckSum:X}.",
                 _loggerInstance);
 
+            // Legacy-artifact diagnosis (0x5784 / 0x251F / 0xE906 / 0x5263 / 0xFFC2 -> 0x0E39):
+            // when the CONFIGURED artifact resolves to a KNOWN LEGACY checksum, it points at a
+            // legacy artifact rather than the intended 0x0E39 release. Detect + report + block;
+            // never silently match file<->amp checksum and proceed, never auto-migrate the path and
+            // never auto-flash.
+            if (IsLegacyFirmwareChecksum(checksum))
+            {
+                IoC.Logger.Log(
+                    $"State.FlashFwTrackamplifiers => configured TrackAmplifierFwPath points at legacy 0x{checksum:X4}, not the intended 0x0E39 release.",
+                    _loggerInstance);
+
+                return Task.FromResult(InitStepResult.Blocked(
+                    $"configured TrackAmplifierFwPath points at legacy 0x{checksum:X4}, not the intended 0x0E39 release."));
+            }
+
+            var mismatches = new List<FirmwareAmpMismatch>();
             foreach (TrackAmplifierItem amplifier in _variables.trackAmpItems)
             {
                 if (checksum != amplifier.HoldingReg[TrackAmplifierRegisters.SwChecksum] &&
@@ -143,11 +178,13 @@ namespace SiebwaldeApp.Core
                     amplifier.SlaveNumber > 0 &&
                     amplifier.SlaveNumber < 51)
                 {
+                    var actual = amplifier.HoldingReg[TrackAmplifierRegisters.SwChecksum];
                     _fwFlashRequired++;
+                    mismatches.Add(new FirmwareAmpMismatch((byte)amplifier.SlaveNumber, actual));
 
                     IoC.Logger.Log(
                         "State.FlashFwTrackamplifiers => Slave " + amplifier.SlaveNumber +
-                        " has checksum = 0x" + amplifier.HoldingReg[TrackAmplifierRegisters.SwChecksum].ToString("X") +
+                        " has checksum = 0x" + actual.ToString("X") +
                         " and requires flashing.",
                         _loggerInstance);
                 }
@@ -159,25 +196,66 @@ namespace SiebwaldeApp.Core
                     "State.FlashFwTrackamplifiers => 0 slaves require flashing, initialization DONE.",
                     _loggerInstance);
 
-                return InitStepResult.Next("InitTrackamplifiers");
+                return Task.FromResult(InitStepResult.Next("InitTrackamplifiers"));
             }
 
-            IoC.Logger.Log(
-                $"State.FlashFwTrackamplifiers => {_fwFlashRequired} slave(s) will be flashed.",
-                _loggerInstance);
+            // SAFETY: a firmware checksum mismatch must NEVER auto-trigger destructive flashing.
+            // Detect + report the mismatch, record it for the operator, and FAIL CLOSED (Blocked).
+            // The flash sequence (103/120/121/122/ERASE/PROGRAM) is not entered and nothing is sent.
+            var expectedSha256 = TryComputeSha256();
+            _firmwareDeployment?.RecordMismatch(checksum, expectedSha256, mismatches);
 
-            // Legacy: next is FWHANDLERINIT for all slaves.
-            var msg = _sendMessageTemplate;
-            msg.Command = TrackCommand.EXEC_MBUS_STATE_SLAVE_FW_FLASH;
-            await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
+            var ampDetail = string.Join(", ", mismatches
+                .Select(m => $"amp {m.Amplifier} (actual 0x{m.ActualChecksum:X4})"));
+            var message =
+                $"Firmware checksum mismatch on {mismatches.Count} detected amplifier(s): {ampDetail}; " +
+                $"expected checksum 0x{checksum:X4}" +
+                (string.IsNullOrEmpty(expectedSha256) ? string.Empty : $", expected SHA-256 {expectedSha256}") +
+                ". Firmware deployment is NOT automatic; authorize an explicit per-amplifier " +
+                "deployment (command 131) or correct the configured firmware. No flash command was sent.";
 
-            _subState = 1;
+            IoC.Logger.Log("State.FlashFwTrackamplifiers => " + message, _loggerInstance);
 
-            IoC.Logger.Log(
-                "State.FlashFwTrackamplifiers => EXEC_MBUS_STATE_SLAVE_FW_FLASH.",
-                _loggerInstance);
+            return Task.FromResult(InitStepResult.Blocked(message));
+        }
 
-            return InitStepResult.Continue();
+        /// <summary>
+        /// Best-effort SHA-256 identity of the configured firmware file (empty when it cannot be
+        /// hashed). Reported to the operator so the deployment can be authorized against an exact
+        /// artifact identity.
+        /// </summary>
+        private string TryComputeSha256()
+        {
+            try
+            {
+                return FirmwareArtifactVerifier.ComputeSha256Hex(_bootloaderHelpers.Path);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// True when the configured artifact checksum is a KNOWN LEGACY build (pre-0x0E39): the
+        /// legacy 12-register image (0x251F) and the intermediate/other release checksums
+        /// (0x5784, 0xE906, 0x5263, 0xFFC2). Used diagnosis-first to detect a mis-configured
+        /// <c>TrackAmplifierFwPath</c> that points at a legacy artifact rather than the intended
+        /// 0x0E39 release.
+        /// </summary>
+        private static bool IsLegacyFirmwareChecksum(ushort checksum)
+        {
+            switch (checksum)
+            {
+                case 0x5784:
+                case 0x251F:
+                case 0xE906:
+                case 0x5263:
+                case 0xFFC2:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         #endregion

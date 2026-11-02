@@ -178,7 +178,7 @@ namespace SiebwaldeApp.Core.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\\\Localdata\\\\Siebwalde\\\\TrackAmplifier4.X\\\\dist\\\\Offset\\\\production\\\\TrackAmplifier4.X.production.hex")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\\\Localdata\\\\Siebwalde\\\\release\\\\current\\\\TrackAmplifier4.X.production.hex")]
         public string TrackAmplifierFwPath {
             get {
                 return ((string)(this["TrackAmplifierFwPath"]));

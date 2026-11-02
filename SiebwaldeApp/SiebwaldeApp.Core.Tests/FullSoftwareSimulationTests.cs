@@ -43,9 +43,15 @@ namespace SiebwaldeApp.Core.Tests
         [Fact]
         public async Task FullSimulation_EmptyGroups_UsesSimulationDefaultDomain_ReachesRunningAndGrants()
         {
-            await RunAsync(TrackControlMode.FullSimulation, TrackAmplifierGroups.Empty, (runtime, _, ecosPort, ct) =>
+            await RunAsync(TrackControlMode.FullSimulation, TrackAmplifierGroups.Empty, async (runtime, _, ecosPort, ct) =>
             {
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                // Operator authorizes + executes Stage 6 after StartAsync: movement permission is
+                // granted only now.
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
+
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
                 Assert.True(runtime.IsMovementSafe);
 
@@ -53,8 +59,6 @@ namespace SiebwaldeApp.Core.Tests
                 // slaves {1,2,3} as the effective domain when no group is configured.
                 Assert.NotNull(runtime.SimulatedTrackIo);
                 Assert.Equal(new byte[] { 1, 2, 3 }, runtime.SimulatedTrackIo!.DetectedSlaves.ToArray());
-
-                return Task.CompletedTask;
             });
         }
 
@@ -123,6 +127,8 @@ namespace SiebwaldeApp.Core.Tests
         {
             await RunAsync(TrackControlMode.FullSimulation, TrackAmplifierGroups.Empty, async (runtime, simulator, ecosPort, ct) =>
             {
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
 
                 var expectedHr0 = TrackApplicationVariables.BuildHr0Value(500, emoStop: false);
@@ -152,6 +158,8 @@ namespace SiebwaldeApp.Core.Tests
         {
             await RunAsync(TrackControlMode.FullSimulation, TrackAmplifierGroups.Empty, async (runtime, simulator, ecosPort, ct) =>
             {
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
 
                 Assert.True(ProtocolSpeedNormalizer.TryNormalize("DCC28", 10, out var normalizedSpeed));
@@ -187,6 +195,8 @@ namespace SiebwaldeApp.Core.Tests
         {
             await RunAsync(TrackControlMode.FullSimulation, TrackAmplifierGroups.Empty, async (runtime, _, ecosPort, ct) =>
             {
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
                 Assert.NotNull(runtime.SimulatedTrackIo);
 
@@ -244,8 +254,11 @@ namespace SiebwaldeApp.Core.Tests
         {
             await RunAsync(TrackControlMode.FullSimulation, TrackAmplifierGroups.Empty, async (runtime, _, ecosPort, ct) =>
             {
-                // First start (done by the harness) is Running + Granted.
+                // First start (done by the harness) is Running; Stage 6 must be authorized + executed
+                // to grant movement permission.
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
                 Assert.NotNull(runtime.SimulatedTrackIo);
 
@@ -257,6 +270,8 @@ namespace SiebwaldeApp.Core.Tests
 
                     await runtime.StartAsync(TrackControlMode.FullSimulation, ct);
                     Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                    runtime.AuthorizeTrackPowerEnable();
+                    Assert.True(await runtime.EnableTrackPowerAsync(ct));
                     Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
                     Assert.NotNull(runtime.SimulatedTrackIo);
                 }
@@ -561,7 +576,7 @@ namespace SiebwaldeApp.Core.Tests
             {
                 string address = (row * 16).ToString("X4");
                 string data = row == dataRows - 1
-                    ? "1F25" + new string('0', 28)
+                    ? "390E" + new string('0', 28)
                     : new string('0', 32);
 
                 sb.Append(':').Append("10").Append(address).Append("00").Append(data).Append("00").AppendLine();

@@ -58,7 +58,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
         public SimulatedTrackAmplifier(byte slaveNumber, ushort identity = Phase1Identity,
             ushort firmwareChecksum = TrackSimulatorConfig.DefaultFirmwareChecksum,
-            ushort protocolVersion = TrackAmplifierRegisters.Phase1ProtocolVersion,
+            ushort protocolVersion = TrackAmplifierRegisters.TrackPowerProtocolVersion,
             bool rejectGroupReady = false)
         {
             SlaveNumber = slaveNumber;

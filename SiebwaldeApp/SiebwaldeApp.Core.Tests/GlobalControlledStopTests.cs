@@ -304,7 +304,7 @@ public class GlobalControlledStopTests : IDisposable
         var path = Path.Combine(Path.GetTempPath(), $"estop-fw-{Guid.NewGuid():N}.hex");
         var data = new StringBuilder();
         for (int row = 0; row < 1920; row++)
-            data.Append($":10{row * 16:X4}00{(row == 1919 ? "1F25" + new string('0', 28) : new string('0', 32))}00\n");
+            data.Append($":10{row * 16:X4}00{(row == 1919 ? "390E" + new string('0', 28) : new string('0', 32))}00\n");
         data.Append(":0C000000" + new string('F', 24) + "00\n");
         File.WriteAllText(path, data.ToString());
         var transport = new DeterministicTrackTransport(new TrackSimulatorConfig(
@@ -315,6 +315,12 @@ public class GlobalControlledStopTests : IDisposable
             await using var runtime = new TrackApplicationRuntimeHost(new Host(), transportFactory: () => transport,
                 amplifierGroups: TrackAmplifierGroups.Create(new[] { 1, 2, 3 }, null, null));
             await runtime.StartAsync(TrackControlMode.Real);
+
+            // Operator authorizes + executes Stage 6 (track power) so a non-neutral 500 write is
+            // accepted (movement permission granted) later in this test.
+            runtime.AuthorizeTrackPowerEnable();
+            Assert.True(await runtime.EnableTrackPowerAsync());
+
             await WaitUntil(() => runtime.GlobalStop.State == GlobalStopState.Armed);
             Assert.Equal(GlobalStopState.Armed, runtime.GlobalStop.State);
             await WaitUntil(() => transport.SentFrames.Count(f => f[1] == 110) >= 3);

@@ -56,8 +56,10 @@ namespace SiebwaldeApp.Core
         bool IsControlPathUnsafe { get; }
 
         /// <summary>
-        /// The current movement-permission state (observed neutral). Not granted until neutral has
-        /// been commanded to and observed on every configured amplifier.
+        /// The current movement-permission state. Granted only after BOTH observed neutral has been
+        /// established (command echo AND applied PWM on every configured amplifier) AND Stage 6
+        /// (track power) has been authorized and executed — never merely because neutral was
+        /// observed, and never merely to start the write loop.
         /// </summary>
         MovementPermissionState MovementPermission { get; }
 
@@ -152,6 +154,14 @@ namespace SiebwaldeApp.Core
         /// <summary>True when track power is ON (TRACK_POWER_ON verified on every required amplifier).</summary>
         bool TrackPowerOn { get; }
 
+        /// <summary>
+        /// The current initialization run status, or <see cref="InitializationStatus.Idle"/> before
+        /// the track part has been composed. <see cref="InitializationStatus.Completed"/> is reached
+        /// only after Stage 6 (track power) completes; a non-energized run stops at
+        /// <see cref="InitializationStatus.StoppedAtGlobalReady"/>.
+        /// </summary>
+        InitializationStatus RunStatus { get; }
+
         /// <summary>Explicit operator authorization for the Stage 6 track-power transition (never auto-energized).</summary>
         void AuthorizeTrackPowerEnable();
 
@@ -173,5 +183,25 @@ namespace SiebwaldeApp.Core
 
         /// <summary>Manual initialization: move back one stage and mark it Pending for re-execution.</summary>
         void BacktrackInit();
+
+        /// <summary>
+        /// True when an explicit firmware deployment is currently authorized (in-memory,
+        /// session-scoped). Never set by automatic/manual init or recovery; cleared on completion
+        /// or restart.
+        /// </summary>
+        bool FirmwareDeploymentAuthorized { get; }
+
+        /// <summary>
+        /// Explicit operator action that authorizes exactly ONE bounded firmware deployment for the
+        /// given target amplifiers against the given expected firmware SHA-256. Reuses the proven
+        /// per-amplifier command-131 flash path (never 122). The deployment additionally requires
+        /// the existing controller-session lease (acquired by the shared runner), so no caller can
+        /// bypass both the explicit authorization and the ownership rules. The grant is consumed
+        /// (one-shot) regardless of the outcome.
+        /// </summary>
+        Task<IReadOnlyList<FlashOneRunResult>> AuthorizeFirmwareDeploymentAsync(
+            IReadOnlyCollection<byte> targetAmps,
+            string expectedSha256Hex,
+            CancellationToken ct = default);
     }
 }

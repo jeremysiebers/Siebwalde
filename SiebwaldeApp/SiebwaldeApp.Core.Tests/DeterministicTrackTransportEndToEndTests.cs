@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -91,7 +92,7 @@ namespace SiebwaldeApp.Core.Tests
             // The real-mode init pipeline reads the firmware hex in FlashFwTrackamplifiersStep even when
             // flashing is skipped, so the test must not depend on the (untracked) repo dist/ hex being
             // present. Generate a minimal self-contained hex whose checksum equals the simulator's
-            // FirmwareChecksum (0x251F), point the setting at it, then restore + delete on the way out.
+            // FirmwareChecksum (0x0E39), point the setting at it, then restore + delete on the way out.
             var originalFwPath = CoreSettings.Default.TrackAmplifierFwPath;
             var tempHexPath = Path.Combine(Path.GetTempPath(), $"siebwalde-test-firmware-{Guid.NewGuid():N}.hex");
 
@@ -126,8 +127,8 @@ namespace SiebwaldeApp.Core.Tests
 
         /// <summary>
         /// Writes a minimal Intel HEX that <see cref="TrackAmplifierBootloaderHelpers.Execute"/> parses
-        /// to a file checksum of 0x251F: 1920 zero data rows, with the LAST row's first word set to
-        /// 0x251F little-endian (0x1F, 0x25) and its checksum word (bytes 14..15) left zero (that word is
+        /// to a file checksum of 0x0E39: 1920 zero data rows, with the LAST row's first word set to
+        /// 0x0E39 little-endian (0x39, 0x0E) and its checksum word (bytes 14..15) left zero (that word is
         /// excluded from the sum), followed by one 12-byte config row so the config word is "found".
         /// </summary>
         private static void WriteTestFirmwareHex(string path)
@@ -142,7 +143,7 @@ namespace SiebwaldeApp.Core.Tests
 
                 // 32 hex chars = 16 data bytes. The checksum byte (CC) is not read by Execute().
                 string data = row == dataRows - 1
-                    ? "1F25" + new string('0', 28)
+                    ? "390E" + new string('0', 28)
                     : new string('0', 32);
 
                 sb.Append(':').Append("10").Append(address).Append("00").Append(data).Append("00").AppendLine();
@@ -178,8 +179,14 @@ namespace SiebwaldeApp.Core.Tests
             {
                 await runtime.StartAsync(TrackControlMode.Real, ct);
 
-                // Running only happens once the init pipeline reached Completed.
+                // Running happens after stages 1..5 are finalized and neutral is observed; Stage 6
+                // (track power) is still gated until the operator authorizes it.
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                // Operator authorizes + executes Stage 6 (track power): movement permission is
+                // granted only now.
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
 
                 var simulator = Assert.Single(factory.Created);
 
@@ -310,11 +317,20 @@ namespace SiebwaldeApp.Core.Tests
                 await runtime.StartAsync(TrackControlMode.Real, ct);
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
 
+                // Non-energized run: stages 1..5 completed but Stage 6 (track power) was not
+                // authorized/executed, so the run stopped at GlobalReady and movement is NotGranted.
+                Assert.Equal(InitializationStatus.StoppedAtGlobalReady, runtime.RunStatus);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+
                 var first = Assert.Single(factory.Created);
                 var firstCommands = first.SentCommands.ToArray();
 
                 await runtime.RestartAsync(ct);
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                // The fresh run is again non-energized (StoppedAtGlobalReady), never Completed.
+                Assert.Equal(InitializationStatus.StoppedAtGlobalReady, runtime.RunStatus);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
 
                 Assert.Equal(2, factory.Created.Count);
                 var second = factory.Created[1];
@@ -344,6 +360,8 @@ namespace SiebwaldeApp.Core.Tests
                 {
                     await runtime.StartAsync(TrackControlMode.Real, ct);
                     Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                    Assert.Equal(InitializationStatus.StoppedAtGlobalReady, runtime.RunStatus);
+                    Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
 
                     await runtime.StopAsync(ct);
                     Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
@@ -368,6 +386,8 @@ namespace SiebwaldeApp.Core.Tests
             return RunWithRuntimeAsync(factory, async (runtime, ct) =>
             {
                 await runtime.StartAsync(TrackControlMode.Real, ct);
+                Assert.Equal(InitializationStatus.StoppedAtGlobalReady, runtime.RunStatus);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
                 var first = Assert.Single(factory.Created);
                 var firstCommands = first.SentCommands.ToArray();
                 var firstRegisters = new Dictionary<byte, ushort[]>();
@@ -380,6 +400,8 @@ namespace SiebwaldeApp.Core.Tests
 
                 await runtime.StartAsync(TrackControlMode.Real, ct);
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(InitializationStatus.StoppedAtGlobalReady, runtime.RunStatus);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
 
                 var second = factory.Created[1];
                 Assert.Equal(firstCommands, second.SentCommands.ToArray());
@@ -411,6 +433,12 @@ namespace SiebwaldeApp.Core.Tests
                 await runtime.StartAsync(TrackControlMode.Real, ct);
 
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                // Operator authorizes + executes Stage 6 (track power) after StartAsync: movement
+                // permission is granted only now (neutral verified + Stage 6 completed).
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
+
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
                 Assert.True(runtime.IsMovementSafe);
 
@@ -440,6 +468,12 @@ namespace SiebwaldeApp.Core.Tests
             return RunWithRuntimeAsync(factory, async (runtime, ct) =>
             {
                 await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                // Operator authorizes + executes Stage 6 (track power) after StartAsync: movement
+                // permission is granted only now.
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
+
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
 
                 // Put a non-neutral value on an amplifier so the stop must neutralize it.
@@ -558,6 +592,12 @@ namespace SiebwaldeApp.Core.Tests
                 await runtime.StartAsync(TrackControlMode.Real, ct);
 
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                // Operator authorizes + executes Stage 6 (track power) after StartAsync: movement
+                // permission is granted only now (neutral verified + Stage 6 completed).
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
+
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
                 Assert.True(runtime.IsMovementSafe);
 
@@ -575,6 +615,10 @@ namespace SiebwaldeApp.Core.Tests
             return RunWithRuntimeAsync(factory, async (runtime, ct) =>
             {
                 await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                // Operator authorizes + executes Stage 6 after the first StartAsync.
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
 
                 // Queue a non-neutral command so there is a pending write before restart.
@@ -583,7 +627,12 @@ namespace SiebwaldeApp.Core.Tests
                 await runtime.RestartAsync(ct);
 
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
-                // A fresh start re-established neutral and re-created the permission.
+                // A fresh start re-ran stages 1..5 and re-observed neutral, but the fresh permission
+                // is NotGranted until Stage 6 is re-authorized + executed on the new run.
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
                 Assert.True(runtime.IsMovementSafe);
 
@@ -630,6 +679,138 @@ namespace SiebwaldeApp.Core.Tests
                 await runtime.StopAsync(ct);
                 Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
             });
+        }
+
+        // -----------------------------------------------------------------
+        // Focused regressions: three-concept separation (neutral / Stage 6 / grant)
+        // -----------------------------------------------------------------
+
+        [Fact]
+        public Task RealMode_NonEnergizedRun_StopsAtGlobalReady_NotGranted_StagesNotPassed()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig());
+            var groups = Groups(1, 2, 3);
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                // Non-energized run: stages 1..5 done, Stage 6 (track power) not performed.
+                Assert.Equal(InitializationStatus.StoppedAtGlobalReady, runtime.RunStatus);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+                Assert.False(runtime.IsMovementSafe);
+                Assert.False(runtime.TrackPowerOn);
+                Assert.False(runtime.TrackPowerAuthorized);
+
+                // NormalOperation and AmpPowerEnable are NOT Passed; GlobalReady (stage 5) IS.
+                Assert.NotEqual(
+                    TrackInitStageState.Passed,
+                    runtime.InitStages.First(s => s.Stage == TrackInitStage.NormalOperation).State);
+                Assert.NotEqual(
+                    TrackInitStageState.Passed,
+                    runtime.InitStages.First(s => s.Stage == TrackInitStage.AmpPowerEnable).State);
+                Assert.Equal(
+                    TrackInitStageState.Passed,
+                    runtime.InitStages.First(s => s.Stage == TrackInitStage.GlobalReady).State);
+
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
+            }, groups);
+        }
+
+        [Fact]
+        public Task RealMode_NeutralVerified_ButStage6NotRun_StillNotGranted()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig());
+            var groups = Groups(1, 2, 3);
+            var faults = new List<RuntimeFaultEventArgs>();
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                runtime.Faulted += (_, e) => faults.Add(e);
+
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(InitializationStatus.StoppedAtGlobalReady, runtime.RunStatus);
+
+                // Neutral WAS verified (no NeutralNotEstablished fault), yet movement permission is
+                // still NotGranted because Stage 6 (track power) has not been authorized + executed.
+                Assert.DoesNotContain(
+                    faults,
+                    f => f.Source.Contains("EstablishObservedNeutral", StringComparison.Ordinal));
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+                Assert.False(runtime.IsMovementSafe);
+
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
+            }, groups);
+        }
+
+        [Fact]
+        public Task RealMode_FullSequence_GrantsAndCompletes()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig());
+            var groups = Groups(1, 2, 3);
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(InitializationStatus.StoppedAtGlobalReady, runtime.RunStatus);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+
+                // Authorize + execute Stage 6 (track power): the full sequence completes and
+                // movement permission is granted only now.
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
+
+                Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
+                Assert.True(runtime.IsMovementSafe);
+                Assert.True(runtime.TrackPowerOn);
+                Assert.Equal(InitializationStatus.Completed, runtime.RunStatus);
+                Assert.Equal(
+                    TrackInitStageState.Passed,
+                    runtime.InitStages.First(s => s.Stage == TrackInitStage.NormalOperation).State);
+                Assert.Equal(
+                    TrackInitStageState.Passed,
+                    runtime.InitStages.First(s => s.Stage == TrackInitStage.AmpPowerEnable).State);
+
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
+            }, groups);
+        }
+
+        [Fact]
+        public Task RealMode_Stage6Refused_WhenNeutralNotVerified()
+        {
+            // Amp 1 reads back HR0 = 400 (non-neutral), so neutral is never observed.
+            var config = new TrackSimulatorConfig(
+                hr0ReadbackOverrides: new Dictionary<byte, ushort> { { 1, 400 } });
+            var factory = new SimulatorFactory(config);
+            var groups = Groups(1, 2, 3);
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+
+                // Stage 6 is refused while neutral is not verified (fail-closed): no grant, no power.
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.False(await runtime.EnableTrackPowerAsync(ct));
+
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+                Assert.False(runtime.TrackPowerOn);
+
+                // Stop cannot observe neutral either -> Failed (not Stopped).
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+            }, groups);
         }
     }
 }

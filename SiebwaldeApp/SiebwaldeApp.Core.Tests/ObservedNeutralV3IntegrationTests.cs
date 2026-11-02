@@ -57,6 +57,12 @@ namespace SiebwaldeApp.Core.Tests
             await RunAsync(groups, async (runtime, simulator, ecosPort, ct) =>
             {
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                // Operator authorizes + executes Stage 6 (track power) after StartAsync: movement
+                // permission is granted only now.
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
+
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
                 Assert.True(runtime.IsMovementSafe);
 
@@ -180,7 +186,11 @@ namespace SiebwaldeApp.Core.Tests
                 // The observed-neutral domain is the profile's physical binding {1,3,4,6}.
                 Assert.Equal(new[] { 1, 3, 4, 6 }, runtime.PhysicalAmplifierBinding);
 
-                // Movement permission is granted only after observed neutral on that physical domain.
+                // Operator authorizes + executes Stage 6 (track power) after StartAsync: movement
+                // permission is granted only now (after observed neutral AND Stage 6).
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(timeout.Token));
+
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
                 Assert.True(runtime.IsMovementSafe);
             }
@@ -344,10 +354,12 @@ namespace SiebwaldeApp.Core.Tests
 
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
 
-                // The DOMAIN is non-empty (physical {1,3,4,6}) and neutral was observed, so movement
-                // permission is granted. This proves the domain default is independent of the empty
-                // routing default.
+                // The DOMAIN is non-empty (physical {1,3,4,6}); neutral was observed AND Stage 6 was
+                // authorized + executed, so movement permission is granted. This proves the domain
+                // default is independent of the empty routing default.
                 Assert.Equal(new[] { 1, 3, 4, 6 }, runtime.PhysicalAmplifierBinding);
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(timeout.Token));
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
                 Assert.True(runtime.IsMovementSafe);
 
@@ -551,7 +563,7 @@ namespace SiebwaldeApp.Core.Tests
             // The real-mode init pipeline reads the firmware hex in FlashFwTrackamplifiersStep even
             // when flashing is skipped, so the test must not depend on the (untracked) repo dist/
             // hex being present. Generate a minimal self-contained hex whose checksum equals the
-            // simulator's FirmwareChecksum (0x251F).
+            // simulator's FirmwareChecksum (0x0E39).
             var originalFwPath = CoreSettings.Default.TrackAmplifierFwPath;
             var tempHexPath = Path.Combine(Path.GetTempPath(), $"siebwalde-v3-fw-{Guid.NewGuid():N}.hex");
             var locoPath = Path.Combine(Path.GetTempPath(), $"siebwalde-v3-locos-{Guid.NewGuid():N}.json");
@@ -689,7 +701,7 @@ namespace SiebwaldeApp.Core.Tests
 
         /// <summary>
         /// Writes a minimal Intel HEX that <see cref="TrackAmplifierBootloaderHelpers.Execute"/>
-        /// parses to a file checksum of 0x251F (the simulator's <see cref="TrackSimulatorConfig.DefaultFirmwareChecksum"/>).
+        /// parses to a file checksum of 0x0E39 (the simulator's <see cref="TrackSimulatorConfig.DefaultFirmwareChecksum"/>).
         /// </summary>
         private static void WriteTestFirmwareHex(string path)
         {
@@ -703,7 +715,7 @@ namespace SiebwaldeApp.Core.Tests
 
                 // 32 hex chars = 16 data bytes. The checksum byte (CC) is not read by Execute().
                 string data = row == dataRows - 1
-                    ? "1F25" + new string('0', 28)
+                    ? "390E" + new string('0', 28)
                     : new string('0', 32);
 
                 sb.Append(':').Append("10").Append(address).Append("00").Append(data).Append("00").AppendLine();
