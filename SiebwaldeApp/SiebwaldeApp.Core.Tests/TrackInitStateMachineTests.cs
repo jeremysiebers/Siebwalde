@@ -143,23 +143,37 @@ namespace SiebwaldeApp.Core.Tests
                 .ToArray();
 
         [Fact]
-        public async Task Automatic_RunsStepStages_AndCompletes()
+        public async Task Automatic_RunsStepStages_AndCompletes_AfterHostFinalizesStages4And5()
         {
             var (machine, _) = Build(HappyChain());
 
             await machine.RunAutomaticAsync(CancellationToken.None);
 
-            Assert.True(machine.IsCompleted, $"RunStatus={machine.RunStatus}, CurrentStage={machine.CurrentStage}");
-            Assert.Equal(InitializationStatus.Completed, machine.RunStatus);
+            // Stages 1..3 passed; the final step reached NormalOperation but completion is DEFERRED
+            // until the host finalizes stage 4 (configure/validate) and stage 5 (global ready).
+            Assert.False(machine.IsCompleted, $"RunStatus={machine.RunStatus}, CurrentStage={machine.CurrentStage}");
+            Assert.Equal(InitializationStatus.Running, machine.RunStatus);
             Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.ControllerConnection).State);
             Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.FirmwareAddress).State);
             Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.AmplifierStandby).State);
             // Stage 5 (global ready) and Stage 4 (configure + validate) are host-finalized: the
             // step runner never auto-passes them (they require the whole required amp set).
             Assert.Equal(TrackInitStageState.Running, StageOf(machine, TrackInitStage.GlobalReady).State);
-            Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.NormalOperation).State);
+            // NormalOperation must NOT be Passed (and the run NOT Completed) while stages 4/5 are
+            // not yet Passed.
+            Assert.Equal(TrackInitStageState.Running, StageOf(machine, TrackInitStage.NormalOperation).State);
             Assert.Equal(TrackInitStageState.Pending, StageOf(machine, TrackInitStage.ConfigureValidate).State);
             Assert.Equal(TrackInitStageState.Pending, StageOf(machine, TrackInitStage.AmpPowerEnable).State);
+
+            // The host finalizes stages 4 and 5 -> the deferred run completes.
+            machine.MarkStagePassed(TrackInitStage.ConfigureValidate);
+            machine.MarkStagePassed(TrackInitStage.GlobalReady);
+
+            Assert.True(machine.IsCompleted, $"RunStatus={machine.RunStatus}");
+            Assert.Equal(InitializationStatus.Completed, machine.RunStatus);
+            Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.NormalOperation).State);
+            Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.ConfigureValidate).State);
+            Assert.Equal(TrackInitStageState.Passed, StageOf(machine, TrackInitStage.GlobalReady).State);
         }
 
         [Fact]

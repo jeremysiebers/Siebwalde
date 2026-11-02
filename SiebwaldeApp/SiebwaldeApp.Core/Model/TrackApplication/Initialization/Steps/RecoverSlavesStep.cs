@@ -17,6 +17,7 @@ namespace SiebwaldeApp.Core
         private readonly SendNextFwDataPacket _sendNextFwDataPacket;
         private readonly TrackAmplifierBootloaderHelpers _bootloaderHelpers;
         private readonly string _loggerInstance;
+        private readonly FirmwareDeploymentAuthorization? _firmwareDeployment;
 
         // Legacy fields 1:1
         private int _subState;
@@ -32,13 +33,15 @@ namespace SiebwaldeApp.Core
             SendNextFwDataPacket sendNextFwDataPacket,
             TrackAmplifierBootloaderHelpers bootloaderHelpers,
             string loggerInstance = "Track",
-            uint attemptMax = 3)
+            uint attemptMax = 3,
+            FirmwareDeploymentAuthorization? firmwareDeployment = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             _variables = variables ?? throw new ArgumentNullException(nameof(variables));
             _sendNextFwDataPacket = sendNextFwDataPacket ?? throw new ArgumentNullException(nameof(sendNextFwDataPacket));
             _bootloaderHelpers = bootloaderHelpers ?? throw new ArgumentNullException(nameof(bootloaderHelpers));
             _loggerInstance = loggerInstance ?? "Track";
+            _firmwareDeployment = firmwareDeployment;
 
             _subState = 0;
             _loopCounter = 1;
@@ -53,6 +56,22 @@ namespace SiebwaldeApp.Core
             ReceivedMessage? lastMessage,
             CancellationToken cancellationToken)
         {
+            // Defense-in-depth: the destructive recovery FSM (states 3..15: ERASE/WRITE/CONFIG/
+            // CHECKSUM/RESET) is reachable ONLY under an explicit, session-scoped deployment
+            // authorization. States 0..2 (detect a slave in bootloader mode) never enter the flash
+            // FSM: state 2 reports the stuck amplifier and FAILS CLOSED (Blocked) instead.
+            if (_subState >= 3 && _firmwareDeployment?.Authorized != true)
+            {
+                IoC.Logger.Log(
+                    "RecoverSlavesStep: destructive bootloader-recovery sequence refused (not authorized).",
+                    _loggerInstance);
+
+                _subState = 0;
+                _loopCounter = 1;
+                return InitStepResult.Blocked(
+                    "Bootloader recovery is not authorized: the destructive recovery sequence requires an explicit operator authorization.");
+            }
+
             switch (_subState)
             {
                 // 0: start MBUS->FWHANDLER slave FW flash
@@ -194,7 +213,9 @@ namespace SiebwaldeApp.Core
                 (lastMessage.Value.Taskstate == TaskStates.DONE ||
                  lastMessage.Value.Taskstate == TaskStates.ERROR))
             {
-                // Slave found in bootloader mode -> continue with flash
+                // Slave found in bootloader mode. This MUST NOT auto-flash: report the stuck
+                // amplifier and FAIL CLOSED (Blocked), requesting an explicit operator
+                // authorization before any destructive recovery sequence is attempted.
                 if (lastMessage.Value.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_OK &&
                     lastMessage.Value.Taskstate == TaskStates.DONE)
                 {
@@ -204,12 +225,18 @@ namespace SiebwaldeApp.Core
                     IoC.Logger.Log(
                         "State.DetectSlaveRecovery => Found a slave in bootloader mode!",
                         _loggerInstance);
-                    IoC.Logger.Log(
-                        "State.DetectSlaveRecovery => Start flash sequence for this slave only.",
-                        _loggerInstance);
 
-                    _subState = 3;
-                    return InitStepResult.Continue();
+                    const string message =
+                        "A track amplifier was detected in bootloader mode. Bootloader recovery " +
+                        "(ERASE/WRITE/CONFIG/CHECKSUM/RESET) is NOT automatic: authorize an " +
+                        "explicit recovery, or isolate the affected amplifier. No recovery " +
+                        "command was sent.";
+
+                    IoC.Logger.Log("State.DetectSlaveRecovery => " + message, _loggerInstance);
+
+                    _subState = 0;
+                    _loopCounter = 1;
+                    return InitStepResult.Blocked(message);
                 }
 
                 // No slave in bootloader, stop detection with error (same as legacy)

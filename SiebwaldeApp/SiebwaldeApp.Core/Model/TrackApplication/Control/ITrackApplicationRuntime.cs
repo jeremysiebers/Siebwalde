@@ -173,5 +173,25 @@ namespace SiebwaldeApp.Core
 
         /// <summary>Manual initialization: move back one stage and mark it Pending for re-execution.</summary>
         void BacktrackInit();
+
+        /// <summary>
+        /// True when an explicit firmware deployment is currently authorized (in-memory,
+        /// session-scoped). Never set by automatic/manual init or recovery; cleared on completion
+        /// or restart.
+        /// </summary>
+        bool FirmwareDeploymentAuthorized { get; }
+
+        /// <summary>
+        /// Explicit operator action that authorizes exactly ONE bounded firmware deployment for the
+        /// given target amplifiers against the given expected firmware SHA-256. Reuses the proven
+        /// per-amplifier command-131 flash path (never 122). The deployment additionally requires
+        /// the existing controller-session lease (acquired by the shared runner), so no caller can
+        /// bypass both the explicit authorization and the ownership rules. The grant is consumed
+        /// (one-shot) regardless of the outcome.
+        /// </summary>
+        Task<IReadOnlyList<FlashOneRunResult>> AuthorizeFirmwareDeploymentAsync(
+            IReadOnlyCollection<byte> targetAmps,
+            string expectedSha256Hex,
+            CancellationToken ct = default);
     }
 }

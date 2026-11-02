@@ -55,6 +55,7 @@ namespace SiebwaldeApp.Integration
         private readonly IEcosHostService _ecosHost;
         private readonly IControlTrace? _controlTrace;
         private readonly Func<ITrackTransport>? _transportFactory;
+        private readonly Func<FlashOneAmplifierRunner>? _flashRunnerFactory;
         private readonly TrackAmplifierGroups _amplifierGroups;
         private readonly TrackSimulatorConfig? _simulatorConfig;
         private readonly LayoutProfile? _fullSimulationProfile;
@@ -79,6 +80,7 @@ namespace SiebwaldeApp.Integration
         private TrackAmplifierBootloaderHelpers? _bootloaderHelpers;
         private SendNextFwDataPacket? _sendNextFwDataPacket;
         private TrackInitStateMachine? _trackInitStateMachine;
+        private readonly FirmwareDeploymentAuthorization _firmwareDeploymentAuthorization = new();
         private TrackControlMain? _trackControlMain;
         private string _loggerInstance = "TrackAppLog";
         private ILogger? _trackApplicationLogging;
@@ -141,13 +143,15 @@ namespace SiebwaldeApp.Integration
             TrackAmplifierGroups? amplifierGroups = null,
             TimeSpan? neutralObserveWindow = null,
             TrackSimulatorConfig? simulatorConfig = null,
-            LayoutProfile? fullSimulationProfile = null)
+            LayoutProfile? fullSimulationProfile = null,
+            Func<FlashOneAmplifierRunner>? flashRunnerFactory = null)
         {
             _ecosHost = ecosHost ?? throw new ArgumentNullException(nameof(ecosHost));
             if (ecosHost is TrackControlHost controlHost) controlHost.GlobalStop = GlobalStop;
             GlobalStop.Latched += () => _movementSimulator?.SetPower(false);
             _controlTrace = controlTrace;
             _transportFactory = transportFactory;
+            _flashRunnerFactory = flashRunnerFactory;
             _amplifierGroups = amplifierGroups ?? TrackAmplifierGroups.Empty;
             _neutralObserveWindow = neutralObserveWindow ?? DefaultNeutralObserveWindow;
             _simulatorConfig = simulatorConfig;
@@ -281,6 +285,87 @@ namespace SiebwaldeApp.Integration
         /// <inheritdoc />
         public void BacktrackInit() => _trackInitStateMachine?.Backtrack();
 
+        /// <inheritdoc />
+        public bool FirmwareDeploymentAuthorized => _firmwareDeploymentAuthorization.Authorized;
+
+        /// <inheritdoc />
+        public Task<IReadOnlyList<FlashOneRunResult>> AuthorizeFirmwareDeploymentAsync(
+            IReadOnlyCollection<byte> targetAmps,
+            string expectedSha256Hex,
+            CancellationToken ct = default)
+            => AuthorizeFirmwareDeploymentAsync(targetAmps, expectedSha256Hex, hexPath: null, ct);
+
+        /// <summary>
+        /// Overload for offline tests that need a specific firmware artifact path (the production
+        /// default is <see cref="CoreConfiguration.TrackAmplifierFirmwarePath"/>).
+        /// </summary>
+        public async Task<IReadOnlyList<FlashOneRunResult>> AuthorizeFirmwareDeploymentAsync(
+            IReadOnlyCollection<byte> targetAmps,
+            string expectedSha256Hex,
+            string? hexPath,
+            CancellationToken ct = default)
+        {
+            var results = new List<FlashOneRunResult>();
+
+            if (targetAmps is null || targetAmps.Count == 0)
+            {
+                results.Add(FlashOneRunResult.Fail("No target amplifier set supplied.", 0));
+                return results;
+            }
+
+            if (string.IsNullOrWhiteSpace(expectedSha256Hex))
+            {
+                results.Add(FlashOneRunResult.Fail(
+                    "An exact expected firmware SHA-256 is required before any deployment.", 0));
+                return results;
+            }
+
+            // The explicit operator action authorizes exactly ONE bounded deployment for the given
+            // targets. It is the ONLY way the authorization flag becomes true: automatic/manual
+            // Step/Retry/Backtrack and bootloader recovery cannot set it.
+            _firmwareDeploymentAuthorization.Authorize();
+
+            try
+            {
+                // Reuse the proven command-131 deployment runner (never 122). It re-validates the
+                // firmware SHA-256 (FirmwareArtifactVerifier.Validate) and acquires the
+                // controller-session lease, so this path requires BOTH the explicit authorization
+                // AND the existing session-lease ownership.
+                var path = string.IsNullOrWhiteSpace(hexPath)
+                    ? CoreConfiguration.TrackAmplifierFirmwarePath
+                    : hexPath;
+
+                var runner = CreateFlashRunner();
+                foreach (var amp in targetAmps.Distinct())
+                {
+                    if (!TrackAmplifierAddress.IsTrackAmplifierAddress(amp))
+                    {
+                        results.Add(FlashOneRunResult.Fail(
+                            $"Amplifier address {amp} is outside the valid range 1..50.", amp));
+                        continue;
+                    }
+
+                    results.Add(await runner.RunAsync(path, expectedSha256Hex, amp, ct).ConfigureAwait(false));
+                }
+            }
+            finally
+            {
+                // One-shot: the authorization is consumed whether the deployment succeeded or not.
+                _firmwareDeploymentAuthorization.Reset();
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Builds the command-131 deployment runner. Production uses the real UDP transport and the
+        /// real ownership preflight; tests inject a runner with a scripted transport and a
+        /// permissive preflight via the optional <c>flashRunnerFactory</c> constructor argument.
+        /// </summary>
+        private FlashOneAmplifierRunner CreateFlashRunner()
+            => _flashRunnerFactory?.Invoke()
+               ?? new FlashOneAmplifierRunner(_transportFactory);
+
         /// <summary>The passive KIS-09 observer (KIS-07 shadow + KIS-08 reconciliation over the production variables), or null.</summary>
         public Kis09PassiveObserver? Kis09PassiveObserver => _kis09PassiveObserver;
 
@@ -334,13 +419,14 @@ namespace SiebwaldeApp.Integration
                         if (mode.IsFullTrackChain())
                         {
                             await InitializePhase1AmplifiersAsync(_cts.Token).ConfigureAwait(false);
-                            await EstablishObservedNeutralAsync(_cts.Token).ConfigureAwait(false);
 
                             // Stages 4 (configure + validate) and 5 (global ready) are host-verified
                             // against the SAME readiness source: every required amplifier must have
                             // completed config download + APPLY + readback (ConfigurationVerified)
                             // with no Phase1Failure (identity/protocol compatibility verified). The
-                            // step runner never auto-passes these two stages.
+                            // step runner never auto-passes these two stages. Finalizing them here
+                            // (before commanding neutral) lets the init run COMPLETE first, so the
+                            // runtime write loop is running when neutral is commanded and observed.
                             var domain = EffectiveDomain();
                             var allReady = AllDomainAmplifiersConfigured(domain);
                             if (allReady)
@@ -376,6 +462,12 @@ namespace SiebwaldeApp.Integration
                                     "Not all required amplifiers are ready (config_ok + no Phase1Failure + identity/compatibility verified).",
                                     recovery);
                             }
+
+                            // Command + observe neutral (command echo AND applied PWM) only AFTER
+                            // stages 1..5 are finalized and the init run completed (runtime write
+                            // loop started), so the neutral echo can be observed and movement
+                            // permission granted.
+                            await EstablishObservedNeutralAsync(_cts.Token).ConfigureAwait(false);
                         }
 
                         // Phase 3: feed the ownership-aware carrier from the KIS-09 passive observer
@@ -566,6 +658,10 @@ namespace SiebwaldeApp.Integration
             _operatorRecoveryAuthorized = false;
             _physicalStopInputsClear = () => false;
 
+            // Fresh, session-scoped, in-memory firmware-deployment authorization. It starts
+            // unauthorized and is never persisted, so a restart can never reuse a prior grant.
+            _firmwareDeploymentAuthorization.Reset();
+
             var steps = new IInitializationStep[]
             {
                 new ConnectToEthernetTargetStep(_trackCommClient, _trackVariables, _loggerInstance),
@@ -579,8 +675,10 @@ namespace SiebwaldeApp.Integration
                 new ResetAllSlavesStep(_trackCommClient, _trackVariables, _loggerInstance),
                 new DataUploadStep(_trackCommClient, _trackVariables, _loggerInstance),
                 new DetectSlavesStep(_trackCommClient, _trackVariables, _loggerInstance),
-                new RecoverSlavesStep(_trackCommClient, _trackVariables, _sendNextFwDataPacket, _bootloaderHelpers, _loggerInstance),
-                new FlashFwTrackamplifiersStep(_trackCommClient, _trackVariables, _sendNextFwDataPacket, _bootloaderHelpers, _loggerInstance),
+                new RecoverSlavesStep(_trackCommClient, _trackVariables, _sendNextFwDataPacket, _bootloaderHelpers, _loggerInstance,
+                    firmwareDeployment: _firmwareDeploymentAuthorization),
+                new FlashFwTrackamplifiersStep(_trackCommClient, _trackVariables, _sendNextFwDataPacket, _bootloaderHelpers, _loggerInstance,
+                    firmwareDeployment: _firmwareDeploymentAuthorization),
                 new InitTrackamplifiersStep(_trackCommClient, _loggerInstance),
                 new SetDefaultPwmSetpointsStep(_trackVariables, _loggerInstance),
                 new EnableTrackamplifiersStep(_trackCommClient, _loggerInstance),
@@ -591,7 +689,8 @@ namespace SiebwaldeApp.Integration
                 _trackVariables,
                 steps,
                 requiredAmps: () => EffectiveDomain(),
-                _loggerInstance);
+                _loggerInstance,
+                firmwareDeployment: _firmwareDeploymentAuthorization);
 
             _trackInitStateMachine.LogEvent += (_, e) =>
             {
@@ -636,8 +735,12 @@ namespace SiebwaldeApp.Integration
             await _trackInitStateMachine.RunAutomaticAsync(ct).ConfigureAwait(false);
 
             // A genuine init failure/cancellation never throws from RunAutomaticAsync; observe the
-            // status instead so a failed real-mode start is never masked as Running.
-            if (!_trackInitStateMachine.IsCompleted)
+            // status instead so a failed real-mode start is never masked as Running. A run that
+            // reached NormalOperation but is still awaiting host finalization of stages 4/5 is NOT
+            // a failure: it stays Running until InitializePhase1AmplifiersAsync marks stages 4/5
+            // passed (which completes it) or failed (which keeps it fail-closed).
+            if (_trackInitStateMachine.IsFailed ||
+                _trackInitStateMachine.RunStatus == InitializationStatus.Cancelled)
             {
                 throw new InvalidOperationException(
                     $"Track initialization did not complete: {_trackInitStateMachine.RunStatus}.");

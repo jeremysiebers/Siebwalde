@@ -19,6 +19,9 @@ namespace SiebwaldeApp.Core
 
         #endregion
 
+        /// <summary>The firmware HEX path this helper parses (used for offline SHA-256 identity).</summary>
+        public string Path => PathToFile;
+
         #region Constructor
 
         /// <summary>

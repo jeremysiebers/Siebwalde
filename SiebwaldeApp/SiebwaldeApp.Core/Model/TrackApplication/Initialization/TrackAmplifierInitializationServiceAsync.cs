@@ -109,6 +109,13 @@ namespace SiebwaldeApp.Core
                             SetStatus(InitializationStatus.Failed);
                             RaiseProgress(step.Name, $"Initialization error: {result.ErrorMessage}");
                             return;
+
+                        case InitStepResultKind.Blocked:
+                            // A blocked (authorization-required) step fails closed in the legacy
+                            // linear runner: never proceeds and never flashes.
+                            SetStatus(InitializationStatus.Failed);
+                            RaiseProgress(step.Name, $"Initialization blocked: {result.ErrorMessage}");
+                            return;
                     }
                 }
             }
