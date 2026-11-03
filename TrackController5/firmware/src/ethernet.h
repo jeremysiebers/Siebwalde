@@ -327,6 +327,34 @@ bool CHECKxDATAxINxRECEIVExMAILxBOX(void);
 
 /*******************************************************************************
   Function:
+    udpTrans_t *PEEKxRECEIVExMAILxBOX()
+
+  Summary:
+     
+
+  Description:
+     
+
+  Precondition:
+    The system and application initialization ("SYS_Initialize") should be
+    called before calling this.
+
+  Parameters:
+    None.
+
+  Returns:
+    Pointer to the oldest queued recv frame, or NULL when empty (does not consume).
+
+  Example:    
+
+  Remarks:
+     
+ */
+
+udpTrans_t *PEEKxRECEIVExMAILxBOX(void);
+
+/*******************************************************************************
+  Function:
     void CREATExTASKxSTATUSxMESSAGE(TASK_ID task_id, 
                                 TASK_STATE task_state, 
                                 TASK_COMMAND task_command, 

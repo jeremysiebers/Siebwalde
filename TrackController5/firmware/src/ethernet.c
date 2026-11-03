@@ -103,6 +103,15 @@ static udpTrans_t   *M_Box_Eth_Send_Ptr_prev;
 static udpTrans_t   udpRecvBox[MAILBOXSIZE];
 static udpTrans_t   udpTransBox[MAILBOXSIZE];
 
+/* Bounded ring occupancy. Without these the increment-and-wrap pointers cannot
+ * distinguish an empty ring from a full ring, so a producer lapping the consumer
+ * by MAILBOXSIZE silently overwrites queued frames and the GET helpers return an
+ * uninitialized pointer when empty. */
+static uint8_t  RecvMailboxCount = 0;
+static uint8_t  SendMailboxCount = 0;
+static uint16_t RecvOverflowCount = 0;   /* saturated drop counter */
+static uint16_t SendOverflowCount = 0;   /* saturated drop counter */
+
 static TCP_SOCKET         logSocket = INVALID_SOCKET;
 
 //unsigned char *Cmd2Ascii[] = {
@@ -182,6 +191,10 @@ void ETHERNET_Initialize ( void )
     M_Box_Eth_Send_Ptr      = &udpTransBox[0];
     /* For external use to set new data to be send from send mailbox*/
     M_Box_Eth_Send_Ptr_prev = &udpTransBox[0];
+    RecvMailboxCount  = 0;
+    SendMailboxCount  = 0;
+    RecvOverflowCount = 0;
+    SendOverflowCount = 0;
 }
 
 
@@ -313,6 +326,9 @@ void ETHERNET_Tasks ( void )
             {
                 TCPIP_UDP_Discard(ethernetData.recvsocket);
                 TCPIP_UDP_Close(ethernetData.recvsocket);
+                TCPIP_UDP_Discard(ethernetData.transsocket);
+                TCPIP_UDP_Close(ethernetData.transsocket);
+                TransSocketReady = false;
                 ethernetData.state = ETHERNET_TCPIP_OPENING_SERVER;
                 LOG_Push("Ethernet\t: Connection was closed");
                 break;
@@ -396,11 +412,18 @@ void ETHERNET_Tasks ( void )
 void PutDataInReceiveMailBox (udpTrans_t data){
     
     if(data.header == HEADER){
+        if (RecvMailboxCount >= MAILBOXSIZE){
+            /* Ring full: refuse the write instead of silently overwriting the
+             * oldest unconsumed frame. */
+            if (RecvOverflowCount < 0xFFFFu) RecvOverflowCount++;
+            return;
+        }
         *M_Box_Eth_Recv_Ptr = data;
         M_Box_Eth_Recv_Ptr++;
         if(M_Box_Eth_Recv_Ptr >= &udpRecvBox[MAILBOXSIZE]){
             M_Box_Eth_Recv_Ptr = &udpRecvBox[0];
         }
+        RecvMailboxCount++;
     }    
 }
 
@@ -414,17 +437,16 @@ void PutDataInReceiveMailBox (udpTrans_t data){
 
 udpTrans_t *GETxDATAxFROMxRECEIVExMAILxBOX(){
     
-    udpTrans_t *data;
+    udpTrans_t *data = NULL;
     
-    if (M_Box_Eth_Recv_Ptr != M_Box_Eth_Recv_Ptr_prev){
-        
+    if (RecvMailboxCount > 0){
         data = M_Box_Eth_Recv_Ptr_prev;
-        //memcpy(&data, M_Box_Eth_Recv_Ptr_prev, sizeof(data));
         
         M_Box_Eth_Recv_Ptr_prev++;        
         if(M_Box_Eth_Recv_Ptr_prev >= &udpRecvBox[MAILBOXSIZE]){
             M_Box_Eth_Recv_Ptr_prev = &udpRecvBox[0];
         }
+        RecvMailboxCount--;
     }
     return (data);     
 }
@@ -439,13 +461,23 @@ udpTrans_t *GETxDATAxFROMxRECEIVExMAILxBOX(){
 
 bool CHECKxDATAxINxRECEIVExMAILxBOX(){
     
-    if (M_Box_Eth_Recv_Ptr != M_Box_Eth_Recv_Ptr_prev){
-        
-        return (true);
+    return (RecvMailboxCount > 0);
+}
+
+/******************************************************************************
+  Function:
+    udpTrans_t *PEEKxRECEIVExMAILxBOX()
+
+  Remarks:
+    Peek at the oldest queued recv frame without consuming it; NULL when empty.
+
+ */
+
+udpTrans_t *PEEKxRECEIVExMAILxBOX(){
+    if (RecvMailboxCount == 0){
+        return (NULL);
     }
-    else{
-        return (false);
-    }
+    return (M_Box_Eth_Recv_Ptr_prev);
 }
 
 /******************************************************************************
@@ -458,18 +490,16 @@ bool CHECKxDATAxINxRECEIVExMAILxBOX(){
 
 udpTrans_t *GetDataFromSendMailBox (){
     
-    udpTrans_t *data;
+    udpTrans_t *data = NULL;
     
-    if (M_Box_Eth_Send_Ptr != M_Box_Eth_Send_Ptr_prev){
-        
-        //memcpy(&data, M_Box_Eth_Send_Ptr_prev, sizeof(data));
+    if (SendMailboxCount > 0){
         data = M_Box_Eth_Send_Ptr_prev;
         
         M_Box_Eth_Send_Ptr_prev++;
         if(M_Box_Eth_Send_Ptr_prev >= &udpTransBox[MAILBOXSIZE]){
             M_Box_Eth_Send_Ptr_prev = &udpTransBox[0];
         }
-        
+        SendMailboxCount--;
     }
     return (data);      
 }
@@ -484,13 +514,7 @@ udpTrans_t *GetDataFromSendMailBox (){
 
 bool CheckDataInSendMailBox (){
     
-    if (M_Box_Eth_Send_Ptr != M_Box_Eth_Send_Ptr_prev){
-        
-        return(true);
-    }
-    else{
-        return (false);
-    }  
+    return (SendMailboxCount > 0);
 }
 
 /******************************************************************************
@@ -503,12 +527,19 @@ bool CheckDataInSendMailBox (){
 
 void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t *data){
     
+    if (SendMailboxCount >= MAILBOXSIZE){
+        /* Ring full: refuse the write instead of silently overwriting the
+         * oldest unsent frame. */
+        if (SendOverflowCount < 0xFFFFu) SendOverflowCount++;
+        return;
+    }
     *M_Box_Eth_Send_Ptr = *data;
     M_Box_Eth_Send_Ptr++;
     
     if(M_Box_Eth_Send_Ptr >= &udpTransBox[MAILBOXSIZE]){
         M_Box_Eth_Send_Ptr = &udpTransBox[0];
-    } 
+    }
+    SendMailboxCount++;
 }
 
 /******************************************************************************
@@ -566,6 +597,7 @@ void DISCONNECTxCLIENT(){
     TCPIP_UDP_Close(ethernetData.recvsocket);
     TCPIP_UDP_Discard(ethernetData.transsocket);
     TCPIP_UDP_Close(ethernetData.transsocket);
+    TransSocketReady = false;
     ethernetData.state = ETHERNET_TCPIP_OPENING_SERVER;
     LOG_Push(" Ethernet:    Connection was closed\r\n");    
 }
