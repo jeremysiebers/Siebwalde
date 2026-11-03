@@ -47,7 +47,13 @@ Investigate and explain the architecture that exists, and assess design impact:
 
 ## Knowledge use (Knowledge MCP)
 
-The shared knowledge-use contract is centralized in `AGENTS.md` §"Knowledge Use (Knowledge MCP)". Use the Knowledge MCP when assessing:
+The shared knowledge-use contract is centralized in `AGENTS.md` §"Knowledge Use (Knowledge MCP)". For any assignment touching architecture, independently retrieve:
+
+- recorded architectural decisions and design history (`knowledge_search`, `knowledge_node`);
+- safety and protocol invariants (`knowledge_safety_invariants`, `knowledge_protocol_contract`);
+- historical system dependencies, firmware identities and lifecycle facts (`knowledge_firmware_state`, `knowledge_search`).
+
+Identify conflicting requirements and places where recorded implementation behavior disagrees with the actual code; flag unresolved hypotheses and never promote one to fact. Use the Knowledge MCP in particular when assessing:
 
 - hardware/software boundaries;
 - protocol architecture;
@@ -57,7 +63,7 @@ The shared knowledge-use contract is centralized in `AGENTS.md` §"Knowledge Use
 - concurrent PIC32 access;
 - recovery and safety responsibilities.
 
-Preserve the distinction between existing behavior, inferred behavior, and proposed architecture.
+Preserve the distinction between existing behavior, inferred behavior, and proposed architecture. Report the knowledge actually retrieved and how it shaped the assessment; avoid lengthy ritualized MCP transcripts or redundant queries.
 
 ## Result vocabulary
 
