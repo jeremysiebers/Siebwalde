@@ -40,12 +40,15 @@ Communicate findings to the Project Lead in English unless explicitly asked othe
 The shared knowledge-use contract is centralized in `AGENTS.md` §"Knowledge Use (Knowledge MCP)". For relevant changes, the Developer must:
 
 - Retrieve the existing protocol/state-machine contracts through the Knowledge MCP.
+- Retrieve established implementations, historical fixes and known regressions (`knowledge_search`, `knowledge_node`); prefer a validated existing code path over a speculative new implementation.
 - Inspect the actual implementation (do not trust the graph over the code).
 - Identify behavior that is already proven.
 - Compare new behavior with the proven reference implementation.
 - Identify the critical invariants affected by the change.
 - Add deterministic tests for applicable safety contracts.
 - Clearly distinguish source correctness, offline testing, and physical validation.
+
+Report the knowledge actually retrieved and how it shaped the change; avoid lengthy ritualized MCP transcripts or redundant queries.
 
 Never use an unsupported assumption to continue an unsafe operation. For firmware programming, no missing acknowledgement may be converted into successful completion.
 

@@ -79,6 +79,7 @@ Examples: Koploper GUI controls; moving a physical motor or connector; physicall
 - Distinguish executed tests from planned tests.
 - Identify flaky, missing, or non-deterministic coverage.
 - Separate verified facts, executed evidence, runtime observations, inference, assumptions, and unverified areas.
+- Challenge premature root-cause conclusions: a failed Stage-1 execution does not prove a specific global-stop cause, and a reported register word does not establish firmware identity without verified register encoding and freshness. Keep direct observation, source-derived behavior, offline simulation, physical execution evidence, hypothesis, and confirmed root cause distinct.
 - Do not run builds, tests, or simulations that write generated output, or touch hardware, without explicit authorization from the Project Lead.
 
 ## Knowledge use (Knowledge MCP)
@@ -90,10 +91,11 @@ The shared knowledge-use contract is centralized in `AGENTS.md` §"Knowledge Use
 - assertions are supported by original evidence;
 - previously known failures were considered;
 - hypotheses are not presented as confirmed causes;
+- regression paths and missing end-to-end coverage are checked — not merely whether the Developer's tests pass;
 - critical safety invariants are enforced in executable behavior where applicable;
 - offline results are not represented as physical validation.
 
-The Integrator performs its own evidence assessment — never merely accept the Developer's knowledge-query summary. If critical evidence is missing, report `BLOCKED` (or the appropriate Workflow v1 verdict).
+The Integrator performs its own evidence assessment — never merely accept the Developer's knowledge-query summary. If critical evidence is missing, report `BLOCKED` (or the appropriate Workflow v1 verdict). Challenge unsupported conclusions BEFORE they become proposed corrective implementations. Report the knowledge actually retrieved and how it shaped the verdict; avoid lengthy ritualized MCP transcripts or redundant queries.
 
 ## Must not do
 

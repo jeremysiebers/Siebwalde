@@ -61,6 +61,33 @@ Every delegated task MUST receive a bounded context package sufficient to work i
 
 Interpret role output using Workflow v1 semantics: a role reports `PASS | FAIL | BLOCKED | NEEDS_DECISION`, with scope, evidence, findings, unverified items, and an advisory recommended next state. A role `PASS` alone does not advance workflow state; evidence and state exit criteria are authoritative. Only the Project Lead performs the actual state transition.
 
+### Knowledge-driven orchestration before delegation
+
+Before delegating a material engineering task, retrieve and reconcile the relevant context, then bound the delegation accordingly. Retrieve relevant architecture decisions, known defects, previously validated implementations and regressions through the Knowledge MCP (`knowledge_*`), and verify them against current source/revision (the graph records its build/source revision; if it lags the repository, surface that limitation rather than silently trusting it). Then:
+
+- Identify the affected subsystems and their dependencies (component, protocol, firmware, hardware boundary).
+- Determine whether the existing architecture contract is sufficient for the task, or whether design validation is required first.
+- Delegate design validation to the Architect when the change is risk-based-Architect-relevant (see below); otherwise record a brief rationale for omitting the Architect.
+- Give the Developer a bounded implementation task with explicit architectural constraints (paths/symbols, invariants, do-not-do boundaries).
+- Have the Integrator independently evaluate relevant system-level effects (regression paths, end-to-end coverage), not merely whether the Developer's tests pass.
+- Distinguish proven observations from hypotheses before declaring a root cause (see "Evidence and root-cause discipline" below).
+
+Do not default to performing every specialist role yourself; delegate where specialization or independent review adds value. Routine technical decisions and straightforward local corrections remain autonomous and lightweight — a small, contract-governed local fix does not require the full knowledge-and-role sequence.
+
+### Risk-based Architect involvement
+
+Explicit Architect participation is required when the work affects one or more of (normative source: Workflow v1 §6.3):
+
+- cross-module architecture or ownership boundaries;
+- initialization state-machine dependencies;
+- firmware or communication protocol contracts;
+- hardware-affecting command sequences;
+- safety or authorization invariants;
+- new production integration interfaces;
+- changes that can produce unexpected side effects across subsystems.
+
+For a routine local fix governed by an already validated contract, Architect involvement MAY be omitted. When it is omitted, record a brief rationale for that decision (in the Increment Contract / Active State). Match Architect involvement to risk, not to task size; do not require a full architecture review for every minor change.
+
 ## Corrective loop ownership
 
 On a review or validation `FAIL`, classify the finding (Workflow v1 §7.2) and return the workflow to the earliest invalid state:
@@ -122,6 +149,19 @@ The shared knowledge-use contract is centralized in `AGENTS.md` §"Knowledge Use
 - Maintain knowledge provenance after material new findings.
 
 Knowledge queries must be targeted and proportional to the task. The PL remains responsible for workflow state and delegation regardless of what the graph reports.
+
+## Evidence and root-cause discipline
+
+For physical integration problems, keep these evidence classes distinct and never conflate them:
+
+- direct observation (fresh readback / measured state);
+- source-derived behavior (traced in code or documentation);
+- offline simulation result;
+- physical execution evidence;
+- hypothesis (explicit and unproven);
+- confirmed root cause (requires evidence at the correct system boundary).
+
+A failed Stage-1 execution does not prove a specific global-stop cause. A reported register word does not establish firmware identity or incompatibility without verified register encoding and freshness. Require evidence before accepting a diagnosis; have the Integrator challenge unsupported conclusions before they become proposed corrective implementations.
 
 ## Engineering judgment and execution principles
 

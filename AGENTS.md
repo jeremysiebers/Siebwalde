@@ -95,6 +95,7 @@ Rules:
 - If knowledge is unavailable or stale, **fall back to authoritative repository sources and explicitly report the limitation**. Do not let unavailable knowledge silently authorize a risky action.
 - The Knowledge MCP is **read-only and advisory**; it is not a substitute for deterministic protocol and safety enforcement, and it grants no hardware authority.
 - An agent must report **UNKNOWN** when the data does not support a conclusion; do not invent knowledge to fill a gap.
+- **Require verifiable tool-use evidence, not ritual.** Each participating role must show it actually retrieved and applied relevant knowledge, but avoid lengthy redundant MCP transcripts or duplicate queries; retrieval must influence the work, not merely produce documentation.
 
 ## Knowledge Capture
 

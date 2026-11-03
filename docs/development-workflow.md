@@ -785,17 +785,20 @@ Architect is required when one or more of the following materially change:
 
 - state ownership;
 - lifecycle ownership;
+- initialization state-machine dependencies;
 - concurrency model;
 - subsystem boundary;
 - public/internal interface boundary;
 - dependency direction;
+- firmware or communication protocol contract;
+- hardware-affecting command sequence;
 - safety responsibility;
 - persistent state model;
 - material architecture trade-off.
 
 Architect SHOULD also be involved when Developer investigation exposes a design blocker.
 
-Architect is not mandatory for routine local implementation defects.
+Architect is not mandatory for routine local implementation defects governed by an already validated contract. When Architect involvement is omitted for a routine local fix, the Project Lead MUST record a brief rationale for that decision.
 
 Architect evaluates design correctness, not final feature acceptance.
 
