@@ -388,6 +388,18 @@ void CONTROLLER_Tasks ( void )
         
         case CONTROLLER_STATE_CHECK_MBUS_STATE:
         {
+            /* Answer a client (re)connect even while MBUS is busy: a 250 must
+             * not stall until the in-flight MBUS command finishes. Consume it
+             * without disturbing MBUS processing of the current command, and
+             * stay in this state so the MBUS-idle gate below still controls
+             * when the next non-250 command is accepted. */
+            EthernetRecvData = PEEKxRECEIVExMAILxBOX();
+            if (EthernetRecvData != NULL && EthernetRecvData->header == HEADER &&
+                    EthernetRecvData->command == CLIENT_CONNECTION_REQUEST){
+                EthernetRecvData = GETxDATAxFROMxRECEIVExMAILxBOX();
+                CREATExTASKxSTATUSxMESSAGE(task_id, CONNECTED, DONE, NONE);
+                LOG_Push("Controller\t: Client re-connected, staying in Check MBUS state.");
+            }
             if (GETxMBUSxSTATE() == MBUS_STATE_WAIT || GETxMBUSxSTATE() == MBUS_STATE_SERVICE_TASKS){
                 controllerData.state = CONTROLLER_STATE_IDLE;                
             }
