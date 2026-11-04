@@ -64,9 +64,9 @@ void *memset(void *p, int value, unsigned long long size) {
  * the harness compiles production C without the Harmony include tree). */
 #define CTRL_FW_MAJOR 1u
 #define CTRL_FW_MINOR 0u
-#define CTRL_FW_PATCH 1u
+#define CTRL_FW_PATCH 2u
 #define CTRL_PROTOCOL_VERSION 0x01u
-#define CTRL_RELEASE_TIMESTAMP "2026-10-26"
+#define CTRL_RELEASE_TIMESTAMP "2026-11-04"
 enum { MBUS_EV_ENQUEUE = 1, MBUS_EV_GATE_DROP = 2, MBUS_EV_FC16_SENT = 3,
        MBUS_EV_PURGE = 4, MBUS_EV_TX_DONE = 5, MBUS_EV_ACK = 6, MBUS_EV_TIMEOUT = 7 };
 void MBUS_EVENT_PUSH(uint8_t type, uint8_t slave, uint8_t reg, uint16_t val, uint8_t rv) {
@@ -186,9 +186,9 @@ void *memcpy(void *dst, const void *src, unsigned long long size) {
 #include "enums.h"
 #define CTRL_FW_MAJOR 1u
 #define CTRL_FW_MINOR 0u
-#define CTRL_FW_PATCH 1u
+#define CTRL_FW_PATCH 2u
 #define CTRL_PROTOCOL_VERSION 0x01u
-#define CTRL_RELEASE_TIMESTAMP "2026-10-26"
+#define CTRL_RELEASE_TIMESTAMP "2026-11-04"
 '''
 session_prefix += r'''
 typedef int UDP_SOCKET;
