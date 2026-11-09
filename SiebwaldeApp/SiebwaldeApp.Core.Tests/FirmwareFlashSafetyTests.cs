@@ -357,22 +357,22 @@ namespace SiebwaldeApp.Core.Tests
             try
             {
                 var sha256 = FirmwareArtifactVerifier.ComputeSha256Hex(hexPath);
-                var transport = new ScriptedTransport { Responder = BuildResponder() };
 
-                // Hold the WPF session lease: the deployment runner must fail closed and never send.
-                using (TrackControllerSessionLease.TryAcquire(
-                    TrackControllerSessionLease.WpfOwnerName, out _))
-                {
-                    var runner = new FlashOneAmplifierRunner(
-                        transportFactory: () => transport,
-                        preflight: new PermissivePreflight());
+                // Hold the WPF session lease: the REAL transport path (no injected factory) must
+                // acquire the CLI session lease, fail closed on the blocking WPF owner, and never
+                // compose a transport / send.
+                using var wpfLease = TrackControllerSessionLease.TryAcquire(
+                    TrackControllerSessionLease.WpfOwnerName, out _);
+                Assert.NotNull(wpfLease);
 
-                    var result = await runner.RunAsync(hexPath, sha256, amplifier: 6);
+                var runner = new FlashOneAmplifierRunner(
+                    transportFactory: null,   // production real transport path acquires the lease
+                    preflight: new PermissivePreflight());
 
-                    Assert.False(result.Success);
-                    Assert.Contains("owned by", result.Error, StringComparison.OrdinalIgnoreCase);
-                    Assert.Empty(transport.SentFrames);
-                }
+                var result = await runner.RunAsync(hexPath, sha256, amplifier: 6);
+
+                Assert.False(result.Success);
+                Assert.Contains("owned by", result.Error, StringComparison.OrdinalIgnoreCase);
             }
             finally { TryDelete(hexPath); }
         }

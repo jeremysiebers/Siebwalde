@@ -70,8 +70,9 @@ namespace SiebwaldeApp.Integration
         private DeterministicMovementSimulator? _movementSimulator;
         private MovementSimulationAdapter? _movementSimulationAdapter;
 
-        // Cross-process controller-session ownership: the exclusive lease held while the
-        // REAL-hardware track part is composed. Null when not running / in FullSimulation.
+        // Cross-process controller-session ownership: the exclusive lease held only while the REAL
+        // UDP transport is composed (no injected transport factory + Real mode). Null when not
+        // running, in FullSimulation/Simulator, or when a test/harness injected a transport factory.
         private TrackControllerSessionLease? _controllerSessionLease;
 
         // Track-part fields (moved verbatim from SiebwaldeApplicationModel).
@@ -665,13 +666,17 @@ namespace SiebwaldeApp.Integration
             // Fresh neutral-verified flag per start: never carried over from a previous run.
             _neutralVerified = false;
 
-            // 2b) Cross-process controller-session ownership. The WPF runtime owns the controller
-            //     session exclusively for the REAL-hardware path (the primary authority, closing the
-            //     preflight-to-bind race). FullSimulation uses a software transport with no controller
-            //     to own, and the lightweight Simulator never composes a track transport. A failed
-            //     acquisition (another session owns the controller) throws, which StartAsync surfaces
-            //     as an init fault and a Failed state — the start fails safely before any bind/send.
-            if (mode != TrackControlMode.FullSimulation)
+            // 2b) Cross-process controller-session ownership. The lease is held ONLY for the REAL
+            //     UDP transport (no injected transport factory + Real mode): that is the sole path
+            //     that binds the real controller port (10001), which must be exclusive across
+            //     processes (the primary authority, closing the preflight-to-bind race).
+            //     FullSimulation and Simulator use software transports / no track transport, and any
+            //     injected in-process transport (tests, harnesses) binds no real controller port, so
+            //     all of those skip the lease — acquiring it there would only add a shared-mutable
+            //     cross-process race with no real port to protect. A failed acquisition (another
+            //     session owns the controller) throws, which StartAsync surfaces as an init fault and
+            //     a Failed state — the start fails safely before any bind/send.
+            if (_transportFactory is null && mode == TrackControlMode.Real)
             {
                 _controllerSessionLease = TrackControllerSessionLease.TryAcquire(
                     TrackControllerSessionLease.WpfOwnerName, out var blockingOwner)

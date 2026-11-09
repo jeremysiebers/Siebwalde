@@ -18,20 +18,20 @@ namespace SiebwaldeApp.Core.Tests
     /// temp path, so only the cross-class static-setting mutation is the hazard).
     ///
     /// <para>
-    /// There is a SECOND shared mutable the collection serializes but cannot isolate: the
-    /// cross-process controller-session lease <c>SiebwaldeApp.Core.TrackControllerSessionLease</c>
-    /// (named mutex <c>Local\Siebwalde.TrackController.Session</c> + the diagnostic owner file under
-    /// <c>CoreConfiguration.LogDirectory</c>). Every real-mode start (the
-    /// <c>SiebwaldeApp.Integration.TrackApplicationRuntimeHost.StartAsync</c> →
-    /// <c>ComposeTrackPartAsync</c> path) acquires it as the WPF owner, and
-    /// <c>SiebwaldeApp.Core.TrackApplication.Maintenance.FlashOneAmplifierRunner.RunAsync</c>
-    /// acquires it as the CLI owner. Both owner types contend on the same OS mutex. Serializing the
-    /// classes in-process prevents the two offline test owners from racing each other, but it cannot
-    /// prevent a real <c>SiebwaldeApp</c> process (or a leftover lease from a crashed run) from
-    /// holding the mutex: in that case the real-mode start transitions to <c>Failed</c> and the flash
-    /// runner reports "The track-controller session is owned by …". Making the offline tests stop
-    /// acquiring the real lease (skip the lease when a custom in-process <c>transportFactory</c> is
-    /// supplied) is a production change and is out of scope for this test-isolation fix.
+    /// There is a SECOND shared mutable the collection serializes: the cross-process
+    /// controller-session lease <c>SiebwaldeApp.Core.TrackControllerSessionLease</c> (named mutex
+    /// <c>Local\Siebwalde.TrackController.Session</c> + the diagnostic owner file under
+    /// <c>CoreConfiguration.LogDirectory</c>). The lease protects ONLY the real UDP transport
+    /// (controller port 10001), which must be exclusive across processes. As of the
+    /// test-isolation fix, the production code acquires the lease ONLY when it will actually
+    /// compose the real transport — i.e. when no in-process <c>transportFactory</c> is supplied and
+    /// the mode is <c>Real</c> (see
+    /// <c>SiebwaldeApp.Integration.TrackApplicationRuntimeHost.ComposeTrackPartAsync</c> and
+    /// <c>SiebwaldeApp.Core.TrackApplication.Maintenance.FlashOneAmplifierRunner.RunAsync</c>).
+    /// Offline tests that inject a custom in-process <c>transportFactory</c> therefore never touch
+    /// the real lease, so they no longer contend on the shared OS mutex. Tests that DO exercise the
+    /// real-lease contention path (holding one owner while the other owner tries to acquire) live in
+    /// this serialized collection and hold the mutex only for the duration of a single test.
     /// </para>
     /// </summary>
     [CollectionDefinition("RealModeEndToEnd", DisableParallelization = true)]

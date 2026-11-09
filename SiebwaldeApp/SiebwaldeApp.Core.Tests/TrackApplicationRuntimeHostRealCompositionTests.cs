@@ -173,9 +173,10 @@ namespace SiebwaldeApp.Core.Tests
                 TrackControllerSessionLease.FlashOneConsoleOwnerName, out _);
             Assert.NotNull(cliLease);
 
-            var transport = new RecordingTrackTransport();
+            // No injected transport factory: this exercises the REAL production composition path,
+            // which is the only path that acquires the cross-process controller-session lease.
             var host = new RecordingEcosHostService();
-            var runtime = CreateRuntime(transport, host);
+            var runtime = new TrackApplicationRuntimeHost(host);
 
             string? failure = null;
             runtime.StateChanged += (_, e) =>
@@ -194,9 +195,9 @@ namespace SiebwaldeApp.Core.Tests
             Assert.Contains("owned by", failure);
             Assert.Contains(TrackControllerSessionLease.FlashOneConsoleOwnerName, failure);
 
-            // Composition aborted before the bind/send: no transport was opened and nothing sent.
-            Assert.Equal(0, transport.OpenCallCount);
-            Assert.Empty(transport.SentCommands);
+            // The lease was not acquired, so composition aborted before the ECoS host was started
+            // (the failure occurred in ComposeTrackPartAsync, before the host/comm/init pipeline).
+            Assert.False(host.IsRunning);
         }
 
         [Fact]
