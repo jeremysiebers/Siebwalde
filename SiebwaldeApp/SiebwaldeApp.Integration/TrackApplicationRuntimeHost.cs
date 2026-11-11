@@ -155,6 +155,14 @@ namespace SiebwaldeApp.Integration
             _ecosHost = ecosHost ?? throw new ArgumentNullException(nameof(ecosHost));
             if (ecosHost is TrackControlHost controlHost) controlHost.GlobalStop = GlobalStop;
             GlobalStop.Latched += () => _movementSimulator?.SetPower(false);
+            // Comm/host-authority fault recovery: when the global stop latches, the init machine
+            // (if composed) transitions to RecoveryHold and invalidates the now-stale stage evidence.
+            // The desired-setpoint neutralization itself is performed by
+            // TrackApplicationVariables.ApplyGlobalStop, subscribed when the variables bind this
+            // controller; EnterRecoveryHold guards the reason (comm/host-authority only) and the
+            // run progress (must have reached NormalOperation), so an operator/Koploper stop or a
+            // still-starting run is a no-op.
+            GlobalStop.Latched += OnGlobalStopLatched;
             _controlTrace = controlTrace;
             _transportFactory = transportFactory;
             _flashRunnerFactory = flashRunnerFactory;
@@ -315,6 +323,93 @@ namespace SiebwaldeApp.Integration
 
         /// <inheritdoc />
         public void BacktrackInit() => _trackInitStateMachine?.Backtrack();
+
+        /// <summary>
+        /// Re-validates a run that entered <see cref="InitializationStatus.RecoveryHold"/> after a
+        /// comm/host-authority fault. It re-runs the existing automatic initialization path (which
+        /// re-issues the Stage 1 connect (250), controller-version (113) and global-stop precondition
+        /// (111), re-confirms Stages 2/3 via fresh readback, and reaches the NormalOperation step),
+        /// then re-runs Stage 4 (config APPLY + verify) and Stage 5 (GROUP_READY + verify) through the
+        /// production Phase-1 host path, and STOPS before Stage 6 (track power, operator-gated). No
+        /// second execution path is used: the same step dictionary and the same
+        /// <see cref="InitializePhase1AmplifiersAsync"/> / <see cref="WriteGroupReadyAsync"/> are reused.
+        ///
+        /// The reconnect does NOT clear a latched global stop: the Stage 1
+        /// <see cref="GlobalStopPreconditionStep"/> keeps blocking until an explicit operator
+        /// <see cref="AuthorizeGlobalStopRecovery"/> re-arms the controller (and the physical stop
+        /// inputs are confirmed clear). Movement permission is NOT re-granted and neutral is NOT
+        /// re-observed here (it stays NotGranted until Stage 6 is re-authorized + executed, and the
+        /// sticky latch keeps the movement gate fail-closed regardless). Returns the resulting
+        /// <see cref="InitializationStatus"/>: <see cref="InitializationStatus.StoppedAtGlobalReady"/>
+        /// on a healthy revalidation, or a non-StoppedAtGlobalReady status when an amplifier is
+        /// missing/incompatible (stages 4/5 fail closed).
+        /// </summary>
+        public async Task<InitializationStatus> RevalidateAsync(CancellationToken ct = default)
+        {
+            await _gate.WaitAsync(ct).ConfigureAwait(false);
+            try
+            {
+                if (_trackInitStateMachine is null || _trackCommClient is null)
+                {
+                    return InitializationStatus.Idle;
+                }
+
+                // Re-run stages 1..7 (automatic). Stage 1 re-issues the 250 reconnect + 113 version +
+                // 111 global-stop precondition (which blocks on a still-latched controller until
+                // operator recovery); Stages 2/3 are re-confirmed by fresh readback; the run reaches
+                // the NormalOperation step and defers completion to host finalization of stages 4/5.
+                // The operator-gated Stage 6 is never auto-run.
+                await _trackInitStateMachine.RunAutomaticAsync(ct).ConfigureAwait(false);
+
+                if (_trackInitStateMachine.IsFailed ||
+                    _trackInitStateMachine.RunStatus == InitializationStatus.Cancelled)
+                {
+                    return _trackInitStateMachine.RunStatus;
+                }
+
+                // Re-run Stage 4 (config APPLY + verify) and Stage 5 (GROUP_READY + verify) via the
+                // production Phase-1 host path (fail-closed per amplifier).
+                await InitializePhase1AmplifiersAsync(ct).ConfigureAwait(false);
+
+                var domain = EffectiveDomain();
+                var allReady = AllDomainAmplifiersConfigured(domain);
+                if (allReady)
+                {
+                    _trackInitStateMachine.MarkStagePassed(TrackInitStage.ConfigureValidate);
+                    var groupReadyOk = await WriteGroupReadyAsync(domain, ct).ConfigureAwait(false);
+                    if (groupReadyOk)
+                    {
+                        _trackInitStateMachine.MarkStagePassed(TrackInitStage.GlobalReady);
+                    }
+                    else
+                    {
+                        _trackInitStateMachine.MarkStageFailed(
+                            TrackInitStage.GlobalReady,
+                            "GROUP_READY rejected by one or more required amplifiers.",
+                            "Check the rejecting amplifier's local conditions (enable/config/fault/lease) and re-run.");
+                    }
+                }
+                else
+                {
+                    const string recovery =
+                        "Re-run the startup or check the affected amplifier's identity/config.";
+                    _trackInitStateMachine.MarkStageFailed(
+                        TrackInitStage.ConfigureValidate,
+                        "One or more required amplifiers did not complete configuration.",
+                        recovery);
+                    _trackInitStateMachine.MarkStageFailed(
+                        TrackInitStage.GlobalReady,
+                        "Not all required amplifiers are ready (config_ok + no Phase1Failure + identity/compatibility verified).",
+                        recovery);
+                }
+
+                return _trackInitStateMachine.RunStatus;
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
 
         /// <inheritdoc />
         public bool FirmwareDeploymentAuthorized => _firmwareDeploymentAuthorization.Authorized;
@@ -911,9 +1006,17 @@ namespace SiebwaldeApp.Integration
         }
 
         /// <summary>Issues a fresh FC03 read to every domain amplifier and waits (bounded) until each
-        /// has a genuine protocol readback, re-proving detected + fresh + genuine evidence.</summary>
+        /// has a genuine, NEW protocol readback, re-proving detected + fresh + genuine evidence.</summary>
         private async Task RefreshReadbackAsync(IReadOnlyCollection<byte> domain, CancellationToken ct)
         {
+            // Capture the sequence BEFORE issuing the read, so "fresh" requires a NEW readback rather
+            // than a previously-observed one. This matters on revalidation (RecoveryHold): a prior run
+            // may already have ProtocolReadbackObserved set, and a stale timestamp would otherwise be
+            // mistaken for a fresh, genuine readback before the identity/config gate.
+            var sequenceBefore = domain.ToDictionary(
+                slave => slave,
+                slave => _trackVariables!.trackAmpItems[slave].ProtocolReadbackSequence);
+
             foreach (var slave in domain)
             {
                 await _trackCommClient!.SendAsync(
@@ -929,7 +1032,7 @@ namespace SiebwaldeApp.Integration
                     return;
                 }
 
-                if (domain.All(s => _trackVariables!.trackAmpItems[s].ProtocolReadbackObserved))
+                if (domain.All(s => _trackVariables!.trackAmpItems[s].ProtocolReadbackSequence > sequenceBefore[s]))
                 {
                     return;
                 }
@@ -1549,5 +1652,17 @@ namespace SiebwaldeApp.Integration
             TransitionTo(TrackRuntimeState.Failed, e.Exception?.Message);
             RaiseFault(e.Source ?? "ECoSHost", e.Exception);
         }
+
+        /// <summary>
+        /// Called (synchronously) when the process-lifetime <see cref="GlobalStopController"/> latches.
+        /// The desired-setpoint neutralization (PendingWrites clear + neutral re-queue) is performed by
+        /// <see cref="TrackApplicationVariables.ApplyGlobalStop"/> (subscribed when the variables bind
+        /// this controller). Here the init machine transitions to
+        /// <see cref="InitializationStatus.RecoveryHold"/>; <see cref="TrackInitStateMachine.EnterRecoveryHold"/>
+        /// itself guards the reason (comm/host-authority only) and the run progress (must have reached
+        /// NormalOperation), so an operator/Koploper stop or a still-starting run is a no-op.
+        /// </summary>
+        private void OnGlobalStopLatched()
+            => _trackInitStateMachine?.EnterRecoveryHold();
     }
 }
