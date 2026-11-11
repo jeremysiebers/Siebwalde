@@ -8,7 +8,14 @@ namespace SiebwaldeApp.Core
     /// <summary>Runtime-owned PIC32 status, heartbeat and receive freshness monitor. No slave writes on link loss.</summary>
     public sealed class GlobalStopMonitor : IDisposable
     {
-        public static readonly TimeSpan HeartbeatInterval = TimeSpan.FromMilliseconds(500);
+        /// <summary>
+        /// Candidate host-heartbeat cadence (250 ms). Against the unchanged 2000 ms PIC32
+        /// <c>HOST_AUTHORITY_WATCHDOG_MS</c> this yields an 8x renewal margin (was 4x at 500 ms).
+        /// It does NOT shorten host-loss detection — that is the PIC32 watchdog's job — nor the
+        /// C# <c>Pic32Lost</c> freshness window, which stays keyed to
+        /// <see cref="TrackAmplifierDataFreshness.DefaultStaleAfter"/> (2 s).
+        /// </summary>
+        public static readonly TimeSpan HeartbeatInterval = TimeSpan.FromMilliseconds(250);
         private readonly ITrackCommClient _comm;
         private readonly TrackApplicationVariables _variables;
         private readonly GlobalStopController _stop;
