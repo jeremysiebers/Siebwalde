@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
 using Xunit;
@@ -90,13 +89,10 @@ namespace SiebwaldeApp.Core.Tests
                 TrackControllerSessionLease.WpfOwnerName, out _);
             Assert.NotNull(wpfLease);
 
-            var transportFactoryInvoked = false;
+            // No injected transport factory: the REAL production path acquires the CLI session
+            // lease, which is blocked by the WPF lease above.
             var runner = new FlashOneAmplifierRunner(
-                transportFactory: () =>
-                {
-                    transportFactoryInvoked = true;
-                    throw new InvalidOperationException("The transport must never be built.");
-                },
+                transportFactory: null,
                 preflight: new PermissivePreflight());
 
             var result = await runner.RunAsync(
@@ -109,7 +105,6 @@ namespace SiebwaldeApp.Core.Tests
             Assert.False(result.Success);
             Assert.Equal(1, result.ExitCode);
             Assert.Contains(TrackControllerSessionLease.WpfOwnerName, result.Error);
-            Assert.False(transportFactoryInvoked);
         }
 
         private sealed class PermissivePreflight : IFlashOneOwnershipPreflight

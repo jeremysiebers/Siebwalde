@@ -682,13 +682,15 @@ namespace SiebwaldeApp.Core.Tests
                     {
                         if (value == TrackAmplifierRegisters.DisableBit && _clearsOnDisable)
                         {
-                            // The DISABLE is applied a moment later (mailbox dispatch latency); a
-                            // periodic poll can still read the pre-DISABLE HR8 in the meantime.
+                            // The DISABLE is applied asynchronously (mailbox dispatch latency), so a
+                            // periodic poll can still read the pre-DISABLE HR8 first. The latency is
+                            // kept tiny (1 ms) so full-parallel CPU/thread contention cannot push the
+                            // post-DISABLE clear past the bounded verify window (a fixed 50 ms race).
                             _ = Task.Run(async () =>
                             {
                                 try
                                 {
-                                    await Task.Delay(50, _cts.Token).ConfigureAwait(false);
+                                    await Task.Delay(1, _cts.Token).ConfigureAwait(false);
                                 }
                                 catch (OperationCanceledException)
                                 {

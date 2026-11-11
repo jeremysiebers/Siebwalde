@@ -185,6 +185,15 @@ namespace SiebwaldeApp.Core
         void BacktrackInit();
 
         /// <summary>
+        /// Re-validates a run that entered <see cref="InitializationStatus.RecoveryHold"/> after a
+        /// comm/host-authority fault: re-runs Stage 1 (connect 250 / version 113 / global-stop
+        /// precondition 111), re-confirms Stages 2/3, re-runs Stage 4 (config APPLY + verify) and
+        /// Stage 5 (GROUP_READY + verify), and stops before the operator-gated Stage 6. The reconnect
+        /// does NOT clear a latched global stop, does NOT re-arm, and does NOT re-grant movement.
+        /// </summary>
+        Task<InitializationStatus> RevalidateAsync(CancellationToken ct = default);
+
+        /// <summary>
         /// True when an explicit firmware deployment is currently authorized (in-memory,
         /// session-scoped). Never set by automatic/manual init or recovery; cleared on completion
         /// or restart.

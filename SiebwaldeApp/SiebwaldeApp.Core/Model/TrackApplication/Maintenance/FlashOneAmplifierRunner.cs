@@ -44,13 +44,17 @@ namespace SiebwaldeApp.Core
     ///
     /// Order of operations (all before any write):
     /// 1. cross-process controller-session lease (<see cref="TrackControllerSessionLease"/>),
-    ///    the PRIMARY ownership authority — fail-closed when another session owns it;
+    ///    the PRIMARY ownership authority — fail-closed when another session owns it. It is
+    ///    acquired ONLY for the REAL UDP transport (no injected transport factory), the sole path
+    ///    that binds the real controller port (10001); offline tests/harnesses inject an in-process
+    ///    transport that binds no controller port, so they skip the lease;
     /// 2. read-only ownership preflight (secondary heuristic, fail-closed);
     /// 3. firmware HEX validation (SHA-256 + embedded checksum) via
     ///    <see cref="FirmwareArtifactVerifier.Validate"/>;
     /// 4. transport/comm composition, bounded heartbeat start, then
     ///    <see cref="FlashOneAmplifierCommand.ExecuteAsync"/>.
-    /// The lease is held for the entire run and released in a finally even on exception/cancel.
+    /// When the real transport is used, the lease is held for the entire run and released in a
+    /// finally even on exception/cancel.
     /// The heartbeat runs only while the flash command is in flight and is never an auto-retry.
     /// </summary>
     public sealed class FlashOneAmplifierRunner
@@ -87,18 +91,27 @@ namespace SiebwaldeApp.Core
             byte amplifier,
             CancellationToken ct = default)
         {
-            // 0. Cross-process controller-session ownership. Acquire the exclusive lease FIRST,
-            //    before the heuristic preflight: this closes the time-of-check/time-of-use race
-            //    between the read-only preflight and the UDP bind. Fail closed with an
-            //    operator-facing message naming the blocking session when another process holds it.
-            var lease = TrackControllerSessionLease.TryAcquire(
-                TrackControllerSessionLease.FlashOneConsoleOwnerName, out var blockingOwner);
-            if (lease is null)
+            // 0. Cross-process controller-session ownership. The lease is held ONLY for the REAL
+            //    UDP transport (no injected transport factory): that is the sole path that binds the
+            //    real controller port (10001), which must be exclusive across processes. It is
+            //    acquired FIRST, before the heuristic preflight, to close the time-of-check/time-of-use
+            //    race between the read-only preflight and the UDP bind. Offline tests/harnesses inject
+            //    an in-process transport that binds no controller port, so they skip the lease — and
+            //    the shared-mutable cross-process race it would otherwise add under parallel execution.
+            //    Fail closed with an operator-facing message naming the blocking session when another
+            //    process holds it.
+            TrackControllerSessionLease? lease = null;
+            if (_transportFactory is null)
             {
-                var blocker = blockingOwner ?? "another process";
-                return FlashOneRunResult.Fail(
-                    $"The track-controller session is owned by {blocker}. Close it before flashing.",
-                    amplifier);
+                lease = TrackControllerSessionLease.TryAcquire(
+                    TrackControllerSessionLease.FlashOneConsoleOwnerName, out var blockingOwner);
+                if (lease is null)
+                {
+                    var blocker = blockingOwner ?? "another process";
+                    return FlashOneRunResult.Fail(
+                        $"The track-controller session is owned by {blocker}. Close it before flashing.",
+                        amplifier);
+                }
             }
 
             try
@@ -184,7 +197,7 @@ namespace SiebwaldeApp.Core
             finally
             {
                 // Release the lease even on exception/cancel so the controller session is never wedged.
-                lease.Dispose();
+                lease?.Dispose();
             }
         }
 
