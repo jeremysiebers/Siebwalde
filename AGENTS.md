@@ -64,6 +64,25 @@ See `docs/inventory.md` for the full inventory and `docs/analysis-coverage.md` f
 - Do not document generated output or vendored packages line by line.
 - Create new temporary Git worktrees/test repositories only under `C:\Localdata\Siebwalde_temp\` (never directly under `C:\Localdata` or inside the canonical repo). See `docs/development-workflow.md` §10.14 "Temporary repositories, Git worktrees, and workspace lifecycle" for the full convention, lifecycle, preservation, and exception rules.
 
+## Language standard (C# and WPF)
+
+**Permanent PO coding standard: all C# application code and its user-facing surface are written in English.** This is the single authoritative rule; role files reference it rather than restate it.
+
+Applies to:
+
+- C# source code, identifiers, inline comments, and XML documentation.
+- WPF XAML and code-behind — labels, buttons, dialogs, tooltips, and status messages.
+- User-facing error and warning messages, exception messages, and diagnostic descriptions.
+- Runtime diagnostic logging (`TrackAppLog`, `CoreLog`, and all other runtime logs).
+- Unit/integration test names, assertions, and comments.
+- New technical documentation that directly describes C# implementation.
+
+Enforcement: the **Developer** writes English-only C#/WPF content; the **Integrator** verifies English compliance during review. Noncompliant new Dutch UI strings, log messages, or comments are corrected before an increment is accepted.
+
+Communication with the Product Owner and Project Lead reporting remain in Dutch — this distinction is intentional.
+
+Preserve, unless an explicit PO change is approved: protocol identifiers, external interface contracts, proper names, persisted configuration values, and compatibility-sensitive strings. Existing Dutch content is inventoried and corrected via a separate cleanup increment; do not bulk-translate the legacy application.
+
 ## Knowledge Maintenance
 
 - Update `docs/analysis-coverage.md` whenever investigation status changes.

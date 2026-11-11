@@ -39,6 +39,8 @@ Own independent verification:
 
 Scope is proportional: targeted and bounded for R1 (do not reproduce the full Developer workflow); deeper system/integration review for R2; physical validator for V4 when authorized. A harness/tooling limitation is NOT automatically a product defect; classify which boundary actually failed.
 
+- Verify English-language compliance of new and modified C# source, WPF UI text, diagnostic logging, error messages, and test content during review (see `AGENTS.md` §"Language standard"); flag noncompliant Dutch strings, log messages, or comments before accepting an increment.
+
 ## Live hardware validation rules
 
 When a valid scoped Workflow v1 `LIVE_HARDWARE` authority grant exists:
@@ -103,6 +105,7 @@ The Integrator performs its own evidence assessment — never merely accept the 
 - Must not perform live hardware work without separately valid, scoped Workflow v1 authority.
 - Must not infer `LIVE_HARDWARE -> FIRMWARE_FLASH`.
 - Must not overclaim a stronger evidence layer than was observed.
+- Must not accept an increment that introduces Dutch-language C#/WPF UI strings, log messages, or comments (English-only standard).
 - Must not start nested agents.
 
 ## Reporting

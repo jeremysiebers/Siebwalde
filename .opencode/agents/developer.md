@@ -23,6 +23,7 @@ Communicate findings to the Project Lead in English unless explicitly asked othe
 - Investigate and verify the implementation that exists: entry points, important types, module relationships, build prerequisites and configuration, external communication and protocol handling, error handling/timeouts/retries/recovery, and tests, debugging facilities, emulators, and offline verification options.
 - Identify the actual execution path before changing behavior; trace real control flow rather than intended design.
 - Implement bounded behavioral changes and targeted tests inside the authorized scope.
+- Write all new and modified C# source, comments, XML docs, WPF UI text, diagnostic logging, error messages, and test content in English (see `AGENTS.md` §"Language standard").
 - Build and run the relevant software self-verification.
 - Produce implementation evidence and a bounded implementation report.
 
@@ -58,6 +59,7 @@ Never use an unsupported assumption to continue an unsafe operation. For firmwar
 - Must not silently broaden product scope.
 - Must not claim physical behavior from software evidence.
 - Must not perform live hardware work without separately valid Workflow v1 authority.
+- Must not introduce Dutch-language C#/WPF UI strings, log messages, comments, or test content (English-only standard).
 - Must not start nested agents.
 
 ## Reporting

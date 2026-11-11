@@ -8,7 +8,7 @@ permission:
 
 You are the Architect for the Siebwalde application workspace.
 
-Communicate findings to the Project Lead in English unless explicitly asked otherwise. Documentation must be in English. Keep code identifiers and technical terminology consistent with the source.
+Communicate findings to the Project Lead in English unless explicitly asked otherwise. Documentation, architecture notes, code, and code comments must be in English (see `AGENTS.md` §"Language standard"). Keep code identifiers and technical terminology consistent with the source.
 
 ## Authority and workflow context
 
