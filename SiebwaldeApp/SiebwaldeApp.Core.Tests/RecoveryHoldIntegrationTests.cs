@@ -259,5 +259,102 @@ namespace SiebwaldeApp.Core.Tests
                 Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
             });
         }
+
+        /// <summary>
+        /// Invariant A (movement authorization): a comm-loss fault must WITHDRAW the movement
+        /// permission, not merely gate it behind the sticky latch. After the fault the permission is
+        /// <see cref="MovementPermissionState.Withdrawn"/>, so clearing the latch later (operator
+        /// REARM) cannot make the pre-fault grant effective again — a non-neutral command is still
+        /// refused by the movement gate.
+        /// </summary>
+        [Fact]
+        public Task CommLossFault_AfterMovementGranted_WithdrawsPermission_RearmDoesNotRegrant()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig()); // detected {1,2,3}, no heartbeat
+
+            return RunWithRuntimeAsync(factory, Groups(1, 2, 3), async (runtime, ct) =>
+            {
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(InitializationStatus.StoppedAtGlobalReady, runtime.RunStatus);
+
+                // Establish movement authority the production way: neutral was observed during start,
+                // and the operator authorizes + executes Stage 6 (track power), which grants movement.
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.True(await runtime.EnableTrackPowerAsync(ct));
+                Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
+                Assert.True(runtime.IsMovementSafe);
+
+                // With no further movement commanded the write loop goes idle, so status/readback go
+                // stale and the production monitor latches Pic32Lost (same path a silent PIC32 takes).
+                await WaitUntilAsync(
+                    () => runtime.RunStatus == InitializationStatus.RecoveryHold,
+                    TimeSpan.FromSeconds(15));
+                Assert.True(runtime.GlobalStop.IsLatched);
+                Assert.Equal(GlobalStopReason.Pic32Lost, runtime.GlobalStop.Reason);
+
+                // Invariant A: the fault WITHDREW movement permission. Before the fix the permission
+                // stayed Granted and only the latch blocked movement, so a later latch-clear would
+                // silently re-expose the stale grant.
+                Assert.Equal(MovementPermissionState.Withdrawn, runtime.MovementPermission);
+                Assert.False(runtime.IsMovementSafe);
+
+                // Operator REARM (the C# mirror of the physical 112 invoked by the recovery path once
+                // the post-re-arm 111 confirms the PIC32 left the latched state). Re-arm clears the
+                // latch but grants NO movement authority.
+                Assert.True(runtime.GlobalStop.ReArm());
+                Assert.False(runtime.GlobalStop.IsLatched);
+
+                // Even with the latch cleared, a non-neutral command is STILL refused by the movement
+                // gate because the permission is Withdrawn (IsGranted == false). If the permission had
+                // merely stayed Granted behind the latch, this would now be accepted.
+                Assert.False(runtime.TrackVariables!.SetDesiredAmplifierControl(1, 500, false));
+            });
+        }
+
+        /// <summary>
+        /// Invariant B (neutral verification): a comm-loss fault must reset the cached
+        /// <c>_neutralVerified</c> flag so a future Stage 6 cannot rely on pre-fault neutral evidence.
+        /// Observable behavior: after recovery revalidation reaches <see cref="InitializationStatus.StoppedAtGlobalReady"/>
+        /// again (stages 1..5 re-passed) and Stage 6 is operator-authorized, <see cref="TrackApplicationRuntimeHost.EnableTrackPowerAsync"/>
+        /// must STILL fail because neutral has not been freshly re-observed.
+        /// </summary>
+        [Fact]
+        public Task CommLossFault_ResetsNeutralVerified_EnableTrackPowerFailsUntilFreshNeutral()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig());
+
+            return RunWithRuntimeAsync(factory, Groups(1, 2, 3), async (runtime, ct) =>
+            {
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(InitializationStatus.StoppedAtGlobalReady, runtime.RunStatus);
+
+                // Neutral was observed during start (concept 1), so the cached flag is true here. We
+                // deliberately do NOT energize yet: the fault below must invalidate that cached fact.
+
+                // Drive the real comm-loss fault: idle write loop -> stale status/readback -> Pic32Lost.
+                await WaitUntilAsync(
+                    () => runtime.RunStatus == InitializationStatus.RecoveryHold,
+                    TimeSpan.FromSeconds(15));
+                Assert.True(runtime.GlobalStop.IsLatched);
+                Assert.Equal(GlobalStopReason.Pic32Lost, runtime.GlobalStop.Reason);
+
+                // Recovery revalidation re-runs stages 1..5 (the latch stays sticky; the deterministic
+                // simulator's physical 111 state is Disarmed so the precondition proceeds without an
+                // auto re-arm, matching the existing NoAutoRearm test). RevalidateAsync deliberately
+                // does NOT re-observe neutral.
+                var result = await runtime.RevalidateAsync(ct);
+                Assert.Equal(InitializationStatus.StoppedAtGlobalReady, result);
+                Assert.Equal(TrackInitStageState.Passed, Stage(runtime, TrackInitStage.GlobalReady));
+
+                // Stage 5 is Passed again and Stage 6 is operator-authorized, so the ONLY remaining
+                // gate in the host path is the neutral-verified flag. Invariant B: the fault reset
+                // that flag, so EnableTrackPowerAsync must FAIL rather than energize on stale evidence.
+                runtime.AuthorizeTrackPowerEnable();
+                Assert.False(await runtime.EnableTrackPowerAsync(ct));
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+            });
+        }
     }
 }

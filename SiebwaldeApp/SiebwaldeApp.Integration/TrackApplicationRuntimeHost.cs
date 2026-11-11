@@ -1661,8 +1661,36 @@ namespace SiebwaldeApp.Integration
         /// <see cref="InitializationStatus.RecoveryHold"/>; <see cref="TrackInitStateMachine.EnterRecoveryHold"/>
         /// itself guards the reason (comm/host-authority only) and the run progress (must have reached
         /// NormalOperation), so an operator/Koploper stop or a still-starting run is a no-op.
+        ///
+        /// For a comm/host-authority fault (the same reasons that put the init machine into
+        /// RecoveryHold) the host-level movement authority and cached neutral evidence are also
+        /// invalidated here: movement permission is withdrawn (so clearing the sticky latch later can
+        /// never make a pre-fault grant effective again) and the neutral-verified flag is reset (so a
+        /// future Stage 6 cannot rely on pre-fault neutral evidence). An operator/Koploper stop does
+        /// neither — the latch alone already gates movement and is not a comm fault.
         /// </summary>
         private void OnGlobalStopLatched()
-            => _trackInitStateMachine?.EnterRecoveryHold();
+        {
+            _trackInitStateMachine?.EnterRecoveryHold();
+
+            // Mirror the reason gate in TrackInitStateMachine.EnterRecoveryHold: only a comm/host-
+            // authority fault invalidates the host-level movement authority and cached neutral
+            // evidence. An operator/Koploper latch does not withdraw movement permission (the sticky
+            // latch gates movement until re-armed; the fault latch additionally invalidates authority).
+            if (GlobalStop.Reason is GlobalStopReason.Pic32Lost
+                or GlobalStopReason.Pic32HostLoss
+                or GlobalStopReason.Pic32HostInitiated)
+            {
+                // Withdraw only a previously-granted permission (Granted -> Withdrawn). A permission
+                // that was never granted stays NotGranted, preserving the "never established" vs
+                // "established then revoked" distinction the movement gate relies on.
+                if (_movementPermission is { IsGranted: true })
+                {
+                    _movementPermission.Withdraw();
+                }
+
+                _neutralVerified = false;
+            }
+        }
     }
 }
