@@ -1121,7 +1121,13 @@ namespace SiebwaldeApp.Integration
                 return true;
             }
 
-            var step = new GroupReadyStep(_trackCommClient, _trackVariables, domain.ToArray(), _loggerInstance);
+            // Diagnostic-only correlation for the Stage-5 GROUP_READY verification. The sink writes
+            // to the TrackAppLog file via the existing logging infrastructure.
+            string correlationId = "P1GR-" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            void Log(string message) =>
+                SiebwaldeApp.Core.IoC.Logger.Log($"[{correlationId}] {message}", _loggerInstance, LogLevel.Informative);
+
+            var step = new GroupReadyStep(_trackCommClient, _trackVariables, domain.ToArray(), _loggerInstance, log: Log);
 
             while (true)
             {
