@@ -116,7 +116,7 @@ public class GlobalControlledStopTests : IDisposable
     }
 
     [Fact]
-    public async Task Heartbeat_LinkEstablished_500ms_Stationary_AndLittleEndianSequence()
+    public async Task Heartbeat_LinkEstablished_250ms_Stationary_AndLittleEndianSequence()
     {
         var variables = new TrackApplicationVariables();
         await using var transport = new DeterministicTrackTransport(new TrackSimulatorConfig());
@@ -131,10 +131,10 @@ public class GlobalControlledStopTests : IDisposable
         monitor.EstablishLink(Epoch);
         for (int i = 0; i <= 260; i++)
         {
-            var now = Epoch.AddMilliseconds(500 * i);
+            var now = Epoch.AddMilliseconds(250 * i);
             monitor.ObserveStatus(new ReceivedMessage(10, 111, 7, GlobalStopStatusMessage.Disarmed), now);
             await monitor.TickAsync(now);
-            await monitor.TickAsync(now.AddMilliseconds(499));
+            await monitor.TickAsync(now.AddMilliseconds(249));
         }
         var heartbeats = transport.SentFrames.ToArray();
         Assert.Equal(261, heartbeats.Length);
@@ -142,6 +142,95 @@ public class GlobalControlledStopTests : IDisposable
             Assert.Equal(new byte[] { 0xAA, 110, (byte)i, (byte)(i >> 8) }, heartbeats[i]);
         Assert.Empty(variables.PendingWrites); // no speed change needed to keep authority alive
         Assert.Equal(GlobalStopState.Disarmed, variables.GlobalStop.State); // confirmation is not the heartbeat gate
+    }
+
+    [Fact]
+    public async Task LateTick_WithinFreshnessWindow_DoesNotSpuriouslyLatch_AndSendsSingleHeartbeat()
+    {
+        var variables = new TrackApplicationVariables();
+        await using var transport = new DeterministicTrackTransport(new TrackSimulatorConfig());
+        await using var comm = new TrackCommClientAsync(transport, variables);
+        await comm.StartAsync(false);
+        using var monitor = new GlobalStopMonitor(comm, variables);
+        monitor.EstablishLink(Epoch);
+        monitor.ObserveStatus(Armed, Epoch);
+        await monitor.TickAsync(Epoch); // first heartbeat (seq 0)
+
+        // Scheduling jitter: the runtime loop stalls ~1.9 s and resumes with a single late tick.
+        // The last status is still within the 2 s freshness window, so this must NOT latch, and a
+        // single TickAsync must emit at most one heartbeat (no burst of 110 frames).
+        await monitor.TickAsync(Epoch.AddMilliseconds(1900));
+
+        Assert.Equal(GlobalStopState.Armed, variables.GlobalStop.State);
+        Assert.DoesNotContain(transport.SentFrames, f => f[1] == 109); // no spurious stop
+        Assert.Equal(2, transport.SentFrames.Count(f => f[1] == 110)); // seq 0 + exactly one late heartbeat
+    }
+
+    [Fact]
+    public async Task GenuineLoss_StaleStatusAndReadbackPast2s_LatchesPic32Lost_AndResumptionDoesNotAutoRearm()
+    {
+        var variables = new TrackApplicationVariables();
+        await using var transport = new DeterministicTrackTransport(new TrackSimulatorConfig());
+        await using var comm = new TrackCommClientAsync(transport, variables);
+        await comm.StartAsync(false);
+        using var monitor = new GlobalStopMonitor(comm, variables);
+        monitor.EstablishLink(Epoch);
+        monitor.ObserveStatus(Armed, Epoch);
+        await monitor.TickAsync(Epoch); // first heartbeat (seq 0)
+
+        // Genuine loss: the last status is stale AND no amplifier has a fresh protocol readback,
+        // now past the 2 s freshness window -> Pic32Lost latch.
+        await monitor.TickAsync(Epoch.AddSeconds(2).AddMilliseconds(1));
+        Assert.Equal(GlobalStopReason.Pic32Lost, variables.GlobalStop.Reason);
+        Assert.True(variables.GlobalStop.IsLatched);
+        Assert.DoesNotContain(transport.SentFrames, f => f[1] == 109); // Pic32Lost suppresses dead-link writes
+
+        // Reconnect + heartbeat resumption must NOT implicitly re-arm the sticky latch.
+        monitor.ObserveStatus(Armed, Epoch.AddSeconds(3));
+        await monitor.TickAsync(Epoch.AddSeconds(3));
+        Assert.Equal(GlobalStopReason.Pic32Lost, variables.GlobalStop.Reason);
+        Assert.True(variables.GlobalStop.IsLatched);
+
+        // Only the explicit operator-authorized re-arm (112 mirror) clears the latch.
+        Assert.True(variables.GlobalStop.ReArm());
+        Assert.Equal(GlobalStopState.Armed, variables.GlobalStop.State);
+    }
+
+    [Fact]
+    public async Task Dispose_UnsubscribesFromControlMessages_SoNoFurtherHeartbeatOrStatusProcessing()
+    {
+        var variables = new TrackApplicationVariables();
+        await using var transport = new DeterministicTrackTransport(new TrackSimulatorConfig());
+        await using var comm = new TrackCommClientAsync(transport, variables);
+        await comm.StartAsync(false);
+        var monitor = new GlobalStopMonitor(comm, variables);
+        try
+        {
+            monitor.EstablishLink(Epoch);
+            await monitor.TickAsync(Epoch);
+            Assert.Equal(1, transport.SentFrames.Count(f => f[1] == 110));
+
+            // Before teardown, an inbound 111 status reaches the monitor.
+            await comm.SendAsync(new SendMessage(TrackCommand.GLOBAL_STOP_STATE, Array.Empty<byte>()));
+            await WaitUntil(() => monitor.LastObservedPic32Status is not null);
+            Assert.Equal(GlobalStopStatusMessage.Disarmed, monitor.LastObservedPic32Status);
+
+            // Teardown: dispose (unsubscribe). The monitor owns no background sender (it is
+            // TickAsync-driven), so nothing can emit a heartbeat after the runtime stops driving it.
+            monitor.Dispose();
+
+            // A subsequent latch status must NOT reach the (unsubscribed) monitor.
+            await comm.SendAsync(new SendMessage(TrackCommand.EXEC_GLOBAL_STOP, new byte[] { 0, 0 }));
+            await WaitUntil(() => variables.trackControllerCommands.ReceivedMessage.Taskmessage ==
+                                 GlobalStopStatusMessage.LatchedHostInitiated);
+            Assert.Equal(GlobalStopStatusMessage.Disarmed, monitor.LastObservedPic32Status);
+            Assert.Equal(GlobalStopState.Disarmed, variables.GlobalStop.State); // no latch was processed
+            Assert.Equal(1, transport.SentFrames.Count(f => f[1] == 110)); // no orphaned heartbeat sender
+        }
+        finally
+        {
+            monitor.Dispose();
+        }
     }
 
     [Fact]
