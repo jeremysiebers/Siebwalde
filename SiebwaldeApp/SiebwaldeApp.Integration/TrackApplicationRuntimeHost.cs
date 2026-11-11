@@ -999,10 +999,25 @@ namespace SiebwaldeApp.Integration
                     ? DateTimeOffset.UtcNow - received
                     : (TimeSpan?)null;
 
+                // Diagnostic: raw identity/version registers + individual compatibility, captured for
+                // every amplifier at the compatibility decision point (reads cached HoldingReg only —
+                // no new controller transaction). A fresh timestamp does NOT prove every register was
+                // refreshed in the same SLAVEINFO cycle: HR7/HR22 == 0x0000 indicates an unpopulated/
+                // legacy/partial acquisition, which must be distinguished from a genuinely
+                // incompatible amplifier.
+                var regs = item.HoldingReg;
+                ushort hr7 = regs[TrackAmplifierRegisters.Identity];
+                ushort hr11 = regs[TrackAmplifierRegisters.SwChecksum];
+                ushort hr21 = regs[TrackAmplifierRegisters.FwVersionMajorMinor];
+                ushort hr22 = regs[TrackAmplifierRegisters.FwVersionPatchProtocol];
+                bool identityOk = TrackAmplifierRegisters.HasCompatibleIdentityFields(hr7);
+                bool protocolOk = TrackAmplifierRegisters.HasCompatibleProtocolVersion(hr22);
+
                 Log(
                     $"slave={slave} detected={item.SlaveDetected} protocolObserved={item.ProtocolReadbackObserved} " +
-                    $"freshAgeMs={(freshnessAge?.TotalMilliseconds ?? -1):F0} " +
-                    $"seq={item.ProtocolReadbackSequence}");
+                    $"freshAgeMs={(freshnessAge?.TotalMilliseconds ?? -1):F0} seq={item.ProtocolReadbackSequence} " +
+                    $"HR7=0x{hr7:X4} HR11=0x{hr11:X4} HR21=0x{hr21:X4} HR22=0x{hr22:X4} " +
+                    $"identityOk={identityOk} protocolOk={protocolOk}");
 
                 if (item.SlaveDetected == 0)
                 {
@@ -1016,7 +1031,8 @@ namespace SiebwaldeApp.Integration
                 {
                     // Identity/protocol fail-closed: never download, never enable, never grant for
                     // this amp. The reason distinguishes a legacy/unknown identity from a Phase-1
-                    // identity carrying a mismatched HR22 PROTOCOL_VERSION.
+                    // identity carrying a mismatched HR22 PROTOCOL_VERSION. The raw registers and the
+                    // individual compatibility results were already logged above at the decision point.
                     item.Phase1Failure ??= AmplifierPhase1Safety.IncompatibilityReason(item)
                         ?? AmplifierPhase1Safety.IncompatibleFirmware;
                     item.ConfigurationVerified = false;

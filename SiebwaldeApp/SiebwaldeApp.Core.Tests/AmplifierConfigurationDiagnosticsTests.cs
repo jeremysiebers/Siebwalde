@@ -496,6 +496,13 @@ namespace SiebwaldeApp.Core.Tests
             Assert.Contains(lines, l => l.Contains("ENTRY domain=[1]"));
             Assert.Contains(lines, l => l.Contains("SKIPPED incompatible"));
             Assert.DoesNotContain(lines, l => l.Contains("INVOKE DownloadAsync"));
+
+            // The compatibility decision point now reports the raw identity/version registers and the
+            // individual compatibility results, so a partial/stale acquisition can be distinguished
+            // from a genuinely incompatible amplifier.
+            Assert.Contains(lines, l => l.Contains("HR7=0x") && l.Contains("HR11=0x") &&
+                                        l.Contains("HR21=0x") && l.Contains("HR22=0x"));
+            Assert.Contains(lines, l => l.Contains("identityOk=") && l.Contains("protocolOk="));
         }
 
         /// <summary>Writes a minimal Intel HEX parsed to a file checksum of 0x0E39 by
