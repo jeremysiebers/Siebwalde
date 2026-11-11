@@ -139,6 +139,14 @@ namespace SiebwaldeApp.Core
         /// <summary>True when the run failed (a stage failed and the machine stopped, fail-closed).</summary>
         public bool IsFailed => _runStatus == InitializationStatus.Failed;
 
+        /// <summary>
+        /// True when a comm/host-authority fault latched the global stop while the run had reached
+        /// NormalOperation (Running/StoppedAtGlobalReady/Completed), moving it into
+        /// <see cref="InitializationStatus.RecoveryHold"/> (see <see cref="EnterRecoveryHold"/>).
+        /// Movement/energize/re-arm are withheld until revalidated.
+        /// </summary>
+        public bool IsRecoveryHold => _runStatus == InitializationStatus.RecoveryHold;
+
         /// <summary>The overall run status (mirrors <see cref="InitializationStatus"/>).</summary>
         public InitializationStatus RunStatus => _runStatus;
 
@@ -862,6 +870,83 @@ namespace SiebwaldeApp.Core
             _status[stage] = new TrackInitStageStatus(stage, TrackInitStageState.Blocked, reason, recoveryAction, BuildAmpStatuses(stage));
             StageStatusChanged?.Invoke(this, new TrackInitStageStatusChangedEventArgs(_status[stage]));
             Log(stage, $"Stage '{TrackInitStageInfo.DisplayName(stage)}' blocked: {reason}.");
+        }
+
+        // ---------------------------------------------------------------------------------
+        // Recovery hold
+        // ---------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Transitions a run that has reached NormalOperation (i.e. its status is
+        /// <see cref="InitializationStatus.Running"/>, <see cref="InitializationStatus.StoppedAtGlobalReady"/>
+        /// or <see cref="InitializationStatus.Completed"/>) into
+        /// <see cref="InitializationStatus.RecoveryHold"/> after a comm/host-authority fault latched
+        /// the global stop. Stage evidence that depends on a live host authority and fresh amplifier
+        /// readbacks — Stage 4 (configure/validate), Stage 5 (global ready), Stage 6 (track power) and
+        /// Stage 7 (normal operation) — is invalidated to <see cref="TrackInitStageState.Pending"/>.
+        /// Stages 2 (firmware address) and 3 (amplifier standby) are RETAINED (their Passed state is
+        /// left in place) but treated as unconfirmed: a later
+        /// <c>TrackApplicationRuntimeHost.RevalidateAsync</c> re-runs them via fresh readback. The
+        /// stage/step pointer is reset to Stage 1 (controller connection).
+        ///
+        /// Only comm/host-authority fault reasons (<see cref="GlobalStopReason.Pic32Lost"/>,
+        /// <see cref="GlobalStopReason.Pic32HostLoss"/>,
+        /// <see cref="GlobalStopReason.Pic32HostInitiated"/>) invalidate stage evidence; an operator or
+        /// Koploper stop never does. The method is a no-op unless the run has reached NormalOperation.
+        /// Re-arm, track-power enable and movement remain withheld: the latch stays sticky and the
+        /// movement permission is not re-granted by this transition (fail-closed).
+        /// </summary>
+        public void EnterRecoveryHold()
+        {
+            // The latch reason is the authoritative discriminator: only comm/host-authority faults
+            // invalidate stage evidence (the operator/Koploper reasons do not).
+            var reason = _variables.GlobalStop.Reason;
+            if (reason is not (GlobalStopReason.Pic32Lost
+                               or GlobalStopReason.Pic32HostLoss
+                               or GlobalStopReason.Pic32HostInitiated))
+            {
+                return;
+            }
+
+            lock (_gate)
+            {
+                // Only a run that has REACHED NormalOperation (the EnableTrackamplifiers step
+                // completed) can enter RecoveryHold. A still-starting run whose Stage 1 precondition
+                // is merely observing a latched global stop has NOT reached NormalOperation and must
+                // not have its stage evidence invalidated (the operator-recovery path handles it).
+                if (!_normalOperationStepCompleted ||
+                    _runStatus is not (InitializationStatus.Running
+                                       or InitializationStatus.StoppedAtGlobalReady
+                                       or InitializationStatus.Completed))
+                {
+                    return;
+                }
+
+                // Invalidate the stages whose Passed evidence depends on a live host authority and
+                // fresh amplifier readbacks. Stages 2 (firmware address) and 3 (amplifier standby)
+                // are deliberately RETAINED (left Passed) but must be re-confirmed by a revalidation.
+                SetStageState(TrackInitStage.ConfigureValidate, TrackInitStageState.Pending,
+                    "Recovery hold: stage evidence invalidated by a comm/host-authority fault.");
+                SetStageState(TrackInitStage.GlobalReady, TrackInitStageState.Pending,
+                    "Recovery hold: stage evidence invalidated by a comm/host-authority fault.");
+                SetStageState(TrackInitStage.AmpPowerEnable, TrackInitStageState.Pending,
+                    "Recovery hold: track power withheld; re-validation and operator authorization required.");
+                SetStageState(TrackInitStage.NormalOperation, TrackInitStageState.Pending,
+                    "Recovery hold: normal operation evidence invalidated by a comm/host-authority fault.");
+
+                // Reset the pointer to Stage 1 so a revalidation re-runs the connection (250),
+                // controller version (113) and global-stop precondition (111) first.
+                _currentStage = TrackInitStage.ControllerConnection;
+                _currentStep = FirstStepOfStage(TrackInitStage.ControllerConnection);
+                _mode = TrackInitRunMode.Idle;
+                _normalOperationStepCompleted = false;
+                _trackPowerAuthorized = false;
+                _trackPowerOn = false;
+
+                SetRunStatus(InitializationStatus.RecoveryHold);
+                Log(TrackInitStage.ControllerConnection,
+                    $"Entered recovery hold: global stop latched with reason {reason}.");
+            }
         }
 
         /// <summary>
