@@ -947,16 +947,26 @@ namespace SiebwaldeApp.Integration
         /// </summary>
         private async Task InitializePhase1AmplifiersAsync(CancellationToken ct)
         {
+            // Diagnostic-only correlation for the whole Phase-1 config run (stages 4/5 host path).
+            // The downloader receives the same sink, so host and downloader lines share the ID.
+            string correlationId = "P1CFG-" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            void Log(string message) =>
+                SiebwaldeApp.Core.IoC.Logger.Log($"[{correlationId}] {message}", _loggerInstance, LogLevel.Informative);
+
             if (_trackVariables is null || _trackCommClient is null)
             {
+                Log("SKIPPED (track variables or comm client not composed)");
                 return;
             }
 
             var domain = EffectiveDomain();
             if (domain.Count == 0)
             {
+                Log("SKIPPED (empty effective domain)");
                 return;
             }
+
+            Log($"ENTRY domain=[{string.Join(",", domain)}]");
 
             // The 111 stop-confirmation payload is decoded against the physical detected-amplifier
             // list in ascending slave-address order (the PIC32 packs StopDelivery[i] != STOP_UNUSED,
@@ -973,21 +983,32 @@ namespace SiebwaldeApp.Integration
             // fresh read is required to re-prove "detected + fresh + genuine" before checking HR7.
             await RefreshReadbackAsync(domain, ct).ConfigureAwait(false);
 
-            var downloader = new AmplifierConfigurationDownloader(_trackCommClient);
+            var downloader = new AmplifierConfigurationDownloader(_trackCommClient, Log);
             var config = new AmplifierConfiguration();
 
             foreach (var slave in domain)
             {
                 if (ct.IsCancellationRequested)
                 {
+                    Log($"SKIPPED (cancellation requested before slave {slave})");
                     return;
                 }
 
                 var item = _trackVariables.trackAmpItems[slave];
+                var freshnessAge = item.LastDataReceivedUtc is DateTimeOffset received
+                    ? DateTimeOffset.UtcNow - received
+                    : (TimeSpan?)null;
+
+                Log(
+                    $"slave={slave} detected={item.SlaveDetected} protocolObserved={item.ProtocolReadbackObserved} " +
+                    $"freshAgeMs={(freshnessAge?.TotalMilliseconds ?? -1):F0} " +
+                    $"seq={item.ProtocolReadbackSequence}");
+
                 if (item.SlaveDetected == 0)
                 {
                     item.Phase1Failure ??= "not detected";
                     item.ConfigurationVerified = false;
+                    Log($"slave={slave} SKIPPED not detected");
                     continue;
                 }
 
@@ -999,15 +1020,24 @@ namespace SiebwaldeApp.Integration
                     item.Phase1Failure ??= AmplifierPhase1Safety.IncompatibilityReason(item)
                         ?? AmplifierPhase1Safety.IncompatibleFirmware;
                     item.ConfigurationVerified = false;
+                    Log($"slave={slave} SKIPPED incompatible: {item.Phase1Failure}");
                     continue;
                 }
 
+                Log($"slave={slave} INVOKE DownloadAsync");
                 var ok = await downloader.DownloadAsync(item, config, ct).ConfigureAwait(false);
                 if (!ok)
                 {
                     item.ConfigurationVerified = false;
                 }
+
+                Log(
+                    $"slave={slave} DownloadAsync result={ok} " +
+                    $"ConfigurationVerified={item.ConfigurationVerified} " +
+                    $"Phase1Failure={item.Phase1Failure ?? "(null)"}");
             }
+
+            Log("EXIT");
         }
 
         /// <summary>Issues a fresh FC03 read to every domain amplifier and waits (bounded) until each
