@@ -63,7 +63,7 @@ namespace SiebwaldeApp.Integration
         private readonly SemaphoreSlim _gate = new(1, 1);
 
         private volatile CancellationTokenSource? _cts;
-        private TrackRuntimeState _state = TrackRuntimeState.Stopped;
+        private volatile TrackRuntimeState _state = TrackRuntimeState.Stopped;
         private TrackControlMode? _requestedMode;
         private LayoutProfile? _activeFullSimulationProfile;
         private ISimulatedTrackIo? _simulatedTrackIo;
