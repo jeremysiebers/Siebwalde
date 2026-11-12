@@ -22,6 +22,16 @@
         private readonly SendMessage _sendMessageTemplate;
 
         /// <summary>
+        /// Bounded window for the MBUS_STATE_START_DATA_UPLOAD DONE acknowledgement. When the
+        /// controller does not confirm command 106 within this window the step fails closed
+        /// (Error), so a non-responsive controller cannot leave the initialization blocked
+        /// indefinitely. Default 5 s matches the GroupReadyStep verify window; a normal
+        /// controller acknowledges 106 in well under a second.
+        /// </summary>
+        private readonly TimeSpan _timeout;
+        private DateTimeOffset _deadline;
+
+        /// <summary>
         /// Name of this initialization step.
         /// Must match the key used by the initialization service.
         /// </summary>
@@ -30,11 +40,13 @@
         public DataUploadStep(
             ITrackCommClient commClient,
             TrackApplicationVariables variables,
-            string loggerInstance = "Track")
+            string loggerInstance = "Track",
+            TimeSpan? timeout = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             _variables = variables ?? throw new ArgumentNullException(nameof(variables));
             _loggerInstance = loggerInstance ?? "Track";
+            _timeout = timeout ?? TimeSpan.FromSeconds(5);
 
             _subState = 0;
 
@@ -82,6 +94,7 @@
             await _commClient.SendAsync(messageToSend, cancellationToken).ConfigureAwait(false);
 
             _subState = 1;
+            _deadline = DateTimeOffset.UtcNow + _timeout;
 
             IoC.Logger.Log(
                 "State.DataUploadStart => EXEC_MBUS_STATE_START_DATA_UPLOAD.",
@@ -98,6 +111,18 @@
         /// </summary>
         private InitStepResult ExecuteWaitForStartDataUpload(ReceivedMessage? lastMessage)
         {
+            // Fail closed when the controller never confirms command 106: a late DONE is never
+            // treated as authorization to resume, so the step completes (Next) only on a DONE
+            // observed within the window.
+            if (DateTimeOffset.UtcNow >= _deadline)
+            {
+                _subState = 0;
+                const string message =
+                    "Data upload timed out waiting for MBUS_STATE_START_DATA_UPLOAD DONE.";
+                IoC.Logger.Log($"DataUploadStep => {message}", _loggerInstance);
+                return InitStepResult.Error(message);
+            }
+
             if (!lastMessage.HasValue)
             {
                 // No message yet, keep waiting.

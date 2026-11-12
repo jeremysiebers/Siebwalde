@@ -62,8 +62,8 @@ namespace SiebwaldeApp.Integration
         private readonly TimeSpan _neutralObserveWindow;
         private readonly SemaphoreSlim _gate = new(1, 1);
 
-        private CancellationTokenSource? _cts;
-        private TrackRuntimeState _state = TrackRuntimeState.Stopped;
+        private volatile CancellationTokenSource? _cts;
+        private volatile TrackRuntimeState _state = TrackRuntimeState.Stopped;
         private TrackControlMode? _requestedMode;
         private LayoutProfile? _activeFullSimulationProfile;
         private ISimulatedTrackIo? _simulatedTrackIo;
@@ -668,6 +668,23 @@ namespace SiebwaldeApp.Integration
         /// <inheritdoc />
         public async Task StopAsync(CancellationToken ct = default)
         {
+            // A blocked initialization (for example a step whose controller acknowledgement never
+            // arrives) holds the lifecycle gate. Cancel the pending init BEFORE acquiring the gate,
+            // but ONLY while the runtime is still Starting: an already-Running runtime must keep its
+            // CTS alive so the normal teardown can still command and observe neutral first.
+            // Idempotent and safe when _cts is null (not started) or already torn down.
+            if (_state == TrackRuntimeState.Starting)
+            {
+                try
+                {
+                    _cts?.Cancel();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Already disposed by a concurrent teardown; nothing left to cancel.
+                }
+            }
+
             await _gate.WaitAsync(ct).ConfigureAwait(false);
             try
             {
@@ -947,16 +964,26 @@ namespace SiebwaldeApp.Integration
         /// </summary>
         private async Task InitializePhase1AmplifiersAsync(CancellationToken ct)
         {
+            // Diagnostic-only correlation for the whole Phase-1 config run (stages 4/5 host path).
+            // The downloader receives the same sink, so host and downloader lines share the ID.
+            string correlationId = "P1CFG-" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            void Log(string message) =>
+                SiebwaldeApp.Core.IoC.Logger.Log($"[{correlationId}] {message}", _loggerInstance, LogLevel.Informative);
+
             if (_trackVariables is null || _trackCommClient is null)
             {
+                Log("SKIPPED (track variables or comm client not composed)");
                 return;
             }
 
             var domain = EffectiveDomain();
             if (domain.Count == 0)
             {
+                Log("SKIPPED (empty effective domain)");
                 return;
             }
+
+            Log($"ENTRY domain=[{string.Join(",", domain)}]");
 
             // The 111 stop-confirmation payload is decoded against the physical detected-amplifier
             // list in ascending slave-address order (the PIC32 packs StopDelivery[i] != STOP_UNUSED,
@@ -973,21 +1000,47 @@ namespace SiebwaldeApp.Integration
             // fresh read is required to re-prove "detected + fresh + genuine" before checking HR7.
             await RefreshReadbackAsync(domain, ct).ConfigureAwait(false);
 
-            var downloader = new AmplifierConfigurationDownloader(_trackCommClient);
+            var downloader = new AmplifierConfigurationDownloader(_trackCommClient, Log);
             var config = new AmplifierConfiguration();
 
             foreach (var slave in domain)
             {
                 if (ct.IsCancellationRequested)
                 {
+                    Log($"SKIPPED (cancellation requested before slave {slave})");
                     return;
                 }
 
                 var item = _trackVariables.trackAmpItems[slave];
+                var freshnessAge = item.LastDataReceivedUtc is DateTimeOffset received
+                    ? DateTimeOffset.UtcNow - received
+                    : (TimeSpan?)null;
+
+                // Diagnostic: raw identity/version registers + individual compatibility, captured for
+                // every amplifier at the compatibility decision point (reads cached HoldingReg only —
+                // no new controller transaction). A fresh timestamp does NOT prove every register was
+                // refreshed in the same SLAVEINFO cycle: HR7/HR22 == 0x0000 indicates an unpopulated/
+                // legacy/partial acquisition, which must be distinguished from a genuinely
+                // incompatible amplifier.
+                var regs = item.HoldingReg;
+                ushort hr7 = regs[TrackAmplifierRegisters.Identity];
+                ushort hr11 = regs[TrackAmplifierRegisters.SwChecksum];
+                ushort hr21 = regs[TrackAmplifierRegisters.FwVersionMajorMinor];
+                ushort hr22 = regs[TrackAmplifierRegisters.FwVersionPatchProtocol];
+                bool identityOk = TrackAmplifierRegisters.HasCompatibleIdentityFields(hr7);
+                bool protocolOk = TrackAmplifierRegisters.HasCompatibleProtocolVersion(hr22);
+
+                Log(
+                    $"slave={slave} detected={item.SlaveDetected} protocolObserved={item.ProtocolReadbackObserved} " +
+                    $"freshAgeMs={(freshnessAge?.TotalMilliseconds ?? -1):F0} seq={item.ProtocolReadbackSequence} " +
+                    $"HR7=0x{hr7:X4} HR11=0x{hr11:X4} HR21=0x{hr21:X4} HR22=0x{hr22:X4} " +
+                    $"identityOk={identityOk} protocolOk={protocolOk}");
+
                 if (item.SlaveDetected == 0)
                 {
                     item.Phase1Failure ??= "not detected";
                     item.ConfigurationVerified = false;
+                    Log($"slave={slave} SKIPPED not detected");
                     continue;
                 }
 
@@ -995,19 +1048,29 @@ namespace SiebwaldeApp.Integration
                 {
                     // Identity/protocol fail-closed: never download, never enable, never grant for
                     // this amp. The reason distinguishes a legacy/unknown identity from a Phase-1
-                    // identity carrying a mismatched HR22 PROTOCOL_VERSION.
+                    // identity carrying a mismatched HR22 PROTOCOL_VERSION. The raw registers and the
+                    // individual compatibility results were already logged above at the decision point.
                     item.Phase1Failure ??= AmplifierPhase1Safety.IncompatibilityReason(item)
                         ?? AmplifierPhase1Safety.IncompatibleFirmware;
                     item.ConfigurationVerified = false;
+                    Log($"slave={slave} SKIPPED incompatible: {item.Phase1Failure}");
                     continue;
                 }
 
+                Log($"slave={slave} INVOKE DownloadAsync");
                 var ok = await downloader.DownloadAsync(item, config, ct).ConfigureAwait(false);
                 if (!ok)
                 {
                     item.ConfigurationVerified = false;
                 }
+
+                Log(
+                    $"slave={slave} DownloadAsync result={ok} " +
+                    $"ConfigurationVerified={item.ConfigurationVerified} " +
+                    $"Phase1Failure={item.Phase1Failure ?? "(null)"}");
             }
+
+            Log("EXIT");
         }
 
         /// <summary>Issues a fresh FC03 read to every domain amplifier and waits (bounded) until each
@@ -1091,7 +1154,13 @@ namespace SiebwaldeApp.Integration
                 return true;
             }
 
-            var step = new GroupReadyStep(_trackCommClient, _trackVariables, domain.ToArray(), _loggerInstance);
+            // Diagnostic-only correlation for the Stage-5 GROUP_READY verification. The sink writes
+            // to the TrackAppLog file via the existing logging infrastructure.
+            string correlationId = "P1GR-" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            void Log(string message) =>
+                SiebwaldeApp.Core.IoC.Logger.Log($"[{correlationId}] {message}", _loggerInstance, LogLevel.Informative);
+
+            var step = new GroupReadyStep(_trackCommClient, _trackVariables, domain.ToArray(), _loggerInstance, log: Log);
 
             while (true)
             {

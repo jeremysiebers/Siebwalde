@@ -56,7 +56,7 @@ def test_snapshot_recovery_roundtrip(tmp_path):
     # manifest metadata
     assert manifest["ladybug_version"] == "0.21.2"
     assert manifest["source_revision"] == _runtime.git_revision()
-    assert manifest["totals"] == {"nodes": 230, "rels": 171}
+    assert manifest["totals"] == {"nodes": 231, "rels": 171}
     assert manifest["source_db_path"] == str(source.resolve())
     assert manifest["files"], "manifest lists no export files"
     for entry in manifest["files"]:
@@ -70,7 +70,7 @@ def test_snapshot_recovery_roundtrip(tmp_path):
     target = tmp_path / "target.lbdb"
     report = recover.recover(snap_dir, target)
 
-    assert report["nodes"] == 230
+    assert report["nodes"] == 231
     assert report["rels"] == 171
     assert _runtime.count_tables(target) == _runtime.count_tables(source)
 
@@ -106,7 +106,7 @@ def test_snapshot_refuses_overwrite_without_force(tmp_path):
         snapshot.snapshot(source, snap_dir)
     # with --force it replaces the directory and still succeeds
     manifest = snapshot.snapshot(source, snap_dir, force=True)
-    assert manifest["totals"] == {"nodes": 230, "rels": 171}
+    assert manifest["totals"] == {"nodes": 231, "rels": 171}
 
 
 def test_recover_refuses_existing_target(tmp_path):

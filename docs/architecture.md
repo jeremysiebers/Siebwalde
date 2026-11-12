@@ -179,6 +179,22 @@ Power commands for object `1` call `IHardwareBackend.SetPower`. Locomotive speed
 - Some comments describe intended future behavior or older design and do not always match the active implementation.
 - Build health is uncertain and likely currently broken for at least `SiebwaldeApp.Core.Host` because it uses `IoC.Kernel` while active `SiebwaldeApp.Core.IoC` has no `Kernel` member.
 
+## Subsystem Lifecycle Requirement (canonical, 2026-11-12)
+
+**Every major Siebwalde subsystem must have an independently manageable and bounded software lifecycle.** A blocked or non-responsive subsystem must never be able to indefinitely prevent the operator from stopping the application, nor leave its resources un-released.
+
+Scope: TrackController/PIC32, TrackAmplifiers/PIC18, FiddleYard, YardController, Koploper/ECoS integration, the internal C# runtime services, and future controller subsystems.
+
+Each subsystem must support, as applicable: observable lifecycle status; bounded Start/Stop; cancellation; controlled software restart; fault isolation; explicit dependency management; safe revalidation; and clear operator control in WPF.
+
+Invariants:
+
+- A software-service restart is not automatically permission to reset physical hardware.
+- A subsystem may only be independently restarted when its safety dependencies allow it.
+- A blocked initialization must not hold a lifecycle gate that a subsequent Stop/Close needs (see `docs/handoff.md` P0, commit `41a265c5`).
+
+This requirement is a target architecture direction, not a framework to implement now. The wider per-subsystem lifecycle work is deferred until after the first successful test-oval driving milestone; the minimal changes required to fix the current P0 hang are the only implementation in this increment.
+
 ## Open Architectural Questions
 
 - Should `SiebwaldeApp.EcosEmu_old` remain as preserved reference material, or can it be archived outside the active workspace later?

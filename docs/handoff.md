@@ -1,5 +1,15 @@
 # Handoff
 
+## PV04 physical init + P0 hang fix + PIC32 command-106 root cause (2026-11-12) — P0 PR (published, see below)
+
+Branch `integration/inc0-1-2-recovery-heartbeat`. PO GO: publish the C# P0 integration PR + commit the PIC32 command-106 reproduction test. No firmware flash/change, no live hardware, no REARM, no Stage-6 track power.
+
+**Corrected PV04 evidence (PHYSICAL_HARDWARE vs OFFLINE_FAULT_INJECTION):** the prior "PV04 hung at command 106" attribution was WRONG. The physical 12-11 log (`Logging/12-11-2026_TrackAppLog.txt`) shows command 106 received its DONE ack on every send; Stage 4 (`ConfigureValidate`) PASSED and Stage 5 (`GlobalReady`) PASSED, reaching `StoppedAtGlobalReady` at `00:04:56.301`. The 106-with-no-DONE observations came from the OFFLINE fault-injection test (`TrackApplicationRuntimeHostStopReliabilityTests`, a `DeterministicTrackTransport` wrapper that deliberately drops 106). Captured registers (amp 1): `HR7=0xF101 HR11=0x0E39 HR21=0x0100 HR22=0x0002` (first two cycles `HR22=0x0000` → "incompatible protocol version", third `0x0002` → configured; the `0x0000`→`0x0002` readback inconsistency remains not-yet-determined). Single run — no repeated-reliability claim.
+
+**PIC32 command-106 root cause (source-proven; correct safety behaviour, NOT a defect):** command 106 is dispatched unconditionally (`controller.c:358-361` → `SETxMBUSxSTATE(MBUS_STATE_START_DATA_UPLOAD)`). On the next superloop iteration `MBUS_Tasks` runs the latch gate FIRST (`mbus.c:209-215`): if `ISxGLOBALxSTOPxLATCHED()`, it overwrites the state to `MBUS_STATE_SERVICE_TASKS`, so `case MBUS_STATE_START_DATA_UPLOAD` (which emits the DONE ack) never runs — the accepted 106 is silently discarded. Reproduced in `TrackController5/firmware/src/tests/test_mbus_106_latch.py` (extracts production `MBUS_Tasks` + `ISxGLOBALxSTOPxLATCHED` unchanged; 5 scenarios A–E PASS). Scenario D reconciles the semantics: a pending 106 overwritten by SERVICE_TASKS is LOST — it does NOT resume when the latch clears (SERVICE_TASKS has no transition back); only a NEWLY-issued 106 (fresh dispatch after re-arm) reaches `MBUS_STATE_START_DATA_UPLOAD` and emits DONE. The global-stop interlock must keep preempting MBUS commands; the C# fail-closed timeout (bounded 5 s) is the correct host-side handling.
+
+**C# P0 fix:** `DataUploadStep` bounded 5 s timeout (fail-closed, no late-DONE resume); `StopAsync` cancels the pending init BEFORE acquiring the lifecycle gate (only while `Starting`); `_cts` and `_state` `volatile`. Tests `DataUploadStepTests` + `TrackApplicationRuntimeHostStopReliabilityTests`. R1 PASS.
+
 ## Ovaaltje2 readiness (2026-10-28/29) — MERGED (PR #64, merge `1e266497`); physical validation PENDING
 
 Branch `feat/ovaaltje2-readiness` (base master `185cd10b`), commits `dd7afa57` (recovery UI surface) + `14159dd5` (consistency fix) + `d8212031` (docs), PR **#64** merged into `master` as `1e266497141c32c694b8ae78aa54e2ebc6e61075` (PO Addendum 01 merge GO, CI green). Objective: restore the normal WPF application startup + operator-controlled global-stop recovery for Ovaaltje2.
@@ -1714,3 +1724,26 @@ Next: step 2 (translation-layer design/implementation) and step 3 (4-amplifier t
 - Evidence archived + NAS-synced under 04_HARDWARE_EVIDENCE/K8B (13 files, SHA-256 verified).
 - Integrator non-blocking findings (flaky ObservedNeutralV3 test, max_uses not enforced, MIN_WAIT_MS=0, capture-tool footer-order) recorded in docs/backlog.md.
 - K8B LIVE_HARDWARE authority EXPIRED at closure. Any further live hardware work needs a fresh scoped PO grant.
+
+## Stage-4 config-path instrumentation (2026-11-11, commit 4e20ad68, NOT merged)
+
+- Offline instrumentation-only increment to make the Stage-4 config-download path observable. Working branch `integration/inc0-1-2-recovery-heartbeat` @ `4e20ad68` (base `046d2397`).
+- Changed: `AmplifierConfiguration.cs` (optional `Action<string>? log` sink; ENTRY/REQUESTED/TRANSMITTED/OBSERVED/VERIFIED/FAILED/RETURN states; register literals -> named constants 1:1; caller-token cancellation logged then rethrown), `TrackApplicationRuntimeHost.InitializePhase1AmplifiersAsync` (correlation ID + per-amp freshness/compatibility decision + result logs), new `AmplifierConfigurationDiagnosticsTests.cs` (10 tests).
+- Integrator R1 PASS. Full suite 1205/1205 (was 1195).
+- Evidence corrections: (A) PIC18 re-addressing does NOT reset HR3-6/HR8 (only `AmpCore_Init` memset); HR15 overwritten by every write. (B) PV02A read all four amps 1/3/4/6, not just amp 6; `Phase1Failure=null`+`ConfigurationVerified=false` proves the downloader never reached its success line and left no config-failure string.
+- Resume: the next physical Stage-4 run must use the instrumented production path; the `[P1CFG-...]` lines in `TrackAppLog.txt` will show exactly whether DownloadAsync was invoked or skipped, the compatibility/freshness decomposition, and the write/APPLY/verify outcome. No hardware/flash/merge authority; the 3 pre-existing dirty files (`AmplifierPhase1MapTests.cs`, `phase1_cases.h`, `docs/backlog.md`) are NOT part of this increment and were left untouched.
+
+## PV02B physical validation + Stage-5 diagnostic (2026-11-11, offline analysis)
+
+- **Result:** Stage 1-4 PASS (all four amplifiers 1/3/4/6 configured + APPLY verified), **Stage 5 (GROUP_READY) FAIL on amplifier 6** (HR8 low nibble stayed ≠ READY while 1/3/4 accepted). Correlation `P1CFG-39dae259`.
+- **Root cause: NOT YET DETERMINED.** The PIC18 GROUP_READY gate requires `enable && config_ok && !fault && lease_fresh`. `config_ok`+`init_done`+`enable_active` are proven present (HR8=0xC708, identical for all four), so the rejection must come from `fault` or `lease_fresh`. HR9 (fault) and HR1 (lease/enable at GROUP_READY) were NOT captured — that is the missing evidence.
+- **PV01 Stage-4 failure is NOT claimed permanently resolved** (single run, no repeatability). The instrumented path now proves config works in this run, but the PV01 divergence remains unexplained.
+- **Authorization-scope deviation (recorded transparently):** GROUP_READY writes HR23 (register 23) = 0x0002 (bit 1, non-energizing; bit 0 TRACK_POWER_ENABLE stayed 0). Source (`amp_adapter.c`, `General.h`) confirms GROUP_READY never energizes, but the PV02B authorization text said "No HR23 track-power write". Future physical authorizations must identify the allowed HR23 values precisely.
+- **Shutdown:** WPF session ended normally (runtime loop stopped, UDP ports released, no process). Physical output state after shutdown was NOT independently remeasured.
+
+## English-only C#/WPF language standard (2026-11-11, PO permanent rule)
+
+- Authored in `AGENTS.md` §"Language standard (C# and WPF)"; referenced from `project-lead.md`/`developer.md`/`integrator.md`/`architect.md`/`designer.md`. Developer writes English-only; Integrator verifies; Dutch only for PO/reports.
+- Knowledge Foundation entry `decision:english-only-csharp-wpf` (PROVEN_SOURCE) — seed added, `build_graph.py` rebuilt, 63/63 knowledge tests pass, MCP readback verified (231 nodes / 171 rels).
+- **Existing Dutch content (bounded inventory, NOT translated):** WPF user-visible + logging in `SiebwaldeInitPage.xaml` (2 buttons "Trackspanning inschakelen/uitschakelen") and `SiebwaldeInitPageViewModel.cs` (~10 strings: stage names, dialogs, `Log(...)` messages). Dutch comments in `TrackAmplifierPage.xaml` (2), `TrackCommClientAsync.cs` (2), `SimpleEcosBackend.cs` (1), `TrackSimulatorBackend.cs` (5), `EcosEmulatorServer.cs` (1). PRESERVED (external contract, not Siebwalde-authored): `"Route onbekend"` in `Koploper5700ParserTests.cs` + `KoploperExternalInfoClient.cs`. Cleanup via a separate increment, prioritized: WPF UI text → logging → error messages → comments.
+

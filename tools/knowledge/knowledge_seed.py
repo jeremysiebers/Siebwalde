@@ -980,6 +980,17 @@ NODES: list[tuple[str, dict]] = [
         "source_path": "docs/PICO-5B-PHYSICAL-SESSION-PREFLIGHT.md",
         "source_location": "1", "source_revision": "1f89c0b", "evidence_status": "SOURCE_REF",
     }),
+    ("Decision", {
+        "id": "decision:english-only-csharp-wpf", "label": "English-only C# and WPF coding standard (PO)",
+        "decision": "All C# source code, identifiers, inline comments, XML docs, WPF XAML and user-facing UI text (labels, buttons, dialogs, tooltips), runtime diagnostic logging, exception messages, and unit/integration test content must be written in English. Dutch remains permitted for Product Owner conversations and agent reports only. The Developer writes English-only C#/WPF content; the Integrator verifies English compliance during review. Protocol identifiers, external interface contracts, proper names, persisted configuration values, and compatibility-sensitive strings are preserved unless an explicit PO change is approved.",
+        "decided_by": "Product Owner", "date": "2026-11-11",
+        "status": "PROVEN_SOURCE",
+        "summary": "Permanent PO coding standard: English-only for all C# code, WPF UI text, logging and errors; Dutch only for PO/report communication.",
+        "source_path": "AGENTS.md",
+        "source_location": "Language standard (C# and WPF)",
+        "source_revision": "unknown",
+        "evidence_status": "SOURCE_REF",
+    }),
 
     # ==================================================================
     # EvidenceSource
