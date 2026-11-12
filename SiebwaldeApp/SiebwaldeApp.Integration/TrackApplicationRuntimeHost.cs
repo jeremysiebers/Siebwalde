@@ -62,7 +62,7 @@ namespace SiebwaldeApp.Integration
         private readonly TimeSpan _neutralObserveWindow;
         private readonly SemaphoreSlim _gate = new(1, 1);
 
-        private CancellationTokenSource? _cts;
+        private volatile CancellationTokenSource? _cts;
         private TrackRuntimeState _state = TrackRuntimeState.Stopped;
         private TrackControlMode? _requestedMode;
         private LayoutProfile? _activeFullSimulationProfile;
@@ -668,6 +668,23 @@ namespace SiebwaldeApp.Integration
         /// <inheritdoc />
         public async Task StopAsync(CancellationToken ct = default)
         {
+            // A blocked initialization (for example a step whose controller acknowledgement never
+            // arrives) holds the lifecycle gate. Cancel the pending init BEFORE acquiring the gate,
+            // but ONLY while the runtime is still Starting: an already-Running runtime must keep its
+            // CTS alive so the normal teardown can still command and observe neutral first.
+            // Idempotent and safe when _cts is null (not started) or already torn down.
+            if (_state == TrackRuntimeState.Starting)
+            {
+                try
+                {
+                    _cts?.Cancel();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Already disposed by a concurrent teardown; nothing left to cancel.
+                }
+            }
+
             await _gate.WaitAsync(ct).ConfigureAwait(false);
             try
             {
