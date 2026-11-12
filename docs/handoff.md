@@ -1,5 +1,15 @@
 # Handoff
 
+## PV04 physical init + P0 hang fix + PIC32 command-106 root cause (2026-11-12) — P0 PR (published, see below)
+
+Branch `integration/inc0-1-2-recovery-heartbeat`. PO GO: publish the C# P0 integration PR + commit the PIC32 command-106 reproduction test. No firmware flash/change, no live hardware, no REARM, no Stage-6 track power.
+
+**Corrected PV04 evidence (PHYSICAL_HARDWARE vs OFFLINE_FAULT_INJECTION):** the prior "PV04 hung at command 106" attribution was WRONG. The physical 12-11 log (`Logging/12-11-2026_TrackAppLog.txt`) shows command 106 received its DONE ack on every send; Stage 4 (`ConfigureValidate`) PASSED and Stage 5 (`GlobalReady`) PASSED, reaching `StoppedAtGlobalReady` at `00:04:56.301`. The 106-with-no-DONE observations came from the OFFLINE fault-injection test (`TrackApplicationRuntimeHostStopReliabilityTests`, a `DeterministicTrackTransport` wrapper that deliberately drops 106). Captured registers (amp 1): `HR7=0xF101 HR11=0x0E39 HR21=0x0100 HR22=0x0002` (first two cycles `HR22=0x0000` → "incompatible protocol version", third `0x0002` → configured; the `0x0000`→`0x0002` readback inconsistency remains not-yet-determined). Single run — no repeated-reliability claim.
+
+**PIC32 command-106 root cause (source-proven; correct safety behaviour, NOT a defect):** command 106 is dispatched unconditionally (`controller.c:358-361` → `SETxMBUSxSTATE(MBUS_STATE_START_DATA_UPLOAD)`). On the next superloop iteration `MBUS_Tasks` runs the latch gate FIRST (`mbus.c:209-215`): if `ISxGLOBALxSTOPxLATCHED()`, it overwrites the state to `MBUS_STATE_SERVICE_TASKS`, so `case MBUS_STATE_START_DATA_UPLOAD` (which emits the DONE ack) never runs — the accepted 106 is silently discarded. Reproduced in `TrackController5/firmware/src/tests/test_mbus_106_latch.py` (extracts production `MBUS_Tasks` + `ISxGLOBALxSTOPxLATCHED` unchanged; 5 scenarios A–E PASS). Scenario D reconciles the semantics: a pending 106 overwritten by SERVICE_TASKS is LOST — it does NOT resume when the latch clears (SERVICE_TASKS has no transition back); only a NEWLY-issued 106 (fresh dispatch after re-arm) reaches `MBUS_STATE_START_DATA_UPLOAD` and emits DONE. The global-stop interlock must keep preempting MBUS commands; the C# fail-closed timeout (bounded 5 s) is the correct host-side handling.
+
+**C# P0 fix:** `DataUploadStep` bounded 5 s timeout (fail-closed, no late-DONE resume); `StopAsync` cancels the pending init BEFORE acquiring the lifecycle gate (only while `Starting`); `_cts` and `_state` `volatile`. Tests `DataUploadStepTests` + `TrackApplicationRuntimeHostStopReliabilityTests`. R1 PASS.
+
 ## Ovaaltje2 readiness (2026-10-28/29) — MERGED (PR #64, merge `1e266497`); physical validation PENDING
 
 Branch `feat/ovaaltje2-readiness` (base master `185cd10b`), commits `dd7afa57` (recovery UI surface) + `14159dd5` (consistency fix) + `d8212031` (docs), PR **#64** merged into `master` as `1e266497141c32c694b8ae78aa54e2ebc6e61075` (PO Addendum 01 merge GO, CI green). Objective: restore the normal WPF application startup + operator-controlled global-stop recovery for Ovaaltje2.
