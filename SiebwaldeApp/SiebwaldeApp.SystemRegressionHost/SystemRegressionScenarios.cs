@@ -152,8 +152,12 @@ namespace SiebwaldeApp.SystemRegressionHost
                 result.TrackPowerOn = runtime.TrackPowerOn;
                 result.Stages = SnapshotStages(runtime);
 
-                // Command prefix: the production init sequence.
-                var prefix = sim.SentCommands.Take(ExpectedInitPrefix.Length).ToArray();
+                // Command prefix: the production init sequence, excluding the periodic HOST_HEARTBEAT
+                // (110) background cadence (wall-clock dependent, not part of the init sequence).
+                var prefix = sim.SentCommands
+                    .Where(c => c != TrackCommand.HOST_HEARTBEAT)
+                    .Take(ExpectedInitPrefix.Length)
+                    .ToArray();
                 result.Check("command-prefix",
                     prefix.SequenceEqual(ExpectedInitPrefix),
                     $"sent={string.Join(",", prefix)} expected={string.Join(",", ExpectedInitPrefix)}");
