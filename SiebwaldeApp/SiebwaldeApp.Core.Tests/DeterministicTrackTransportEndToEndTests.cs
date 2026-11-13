@@ -83,6 +83,11 @@ namespace SiebwaldeApp.Core.Tests
 
         private static readonly byte[] ExpectedInitCommands = { 250, 113, 111, 107, 100, 106, 101, 104, 105 };
 
+        /// <summary>Filters the periodic HOST_HEARTBEAT (110) background command, whose wall-clock
+        /// cadence is not part of the deterministic init command sequence being asserted.</summary>
+        private static byte[] WithoutHeartbeat(IEnumerable<byte> commands) =>
+            commands.Where(c => c != TrackCommand.HOST_HEARTBEAT).ToArray();
+
         private static async Task RunWithRuntimeAsync(
             SimulatorFactory factory,
             Func<TrackApplicationRuntimeHost, CancellationToken, Task> testBody,
@@ -194,7 +199,7 @@ namespace SiebwaldeApp.Core.Tests
                 // neutral (108) writes for the configured domain.
                 Assert.Equal(
                     ExpectedInitCommands,
-                    simulator.SentCommands.Take(ExpectedInitCommands.Length).ToArray());
+                    WithoutHeartbeat(simulator.SentCommands).Take(ExpectedInitCommands.Length).ToArray());
 
                 for (int slave = 1; slave <= 3; slave++)
                 {
@@ -337,7 +342,7 @@ namespace SiebwaldeApp.Core.Tests
                 Assert.NotSame(first, second);
 
                 // Fresh simulator and a deterministic re-run of the same init sequence.
-                Assert.Equal(firstCommands, second.SentCommands.ToArray());
+                Assert.Equal(WithoutHeartbeat(firstCommands), WithoutHeartbeat(second.SentCommands));
 
                 // Give the 10 Hz write loop a few ticks: a stale PendingWrites entry from the first
                 // run must not produce an EXEC_MBUS_SLAVE_DATA_EXCH (108) in the fresh runtime.
@@ -404,7 +409,7 @@ namespace SiebwaldeApp.Core.Tests
                 Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
 
                 var second = factory.Created[1];
-                Assert.Equal(firstCommands, second.SentCommands.ToArray());
+                Assert.Equal(WithoutHeartbeat(firstCommands), WithoutHeartbeat(second.SentCommands));
                 for (byte slave = 1; slave <= 3; slave++)
                 {
                     Assert.Equal(firstRegisters[slave], second.GetRegisters(slave));

@@ -24,7 +24,23 @@ namespace SiebwaldeApp.Core
         private ushort _sequence;
         private bool _stopWasLatched;
         private bool _linkEstablished;
+        private bool _heartbeatActive;
         public byte? LastObservedPic32Status { get; private set; }
+
+        /// <summary>Called after the validated controller session is established (250 connect + 113
+        /// version + 111/112 global-stop precondition), before the full initialization completes.
+        /// Enables HOST_HEARTBEAT transmission so host authority is renewed throughout stages 1-5
+        /// (including MBUS 107/100/106), but deliberately does NOT enable the Pic32Lost receive-
+        /// freshness watch (that stays gated behind <see cref="EstablishLink"/>), so the init's
+        /// legitimate gaps (reset / slave-detect before the first SLAVEINFO readback) are never
+        /// misread as a dead link. Idempotent; never un-latches a latched controller.</summary>
+        public void EnableHeartbeat()
+        {
+            lock (_stop.SyncRoot)
+            {
+                _heartbeatActive = true;
+            }
+        }
 
         /// <summary>Called after full-chain startup/connection succeeds, never merely on object creation.
         /// A new transport session must establish its own link, regardless of retained latch state.</summary>
@@ -32,6 +48,7 @@ namespace SiebwaldeApp.Core
         {
             lock (_stop.SyncRoot)
             {
+                _heartbeatActive = true;
                 if (_linkEstablished) return;
                 _linkEstablished = true;
                 _lastStatus = now; // receive-loss grace starts at link establishment
@@ -94,7 +111,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _stopWasLatched = false;
-                    if (_linkEstablished &&
+                    if (_heartbeatActive &&
                         (_lastHeartbeat is null || now - _lastHeartbeat >= HeartbeatInterval))
                     {
                         _lastHeartbeat = now;
