@@ -866,6 +866,16 @@ namespace SiebwaldeApp.Integration
 
             _trackInitStateMachine.StageStatusChanged += (_, e) =>
             {
+                // Establish the host-authority heartbeat as soon as the controller session is
+                // validated (250 connect + 113 version + 111/112 global-stop precondition), NOT after
+                // Stage 5. The Pic32Lost receive-freshness watch stays gated behind EstablishLink
+                // (Running), so the init's legitimate gaps are never misread as a dead link.
+                if (e.Status.Stage == TrackInitStage.ControllerConnection &&
+                    e.Status.State == TrackInitStageState.Passed)
+                {
+                    _globalStopMonitor?.EnableHeartbeat();
+                }
+
                 InitStageStatusChanged?.Invoke(this, e);
             };
 
