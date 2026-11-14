@@ -13,8 +13,9 @@
 ## 0. Pre-session process/session/port ownership (before any hardware)
 
 - [ ] No `SiebwaldeApp` process running (`Get-Process SiebwaldeApp` empty).
-- [ ] No orphan heartbeat/session: ports **10000** and **10001** free (`Get-NetTCPConnection`).
-- [ ] No competing UDP controller client (no other C# app / Python tooling).
+- [ ] No competing C# client: the **local** C# client UDP endpoint (**10001**) is free — `Get-NetUDPEndpoint -LocalPort 10001` empty. (The TrackController protocol is **UDP**, not TCP.)
+- [ ] Remote PIC32 UDP server **10000** is at `192.168.1.193:10000` (verified via ping + the 113 version probe, not a local host endpoint).
+- [ ] No competing UDP controller client (no other C# app / Python tooling holding the PIC32).
 - [ ] Fresh WPF process from the merged master build (includes PR #76 `EnableHeartbeat`).
 
 ## 1. Physical safety preflight (operator confirms fresh, per start)
