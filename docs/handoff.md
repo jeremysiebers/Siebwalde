@@ -1,6 +1,16 @@
 # Handoff
 
-## PV04 physical init + P0 hang fix + PIC32 command-106 root cause (2026-11-12) — P0 PR (published, see below)
+## PV05 heartbeat-lifecycle root cause + P0 fix (2026-11-13) — PR #76 MERGED (`92301e80`)
+
+Branch `fix/p0-heartbeat-lifecycle`. PO GO: merge the heartbeat-lifecycle correction + prepare PV06. No firmware/watchdog change, no live hardware.
+
+**PV05 root cause (PHYSICAL_HARDWARE, 2026-11-13):** the init started with the PIC32 LATCHED (Pic32HostLoss). After operator REARM (112) at `10:47:58:091`, the init ran 107→100→106, but 106 was sent at `10:48:00:079` — **1988 ms after REARM** — and timed out at `10:48:05:132`. Source-proven mechanism: `GlobalStopMonitor.EstablishLink` was only called after "Running" (post Stage 5), so NO HOST_HEARTBEAT (110) was transmitted during the init; the PIC32's 2000 ms host-authority watchdog re-latched ~12 ms after 106 was sent, and the `mbus.c` latch gate suppressed the 106 DONE (global-stop preemption). `StartCleanup` failed-closed ("neutral not observed") because the init failed before amplifier configuration — expected, not a regression. Physical output state after PV05 was NOT independently verified.
+
+**Fix (C# only):** `GlobalStopMonitor.EnableHeartbeat()` enables heartbeat eligibility at the validated controller-session boundary (250+113+111/112), decoupled from the Pic32Lost receive-freshness watch (still gated by `EstablishLink` until Running); `TrackApplicationRuntimeHost` calls it when `ControllerConnection` passes. Heartbeat 110 never un-latches a latched controller (REARM stays operator-gated). Tests `GlobalStopHeartbeatLifecycleTests` + `TrackApplicationRuntimeHostHeartbeatTests` (110 precedes 106 on the wire); `DeterministicTrackTransportEndToEndTests` + `SystemRegressionScenarios` filter the periodic 110 from init-prefix assertions. Integrator R1 PASS; full suite 1218/1219 (one pre-existing flake); SystemRegressionHost A–F PASS; hosted CI pass.
+
+**PV05 process condition:** the previously-noted `SiebwaldeApp` process (PID 12656) and track ports 10000/10001 were re-verified clear (no process, no port binding) on 2026-11-13 — no orphan heartbeat/session remains. Re-verify before the next physical session.
+
+**PV05 physical init + P0 hang fix + PIC32 command-106 root cause (2026-11-12) — P0 PR (published, see below)**
 
 Branch `integration/inc0-1-2-recovery-heartbeat`. PO GO: publish the C# P0 integration PR + commit the PIC32 command-106 reproduction test. No firmware flash/change, no live hardware, no REARM, no Stage-6 track power.
 
