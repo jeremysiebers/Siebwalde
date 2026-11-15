@@ -68,7 +68,8 @@ void *memset(void *p, int value, unsigned long long size) {
 #define CTRL_PROTOCOL_VERSION 0x01u
 #define CTRL_RELEASE_TIMESTAMP "2026-11-04"
 enum { MBUS_EV_ENQUEUE = 1, MBUS_EV_GATE_DROP = 2, MBUS_EV_FC16_SENT = 3,
-       MBUS_EV_PURGE = 4, MBUS_EV_TX_DONE = 5, MBUS_EV_ACK = 6, MBUS_EV_TIMEOUT = 7 };
+       MBUS_EV_PURGE = 4, MBUS_EV_TX_DONE = 5, MBUS_EV_ACK = 6, MBUS_EV_TIMEOUT = 7,
+       MBUS_EV_EXCEPTION = 8 };
 void MBUS_EVENT_PUSH(uint8_t type, uint8_t slave, uint8_t reg, uint16_t val, uint8_t rv) {
     (void)type; (void)slave; (void)reg; (void)val; (void)rv;
 }
@@ -333,6 +334,106 @@ session_code += "".join(function(ethernet, name) for name in [
 session_code += function(controller, "CONTROLLER_Tasks")
 session_code += "\n#pragma warning(pop)\n" + (SRC / "tests/session_cases.h").read_text()
 
+# ---- PV07-C exception-parsing harness: real CheckPetitModbusBufferComplete /
+#      Petit_RxRTU / PROCESSxPETITxMODBUS and the exception readback handler, with
+#      a recording MBUS_EVENT_PUSH sink and a reference Modbus CRC-16. No hardware. ----
+exception_prefix = r'''
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned int uint32_t;
+typedef signed int int32_t;
+typedef unsigned char bool;
+#define true 1
+#define false 0
+#define TRUE 1
+#define FALSE 0
+#define UINT32_MAX 0xffffffffu
+__declspec(dllimport) void __stdcall ExitProcess(unsigned int code);
+__declspec(dllimport) void * __stdcall GetStdHandle(unsigned int handle);
+__declspec(dllimport) int __stdcall WriteFile(void *, const void *, unsigned int,
+                                           unsigned int *, void *);
+static void puts(const char *s) {
+    unsigned int n=0, written;
+    while(s[n]) ++n;
+    WriteFile(GetStdHandle((unsigned int)-11),s,n,&written,0);
+}
+#define assert(expr) do { if (!(expr)) { puts("FAIL: " #expr "\n"); ExitProcess(1); } } while(0)
+void *memset(void *p, int value, unsigned long long size) {
+    unsigned char *bytes=p;
+    while(size--) *bytes++=(unsigned char)value;
+    return p;
+}
+#include "enums.h"
+/* Mirrors of version.h and mbus_event.h. */
+#define CTRL_FW_MAJOR 1u
+#define CTRL_FW_MINOR 0u
+#define CTRL_FW_PATCH 2u
+#define CTRL_PROTOCOL_VERSION 0x01u
+#define CTRL_RELEASE_TIMESTAMP "2026-11-04"
+enum { MBUS_EV_ENQUEUE = 1, MBUS_EV_GATE_DROP = 2, MBUS_EV_FC16_SENT = 3,
+       MBUS_EV_PURGE = 4, MBUS_EV_TX_DONE = 5, MBUS_EV_ACK = 6, MBUS_EV_TIMEOUT = 7,
+       MBUS_EV_EXCEPTION = 8 };
+/* CheckPetitModbusBufferComplete return codes (mirror PetitModbus.c). */
+#define PETIT_FALSE_FUNCTION    0
+#define PETIT_FALSE_SLAVE_ADDRESS 1
+#define PETIT_DATA_NOT_READY    2
+#define PETIT_DATA_READY        3
+'''
+exception_prefix += re.sub(r"^#include.*$", "", (SRC / "modbus/PetitModbus.h").read_text(), flags=re.M)
+exception_prefix += petit[petit.index("typedef enum"):petit.index("/****************End of Slave Transmit")]
+exception_prefix += r'''
+#define PETITMODBUS_BROADCAST_ADDRESS 0
+static SLAVE_INFO *MASTER_SLAVE_DATA, *DUMP_SLAVE_DATA;
+static unsigned char SlaveAmount;
+static struct { unsigned ModbusCharacterTimeoutHandle; unsigned ModbusReceiveTimeoutHandle; } mbusData;
+volatile unsigned char PetitReceiveBuffer[PETITMODBUS_RECEIVE_BUFFER_SIZE];
+volatile unsigned char PetitReceiveCounter;
+
+/* Reference Modbus CRC-16 (reflected, poly 0xA001, seed 0xFFFF): bit-equivalent
+ * to the production lookup-table Petit_CRC16. Used only to seed valid/invalid
+ * test frames; the production CRC algorithm is unchanged and not under test. */
+void Petit_CRC16(const unsigned char Data, unsigned int* CRC) {
+    unsigned int i;
+    *CRC = *CRC ^ (unsigned int)Data;
+    for (i = 8; i > 0; i--) {
+        if (*CRC & 0x0001u) *CRC = (*CRC >> 1) ^ 0xA001u;
+        else *CRC >>= 1;
+    }
+}
+/* Production applies CRC_HW_REVERSE only to compensate its hardware-CRC unit; a
+ * software reference CRC needs no reversal, so identity keeps frame CRCs
+ * self-consistent. The reverse step itself is not what is under test. */
+uint16_t CRC_ReverseValue(uint16_t crc) { return crc; }
+
+void DRV_TMR_Stop(unsigned h) { (void)h; }
+void DRV_TMR_CounterClear(unsigned h) { (void)h; }
+void DRV_TMR_Start(unsigned h) { (void)h; }
+
+/* TX entry point referenced by PROCESSxPETITxMODBUS; the exception tests stage
+ * the outstanding request directly and never enter the TX state machine. */
+void Petit_TxRTU(void) { assert(false); }
+
+/* Recording MBUS event sink. */
+typedef struct { uint8_t type; uint8_t slave; uint8_t reg; uint8_t rv; uint16_t val; } EV_REC;
+static EV_REC evs[64]; static unsigned evn;
+void MBUS_EVENT_PUSH(uint8_t type, uint8_t slave, uint8_t reg, uint16_t val, uint8_t rv) {
+    if (evn < 64) {
+        evs[evn].type = type; evs[evn].slave = slave; evs[evn].reg = reg;
+        evs[evn].rv = rv; evs[evn].val = val; ++evn;
+    }
+}
+static void ev_clear(void) { evn = 0; }
+'''
+exception_code = exception_prefix + "\n#pragma warning(push)\n#pragma warning(disable:4018 4244 4100 4101 4189 4267 4459)\n"
+exception_code += "".join(function(petit, name) for name in [
+    "Petit_RxDataAvailable", "Petit_CheckRxTimeout", "CheckPetitModbusBufferComplete",
+    "Petit_RxRTU", "PROCESSxPETITxMODBUS",
+    "HandleMPetitodbusMbExceptionCodesSlaveReadback",
+    "HandleMPetitodbusWriteMultipleRegistersSlaveReadback",
+    "HandlePetitModbusReadHoldingRegistersSlaveReadback",
+    "HandlePetitModbusWriteSingleRegisterSlaveReadback"])
+exception_code += "\n#pragma warning(pop)\n" + (SRC / "tests/exception_cases.h").read_text()
+
 vswhere = Path(os.environ["ProgramFiles(x86)"]) / "Microsoft Visual Studio/Installer/vswhere.exe"
 compiler = subprocess.check_output([str(vswhere), "-latest", "-products", "*", "-find",
     r"VC\Tools\MSVC\**\bin\Hostx64\x64\cl.exe"], text=True).strip().splitlines()[-1]
@@ -359,3 +460,9 @@ with tempfile.TemporaryDirectory(prefix="pic32-phase1-", dir=base) as directory:
                     "/subsystem:console", "/nodefaultlib", "kernel32.lib"],
                    cwd=tmp, env=env, check=True)
     subprocess.run([str(tmp / "session.exe")], cwd=tmp, check=True)
+    (tmp / "exception.c").write_text(exception_code)
+    subprocess.run([compiler, "/nologo", "/W4", "/WX", "/GS-", f"/I{SRC}",
+                    "exception.c", "/Fe:exception.exe", "/link", "/entry:main",
+                    "/subsystem:console", "/nodefaultlib", "kernel32.lib"],
+                   cwd=tmp, env=env, check=True)
+    subprocess.run([str(tmp / "exception.exe")], cwd=tmp, check=True)
