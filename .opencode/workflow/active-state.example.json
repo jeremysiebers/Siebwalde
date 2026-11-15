@@ -37,5 +37,9 @@
   "blockers": [],
   "working_tree_state": "clean",
   "next_safe_action": "<one bounded next action>",
+  "stagnation": {
+    "nonproductive_cycles": 0,
+    "strategy_review_required": false
+  },
   "references": []
 }
