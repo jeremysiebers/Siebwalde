@@ -58,6 +58,11 @@ namespace SiebwaldeApp.Core.Tests
                 DiagnosticMode = diagnosticMode
             };
 
+        // Periodic SLAVEINFO is kept enabled (matching the real PIC32's cyclic upload) so the
+        // amplifier cache stays fresh during the init and the Stage-4 config readback has a
+        // continuous data source. The torn-read race in LastDataReceivedUtc is fixed at the source
+        // (TrackAmplifierItem uses an atomic Volatile.Read/Write backing field), so the periodic
+        // timer no longer causes spurious "compatibility changed" failures.
         private static DeterministicTrackTransport CreateTransport(
             IReadOnlyCollection<byte>? groupReadyRejectSlaves = null)
             => new(new TrackSimulatorConfig(
