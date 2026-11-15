@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using SiebwaldeApp.Core;
 using SiebwaldeApp.Core.Koploper;
 using Xunit;
@@ -260,6 +261,74 @@ namespace SiebwaldeApp.Core.Tests
 
             Assert.True(TrackAmplifierDataFreshness.IsFresh(
                 Amplifier(3, false, receivedAt: atLimit), Now, TimeSpan.FromSeconds(2)));
+        }
+
+        [Fact]
+        public void FreshnessPolicy_ResampleRejectsGenuinelyFutureTimestamp()
+        {
+            // A received timestamp genuinely ahead of the real current clock must still be
+            // rejected: the re-sample only closes a sub-tick read-order race, it does not
+            // accept a clock that genuinely moved backwards.
+            var now = DateTimeOffset.UtcNow;
+            var received = now + TimeSpan.FromMinutes(5);
+
+            Assert.False(TrackAmplifierDataFreshness.IsFresh(
+                Amplifier(3, false, receivedAt: received), now, TimeSpan.FromSeconds(2)));
+        }
+
+        [Fact]
+        public void FreshnessPolicy_ResampleAcceptsSubMicrosecondAheadTimestamp()
+        {
+            // A stamp only a few ticks ahead of the caller's `now` (the read-order race, sub-µs)
+            // is genuinely fresh, not a backward clock: it must be accepted after the re-sample.
+            var now = DateTimeOffset.UtcNow;
+            var received = now + TimeSpan.FromTicks(1);
+
+            Assert.True(TrackAmplifierDataFreshness.IsFresh(
+                Amplifier(3, false, receivedAt: received), now, TimeSpan.FromSeconds(2)));
+        }
+
+        [Fact]
+        public void FreshnessPolicy_ConcurrentStamper_ReadOrderRace_IsAlwaysFresh()
+        {
+            // Deterministically reproduces the read-order TOCTOU behind the residual
+            // Stage4DiagnosticPauseTests flake: a stamper thread re-stamps
+            // LastDataReceivedUtc continuously while a checker samples `now` FIRST, then reads
+            // the stamp via IsFresh — exactly the real caller order. A stamp landing in that
+            // window makes a genuinely-fresh stamp a few ticks ahead of the checker's `now`, so
+            // the un-fixed guard spuriously reports stale. The re-sample closes the race.
+            var amplifier = new TrackAmplifierItem { SlaveNumber = 3 };
+            amplifier.LastDataReceivedUtc = DateTimeOffset.UtcNow; // pre-stamp so the first read is fresh
+
+            bool stop = false;
+            var stamper = new Thread(() =>
+            {
+                while (!Volatile.Read(ref stop))
+                {
+                    amplifier.LastDataReceivedUtc = DateTimeOffset.UtcNow;
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "freshness-stamper"
+            };
+            stamper.Start();
+
+            try
+            {
+                for (int i = 0; i < 100_000; i++)
+                {
+                    var now = DateTimeOffset.UtcNow; // sample `now` FIRST, matching the real caller
+                    Assert.True(
+                        TrackAmplifierDataFreshness.IsFresh(amplifier, now, TimeSpan.FromSeconds(2)),
+                        "A freshly-stamped amplifier must never read as stale (read-order TOCTOU).");
+                }
+            }
+            finally
+            {
+                Volatile.Write(ref stop, true);
+                stamper.Join();
+            }
         }
 
         [Fact]

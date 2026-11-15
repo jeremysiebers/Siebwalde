@@ -36,6 +36,16 @@ namespace SiebwaldeApp.Core
                 return false;
             }
 
+            // Read-order TOCTOU: callers sample `now` before this method reads `received`,
+            // so a comm-client stamp landing in that window makes a genuinely-fresh
+            // `received` appear a few ticks ahead of `now`. Re-sample `now` after
+            // `received` to close the race; a genuinely future timestamp (a real backward
+            // clock step) still yields age < 0 and is rejected below (fail-closed).
+            if (now < received)
+            {
+                now = DateTimeOffset.UtcNow;
+            }
+
             var age = now - received;
 
             // A clock that moved backwards must not make old data look fresh.
