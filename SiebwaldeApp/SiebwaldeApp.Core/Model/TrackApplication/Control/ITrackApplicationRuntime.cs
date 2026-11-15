@@ -212,5 +212,53 @@ namespace SiebwaldeApp.Core
             IReadOnlyCollection<byte> targetAmps,
             string expectedSha256Hex,
             CancellationToken ct = default);
+
+        /// <summary>
+        /// The active diagnostic instrumentation mode. <see cref="TrackInitDiagnosticMode.None"/>
+        /// (production default) leaves the initialization sequence unchanged;
+        /// <see cref="TrackInitDiagnosticMode.PauseAfterStage4"/> inserts an operator gate after
+        /// Stage 4 (configure/validate) before Stage 5 (GROUP_READY). Set while the runtime is
+        /// stopped, before <see cref="StartAsync"/>.
+        /// </summary>
+        TrackInitDiagnosticMode DiagnosticMode { get; set; }
+
+        /// <summary>
+        /// True while the Variant-A diagnostic pause is active: Stage 4 has passed (every required
+        /// amplifier STANDBY), GROUP_READY has NOT been issued, and the heartbeat monitor keeps
+        /// running. The pause is an await on the live runtime cancellation token — never a blocking
+        /// call and never a cancellation of that token by the pause itself.
+        /// </summary>
+        bool IsPausedAtStage4 { get; }
+
+        /// <summary>
+        /// Explicit operator action that ends the Stage-4 diagnostic pause and resumes the normal
+        /// Stage 5 (domain-wide GROUP_READY). A no-op when the runtime is not paused. This is the
+        /// "diagnostic-termination" path, distinct from an operator stop (cancel) and from a real
+        /// init failure.
+        /// </summary>
+        void ResumeStage4Pause();
+
+        /// <summary>
+        /// Read-only diagnostic read of a single amplifier (HR1 control/lease, HR8 state, HR9 fault,
+        /// HR22 protocol) via the existing 108 read + SLAVEINFO cache. No second Modbus master, no
+        /// competing UDP session, no backdoor. The returned reading carries an explicit
+        /// FRESH / CACHED / STALE / UNKNOWN label; only a FRESH reading may be treated as live PIC18
+        /// state. Never presents a stale cache value as the live state.
+        /// </summary>
+        Task<SingleAmplifierDiagnosticReading> ReadAmplifierDiagnosticsAsync(
+            byte slaveNumber,
+            CancellationToken ct = default);
+
+        /// <summary>
+        /// Typed single-amplifier GROUP_READY diagnostic operation: writes HR_TRACK_POWER bit 1 to
+        /// exactly one target amplifier and observes its HR_STATE. Exactly ONE transaction per
+        /// authorization, no auto retry, no generic register-write console, no direct HR23 write
+        /// outside the runtime owner, and no config/lease guard bypass. The control layer (this
+        /// runtime) enforces the gate: the operation is refused unless the runtime is paused at
+        /// Stage 4 and the target is a valid, in-domain track amplifier. GROUP_READY never energizes.
+        /// </summary>
+        Task<SingleAmplifierGroupReadyResult> IssueSingleGroupReadyAsync(
+            byte targetAmp,
+            CancellationToken ct = default);
     }
 }

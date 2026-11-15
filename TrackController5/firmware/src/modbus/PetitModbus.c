@@ -301,7 +301,30 @@ unsigned char CheckPetitModbusBufferComplete(void)
             else if(PetitReceiveBuffer[1]==PETITMODBUS_READ_HOLDING_REGISTERS || PetitReceiveBuffer[1]==PETITMODBUS_READ_INPUT_REGISTERS || PetitReceiveBuffer[1]==PETITMODBUS_DIAGNOSTIC_REGISTERS)
             {
                 PetitExpectedReceiveCount=(PetitReceiveBuffer[2])+5;
-            }            
+            }
+            else if((PetitReceiveBuffer[1] & 0x80) != 0)
+            {
+                /* PV07-C: Modbus exception response (respFn = requestFn | 0x80).
+                 * Fixed 5-byte frame: [addr][respFn][exceptionCode][crc lo][crc hi].
+                 * Normalize to the request fn and accept ONLY the functions this
+                 * master can issue (3/4/6/8/16 -> 0x83/0x84/0x86/0x88/0x90); any
+                 * other high-bit fn is rejected exactly as before. Correlation with
+                 * the outstanding request happens in the readback handler, not here. */
+                unsigned char PetitReqFn = (unsigned char)(PetitReceiveBuffer[1] & 0x7Fu);
+                if (PetitReqFn == PETITMODBUS_READ_HOLDING_REGISTERS  ||
+                    PetitReqFn == PETITMODBUS_READ_INPUT_REGISTERS    ||
+                    PetitReqFn == PETITMODBUS_WRITE_SINGLE_REGISTER   ||
+                    PetitReqFn == PETITMODBUS_DIAGNOSTIC_REGISTERS    ||
+                    PetitReqFn == PETITMODBUS_WRITE_MULTIPLE_REGISTERS)
+                {
+                    PetitExpectedReceiveCount = 5;
+                }
+                else
+                {
+                    PetitReceiveCounter = 0;
+                    return PETIT_FALSE_FUNCTION;
+                }
+            }
             else
             {
                 PetitReceiveCounter=0;                
@@ -476,6 +499,11 @@ void PROCESSxPETITxMODBUS(void)
 
     if (Petit_RxDataAvailable())                                                // If data is ready after CRC check etc. then enter this!
     {        
+        /* Normal response functions 3/4/6/8/16 dispatch to their readback
+         * handlers. A Modbus exception response (fn | 0x80, e.g. 0x90) does not
+         * match any enabled case and therefore reaches the default handler
+         * HandleMPetitodbusMbExceptionCodesSlaveReadback(), which validates
+         * correlation before recording it (see PV07-C). */
         switch (Petit_Rx_Data.Function)
         {
             #ifdef PETITMODBUS_IN_USE_READ_HOLDING_REGISTERS
@@ -905,13 +933,65 @@ void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
 
 void HandleMPetitodbusMbExceptionCodesSlaveReadback(void)
 {
-    if (Petit_Rx_Data.Function > 0x80 && Petit_Rx_Data.Function < 0x8C){        // see modbus application_protocol document
-        MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbExceptionCode = Petit_Rx_Data.DataBuf[0];
-    }    
-    MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_EXCEPTION;
-    MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
-    
-    Petit_Tx_State =  PETIT_RXTX_IDLE;
+    unsigned char PetitRespFn   = Petit_Rx_Data.Function;                /* e.g. 0x90 */
+    unsigned char PetitReqFn    = (unsigned char)(PetitRespFn & 0x7Fu);  /* e.g. 0x10 */
+    unsigned char PetitExcCode  = Petit_Rx_Data.DataBuf[0];
+
+    /* PV07-C response-classification semantics (documentation only):
+     *   ACK       = correlated normal response received (NOT proof of READY)
+     *   EXCEPTION = correlated protocol rejection (PIC18 state judged separately)
+     *   GATE_DROP = master gated before dispatch
+     *   TIMEOUT   = no valid response in window (delivery NOT excluded)
+     *   PURGE     = transaction discarded
+     *   UNKNOWN   = insufficient/inconsistent evidence
+     * A TIMEOUT must never be claimed as "slave N did not receive".
+     *
+     * A correlated exception is recorded only when ALL of the following hold:
+     *   1. the response fn has bit 7 set (it is a genuine exception response);
+     *   2. the normalized request fn is one this master can issue (3/4/6/8/16);
+     *   3. the normalized request fn matches the CURRENT outstanding request fn;
+     *   4. the response slave address matches the outstanding request address;
+     *   5. the frame carried exactly one data byte (the exception code), i.e. the
+     *      fixed 5-byte [addr][fn][code][crc lo][crc hi] layout; and
+     *   6. the exception code is a standard Modbus exception code (0x01..0x0B).
+     * Anything else is uncorrelated/corrupt/unexpected and is dropped without any
+     * MbCommError change or event, exactly as every exception frame was dropped
+     * before this change. */
+    if (((PetitRespFn & 0x80u) != 0u)                                  &&
+        (PetitReqFn == PETITMODBUS_READ_HOLDING_REGISTERS  ||
+         PetitReqFn == PETITMODBUS_READ_INPUT_REGISTERS    ||
+         PetitReqFn == PETITMODBUS_WRITE_SINGLE_REGISTER   ||
+         PetitReqFn == PETITMODBUS_DIAGNOSTIC_REGISTERS    ||
+         PetitReqFn == PETITMODBUS_WRITE_MULTIPLE_REGISTERS)           &&
+        (PetitReqFn == Petit_Tx_Data.Function)                         &&
+        (Petit_Rx_Data.Address == Petit_Tx_Data.Address)               &&
+        (Petit_Rx_Data.DataLen == 1u)                                  &&
+        (PetitExcCode >= 0x01u && PetitExcCode <= 0x0Bu))
+    {
+        if (Petit_Rx_Data.Address > SlaveAmount)
+        {
+            DUMP_SLAVE_DATA[0].MbExceptionCode = PetitExcCode;
+            DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_EXCEPTION;
+            DUMP_SLAVE_DATA[0].MbReceiveCounter += 1;
+        }
+        else
+        {
+            MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbExceptionCode = PetitExcCode;
+            MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_EXCEPTION;
+            MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+        }
+
+        /* PV07-C instrumentation: a valid, correlated protocol rejection.
+         * Encoding (see mbus_event.h): slave=addr, reg=request fn, rv=resp fn,
+         * val=exception code. Reaches the PIC32 TCP log (port 50000), NOT UDP. */
+        MBUS_EVENT_PUSH(MBUS_EV_EXCEPTION, (uint8_t)Petit_Rx_Data.Address,
+                        PetitReqFn, (uint16_t)PetitExcCode, PetitRespFn);
+
+        Petit_Tx_State = PETIT_RXTX_IDLE;
+    }
+    /* else: uncorrelated/corrupt frame. The TX state was already idled by the
+     * receive path; no MbCommError change and no event means the frame is dropped
+     * and the outstanding transaction outcome is left unchanged (never fabricated). */
 }
 
 /******************************************************************************/

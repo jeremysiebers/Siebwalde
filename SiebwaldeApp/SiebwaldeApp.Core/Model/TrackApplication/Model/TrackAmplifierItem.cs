@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace SiebwaldeApp.Core
 {
@@ -24,6 +25,19 @@ namespace SiebwaldeApp.Core
         private ushort _mbExceptionCode;
         private uint _mbCommError;
         private ushort _mbSentCounter;
+
+        /// <summary>
+        /// Sentinel for "no frame received yet". A <see cref="DateTimeOffset"/> tick count is always
+        /// non-negative, so a negative sentinel cannot collide with any real timestamp.
+        /// </summary>
+        private const long NoDataTicks = long.MinValue;
+
+        /// <summary>
+        /// Monotonic <see cref="DateTimeOffset.UtcTicks"/> of the last parsed frame, stored as a
+        /// single 64-bit value so a concurrent reader can never observe a torn timestamp.
+        /// <see cref="NoDataTicks"/> represents "no frame received yet" (null).
+        /// </summary>
+        private long _lastDataReceivedUtcTicks = NoDataTicks;
 
         #endregion
 
@@ -55,8 +69,25 @@ namespace SiebwaldeApp.Core
         /// and <see cref="HoldingReg"/> are written once and are never cleared, and the comm
         /// client keeps republishing the cached container, so neither of those proves that the
         /// data is current.
+        ///
+        /// The value is backed by a single 64-bit tick count (<see cref="_lastDataReceivedUtcTicks"/>)
+        /// read and written with <see cref="Volatile.Read(ref long)"/>/<see cref="Volatile.Write(ref long, long)"/>
+        /// so a concurrent reader can never observe a torn <see cref="DateTimeOffset"/> (the comm-client
+        /// receive loop writes this value while the downloader/monitor read it without synchronization).
         /// </summary>
-        public DateTimeOffset? LastDataReceivedUtc { get; set; }
+        public DateTimeOffset? LastDataReceivedUtc
+        {
+            get
+            {
+                long ticks = Volatile.Read(ref _lastDataReceivedUtcTicks);
+                return ticks == NoDataTicks ? null : new DateTimeOffset(ticks, TimeSpan.Zero);
+            }
+            set
+            {
+                Volatile.Write(ref _lastDataReceivedUtcTicks,
+                    value is DateTimeOffset received ? received.UtcTicks : NoDataTicks);
+            }
+        }
 
         /// <summary>
         /// True only when the current <see cref="HoldingReg"/> content was populated by a genuine
