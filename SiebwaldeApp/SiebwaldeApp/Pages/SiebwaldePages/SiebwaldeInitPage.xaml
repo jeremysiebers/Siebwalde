@@ -477,6 +477,66 @@
                             Foreground="White" Content="Trackspanning uitschakelen" />
                 </Grid>
 
+                <!-- Stage-4 diagnostic instrumentation (PV07-C Work Package B). Read-only; the
+                     control-layer authorization for the single GROUP_READY is enforced in the
+                     runtime host, not here. -->
+                <CheckBox Margin="0 12 0 0"
+                          FontSize="{StaticResource FontSizeRegular}"
+                          Foreground="{StaticResource ForegroundLightBrush}"
+                          IsChecked="{Binding DiagnosticPauseMode}"
+                          Content="Pause after Stage 4 (diagnostic)" />
+
+                <TextBlock Margin="0 4 0 0"
+                           FontSize="{StaticResource FontSizeRegular}"
+                           TextWrapping="Wrap"
+                           Foreground="{StaticResource WordOrangeBrush}"
+                           Text="{Binding DiagnosticStatus, Mode=OneWay}" />
+
+                <Grid Margin="0 6 0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               MinWidth="170"
+                               FontSize="{StaticResource FontSizeRegular}"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Diagnostic amp"
+                             FontFamily="{StaticResource FontAwesome}" />
+                    </TextBlock>
+
+                    <TextBox Grid.Column="1"
+                             MinWidth="60"
+                             Height="30"
+                             VerticalAlignment="Center"
+                             Text="{Binding SelectedDiagnosticAmp, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <Button Grid.Column="2" MinWidth="120" Height="36" Padding="12 4"
+                            Margin="10 0 0 0" FontSize="{StaticResource FontSizeSmall}"
+                            Command="{Binding ReadDiagnostics}"
+                            Foreground="White" Content="Read diagnostics" />
+
+                    <Button Grid.Column="3" MinWidth="170" Height="36" Padding="12 4"
+                            Margin="10 0 0 0" FontSize="{StaticResource FontSizeSmall}"
+                            Command="{Binding IssueSingleGroupReady}"
+                            Foreground="White" Content="Single GROUP_READY" />
+                </Grid>
+
+                <Button HorizontalAlignment="Left" MinWidth="170" Height="36" Padding="12 4"
+                        Margin="0 6 0 0" FontSize="{StaticResource FontSizeSmall}"
+                        Command="{Binding ResumeStage4Pause}"
+                        Foreground="White" Content="Resume Stage 4 pause" />
+
+                <TextBlock Margin="0 4 0 0"
+                           FontSize="{StaticResource FontSizeRegular}"
+                           TextWrapping="Wrap"
+                           Foreground="{StaticResource ForegroundLightBrush}"
+                           Text="{Binding DiagnosticResult, Mode=OneWay}" />
+
             </StackPanel>
         </GroupBox>
 

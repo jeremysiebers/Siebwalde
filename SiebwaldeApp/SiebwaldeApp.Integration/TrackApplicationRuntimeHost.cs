@@ -107,6 +107,24 @@ namespace SiebwaldeApp.Integration
         private volatile bool _operatorRecoveryAuthorized;
         private Func<bool> _physicalStopInputsClear = () => false;
 
+        // Stage-4 diagnostic pause (Variant A). Default production init is unchanged: these fields
+        // are only meaningful while DiagnosticMode == PauseAfterStage4 and the runtime is paused.
+        private TrackInitDiagnosticMode _diagnosticMode = TrackInitDiagnosticMode.None;
+        private volatile TaskCompletionSource<Stage4PauseExit>? _stage4PauseGate;
+        private volatile bool _isPausedAtStage4;
+        private volatile bool _singleGroupReadyIssued;
+        private volatile bool _diagnosticPauseCancelled;
+
+        /// <summary>How the Stage-4 diagnostic pause exits.</summary>
+        private enum Stage4PauseExit
+        {
+            /// <summary>The operator explicitly resumed (normal Stage 5 follows).</summary>
+            Resumed,
+
+            /// <summary>A safety fault (global-stop latch / comm loss) aborted the pause (fail-closed).</summary>
+            AbortedByFault
+        }
+
         /// <inheritdoc />
         public event EventHandler<TrackRuntimeStatusChangedEventArgs>? StateChanged;
 
@@ -280,6 +298,16 @@ namespace SiebwaldeApp.Integration
 
         /// <inheritdoc />
         public InitializationStatus RunStatus => _trackInitStateMachine?.RunStatus ?? InitializationStatus.Idle;
+
+        /// <inheritdoc />
+        public TrackInitDiagnosticMode DiagnosticMode
+        {
+            get => _diagnosticMode;
+            set => _diagnosticMode = value;
+        }
+
+        /// <inheritdoc />
+        public bool IsPausedAtStage4 => _isPausedAtStage4;
 
         /// <inheritdoc />
         public void AuthorizeTrackPowerEnable() => _trackInitStateMachine?.AuthorizeTrackPowerEnable();
@@ -512,6 +540,7 @@ namespace SiebwaldeApp.Integration
                 }
 
                 TransitionTo(TrackRuntimeState.Starting);
+                _diagnosticPauseCancelled = false;
                 _requestedMode = mode;
 
                 // Link the caller's cancellation token into the runtime CTS so a cancelled start
@@ -565,6 +594,23 @@ namespace SiebwaldeApp.Integration
                             if (allReady)
                             {
                                 _trackInitStateMachine?.MarkStagePassed(TrackInitStage.ConfigureValidate);
+
+                                // Variant-A diagnostic pause: after Stage 4 (every amplifier
+                                // STANDBY, GROUP_READY not issued) and BEFORE Stage 5. Only active
+                                // when DiagnosticMode == PauseAfterStage4; production default
+                                // (None) skips this gate entirely. The pause is an await on the
+                                // live _cts (never a blocking call, never a _cts.Cancel()), so the
+                                // heartbeat monitor keeps running and a StopAsync / global-stop /
+                                // comm-loss / UI-close cancels it fail-closed.
+                                if (DiagnosticMode == TrackInitDiagnosticMode.PauseAfterStage4)
+                                {
+                                    var pauseExit = await AwaitStage4PauseExitAsync(_cts.Token).ConfigureAwait(false);
+                                    if (pauseExit == Stage4PauseExit.AbortedByFault)
+                                    {
+                                        throw new InvalidOperationException(
+                                            "Stage-4 diagnostic pause aborted: the global stop latched during the pause (fail-closed).");
+                                    }
+                                }
 
                                 // Stage 5: issue the C#-decided GROUP_READY transition and verify
                                 // every required amplifier accepted it. GROUP_READY never energizes.
@@ -702,6 +748,19 @@ namespace SiebwaldeApp.Integration
                 try
                 {
                     await StopTrackPartAsync(budget).ConfigureAwait(false);
+
+                    // A mid-pause operator stop (Stage-4 diagnostic pause) is fail-closed: neutral
+                    // could not be observed before the write loop started, so a clean Stopped claim
+                    // would be a false success. Preserve the Failed exit instead.
+                    if (_diagnosticPauseCancelled)
+                    {
+                        _diagnosticPauseCancelled = false;
+                        TransitionTo(
+                            TrackRuntimeState.Failed,
+                            "Stage-4 diagnostic pause cancelled by operator stop (fail-closed).");
+                        return;
+                    }
+
                     TransitionTo(TrackRuntimeState.Stopped);
                 }
                 catch (Exception ex)
@@ -1575,6 +1634,9 @@ namespace SiebwaldeApp.Integration
             _stopConfirmation = null;
             _trackCommClient = null;
             _trackInitStateMachine = null;
+            _isPausedAtStage4 = false;
+            _stage4PauseGate = null;
+            _singleGroupReadyIssued = false;
             _kis09PassiveConsumer = null;
             _kis09CarrierFeeder = null;
             _carrierTimingTrace = null;
@@ -1689,6 +1751,324 @@ namespace SiebwaldeApp.Integration
         public GlobalStopStateView GlobalStopState
             => new(GlobalStop.State, GlobalStop.Reason, _operatorRecoveryAuthorized && GlobalStop.IsLatched);
 
+        // ---------------------------------------------------------------------------------
+        // Stage-4 diagnostic pause + single-amplifier diagnostics (Variant A)
+        // ---------------------------------------------------------------------------------
+
+        /// <inheritdoc />
+        public void ResumeStage4Pause()
+        {
+            var gate = _stage4PauseGate;
+            if (gate is null || !_isPausedAtStage4)
+            {
+                return; // not paused: idempotent no-op.
+            }
+
+            LogDiagnostic("Stage-4 diagnostic pause ended by operator (diagnostic-termination); resuming Stage 5 (GROUP_READY).");
+            gate.TrySetResult(Stage4PauseExit.Resumed);
+        }
+
+        /// <inheritdoc />
+        public async Task<SingleAmplifierDiagnosticReading> ReadAmplifierDiagnosticsAsync(
+            byte slaveNumber,
+            CancellationToken ct = default)
+        {
+            if (_trackVariables is null || _trackCommClient is null ||
+                !TrackAmplifierAddress.IsTrackAmplifierAddress(slaveNumber) ||
+                slaveNumber >= _trackVariables.trackAmpItems.Count)
+            {
+                return new SingleAmplifierDiagnosticReading
+                {
+                    SlaveNumber = slaveNumber,
+                    Freshness = AmplifierRegisterFreshness.Unknown
+                };
+            }
+
+            var item = _trackVariables.trackAmpItems[slaveNumber];
+
+            try
+            {
+                // Issue a fresh targeted read of HR_STATE (the same 108 read the GroupReadyStep and
+                // RefreshReadbackAsync use). The comm client republishes the full SLAVEINFO frame, so
+                // HR1/HR8/HR9/HR22 are all refreshed from the single read. A dropped-echo or silent
+                // slave never advances the sequence, leaving the reading Cached/Stale/Unknown.
+                long sequenceBefore = item.ProtocolReadbackSequence;
+                await _trackCommClient.SendAsync(
+                    AmplifierConfigurationDownloader.Exchange(
+                        slaveNumber,
+                        TrackAmplifierRegisters.State,
+                        0,
+                        read: true),
+                    ct).ConfigureAwait(false);
+
+                var deadline = DateTimeOffset.UtcNow + TimeSpan.FromSeconds(2);
+                while (DateTimeOffset.UtcNow < deadline && !ct.IsCancellationRequested)
+                {
+                    if (item.ProtocolReadbackSequence > sequenceBefore)
+                    {
+                        break;
+                    }
+
+                    try
+                    {
+                        await Task.Delay(10, ct).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Cancellation is not an amplifier fault; fall through to the cached reading.
+            }
+            catch (Exception ex)
+            {
+                LogDiagnostic($"ReadAmplifierDiagnosticsAsync(slave={slaveNumber}) fault: {ex.GetType().Name}: {ex.Message}");
+            }
+
+            return BuildDiagnosticReading(slaveNumber, item);
+        }
+
+        /// <inheritdoc />
+        public async Task<SingleAmplifierGroupReadyResult> IssueSingleGroupReadyAsync(
+            byte targetAmp,
+            CancellationToken ct = default)
+        {
+            // Control-layer gate 1: the runtime must be paused at Stage 4 (Variant A). This is the
+            // only state in which a single GROUP_READY diagnostic write is authorized; the gate is
+            // enforced here in the runtime owner, not merely in the UI.
+            if (!_isPausedAtStage4)
+            {
+                return GroupReadyResult(
+                    targetAmp,
+                    SingleAmplifierGroupReadyDisposition.NotPaused,
+                    "The runtime is not paused at Stage 4; a single GROUP_READY is refused.");
+            }
+
+            // Control-layer gate 2: the target must be a valid track amplifier present in the
+            // effective domain (the physical binding {1,3,4,6} for Real mode).
+            if (!IsValidSingleGroupReadyTarget(targetAmp))
+            {
+                return GroupReadyResult(
+                    targetAmp,
+                    SingleAmplifierGroupReadyDisposition.InvalidTarget,
+                    $"Amplifier {targetAmp} is not a valid in-domain track amplifier.");
+            }
+
+            // Control-layer gate 3 (one-shot): exactly one GROUP_READY transaction per diagnostic
+            // session. A second write requires ending the pause and starting a fresh session (a
+            // separate operator authorization).
+            if (_singleGroupReadyIssued)
+            {
+                return GroupReadyResult(
+                    targetAmp,
+                    SingleAmplifierGroupReadyDisposition.NotAuthorized,
+                    "A single GROUP_READY has already been issued for this diagnostic session; a new authorization is required.");
+            }
+
+            if (_trackCommClient is null || _trackVariables is null)
+            {
+                return GroupReadyResult(
+                    targetAmp,
+                    SingleAmplifierGroupReadyDisposition.Faulted,
+                    "The runtime comm client is not composed.");
+            }
+
+            // Consume the one-shot grant BEFORE any write: no retry, no second fire.
+            _singleGroupReadyIssued = true;
+
+            var item = _trackVariables.trackAmpItems[targetAmp];
+
+            try
+            {
+                // Exactly ONE GROUP_READY write (HR_TRACK_POWER bit 1). This is the only HR23 write
+                // path outside the normal domain-wide WriteGroupReadyAsync, and both live inside the
+                // runtime owner. No config/lease guard is bypassed: Stage 4 (config APPLY verified)
+                // already passed and the motion lease stays PIC32-owned.
+                await _trackCommClient.SendAsync(
+                    AmplifierConfigurationDownloader.Exchange(
+                        targetAmp,
+                        (byte)TrackAmplifierRegisters.TrackPower,
+                        TrackAmplifierRegisters.GroupReadyBit),
+                    ct).ConfigureAwait(false);
+
+                LogDiagnostic(
+                    $"single GROUP_READY transmitted to amp {targetAmp} (HR23=0x{TrackAmplifierRegisters.GroupReadyBit:X4}).");
+
+                // Observe HR_STATE with fresh readbacks: READY = accepted, STANDBY = rejected/not
+                // yet applied. The durable discriminator is HR8 (never clobbered), not HR15. Poll
+                // with read-only 108 reads (no GROUP_READY retry) so the amplifier's own state tick
+                // (STANDBY -> READY after the accepted write) is observed.
+                var deadline = DateTimeOffset.UtcNow + TimeSpan.FromSeconds(5);
+                bool delivered = false;
+                ushort lastHr8 = 0;
+                AmplifierRegisterFreshness lastFreshness = AmplifierRegisterFreshness.Unknown;
+
+                while (DateTimeOffset.UtcNow < deadline && !ct.IsCancellationRequested)
+                {
+                    long sequenceBeforeRead = item.ProtocolReadbackSequence;
+                    await _trackCommClient.SendAsync(
+                        AmplifierConfigurationDownloader.Exchange(
+                            targetAmp,
+                            TrackAmplifierRegisters.State,
+                            0,
+                            read: true),
+                        ct).ConfigureAwait(false);
+
+                    // Wait for THIS read's readback to be applied (the write's echo may arrive first
+                    // and still show STANDBY before the read's Step() flips it to READY).
+                    while (DateTimeOffset.UtcNow < deadline && !ct.IsCancellationRequested &&
+                           item.ProtocolReadbackSequence == sequenceBeforeRead)
+                    {
+                        try
+                        {
+                            await Task.Delay(10, ct).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
+                    }
+
+                    var hr8 = item.HoldingReg is { Length: > TrackAmplifierRegisters.State }
+                        ? item.HoldingReg[TrackAmplifierRegisters.State]
+                        : (ushort)0;
+                    var freshness = AmplifierRegisterFreshnessClassifier.Classify(item, DateTimeOffset.UtcNow);
+
+                    if (freshness == AmplifierRegisterFreshness.Fresh)
+                    {
+                        delivered = true;
+                        lastHr8 = hr8;
+                        lastFreshness = freshness;
+
+                        if ((hr8 & 0xF) == TrackAmplifierRegisters.ReadyState)
+                        {
+                            return GroupReadyResult(
+                                targetAmp,
+                                SingleAmplifierGroupReadyDisposition.Accepted,
+                                $"Amplifier {targetAmp} reached READY after the single GROUP_READY.",
+                                hr8,
+                                freshness);
+                        }
+                    }
+                }
+
+                if (delivered)
+                {
+                    return GroupReadyResult(
+                        targetAmp,
+                        SingleAmplifierGroupReadyDisposition.Rejected,
+                        $"Amplifier {targetAmp} did not reach READY after the single GROUP_READY (HR8=0x{lastHr8:X4}).",
+                        lastHr8,
+                        lastFreshness);
+                }
+
+                return GroupReadyResult(
+                    targetAmp,
+                    SingleAmplifierGroupReadyDisposition.NotDelivered,
+                    $"No fresh HR_STATE readback observed for amp {targetAmp} after the GROUP_READY write.",
+                    lastHr8,
+                    lastFreshness);
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                return GroupReadyResult(
+                    targetAmp,
+                    SingleAmplifierGroupReadyDisposition.NotDelivered,
+                    "The single GROUP_READY was cancelled.");
+            }
+            catch (Exception ex)
+            {
+                return GroupReadyResult(
+                    targetAmp,
+                    SingleAmplifierGroupReadyDisposition.Faulted,
+                    $"{ex.GetType().Name}: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Enters the Stage-4 diagnostic pause and awaits an explicit exit: an operator resume
+        /// (<see cref="Stage4PauseExit.Resumed"/>) or a safety-fault abort
+        /// (<see cref="Stage4PauseExit.AbortedByFault"/>). Cancellation of <paramref name="ct"/>
+        /// (a StopAsync, a global-stop teardown, a UI close or a start timeout) surfaces as
+        /// <see cref="OperationCanceledException"/> so the start fails closed. The pause is an await
+        /// on the live token — never a blocking call and never a <c>_cts.Cancel()</c> by this code.
+        /// </summary>
+        private async Task<Stage4PauseExit> AwaitStage4PauseExitAsync(CancellationToken ct)
+        {
+            _isPausedAtStage4 = true;
+            _singleGroupReadyIssued = false;
+            _stage4PauseGate = new TaskCompletionSource<Stage4PauseExit>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+
+            LogDiagnostic("Stage-4 diagnostic pause entered (all amplifiers STANDBY; GROUP_READY not issued).");
+
+            try
+            {
+                return await _stage4PauseGate.Task.WaitAsync(ct).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Operator-cancel / shutdown / start-timeout: the pause is released by the live
+                // token, not by this code. Record it so a subsequent StopAsync preserves the
+                // fail-closed Failed exit instead of masking it as a clean Stopped (neutral was
+                // never observed during the pause).
+                _diagnosticPauseCancelled = true;
+                LogDiagnostic("Stage-4 diagnostic pause cancelled (operator stop / shutdown / timeout); failing closed.");
+                throw;
+            }
+            finally
+            {
+                _isPausedAtStage4 = false;
+                _stage4PauseGate = null;
+            }
+        }
+
+        /// <summary>True when <paramref name="targetAmp"/> is a valid, in-domain track amplifier.</summary>
+        private bool IsValidSingleGroupReadyTarget(byte targetAmp)
+            => TrackAmplifierAddress.IsTrackAmplifierAddress(targetAmp) && EffectiveDomain().Contains(targetAmp);
+
+        /// <summary>Builds a read-only diagnostic reading from the current SLAVEINFO cache content.</summary>
+        private SingleAmplifierDiagnosticReading BuildDiagnosticReading(byte slaveNumber, TrackAmplifierItem item)
+        {
+            var regs = item.HoldingReg;
+            bool hasRegs = regs is { Length: > TrackAmplifierRegisters.FwVersionPatchProtocol };
+
+            return new SingleAmplifierDiagnosticReading
+            {
+                SlaveNumber = slaveNumber,
+                Freshness = AmplifierRegisterFreshnessClassifier.Classify(item, DateTimeOffset.UtcNow),
+                Hr1Control = hasRegs ? regs[TrackAmplifierRegisters.Control] : (ushort)0,
+                Hr8State = hasRegs ? regs[TrackAmplifierRegisters.State] : (ushort)0,
+                Hr9Fault = hasRegs ? regs[TrackAmplifierRegisters.Fault] : (ushort)0,
+                Hr22Protocol = hasRegs ? regs[TrackAmplifierRegisters.FwVersionPatchProtocol] : (ushort)0,
+                ProtocolReadbackSequence = item.ProtocolReadbackSequence,
+                LastDataReceivedUtc = item.LastDataReceivedUtc,
+                ConfigurationVerified = item.ConfigurationVerified,
+                Phase1Failure = item.Phase1Failure
+            };
+        }
+
+        private static SingleAmplifierGroupReadyResult GroupReadyResult(
+            byte slave,
+            SingleAmplifierGroupReadyDisposition disposition,
+            string? message,
+            ushort hr8 = 0,
+            AmplifierRegisterFreshness freshness = AmplifierRegisterFreshness.Unknown)
+            => new()
+            {
+                SlaveNumber = slave,
+                Disposition = disposition,
+                Hr8Freshness = freshness,
+                Hr8Value = hr8,
+                Message = message
+            };
+
+        private void LogDiagnostic(string message)
+            => SiebwaldeApp.Core.IoC.Logger.Log(message, _loggerInstance ?? "Track");
+
         private async Task MonitorGlobalStopAsync(CancellationToken ct)
         {
             try
@@ -1756,6 +2136,12 @@ namespace SiebwaldeApp.Integration
         private void OnGlobalStopLatched()
         {
             _trackInitStateMachine?.EnterRecoveryHold();
+
+            // Abort an active Stage-4 diagnostic pause (fail-closed): a latched global stop means
+            // the diagnostic session can no longer proceed safely. The pause await then observes
+            // Stage4PauseExit.AbortedByFault and StartAsync fails closed. The heartbeat monitor is
+            // what detected a comm-loss latch, and it keeps running independently until teardown.
+            _stage4PauseGate?.TrySetResult(Stage4PauseExit.AbortedByFault);
 
             // Mirror the reason gate in TrackInitStateMachine.EnterRecoveryHold: only a comm/host-
             // authority fault invalidates the host-level movement authority and cached neutral

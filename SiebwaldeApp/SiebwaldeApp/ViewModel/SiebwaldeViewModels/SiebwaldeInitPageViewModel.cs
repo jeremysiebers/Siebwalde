@@ -42,6 +42,14 @@ namespace SiebwaldeApp
         private readonly RelayCommand _enableTrackPowerCommand;
         private readonly RelayCommand _disableTrackPowerCommand;
 
+        // Stage-4 diagnostic instrumentation (PV07-C Work Package B). Read-only diagnostics plus the
+        // explicit resume / single GROUP_READY commands. The control-layer authorization is enforced
+        // in the runtime host (not here); these buttons only request it.
+        private readonly RelayCommand _resumeStage4PauseCommand;
+        private readonly RelayCommand _readDiagnosticsCommand;
+        private readonly RelayCommand _issueSingleGroupReadyCommand;
+        private int _selectedDiagnosticAmp = 6;
+
         #endregion
 
         #region Public properties
@@ -134,6 +142,43 @@ namespace SiebwaldeApp
         /// <summary>True when track power is ON and may be disabled.</summary>
         public bool CanDisableTrackPower { get; set; }
 
+        /// <summary>
+        /// Toggles the Stage-4 diagnostic pause mode. When on, the next StartAsync pauses after
+        /// Stage 4 (all amplifiers STANDBY, GROUP_READY not issued). Production default is off.
+        /// </summary>
+        public bool DiagnosticPauseMode
+        {
+            get => _runtime.DiagnosticMode == TrackInitDiagnosticMode.PauseAfterStage4;
+            set
+            {
+                _runtime.DiagnosticMode = value
+                    ? TrackInitDiagnosticMode.PauseAfterStage4
+                    : TrackInitDiagnosticMode.None;
+                OnPropertyChanged(nameof(DiagnosticPauseMode));
+                RefreshDiagnosticStatus();
+            }
+        }
+
+        /// <summary>The selected diagnostic amplifier (1/3/4/6).</summary>
+        public int SelectedDiagnosticAmp
+        {
+            get => _selectedDiagnosticAmp;
+            set
+            {
+                if (_selectedDiagnosticAmp != value)
+                {
+                    _selectedDiagnosticAmp = value;
+                    OnPropertyChanged(nameof(SelectedDiagnosticAmp));
+                }
+            }
+        }
+
+        /// <summary>Human-readable diagnostic pause status (mode, paused, current stage, latch).</summary>
+        public string DiagnosticStatus { get; set; } = "Diagnostic pause: disabled";
+
+        /// <summary>The latest diagnostic read / command result (fresh/cached/stale/unknown + disposition).</summary>
+        public string DiagnosticResult { get; set; } = "";
+
         #endregion
 
         #region Public commands
@@ -192,6 +237,15 @@ namespace SiebwaldeApp
 
         /// <summary>Clear HR_TRACK_POWER (de-energize the bridges).</summary>
         public ICommand DisableTrackPower => _disableTrackPowerCommand;
+
+        /// <summary>End the Stage-4 diagnostic pause and resume the normal Stage 5 (GROUP_READY).</summary>
+        public ICommand ResumeStage4Pause => _resumeStage4PauseCommand;
+
+        /// <summary>Read the selected amplifier's HR1/HR8/HR9/HR22 (read-only, FRESH/CACHED/STALE/UNKNOWN).</summary>
+        public ICommand ReadDiagnostics => _readDiagnosticsCommand;
+
+        /// <summary>Issue exactly ONE GROUP_READY to the selected amplifier (state-changing, control-layer gated).</summary>
+        public ICommand IssueSingleGroupReady => _issueSingleGroupReadyCommand;
 
         #endregion
 
@@ -267,6 +321,11 @@ namespace SiebwaldeApp
             _backtrackInitCommand = new RelayCommand(BacktrackInitNow);
             _enableTrackPowerCommand = new RelayCommand(async () => await EnableTrackPowerAsync(), () => CanEnableTrackPower);
             _disableTrackPowerCommand = new RelayCommand(async () => await DisableTrackPowerAsync(), () => CanDisableTrackPower);
+
+            _resumeStage4PauseCommand = new RelayCommand(
+                () => { _runtime.ResumeStage4Pause(); Log("Stage-4 diagnostic pause resumed."); RefreshDiagnosticStatus(); });
+            _readDiagnosticsCommand = new RelayCommand(async () => await ReadDiagnosticsAsync());
+            _issueSingleGroupReadyCommand = new RelayCommand(async () => await IssueSingleGroupReadyAsync());
 
             Log("Init page ready. Press 'Detect hosts' to scan for FiddleYard, TrackController and Koploper.");
 
@@ -497,6 +556,7 @@ namespace SiebwaldeApp
                 _initEcosSimulatorCommand.RaiseCanExecuteChanged();
                 _initFullSimulationCommand.RaiseCanExecuteChanged();
                 UpdateGlobalStopStatus();
+                RefreshDiagnosticStatus();
             });
         }
 
@@ -656,6 +716,7 @@ namespace SiebwaldeApp
             {
                 RefreshInitStages();
                 LogOperatorEvent(e.Status);
+                RefreshDiagnosticStatus();
             });
         }
 
@@ -803,5 +864,54 @@ namespace SiebwaldeApp
                 : "Trackspanning uitgeschakeld, maar de-energisatie kon niet voor alle amplifiers worden bevestigd.");
             UpdateTrackPowerSurface();
         }
+
+        // ---------------------------------------------------------------------------------
+        // Stage-4 diagnostic instrumentation (PV07-C Work Package B)
+        // ---------------------------------------------------------------------------------
+
+        /// <summary>Refreshes the diagnostic pause status text from the runtime's read-only surface.</summary>
+        private void RefreshDiagnosticStatus()
+        {
+            var mode = _runtime.DiagnosticMode == TrackInitDiagnosticMode.PauseAfterStage4
+                ? "enabled"
+                : "disabled";
+            var paused = _runtime.IsPausedAtStage4 ? "PAUSED after Stage 4" : "not paused";
+            var stage = _runtime.InitStages.FirstOrDefault(s => s.State == TrackInitStageState.Running)?.Stage
+                ?? _runtime.InitStages.LastOrDefault(s => s.State == TrackInitStageState.Passed)?.Stage
+                ?? default;
+            var latch = _runtime.GlobalStopState.IsLatched
+                ? $"global-stop LATCHED ({_runtime.GlobalStopState.Reason})"
+                : $"global-stop {_runtime.GlobalStopState.State.ToString().ToLowerInvariant()}";
+
+            DiagnosticStatus =
+                $"Diagnostic pause: {mode} | {paused} | current stage: {TrackInitStageInfo.DisplayName(stage)} | {latch}";
+            OnPropertyChanged(nameof(DiagnosticStatus));
+        }
+
+        private async Task ReadDiagnosticsAsync()
+        {
+            var reading = await _runtime.ReadAmplifierDiagnosticsAsync((byte)SelectedDiagnosticAmp);
+            DiagnosticResult =
+                $"amp {reading.SlaveNumber}: {reading.Freshness} | HR1=0x{reading.Hr1Control:X4} " +
+                $"HR8=0x{reading.Hr8State:X4} ({StateName(reading)}) HR9=0x{reading.Hr9Fault:X4} " +
+                $"HR22=0x{reading.Hr22Protocol:X4} | seq={reading.ProtocolReadbackSequence}";
+            OnPropertyChanged(nameof(DiagnosticResult));
+            Log(DiagnosticResult);
+        }
+
+        private async Task IssueSingleGroupReadyAsync()
+        {
+            var result = await _runtime.IssueSingleGroupReadyAsync((byte)SelectedDiagnosticAmp);
+            DiagnosticResult =
+                $"amp {result.SlaveNumber}: {result.Disposition} | HR8 freshness {result.Hr8Freshness} " +
+                $"(HR8=0x{result.Hr8Value:X4})" +
+                (result.Message is { Length: > 0 } ? $" | {result.Message}" : "");
+            OnPropertyChanged(nameof(DiagnosticResult));
+            Log(DiagnosticResult);
+            RefreshDiagnosticStatus();
+        }
+
+        private static string StateName(SingleAmplifierDiagnosticReading reading)
+            => reading.IsReady ? "READY" : reading.IsStandby ? "STANDBY" : $"0x{reading.Hr8State & 0xF:X}";
     }
 }
