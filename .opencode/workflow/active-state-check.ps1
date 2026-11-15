@@ -60,7 +60,7 @@ function Test-GitRevisionExists {
   }
 }
 
-$primaryStates = @('INTAKE','CLASSIFY','PLAN','ANALYZE_DESIGN','IMPLEMENT','SELF_VERIFY','INDEPENDENT_REVIEW','VALIDATION_PREP','VALIDATE','EVIDENCE_COMPLETE','PR_PREP','PR_ACTIVE','MERGE_READY','POST_MERGE_VERIFY','CLOSURE','RETROSPECTIVE','DONE','ABORTED')
+$primaryStates = @('INTAKE','CLASSIFY','PLAN','ANALYZE_DESIGN','IMPLEMENT','SELF_VERIFY','INDEPENDENT_REVIEW','VALIDATION_PREP','VALIDATE','EVIDENCE_COMPLETE','PR_PREP','PR_ACTIVE','MERGE_READY','POST_MERGE_VERIFY','CLOSURE','RETROSPECTIVE','DONE','ABORTED','STRATEGY_REVIEW')
 $execStatuses = @('ACTIVE','PAUSED','BLOCKED','WAITING_AUTHORITY','WAITING_PRODUCT_DECISION','UNKNOWN_EXECUTION_STATE','TERMINAL')
 $evidenceStatuses = @('PROVEN','PARTIALLY_PROVEN','NOT_PROVEN','NOT_APPLICABLE')
 $authorityTypes = @('PRODUCT_DECISION','LIVE_HARDWARE','FIRMWARE_FLASH','DESTRUCTIVE_ACTION','REMOTE_PUSH','CREATE_PR','HISTORY_REWRITE','MERGE','EVIDENCE_BRANCH_DELETE')
@@ -169,6 +169,17 @@ foreach ($b in @($m.blockers)) {
     if (-not ($b.PSObject.Properties.Name -contains $k)) { $result.schema_errors += "blocker entry missing '$k'" }
   }
 }
+# Efficiency control / stagnation (optional field; validated when present). A
+# manifest with two or more nonproductive investigation cycles MUST set
+# strategy_review_required so the Project Lead is forced into STRATEGY_REVIEW.
+if ($m.PSObject.Properties.Name -contains 'stagnation' -and $null -ne $m.stagnation) {
+  $stag = $m.stagnation
+  if ($stag.PSObject.Properties.Name -notcontains 'nonproductive_cycles') { $result.schema_errors += "stagnation: missing 'nonproductive_cycles'" }
+  if ($stag.PSObject.Properties.Name -notcontains 'strategy_review_required') { $result.schema_errors += "stagnation: missing 'strategy_review_required'" }
+  if ($stag.nonproductive_cycles -ge 2 -and -not $stag.strategy_review_required) {
+    $result.schema_errors += "stagnation: nonproductive_cycles >= 2 requires strategy_review_required = true (trigger STRATEGY_REVIEW)"
+  }
+}
 $result.schema_ok = ($result.schema_errors.Count -eq 0)
 $result.primary_state = $m.primary_state
 $result.execution_status = $m.execution_status
@@ -213,6 +224,9 @@ switch ($m.execution_status) {
   'UNKNOWN_EXECUTION_STATE'  { $result.resume_guidance = 'Observe current reality before any retry (inspect remote / hardware / process state); do not blindly retry.' }
   'TERMINAL'                 { $result.resume_guidance = 'Increment is terminal (DONE/ABORTED); there is no implementation to resume. Preserve evidence and close/archive the record.' }
   default                    { $result.resume_guidance = 'Unknown execution_status; re-derive workflow state from evidence before acting.' }
+}
+if ($m.primary_state -eq 'STRATEGY_REVIEW') {
+  $result.resume_guidance = 'Reassess the investigation strategy against the original goal; escalate a bounded strategy decision (options + recommendation) to the Product Owner. Do not start a new increment.'
 }
 if ($result.drift -ne 'CONSISTENT') {
   $result.resume_guidance += ' Do not blindly overwrite the manifest to match Git; classify the difference first.'

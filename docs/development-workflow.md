@@ -187,6 +187,7 @@ The following principles are mandatory.
 12. **Physical process termination is not equivalent to confirmed physical safe state.**
 13. **A reviewer reviews a known revision or clearly bounded diff; review validity MUST be reconsidered after material changes.**
 14. **Pre-existing human work and unique evidence MUST be preserved.**
+15. **The Project Lead owns progress toward the original goal and, on stagnation, escalates strategy rather than recursively creating new increments.**
 
 ### 2.5 Material change and non-trivial increment
 
@@ -255,11 +256,14 @@ CLOSURE
 RETROSPECTIVE
 DONE
 ABORTED
+STRATEGY_REVIEW
 ```
 
 States are conditional.
 
 For example, a trivial documentation-only increment may not require `ANALYZE_DESIGN`, `INDEPENDENT_REVIEW`, `VALIDATION_PREP`, `VALIDATE`, or `PR_ACTIVE`.
+
+`STRATEGY_REVIEW` is a reassessment state entered from any non-terminal state on the stagnation trigger (§7.8); it is not a linear forward step.
 
 ### 3.2 Execution status
 
@@ -1045,6 +1049,18 @@ unrelated refactor
 ```
 
 Product code and workflow/tooling changes SHOULD NOT be mixed in the same product increment unless necessary and explicitly accepted.
+
+### 7.8 Efficiency control: goal ownership and stagnation
+
+The Project Lead owns progress toward the original increment goal. To prevent the recursive, non-converging investigation and review cycles observed in earlier increments, the following controls are mandatory:
+
+1. **Goal ownership.** Keep the increment anchored to the original goal. Detect scope or strategy drift early; drift is a signal to reassess, not to silently expand scope (§7.7).
+2. **Smallest decisive experiment.** Prefer the single smallest next experiment that can decisively confirm or refute the current leading hypothesis. Avoid speculative multi-hypothesis or multi-step investigations when one decisive observation would do.
+3. **Risk-proportional rigor.** Match testing and review depth to risk class and behavioral impact (§1.3, §4.3, §4.4). Never substitute ceremony for the smallest decisive evidence, and never substitute lightweight review for safety-relevant rigor.
+4. **Stagnation trigger.** A *nonproductive investigation cycle* is a bounded investigation attempt that produced no new decisive evidence toward the goal and ended in the same (or an equivalent) unresolved state. After **two consecutive** nonproductive cycles, the Project Lead MUST set `stagnation.strategy_review_required = true` in the Active State Manifest and transition to `STRATEGY_REVIEW`.
+5. **Escalate strategy, not increments.** In `STRATEGY_REVIEW`, reassess the approach against the original goal and escalate a bounded strategy decision (options + recommendation) to the Product Owner. Do NOT recursively create a new investigation increment or role cycle as a substitute for a strategy decision.
+
+The stagnation counter is recorded in the Active State Manifest (`stagnation.nonproductive_cycles`); the manifest validator (`.opencode/workflow/active-state-check.ps1`) flags any manifest where `nonproductive_cycles >= 2` but `strategy_review_required` is not set.
 
 ---
 

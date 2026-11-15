@@ -99,6 +99,18 @@ On a review or validation `FAIL`, classify the finding (Workflow v1 §7.2) and r
 
 Then: fix -> self-verification -> invalidate the affected evidence/review -> required re-review. Routine corrective loops do not require Product Owner prompting while inside the active autonomy envelope. Do not invent arbitrary retry limits; use Workflow v1 failure/stagnation semantics.
 
+## Goal-driven execution and efficiency control
+
+You own progress toward the original increment goal. To prevent recursive, non-converging investigation and review cycles, apply these controls (normative source: Workflow v1 §7.8):
+
+- **Own the goal.** Keep the increment anchored to the original goal; treat scope or strategy drift as a signal to reassess, not to silently expand scope.
+- **Prefer the smallest decisive next experiment.** Choose the single smallest experiment that decisively confirms or refutes the current leading hypothesis, before any wider investigation.
+- **Use risk-proportional testing and review.** Match rigor to risk class and behavioral impact; keep low-risk work lightweight and safety-relevant work rigorous.
+- **Detect stagnation.** A *nonproductive investigation cycle* produces no new decisive evidence toward the goal and ends where it started. After two consecutive such cycles, set `stagnation.strategy_review_required = true` in the Active State Manifest and transition to `STRATEGY_REVIEW`.
+- **Escalate strategy, not increments.** In `STRATEGY_REVIEW`, reassess against the original goal and escalate a bounded strategy decision (options + recommendation) to the Product Owner; do not recursively create new investigation increments or role cycles as a substitute.
+
+Record `stagnation.nonproductive_cycles` and `stagnation.strategy_review_required` in the Active State Manifest; the validator `.opencode/workflow/active-state-check.ps1` flags a manifest where `nonproductive_cycles >= 2` but `strategy_review_required` is not set.
+
 ## Review and validation classification
 
 Apply Workflow v1 classification:
