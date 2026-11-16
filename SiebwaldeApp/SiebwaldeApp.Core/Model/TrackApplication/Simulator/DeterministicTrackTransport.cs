@@ -51,6 +51,13 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         public IReadOnlyDictionary<byte, ushort> ProtocolVersionOverrides { get; }
 
         /// <summary>
+        /// Per-slave count of SLAVEINFO frames for which HR21/HR22 are reported 0x0000 before the
+        /// configured protocol version populates. Models the PIC32 cyclic SLAVEINFO upload's SIP10
+        /// packet (HR21/HR22) lagging the earlier SIP2 (HR7) / SIP4 (HR11) packets. Empty by default.
+        /// </summary>
+        public IReadOnlyDictionary<byte, int> ProtocolVersionDelayFrames { get; }
+
+        /// <summary>
         /// Detected slave addresses whose GROUP_READY write is rejected (local conditions not met),
         /// used to model an amplifier that is configured but rejects the C#-issued group-ready
         /// transition. Empty by default.
@@ -96,7 +103,8 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             bool emitGlobalStopArmedStatus = false,
             byte initialGlobalStopState = 0,
             IReadOnlyCollection<byte>? groupReadyRejectSlaves = null,
-            bool controllerMute = false)
+            bool controllerMute = false,
+            IReadOnlyDictionary<byte, int>? protocolVersionDelayFrames = null)
         {
             FirmwareChecksum = firmwareChecksum;
             DetectedSlaves = detectedSlaves is null
@@ -114,6 +122,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             ProtocolVersionOverrides = protocolVersionOverrides is null
                 ? new Dictionary<byte, ushort>()
                 : new Dictionary<byte, ushort>(protocolVersionOverrides);
+            ProtocolVersionDelayFrames = protocolVersionDelayFrames is null
+                ? new Dictionary<byte, int>()
+                : new Dictionary<byte, int>(protocolVersionDelayFrames);
             GroupReadyRejectSlaves = groupReadyRejectSlaves is null
                 ? Array.Empty<byte>()
                 : new List<byte>(groupReadyRejectSlaves);
@@ -153,6 +164,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private readonly HashSet<byte> _detected = new();
         private readonly HashSet<byte> _droppedEchoSlaves = new();
         private readonly List<byte> _sentCommands = new();
+        // Per-slave count of emitted SLAVEINFO frames, used to model the lagging SIP10 (HR21/HR22)
+        // population of the cyclic upload. Only mutated under _sync.
+        private readonly Dictionary<byte, int> _protocolVersionFramesEmitted = new();
         // PIC32 global-stop latch state (mirror of GLOBAL_STOP_STATE message): 0=disarmed,
         // 1=latched-host-loss, 2=latched-host-initiated, 3=armed.
         private byte _globalStopState = GlobalStopStatusMessage.Disarmed;
@@ -702,6 +716,22 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         {
             var detected = _detected.Contains(slave) ? (byte)1 : (byte)0;
             var registers = GetOrCreateAmplifier(slave).Snapshot();
+
+            // Model the PIC32 cyclic SLAVEINFO upload's SIP10 packet (HR21/HR22) lagging the
+            // earlier SIP2 (HR7) / SIP4 (HR11): for the first N emitted frames of a delayed slave,
+            // HR21/HR22 are reported 0x0000 (NOT YET AVAILABLE) before the configured protocol
+            // version populates. Called only under _sync.
+            if (_config.ProtocolVersionDelayFrames.TryGetValue(slave, out var delay))
+            {
+                int emitted = _protocolVersionFramesEmitted.TryGetValue(slave, out var e) ? e : 0;
+                if (emitted < delay)
+                {
+                    registers[TrackAmplifierRegisters.FwVersionMajorMinor] = 0;
+                    registers[TrackAmplifierRegisters.FwVersionPatchProtocol] = 0;
+                }
+                _protocolVersionFramesEmitted[slave] = emitted + 1;
+            }
+
             ushort? pwmOverride = _config.Hr0ReadbackOverrides.TryGetValue(slave, out var overrideValue)
                 ? overrideValue
                 : (ushort?)null;
