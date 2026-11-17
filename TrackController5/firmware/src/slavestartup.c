@@ -230,7 +230,13 @@ bool DetectSlave(uint8_t SlaveId){
                     BackplaneBusyRetries = 0;
                     break;
                 case SLAVEBUSY:
-                    if (++BackplaneBusyRetries >= BACKPLANE_BUSY_MAX_RETRIES){
+                    /* Only count BUSY as "stuck" while no transaction is in
+                     * flight. While the answer is still pending the transmitter
+                     * is armed and PetitModbusIsReady() is false, so the bounded
+                     * retry cannot fire ahead of the answer timeout and wrongly
+                     * terminate a still-in-flight backplane read. */
+                    if (PetitModbusIsReady() &&
+                        ++BackplaneBusyRetries >= BACKPLANE_BUSY_MAX_RETRIES){
                         MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
                         LOG_Printf("Mbus handler\t: DETECTSLAVE Backplane %d not detected.", SlaveId);
                         RunSlaveDetect = 0;
@@ -274,6 +280,11 @@ bool DetectSlave(uint8_t SlaveId){
                 Data.NoOfRegisters = 1;
                 Data.StartRegister = HOLDINGREG0;
                 Data.RegData0      = ShiftSlotNr;
+                /* Defense-in-depth: never dispatch the slot-select FC16 while a
+                 * transaction is in flight (transmitter armed). The write would
+                 * be rejected by SENDxPETITxMODBUS (rv=0), silently dropping the
+                 * frame and leaving case 4 with no comm result. */
+                if (!PetitModbusIsReady()) break;
                 SLAVExCOMMUNICATIONxHANDLER();
                 
                 ShiftSlot2++;

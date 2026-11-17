@@ -18,6 +18,11 @@ Proves source-level decisions, not UART timing or physical backplane presence:
   5. A failed backplane is never marked detected, and its downstream amplifier
      is never detected.
   6. SLAVExDETECT completes a full scan (backplanes all failing) without hanging.
+  7. A perpetually-SLAVEBUSY backplane with the transmitter ARMED is NOT
+     prematurely marked not-detected (the BUSY bound does not advance while
+     PetitModbusIsReady() is false) -- no rv=0 slot-select.
+  8. The slot-select FC16 is not dispatched while the transmitter is armed
+     (case-3 idle-gate).
 """
 from pathlib import Path
 import os
@@ -91,11 +96,28 @@ static uint32_t DelayCount1, DelayCount2, threshold;
 
 /* Peripheral / time / logging mocks (never the safety logic). */
 static uint32_t now;
+static unsigned dispatch_count;
 uint32_t READxCORExTIMER(void) { return now; }
-void SLAVExCOMMUNICATIONxHANDLER(void) { }
+void SLAVExCOMMUNICATIONxHANDLER(void) { ++dispatch_count; }
 void RENEWxHOSTxAUTHORITY(void) { }
 void LOG_Push(const char *str) { (void)str; }
 void LOG_Printf(const char *fmt, ...) { (void)fmt; }
+
+/* Transmitter state is peripheral state; the production PetitModbusIsReady() is
+ * a one-line accessor over Petit_Tx_State. Both are mocked here only to drive
+ * the readiness input of the detect state machine under test (the detect/advance
+ * safety logic itself is never mocked). */
+typedef enum {
+    PETIT_RXTX_IDLE,
+    PETIT_RXTX_START,
+    PETIT_RXTX_DATABUF,
+    PETIT_RXTX_WAIT_ANSWER,
+    PETIT_RXTX_TIMEOUT
+} PETIT_RXTX_STATE;
+static PETIT_RXTX_STATE Petit_Tx_State = PETIT_RXTX_IDLE;
+unsigned char PetitModbusIsReady(void) {
+    return (unsigned char)(Petit_Tx_State == PETIT_RXTX_IDLE);
+}
 
 /* Forward declaration: DetectSlave (extracted first) calls CHECKxMODBUSxCOMMxSTATUS
  * (extracted after it). */
@@ -121,6 +143,8 @@ static void reset(void) {
     iSlaveDetect = 0;
     DelayCount1 = DelayCount2 = threshold = 0;
     now = 0;
+    dispatch_count = 0;
+    Petit_Tx_State = PETIT_RXTX_IDLE;
 }
 
 /* Drive one backplane through case 0 -> WAIT -> 1 -> 2 and return the terminal
@@ -183,6 +207,43 @@ static void test_busy_bounded(void) {
     puts("PASS: perpetually-BUSY backplane terminates after bounded retries as not-detected\n");
 }
 
+static void test_busy_armed_does_not_advance(void) {
+    unsigned observations = 0;
+    reset();
+    Petit_Tx_State = PETIT_RXTX_WAIT_ANSWER;   /* transmitter armed, answer pending */
+    slaves[51].MbCommError = SLAVE_DATA_BUSY;
+    assert(!DetectSlave(51));                 /* case 0 -> WAIT */
+    now += 16u * MILISECONDS;
+    assert(!DetectSlave(51));                 /* WAIT -> case 1 */
+    assert(!DetectSlave(51));                 /* case 1 -> case 2 */
+    while (observations < 2u * BACKPLANE_BUSY_MAX_RETRIES) {
+        assert(DetectSlave(51) == false);     /* must NOT terminate while armed */
+        assert(RunSlaveDetect == 2);          /* still in case 2 */
+        assert(BackplaneBusyRetries == 0);    /* BUSY bound did not advance */
+        ++observations;
+    }
+    assert(slaves[51].SlaveDetected == false);
+    puts("PASS: BUSY while the transmitter is armed is NOT prematurely marked not-detected\n");
+}
+
+static void test_slot_select_not_dispatched_while_armed(void) {
+    reset();
+    slaves[51].SlaveDetected = true;           /* backplane detected */
+    assert(!DetectSlave(1));                   /* case 0 -> RunSlaveDetect = 3 */
+    assert(RunSlaveDetect == 3);
+    Petit_Tx_State = PETIT_RXTX_WAIT_ANSWER;   /* transmitter armed */
+    dispatch_count = 0;
+    assert(DetectSlave(1) == false);           /* case 3 gated: no write, stays in case 3 */
+    assert(RunSlaveDetect == 3);
+    assert(dispatch_count == 0);               /* slot-select FC16 NOT dispatched */
+    /* Once idle, the same case-3 entry dispatches exactly one slot-select write. */
+    Petit_Tx_State = PETIT_RXTX_IDLE;
+    assert(DetectSlave(1) == false);           /* case 3 -> case 4 */
+    assert(RunSlaveDetect == 4);
+    assert(dispatch_count == 1);
+    puts("PASS: slot-select FC16 is not dispatched while the transmitter is armed\n");
+}
+
 static void test_failed_backplane_blocks_downstream(void) {
     reset();
     slaves[51].MbCommError = SLAVE_DATA_NOK;
@@ -223,6 +284,8 @@ int main(void) {
     test_terminal_not_detected();
     test_detected_ok();
     test_busy_bounded();
+    test_busy_armed_does_not_advance();
+    test_slot_select_not_dispatched_while_armed();
     test_failed_backplane_blocks_downstream();
     test_slavedetect_no_hang();
     ExitProcess(0);
