@@ -451,6 +451,32 @@ namespace SiebwaldeApp.Integration
         /// <inheritdoc />
         public bool FirmwareDeploymentAuthorized => _firmwareDeploymentAuthorization.Authorized;
 
+        /// <summary>
+        /// The time the last host-authority heartbeat (110) was sent this session, or null when none
+        /// has been sent yet. Read-only observability for the READY-endurance hold; it is the honest
+        /// host-side liveness signal (independent of the global-stop state).
+        /// </summary>
+        public DateTimeOffset? HeartbeatLastSentUtc => _globalStopMonitor?.LastHeartbeatSentUtc;
+
+        /// <summary>
+        /// True while the host-authority heartbeat (110) is being sent recently enough to keep the
+        /// PIC32 host-authority watchdog alive (sent every
+        /// <see cref="GlobalStopMonitor.HeartbeatInterval"/>, 250 ms; this uses a conservative
+        /// 2 s window). False before a heartbeat has been sent or when the heartbeat has stalled.
+        /// </summary>
+        public bool HeartbeatActive
+        {
+            get
+            {
+                if (_globalStopMonitor?.LastHeartbeatSentUtc is not DateTimeOffset last)
+                {
+                    return false;
+                }
+
+                return DateTimeOffset.UtcNow - last <= ReadyEnduranceMonitor.HeartbeatFreshWindow;
+            }
+        }
+
         /// <inheritdoc />
         public Task<IReadOnlyList<FlashOneRunResult>> AuthorizeFirmwareDeploymentAsync(
             IReadOnlyCollection<byte> targetAmps,

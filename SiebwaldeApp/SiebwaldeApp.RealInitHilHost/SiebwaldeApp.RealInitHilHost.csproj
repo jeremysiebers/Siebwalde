@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Minimal headless hardware-in-the-loop (HIL) console for the REAL production initialization
+    chain (TrackControlMode.Real, real UDP transport) through GLOBAL READY only.
+
+    Two subcommands:
+      hil-a  passive diagnostics: read-only controller identity (113), global-stop state (111)
+             and PIC18 detection + HR7/HR11 via bounded telemetry-enablement (250 -> 100 -> 106 -> 101).
+             NO 104 address-write, NO 105 enable, NO 108 write, NO config, NO firmware, NO track-power.
+      hil-b  the single conditional Stage 1-5 init run through the REAL production
+             TrackApplicationRuntimeHost composition (transportFactory: null, TrackControlMode.Real).
+             It never calls EnableTrackPowerAsync / AuthorizeTrackPowerEnable (Stage 6) and never
+             authorizes firmware deployment, so the production init cannot flash.
+
+    No init-pipeline duplication and no new framework: hil-b composes the real
+    TrackApplicationRuntimeHost exactly once; hil-a drives the existing TrackCommClientAsync over
+    the real UDP transport with bounded, fail-closed acknowledgements.
+
+    This project is intentionally NOT part of SiebwaldeApp.sln (mirroring
+    SiebwaldeApp.SystemRegressionHost / SiebwaldeApp.StopReachabilityHarness) so it never affects
+    the production build or the existing test suite. It is built and run separately, and only ever
+    contacts hardware when an operator explicitly invokes a subcommand (never in this offline task).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>SiebwaldeApp.RealInitHilHost</RootNamespace>
+    <AssemblyName>SiebwaldeApp.RealInitHilHost</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SiebwaldeApp.Core\SiebwaldeApp.Core.csproj" />
+    <ProjectReference Include="..\SiebwaldeApp.EcosEmu\SiebwaldeApp.EcosEmu.csproj" />
+    <ProjectReference Include="..\SiebwaldeApp.Integration\SiebwaldeApp.Integration.csproj" />
+  </ItemGroup>
+
+</Project>

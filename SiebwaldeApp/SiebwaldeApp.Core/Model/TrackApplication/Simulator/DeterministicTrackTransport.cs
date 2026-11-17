@@ -419,6 +419,46 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         }
 
         /// <summary>
+        /// Overrides the state low nibble of one amplifier (test/injection surface) and emits a fresh
+        /// SLAVEINFO frame, modelling an amplifier leaving READY during an endurance hold. No real
+        /// protocol transaction; the production init/runtime logic is unchanged.
+        /// </summary>
+        public void SetSlaveState(byte slaveNumber, ushort state)
+        {
+            lock (_sync)
+            {
+                var writer = _frames?.Writer;
+                if (writer is null || !_amplifiers.TryGetValue(slaveNumber, out var amplifier))
+                    return;
+
+                amplifier.SetState(state);
+
+                // Emit a fresh frame immediately so the change is observed before the next heartbeat.
+                writer.TryWrite(BuildSlaveInfoFrame(slaveNumber));
+            }
+        }
+
+        /// <summary>
+        /// Overrides the HR_FAULT register of one amplifier (test/injection surface) and emits a fresh
+        /// SLAVEINFO frame, modelling an amplifier fault during an endurance hold. No real protocol
+        /// transaction; the production init/runtime logic is unchanged.
+        /// </summary>
+        public void SetSlaveFault(byte slaveNumber, ushort fault)
+        {
+            lock (_sync)
+            {
+                var writer = _frames?.Writer;
+                if (writer is null || !_amplifiers.TryGetValue(slaveNumber, out var amplifier))
+                    return;
+
+                amplifier.SetFault(fault);
+
+                // Emit a fresh frame immediately so the change is observed before the next heartbeat.
+                writer.TryWrite(BuildSlaveInfoFrame(slaveNumber));
+            }
+        }
+
+        /// <summary>
         /// Emits a SLAVEINFO frame for every detected slave on <paramref name="interval"/> until
         /// cancellation. Only started when <see cref="TrackSimulatorConfig.PeriodicSlaveInfoInterval"/>
         /// is set; it is stopped by the transport's <c>_cts</c> cancellation in <see cref="CloseAsync"/>.
