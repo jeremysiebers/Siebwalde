@@ -36,6 +36,24 @@ namespace SiebwaldeApp.Core
         private readonly Action<string>? _log;
         private readonly Dictionary<byte, long> _observedSequence = new();
 
+        /// <summary>
+        /// Upper bound on the number of GROUP_READY re-issues per amplifier within one verification
+        /// window. A persistently-rejecting amplifier is re-issued at most this many times and is
+        /// then left to fail closed at the deadline (no unbounded retry).
+        /// </summary>
+        private const int MaxGroupReadyReissuesPerAmplifier = 3;
+
+        /// <summary>
+        /// Minimum spacing between successive GROUP_READY re-issues to the same amplifier. This
+        /// spreads re-issues across the verification window so a late-settling amplifier (whose
+        /// config_ok settles after the one-shot initial write) gets a later accepted re-issue,
+        /// instead of a tight retry loop that would exhaust the bound immediately.
+        /// </summary>
+        private static readonly TimeSpan GroupReadyReissueInterval = TimeSpan.FromMilliseconds(500);
+
+        private readonly Dictionary<byte, int> _groupReadyReissueCount = new();
+        private readonly Dictionary<byte, DateTimeOffset> _lastGroupReadyReissue = new();
+
         private int _subState;
         private DateTimeOffset _deadline;
 
@@ -117,18 +135,61 @@ namespace SiebwaldeApp.Core
                 IoC.Logger.Log("GroupReady => every required amplifier accepted GROUP_READY.", _loggerInstance);
                 _log?.Invoke("ACCEPTED every required amplifier reached READY.");
                 _subState = 0;
+                _groupReadyReissueCount.Clear();
+                _lastGroupReadyReissue.Clear();
                 return InitStepResult.Completed();
             }
 
             if (DateTimeOffset.UtcNow >= _deadline)
             {
                 _subState = 0;
+                _groupReadyReissueCount.Clear();
+                _lastGroupReadyReissue.Clear();
                 var message = $"GROUP_READY rejected by amplifier(s) {string.Join(",", rejected)}.";
                 IoC.Logger.Log($"GroupReady => {message}", _loggerInstance);
                 _log?.Invoke(
                     $"TIMEOUT after {_verifyWindow.TotalSeconds:F0}s: amplifier(s) [{string.Join(",", rejected)}] " +
                     "did not reach READY within the verification window.");
                 return InitStepResult.Error(message);
+            }
+
+            // Amp-6 settle case: a not-yet-READY amplifier gets its GROUP_READY write re-issued
+            // (bounded per amplifier, spaced by GroupReadyReissueInterval), so one whose config_ok
+            // settles mid-window is accepted instead of being silently re-read until the deadline.
+            // GROUP_READY is bit 1 only and never energizes, so re-issuing is side-effect-safe; a
+            // persistently-rejecting amplifier is re-issued at most MaxGroupReadyReissuesPerAmplifier
+            // times and then fails closed at the deadline.
+            foreach (var amp in rejected)
+            {
+                int count = _groupReadyReissueCount.TryGetValue(amp, out var existing) ? existing : 0;
+                if (count >= MaxGroupReadyReissuesPerAmplifier)
+                {
+                    continue;
+                }
+
+                if (_lastGroupReadyReissue.TryGetValue(amp, out var lastReissue) &&
+                    DateTimeOffset.UtcNow - lastReissue < GroupReadyReissueInterval)
+                {
+                    continue;
+                }
+
+                await _commClient.SendAsync(
+                    AmplifierConfigurationDownloader.Exchange(
+                        amp,
+                        (byte)TrackAmplifierRegisters.TrackPower,
+                        TrackAmplifierRegisters.GroupReadyBit),
+                    ct).ConfigureAwait(false);
+
+                _groupReadyReissueCount[amp] = count + 1;
+                _lastGroupReadyReissue[amp] = DateTimeOffset.UtcNow;
+
+                IoC.Logger.Log(
+                    $"GroupReady => re-issued GROUP_READY to amplifier {amp} " +
+                    $"({count + 1}/{MaxGroupReadyReissuesPerAmplifier}).",
+                    _loggerInstance);
+                _log?.Invoke(
+                    $"REISSUED GROUP_READY HR23=0x{TrackAmplifierRegisters.GroupReadyBit:X4} " +
+                    $"to amp {amp} (re-issue {count + 1}/{MaxGroupReadyReissuesPerAmplifier}).");
             }
 
             return InitStepResult.Continue();

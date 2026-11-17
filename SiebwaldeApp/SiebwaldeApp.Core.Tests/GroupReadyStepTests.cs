@@ -139,5 +139,99 @@ namespace SiebwaldeApp.Core.Tests
             };
             Assert.False(GroupReadyStep.IsGroupReady(shortItem));
         }
+
+        /// <summary>
+        /// Counts the GROUP_READY writes (HR_TRACK_POWER = 0x0002, write direction 0xAA) sent to one
+        /// amplifier. The read-back exchanges target HR_STATE (register 8), so filtering on
+        /// register 23 plus the write direction isolates the GROUP_READY writes exactly.
+        /// </summary>
+        private static int GroupReadyWriteCount(RecordingCommClient comm, byte amp)
+            => comm.Sent.Count(m =>
+                m.Data.Length >= 5 &&
+                m.Data[0] == amp &&
+                m.Data[1] == 0xAA &&
+                m.Data[3] == TrackAmplifierRegisters.TrackPower &&
+                m.Data[4] == (TrackAmplifierRegisters.GroupReadyBit & 0xFF));
+
+        [Fact]
+        public async Task Execute_NotReadyAmpIsReissued_ThenCompletes_WhenConfigSettlesMidWindow()
+        {
+            var comm = new RecordingCommClient();
+            var variables = VariablesWith(RequiredAmps, ReadyState);
+            // Amp 6 has not settled yet: it reports STANDBY (not READY) at the first verification.
+            variables.trackAmpItems[6].HoldingReg[TrackAmplifierRegisters.State] = StandbyState;
+
+            var step = new GroupReadyStep(comm, variables, RequiredAmps);
+
+            await step.ExecuteAsync(null, CancellationToken.None); // substate 0: one-shot write
+
+            // substate 1 (first verification): amp 6 is still not READY, so its GROUP_READY is
+            // re-issued (not just re-read).
+            var first = await step.ExecuteAsync(null, CancellationToken.None);
+            Assert.Equal(InitStepResultKind.Continue, first.Kind);
+            Assert.Equal(2, GroupReadyWriteCount(comm, 6)); // initial + one re-issue
+
+            // Amp 6's config settles mid-window and the re-issued GROUP_READY is accepted -> READY.
+            variables.trackAmpItems[6].HoldingReg[TrackAmplifierRegisters.State] = ReadyState;
+
+            // substate 1 (second verification): every amp is READY -> completed.
+            var second = await step.ExecuteAsync(null, CancellationToken.None);
+            Assert.Equal(InitStepResultKind.Completed, second.Kind);
+
+            // Only amp 6 needed a re-issue; amps 1/3/4 each received exactly their single initial write.
+            Assert.Equal(1, GroupReadyWriteCount(comm, 1));
+            Assert.Equal(1, GroupReadyWriteCount(comm, 3));
+            Assert.Equal(1, GroupReadyWriteCount(comm, 4));
+        }
+
+        [Fact]
+        public async Task Execute_PersistentlyRejectingAmp_FailsClosed_WithBoundedReissues()
+        {
+            var comm = new RecordingCommClient();
+            var variables = VariablesWith(RequiredAmps, ReadyState);
+            // Amp 6 never reaches READY: it rejects every GROUP_READY (initial and re-issues).
+            variables.trackAmpItems[6].HoldingReg[TrackAmplifierRegisters.State] = StandbyState;
+
+            var step = new GroupReadyStep(comm, variables, RequiredAmps, verifyWindow: TimeSpan.FromSeconds(2));
+            await step.ExecuteAsync(null, CancellationToken.None); // substate 0: one-shot write
+
+            InitStepResult result = default;
+            for (int i = 0; i < 400; i++)
+            {
+                result = await step.ExecuteAsync(null, CancellationToken.None);
+                if (result.Kind == InitStepResultKind.Error)
+                {
+                    break;
+                }
+
+                await Task.Delay(10);
+            }
+
+            Assert.Equal(InitStepResultKind.Error, result.Kind);
+            Assert.Contains("6", result.ErrorMessage);
+
+            // Bounded re-issue: one initial write plus at most three re-issues (spaced 500 ms
+            // apart), never an unbounded retry loop. The step still fails closed at the deadline.
+            Assert.Equal(4, GroupReadyWriteCount(comm, 6));
+        }
+
+        [Fact]
+        public async Task Execute_AllReady_Completes_WithoutReissue()
+        {
+            var comm = new RecordingCommClient();
+            var variables = VariablesWith(RequiredAmps, ReadyState);
+            var step = new GroupReadyStep(comm, variables, RequiredAmps);
+
+            await step.ExecuteAsync(null, CancellationToken.None); // substate 0
+            var result = await step.ExecuteAsync(null, CancellationToken.None); // substate 1
+
+            Assert.Equal(InitStepResultKind.Completed, result.Kind);
+
+            // Success path unchanged: exactly one GROUP_READY write per amplifier, no re-issue.
+            Assert.Equal(1, GroupReadyWriteCount(comm, 1));
+            Assert.Equal(1, GroupReadyWriteCount(comm, 3));
+            Assert.Equal(1, GroupReadyWriteCount(comm, 4));
+            Assert.Equal(1, GroupReadyWriteCount(comm, 6));
+        }
     }
 }
