@@ -2,6 +2,7 @@
 #include "system_definitions.h"
 #include "PetitModbus.h"
 #include "PetitModbusPort.h"
+#include "enums.h"
 
 // Modbus RTU Variables
 volatile unsigned char   PetitReceiveBuffer[PETITMODBUS_RECEIVE_BUFFER_SIZE];   // Buffer to collect data from hardware
@@ -46,22 +47,51 @@ static uint8_t DummyCounter;
 //}
 
 
-// Low-level 9-bit write (UART2 on PIC32): write 0..0x1FF to U2TXREG
-static void __attribute__((noinline)) UART2_Write9(uint16_t w)
+// Deadline for the UART2 TX busy-wait, sized to a few byte-times at 2 Mbaud.
+// 9N1 framing is 11 bits per byte (~5.5 us/byte); 30 us covers ~5 byte-times.
+// READxCORExTIMER() ticks at the 126 MHz core-timer rate (MICROSECONDS ticks).
+#define PETITMODBUS_TX_WRITE_DEADLINE (30u * MICROSECONDS)
+
+// Re-establish 9-bit Modbus framing and re-assert TX/RX enables after a stuck
+// TX buffer. Mirrors UART2_Config_9bit_Modbus() in slavefwhandler.c (static there
+// and not reachable from this port file).
+static void __attribute__((noinline)) UART2_RecoverTx(void)
 {
-    while (U2STAbits.UTXBF) { }       // wait while TX buffer full
+    U2MODEbits.ON = 0;
+    U2MODEbits.PDSEL = 0x3;      /* 9-bit, no parity */
+    U2MODEbits.STSEL = 0;        /* 1 stop bit */
+    U2STAbits.UTXEN = 1;
+    U2STAbits.URXEN = 1;
+    U2STAbits.OERR = 0;
+    U2MODEbits.ON = 1;
+    while (U2STAbits.URXDA) { (void)U2RXREG; }
+}
+
+// Low-level 9-bit write (UART2 on PIC32): write 0..0x1FF to U2TXREG.
+// Returns TRUE on success; FALSE if the TX buffer never drained within the
+// deadline (stuck TX FIFO / disabled transmitter), after forcing a recovery.
+static unsigned char __attribute__((noinline)) UART2_Write9(uint16_t w)
+{
+    uint32_t start = READxCORExTIMER();
+    while (U2STAbits.UTXBF) {
+        if ((uint32_t)(READxCORExTIMER() - start) >= PETITMODBUS_TX_WRITE_DEADLINE) {
+            UART2_RecoverTx();
+            return FALSE;
+        }
+    }
     //U2STAbits.TX9D = (w & 0x0100u) ? 1 : 0;     // 9th bit
     U2TXREG = (uint16_t)(w & 0x01FFu);           // 8-bit/9-bit payload
+    return TRUE;
 }
 
-static void __attribute__((noinline)) PetitModBus_UART_PutchData(uint8_t b)
+static unsigned char __attribute__((noinline)) PetitModBus_UART_PutchData(uint8_t b)
 {
-    UART2_Write9((uint16_t)b);        // 9th bit = 0
+    return UART2_Write9((uint16_t)b); // 9th bit = 0
 }
 
-static void __attribute__((noinline)) PetitModBus_UART_PutchAddr(uint8_t addr)
+static unsigned char __attribute__((noinline)) PetitModBus_UART_PutchAddr(uint8_t addr)
 {
-    UART2_Write9(0x0100u | addr);     // 9th bit = 1
+    return UART2_Write9(0x0100u | addr); // 9th bit = 1
 }
 
 unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
@@ -76,21 +106,26 @@ unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
     }
 
     // First byte is Modbus address -> send with 9th bit set
-    PetitModBus_UART_PutchAddr((uint8_t)s[0]);
+    if (!PetitModBus_UART_PutchAddr((uint8_t)s[0]))
+    {
+        Led1Off();
+        return FALSE;
+    }
 
     // Remaining bytes -> 9th bit cleared
     for (DummyCounter = 1; DummyCounter < Length; DummyCounter++)
     {
-        PetitModBus_UART_PutchData((uint8_t)s[DummyCounter]);
+        if (!PetitModBus_UART_PutchData((uint8_t)s[DummyCounter]))
+        {
+            Led1Off();
+            return FALSE;
+        }
     }
 
     LED_TX++;
     Led1Off();
     return TRUE;
 }
-
-
-
 
 /*************************Interrupt Function Slave*****************************/
 // Call this function into your UART Interrupt. Collect data from it!

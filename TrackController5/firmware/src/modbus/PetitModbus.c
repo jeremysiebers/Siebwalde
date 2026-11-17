@@ -215,9 +215,9 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
  */
 unsigned char Petit_DoSlaveTX(void)
 {  
-    PetitModBus_UART_String(Petit_Tx_Buf,Petit_Tx_Buf_Size);
+    unsigned char rv = PetitModBus_UART_String(Petit_Tx_Buf,Petit_Tx_Buf_Size);
     Petit_Tx_Buf_Size = 0;    
-    return TRUE;
+    return rv;
 }
 
 /******************************************************************************/
@@ -290,8 +290,6 @@ unsigned char CheckPetitModbusBufferComplete(void)
 
     if(PetitReceiveCounter>4)
     {
-        Petit_Tx_State    =PETIT_RXTX_IDLE;                                     // When bytes of a message are being received, set the TX state to idle
-        
         if(PetitReceiveBuffer[0] > 0)
         {
             if( PetitReceiveBuffer[1]==PETITMODBUS_WRITE_SINGLE_REGISTER || PetitReceiveBuffer[1]==PETITMODBUS_WRITE_MULTIPLE_REGISTERS)     // RHR
@@ -343,6 +341,10 @@ unsigned char CheckPetitModbusBufferComplete(void)
 
     if(PetitReceiveCounter==PetitExpectedReceiveCount)
     {
+        /* Only a length-complete frame releases WAIT_ANSWER. Leaving WAIT_ANSWER
+         * intact for partial/segmented frames lets the answer timeout still fire
+         * and classify the transaction as TIMEOUT instead of hanging forever. */
+        Petit_Tx_State    =PETIT_RXTX_IDLE;
         return PETIT_DATA_READY;
     }    
     return PETIT_DATA_NOT_READY;
@@ -446,8 +448,23 @@ void Petit_TxRTU(void)
     Petit_Tx_Buf[Petit_Tx_Buf_Size++] = Petit_Tx_CRC16 & 0x00FF;
     Petit_Tx_Buf[Petit_Tx_Buf_Size++] =(Petit_Tx_CRC16 & 0xFF00) >> 8;
 
-    Petit_DoSlaveTX();
-    
+    if (!Petit_DoSlaveTX()){
+        /* Local TX failure: the frame never left the UART. Classify the
+         * transaction as failed (unless broadcast, which expects no answer) and
+         * release the transmitter so the detect FSM observes the outcome instead
+         * of hanging in WAIT_ANSWER forever. */
+        if (Petit_Tx_Data.Address != PETITMODBUS_BROADCAST_ADDRESS){
+            if (Petit_Tx_Data.Address > SlaveAmount){
+                DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_NOK;
+            }
+            else{
+                MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;
+            }
+        }
+        Petit_Tx_State    =PETIT_RXTX_IDLE;
+        return;
+    }
+
     if (Petit_Tx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS){                // When PETITMODBUS_BROADCAST_ADDRESS then no response will be sent back                                          
         Petit_Tx_State    =PETIT_RXTX_IDLE;
     }

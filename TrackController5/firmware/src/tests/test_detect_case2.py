@@ -23,6 +23,10 @@ Proves source-level decisions, not UART timing or physical backplane presence:
      PetitModbusIsReady() is false) -- no rv=0 slot-select.
   8. The slot-select FC16 is not dispatched while the transmitter is armed
      (case-3 idle-gate).
+  9. Case-4 (slot-select) SLAVEBUSY with the transmitter IDLE terminates via a
+     bounded retry counter and advances to not-detected (no livelock).
+ 10. Case-4 SLAVEBUSY with the transmitter ARMED does NOT prematurely advance
+     (does not race the answer timeout).
 """
 from pathlib import Path
 import os
@@ -88,11 +92,13 @@ static uint8_t BackplaneId, PrevBackplaneId, ShiftSlot2;
 uint16_t ShiftSlotNr;
 static uint8_t BackplaneSelectRetries;
 static uint8_t BackplaneBusyRetries;
+static uint8_t BackplaneSelectBusyRetries;
 uint8_t SlaveId;
 uint8_t iSlaveDetect;
 static uint32_t DelayCount1, DelayCount2, threshold;
 #define BACKPLANE_SELECT_MAX_RETRIES 3u
 #define BACKPLANE_BUSY_MAX_RETRIES 20u
+#define BACKPLANE_SELECT_BUSY_MAX_RETRIES 20u
 
 /* Peripheral / time / logging mocks (never the safety logic). */
 static uint32_t now;
@@ -139,6 +145,7 @@ static void reset(void) {
     ShiftSlotNr = 0;
     BackplaneSelectRetries = 0;
     BackplaneBusyRetries = 0;
+    BackplaneSelectBusyRetries = 0;
     SlaveId = 51;
     iSlaveDetect = 0;
     DelayCount1 = DelayCount2 = threshold = 0;
@@ -259,6 +266,47 @@ static void test_failed_backplane_blocks_downstream(void) {
     puts("PASS: a failed backplane is not detected and its downstream amplifier is never detected\n");
 }
 
+static void test_case4_busy_bounded(void) {
+    unsigned busy_observations = 0;
+    reset();
+    slaves[51].SlaveDetected = true;           /* backplane detected */
+    assert(!DetectSlave(1));                   /* case 0 -> RunSlaveDetect = 3 */
+    assert(RunSlaveDetect == 3);
+    assert(!DetectSlave(1));                   /* case 3 -> case 4 (slot-select dispatched) */
+    assert(RunSlaveDetect == 4);
+    slaves[51].MbCommError = SLAVE_DATA_BUSY;
+    while (1) {
+        assert(busy_observations < 2u * BACKPLANE_SELECT_BUSY_MAX_RETRIES);
+        if (DetectSlave(1)) break;
+        ++busy_observations;
+    }
+    /* Exactly BACKPLANE_SELECT_BUSY_MAX_RETRIES-1 BUSY observations, then exhaustion. */
+    assert(busy_observations == BACKPLANE_SELECT_BUSY_MAX_RETRIES - 1u);
+    assert(RunSlaveDetect == 0);
+    assert(slaves[51].SlaveDetected == false);
+    assert(BackplaneSelectBusyRetries == 0);   /* reset on the terminal branch */
+    puts("PASS: case-4 perpetually-BUSY slot-select terminates after bounded retries as not-detected\n");
+}
+
+static void test_case4_busy_armed_does_not_advance(void) {
+    unsigned observations = 0;
+    reset();
+    slaves[51].SlaveDetected = true;
+    assert(!DetectSlave(1));                   /* case 0 -> 3 */
+    assert(!DetectSlave(1));                   /* case 3 -> 4 */
+    assert(RunSlaveDetect == 4);
+    Petit_Tx_State = PETIT_RXTX_WAIT_ANSWER;   /* transmitter armed, answer pending */
+    slaves[51].MbCommError = SLAVE_DATA_BUSY;
+    while (observations < 2u * BACKPLANE_SELECT_BUSY_MAX_RETRIES) {
+        assert(DetectSlave(1) == false);       /* must NOT terminate while armed */
+        assert(RunSlaveDetect == 4);           /* still in case 4 */
+        assert(BackplaneSelectBusyRetries == 0); /* BUSY bound did not advance */
+        ++observations;
+    }
+    assert(slaves[51].SlaveDetected == true);  /* NOT marked not-detected */
+    puts("PASS: case-4 BUSY while the transmitter is armed is NOT prematurely marked not-detected\n");
+}
+
 static bool pump_slavedetect(unsigned max_iterations) {
     unsigned i;
     for (i = 0; i < max_iterations; ++i) {
@@ -287,6 +335,8 @@ int main(void) {
     test_busy_armed_does_not_advance();
     test_slot_select_not_dispatched_while_armed();
     test_failed_backplane_blocks_downstream();
+    test_case4_busy_bounded();
+    test_case4_busy_armed_does_not_advance();
     test_slavedetect_no_hang();
     ExitProcess(0);
     return 0;
