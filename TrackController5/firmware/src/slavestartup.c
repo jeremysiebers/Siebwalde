@@ -164,11 +164,13 @@ bool SLAVExDETECT(){
  *  Notes      : Sets all the addresses to the slaves according to location
  */
 /*#--------------------------------------------------------------------------#*/
+#define BACKPLANE_SELECT_MAX_RETRIES 3u
 static uint8_t RunSlaveDetect      = 0;
 static uint8_t BackplaneId         = 0;    // Used when slaves are checked
 static uint8_t PrevBackplaneId     = 0;    // Used to point to first slot again
 static uint8_t ShiftSlot2          = 0;
 uint16_t       ShiftSlotNr         = 0;
+static uint8_t BackplaneSelectRetries = 0;
 
 bool DetectSlave(uint8_t SlaveId){
     bool return_val = false;
@@ -274,14 +276,34 @@ bool DetectSlave(uint8_t SlaveId){
                 case SLAVEOK:  
                     GoToCase = RunSlaveDetect + 1;
                     RunSlaveDetect = WAIT;
-                    DelayCount1 = READxCORExTIMER();                    
+                    DelayCount1 = READxCORExTIMER();
+                    BackplaneSelectRetries = 0;
                     break;                    
                 case SLAVENOK: 
                     MASTER_SLAVE_DATA[BackplaneId].SlaveDetected = false;
                     LOG_Push("Mbus handler\t: DETECTSLAVE SLAVENOK returned in case 4.");
                     RunSlaveDetect = 0;
                     return_val = true;
+                    BackplaneSelectRetries = 0;
                     //DRV_USART0_WriteByte('4');
+                    break;
+                case SLAVE_DATA_TIMEOUT:
+                    if (BackplaneSelectRetries < BACKPLANE_SELECT_MAX_RETRIES){
+                        Data.SlaveAddress  = BackplaneId;
+                        Data.Direction     = WRITE;
+                        Data.NoOfRegisters = 1;
+                        Data.StartRegister = HOLDINGREG0;
+                        Data.RegData0      = ShiftSlotNr;
+                        SLAVExCOMMUNICATIONxHANDLER();
+                        BackplaneSelectRetries++;
+                    }
+                    else{
+                        MASTER_SLAVE_DATA[BackplaneId].SlaveDetected = false;
+                        LOG_Push("Mbus handler\t: DETECTSLAVE SLAVE_DATA_TIMEOUT returned in case 4.");
+                        BackplaneSelectRetries = 0;
+                        RunSlaveDetect = 0;
+                        return_val = true;
+                    }
                     break;
                 case SLAVEBUSY: break;
                 default : break;
@@ -350,6 +372,10 @@ bool DetectSlave(uint8_t SlaveId){
                     RunSlaveDetect = 0;
                     return_val = true;
                     LOG_Push("Mbus handler\t: DETECTSLAVE SLAVENOK returned in case 8.");
+                    break;
+                case SLAVE_DATA_TIMEOUT:
+                    RunSlaveDetect = 0;
+                    return_val = true;
                     break;
                 case SLAVEBUSY: break;
                 default : break;
