@@ -13,15 +13,17 @@ namespace SiebwaldeApp.RealInitHilHost
     ///   SiebwaldeApp.RealInitHilHost hil-c [--jsonl &lt;path&gt;] [--domain 1,3,4,6] [--timeout &lt;seconds&gt;]
     ///                       [--poll-interval &lt;seconds&gt;] [--max-duration &lt;seconds&gt;] [--stop-file &lt;path&gt;]
     ///   SiebwaldeApp.RealInitHilHost hil-d [--jsonl &lt;path&gt;] [--domain 1,3,4,6] [--timeout &lt;seconds&gt;]
-    ///                       [--max-duration &lt;seconds&gt;] [--stop-file &lt;path&gt;]
+    ///                       [--max-duration &lt;seconds&gt;] [--stop-file &lt;path&gt;] [--continue-on-fail]
     ///
     /// hil-a is passive diagnostics (read-only). hil-b composes the REAL production runtime host and
     /// runs the conditional Stage 1-5 init once, asserting the expected terminal state. hil-c does the
     /// same init once, then HOLDS the session (single-session READY endurance — NOT a repeated-init
     /// test) and monitors for up to --max-duration (default 8 h). hil-d is the REARM + repeated
     /// Stage 1-5 init campaign loop: it re-arms (112) ONLY a proven host-loss latch and fails closed
-    /// on a host-initiated/EMO/unknown latch. Exit code 0 on pass, non-zero on fail. No subcommand
-    /// flashes firmware or energizes track power.
+    /// on a host-initiated/EMO/unknown latch. With --continue-on-fail, hil-d instead counts each
+    /// recoverable init failure and CONTINUES the soak (never re-arming an unexpected/unsafe
+    /// global-stop state), stopping only on unexpected/unsafe conditions. Exit code 0 on pass,
+    /// non-zero on fail. No subcommand flashes firmware or energizes track power.
     /// </summary>
     internal static class Program
     {
@@ -34,6 +36,7 @@ namespace SiebwaldeApp.RealInitHilHost
             var pollInterval = TimeSpan.FromSeconds(30);
             var maxDuration = TimeSpan.FromHours(8);
             string? stopFilePath = null;
+            bool continueOnFail = false;
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -56,6 +59,9 @@ namespace SiebwaldeApp.RealInitHilHost
                         break;
                     case "--stop-file" when i + 1 < args.Length:
                         stopFilePath = args[++i];
+                        break;
+                    case "--continue-on-fail":
+                        continueOnFail = true;
                         break;
                     case "hil-a":
                     case "hil-b":
@@ -103,7 +109,7 @@ namespace SiebwaldeApp.RealInitHilHost
                     "hil-c" => await HilScenarios.RunHilCAsync(
                         domain, timeout, pollInterval, maxDuration, jsonlPath, stopFilePath, operatorStop.Token).ConfigureAwait(false),
                     "hil-d" => await HilScenarios.RunHilDAsync(
-                        domain, timeout, maxDuration, jsonlPath, stopFilePath, operatorStop.Token).ConfigureAwait(false),
+                        domain, timeout, maxDuration, jsonlPath, stopFilePath, operatorStop.Token, continueOnFail).ConfigureAwait(false),
                     _ => throw new ArgumentException($"Unknown subcommand '{subcommand}'."),
                 };
 
@@ -242,7 +248,7 @@ namespace SiebwaldeApp.RealInitHilHost
             Console.WriteLine("Usage: SiebwaldeApp.RealInitHilHost hil-a|hil-b|hil-c|hil-d [--jsonl <path>] [--domain 1,3,4,6]");
             Console.WriteLine("                                    [--timeout <seconds>]");
             Console.WriteLine("  hil-c additionally: [--poll-interval <seconds>] [--max-duration <seconds>] [--stop-file <path>]");
-            Console.WriteLine("  hil-d additionally: [--max-duration <seconds>] [--stop-file <path>]");
+            Console.WriteLine("  hil-d additionally: [--max-duration <seconds>] [--stop-file <path>] [--continue-on-fail]");
             Console.WriteLine();
             Console.WriteLine("Subcommands (REAL hardware, NOT run in offline builds):");
             Console.WriteLine("  hil-a  Passive diagnostics: controller identity (113), global-stop state (111), and");
@@ -265,8 +271,10 @@ namespace SiebwaldeApp.RealInitHilHost
             Console.WriteLine("         state STOPS (never re-arms); otherwise it runs the Stage 1-5 init and verifies every");
             Console.WriteLine("         domain amplifier is READY (recording per-amp HR8/HR9/HR22). Bounded per cycle and");
             Console.WriteLine("         overall (--max-duration, default 8 h); operator STOP via Ctrl+C or --stop-file.");
-            Console.WriteLine("         Fails closed on the first unexpected deviation. No Stage 6/7, no energization, no flash.");
-            Console.WriteLine("         Per-cycle JSONL evidence is written to --jsonl when given.");
+            Console.WriteLine("         Fails closed on the first unexpected deviation; --continue-on-fail instead counts each");
+            Console.WriteLine("         recoverable init failure and CONTINUES (never re-arming an unexpected/unsafe global-stop");
+            Console.WriteLine("         state), stopping only on unexpected/unsafe conditions. No Stage 6/7, no energization,");
+            Console.WriteLine("         no flash. Per-cycle JSONL evidence is written to --jsonl when given.");
             Console.WriteLine();
             Console.WriteLine("Safety:");
             Console.WriteLine("  No subcommand flashes firmware (no 122/131/123/125/126/127, no bootloader ERASE/PROGRAM)");

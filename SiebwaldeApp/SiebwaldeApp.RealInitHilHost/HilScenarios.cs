@@ -88,6 +88,12 @@ namespace SiebwaldeApp.RealInitHilHost
         public string RecoveryAction { get; set; } = string.Empty;
         public string? FirstFailure { get; set; }
 
+        // Repeated-init campaign summary fields (populated only on the terminal campaign summary
+        // line, not on per-cycle lines): the pass/fail cycle tallies and the final disposition.
+        public int PassCount { get; set; }
+        public int FailCount { get; set; }
+        public string Disposition { get; set; } = string.Empty;
+
         public void Check(string name, bool pass, string detail) => Checks.Add(new HilCheck(name, pass, detail));
 
         public void AddTimeline(string entry) => Timeline.Add($"{DateTimeOffset.UtcNow:O} {entry}");
@@ -112,6 +118,10 @@ namespace SiebwaldeApp.RealInitHilHost
             ["cycle"] = Cycle,
             ["recoveryAction"] = RecoveryAction,
             ["firstFailure"] = FirstFailure,
+            ["passCount"] = PassCount,
+            ["failCount"] = FailCount,
+            ["successPercentage"] = Cycle > 0 ? Math.Round(PassCount * 100.0 / Cycle, 2) : 0.0,
+            ["disposition"] = Disposition,
         };
     }
 
@@ -489,9 +499,21 @@ namespace SiebwaldeApp.RealInitHilHost
         /// <see cref="StartRealInitAndVerifyAsync"/>; (d) verifies every domain amplifier is READY
         /// and records per-amp HR8/HR9/HR22; (e) performs a controlled Stop (DisposeAsync); (f) writes
         /// one JSONL line per cycle. It is bounded per cycle (<paramref name="initTimeout"/>) and
-        /// overall (<paramref name="maxDuration"/>), honours an operator STOP file and Ctrl+C, and
-        /// fails closed on the first unexpected deviation (no retry). No Stage 6/7, no track
-        /// energization, no firmware flash.
+        /// overall (<paramref name="maxDuration"/>), honours an operator STOP file and Ctrl+C. No
+        /// Stage 6/7, no track energization, no firmware flash.
+        ///
+        /// By default (<paramref name="continueOnFail"/> false) it fails closed on the first
+        /// unexpected deviation (no retry). When <paramref name="continueOnFail"/> is true, a
+        /// RECOVERABLE init failure (a failed <see cref="StartRealInitAndVerifyAsync"/> after a
+        /// REARM'd host-loss latch or a non-latched state) is counted and the loop CONTINUES so the
+        /// next cycle runs its safe REARM + init recovery; an unexpected/unsafe global-stop state
+        /// (<see cref="GlobalStopRecoveryAction.StopFailClosed"/>) still STOPS unconditionally and
+        /// is never re-armed. The reliability soak therefore counts every recoverable failure and
+        /// stops only on unexpected/unsafe conditions.
+        ///
+        /// <paramref name="transportFactory"/>, when non-null, substitutes the deterministic
+        /// software transport for the real UDP transport (offline tests only); null keeps the real
+        /// UDP transport.
         /// </summary>
         public static async Task<HilResult> RunHilDAsync(
             int[] domain,
@@ -499,7 +521,9 @@ namespace SiebwaldeApp.RealInitHilHost
             TimeSpan maxDuration,
             string? jsonlPath,
             string? stopFilePath,
-            CancellationToken operatorStopToken)
+            CancellationToken operatorStopToken,
+            bool continueOnFail = false,
+            Func<ITrackTransport>? transportFactory = null)
         {
             var campaign = new HilResult("hil-d");
             campaign.Check("campaign-mode", true, "REARM + repeated Stage 1-5 init (no Stage 6/7, no flash)");
@@ -513,6 +537,8 @@ namespace SiebwaldeApp.RealInitHilHost
                 : null;
 
             int cyclesRun = 0;
+            int passes = 0;
+            int failures = 0;
             string? firstFailure = null;
             string disposition = "DurationBoundReached";
 
@@ -541,7 +567,7 @@ namespace SiebwaldeApp.RealInitHilHost
                     ushort? state;
                     try
                     {
-                        state = await ProbeGlobalStopStateAsync(initTimeout, campaignCts.Token)
+                        state = await ProbeGlobalStopStateAsync(initTimeout, campaignCts.Token, transportFactory)
                             .ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
@@ -571,6 +597,7 @@ namespace SiebwaldeApp.RealInitHilHost
                         result.Faults.Add(why);
                         result.Pass = false;
                         firstFailure ??= $"cycle {cyclesRun}: {why}";
+                        failures++;
                         AppendCampaignJsonl(jsonlPath, result);
                         disposition = "FirstFailure";
                         break;
@@ -579,7 +606,7 @@ namespace SiebwaldeApp.RealInitHilHost
                     // (c) run the real Stage 1-5 init; REARM only for a proven host-loss latch.
                     bool authorizeRecovery = action == GlobalStopRecoveryAction.Rearm;
                     var runtime = await StartRealInitAndVerifyAsync(
-                        domain, initTimeout, result, authorizeRecovery).ConfigureAwait(false);
+                        domain, initTimeout, result, authorizeRecovery, transportFactory).ConfigureAwait(false);
 
                     if (runtime is not null)
                     {
@@ -593,12 +620,21 @@ namespace SiebwaldeApp.RealInitHilHost
                     if (!result.Pass)
                     {
                         firstFailure ??= $"cycle {cyclesRun}: {result.FirstFailure ?? "init verification failed"}";
+                        failures++;
+                    }
+                    else
+                    {
+                        passes++;
                     }
 
                     AppendCampaignJsonl(jsonlPath, result);
 
-                    // Fail closed on the first unexpected deviation (no retry).
-                    if (!result.Pass)
+                    // Fail closed on the first unexpected deviation by default (no retry). With
+                    // --continue-on-fail, a RECOVERABLE init failure is counted and the loop
+                    // continues so the next cycle runs its safe REARM + init recovery. The
+                    // unexpected-global-stop STOP path above still breaks unconditionally and is
+                    // never re-armed, so --continue-on-fail never weakens the fail-closed stop.
+                    if (!result.Pass && !continueOnFail)
                     {
                         disposition = "FirstFailure";
                         break;
@@ -616,15 +652,30 @@ namespace SiebwaldeApp.RealInitHilHost
             }
 
             campaign.Cycle = cyclesRun;
-            campaign.Pass = firstFailure is null;
+            campaign.Pass = failures == 0;
             campaign.FirstFailure = firstFailure;
-            campaign.RecoveryAction = disposition;
-            campaign.AddTimeline(
-                $"CAMPAIGN {disposition} cycles={cyclesRun} duration={DateTimeOffset.UtcNow - startedAt}");
+            campaign.PassCount = passes;
+            campaign.FailCount = failures;
 
-            if (firstFailure is not null)
+            // A continue-on-fail soak that ran to its duration bound with recoverable failures
+            // "completed with failures"; it did NOT fail closed on the first deviation.
+            if (continueOnFail && failures > 0 && disposition == "DurationBoundReached")
+            {
+                disposition = "CompletedWithFailures";
+            }
+
+            campaign.Disposition = disposition;
+            campaign.AddTimeline(
+                $"CAMPAIGN {disposition} cycles={cyclesRun} passes={passes} failures={failures} duration={DateTimeOffset.UtcNow - startedAt}");
+
+            if (disposition == "FirstFailure" && firstFailure is not null)
             {
                 campaign.Faults.Add($"campaign failed closed: {firstFailure}");
+            }
+            else if (failures > 0)
+            {
+                campaign.Faults.Add(
+                    $"campaign completed with {failures} init failure(s); first failure: {firstFailure}");
             }
 
             AppendCampaignJsonl(jsonlPath, campaign);
@@ -655,18 +706,23 @@ namespace SiebwaldeApp.RealInitHilHost
         /// (250 CONNECT), issues one 111 query and returns the raw state (0/1/2/3), or null when the
         /// controller is unreachable or the reply does not arrive. No write, no re-arm, no slave
         /// register access. Disposes its own transport/comm before returning so the runtime can
-        /// acquire the controller-session lease afterwards.
+        /// acquire the controller-session lease afterwards. A non-null
+        /// <paramref name="transportFactory"/> substitutes the deterministic software transport
+        /// (offline tests only).
         /// </summary>
-        private static async Task<ushort?> ProbeGlobalStopStateAsync(TimeSpan timeout, CancellationToken ct)
+        private static async Task<ushort?> ProbeGlobalStopStateAsync(
+            TimeSpan timeout, CancellationToken ct, Func<ITrackTransport>? transportFactory = null)
         {
             var variables = new TrackApplicationVariables();
             TrackCommClientAsync comm;
             try
             {
-                var transport = new RawUdpTrackTransport(new RawUdpTransport(
-                    CoreConfiguration.TrackControllerIpAddress,
-                    CoreConfiguration.TrackControllerSendingPort,
-                    CoreConfiguration.TrackControllerReceivingPort));
+                ITrackTransport transport = transportFactory is not null
+                    ? transportFactory()
+                    : new RawUdpTrackTransport(new RawUdpTransport(
+                        CoreConfiguration.TrackControllerIpAddress,
+                        CoreConfiguration.TrackControllerSendingPort,
+                        CoreConfiguration.TrackControllerReceivingPort));
                 comm = new TrackCommClientAsync(transport, variables);
             }
             catch
@@ -749,9 +805,13 @@ namespace SiebwaldeApp.RealInitHilHost
         /// is applied during composition AFTER the per-start fail-closed reset. The caller (hil-d)
         /// sets this ONLY after a pre-read of 111 proved the latch reason is host-loss (state 1); it
         /// is never set for a host-initiated/unknown latch.
+        ///
+        /// <paramref name="transportFactory"/>, when non-null, is passed to the runtime host in place
+        /// of the real UDP transport (offline tests only); null keeps the real UDP transport.
         /// </summary>
         private static async Task<TrackApplicationRuntimeHost?> StartRealInitAndVerifyAsync(
-            int[] domain, TimeSpan timeout, HilResult result, bool authorizeRecovery = false)
+            int[] domain, TimeSpan timeout, HilResult result, bool authorizeRecovery = false,
+            Func<ITrackTransport>? transportFactory = null)
         {
             // Real mode fails closed on an empty domain: never let a malformed --domain silently
             // become an empty safety domain.
@@ -766,13 +826,14 @@ namespace SiebwaldeApp.RealInitHilHost
                 return null;
             }
 
-            // Same production composition the WPF application uses, except transportFactory: null
-            // (-> CreateRealTransport() real UDP) and TrackControlMode.Real. The controller-session
-            // lease is acquired INSIDE StartAsync(Real); this harness never pre-acquires it.
+            // Same production composition the WPF application uses, except the optional
+            // transportFactory (null -> CreateRealTransport() real UDP) and TrackControlMode.Real.
+            // The controller-session lease is acquired INSIDE StartAsync(Real) when no transport
+            // factory is injected; this harness never pre-acquires it.
             var runtime = new TrackApplicationRuntimeHost(
                 new NullEcosHostService(),
                 controlTrace: null,
-                transportFactory: null,
+                transportFactory: transportFactory,
                 amplifierGroups: groups);
 
             if (authorizeRecovery)
