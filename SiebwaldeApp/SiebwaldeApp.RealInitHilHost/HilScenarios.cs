@@ -745,8 +745,10 @@ namespace SiebwaldeApp.RealInitHilHost
         /// is empty (fail closed before any composition).
         ///
         /// <paramref name="authorizeRecovery"/>, when true, authorizes a global-stop re-arm (112)
-        /// before the start. The caller (hil-d) sets this ONLY after a pre-read of 111 proved the
-        /// latch reason is host-loss (state 1); it is never set for a host-initiated/unknown latch.
+        /// for the start via <see cref="TrackApplicationRuntimeHost.AuthorizeRecoveryOnStart"/>, which
+        /// is applied during composition AFTER the per-start fail-closed reset. The caller (hil-d)
+        /// sets this ONLY after a pre-read of 111 proved the latch reason is host-loss (state 1); it
+        /// is never set for a host-initiated/unknown latch.
         /// </summary>
         private static async Task<TrackApplicationRuntimeHost?> StartRealInitAndVerifyAsync(
             int[] domain, TimeSpan timeout, HilResult result, bool authorizeRecovery = false)
@@ -779,7 +781,10 @@ namespace SiebwaldeApp.RealInitHilHost
                 // The physical-stop-clear evidence source is the campaign's operator confirmation;
                 // the precondition step still re-confirms 111 before emitting 112 and re-checks the
                 // latch is still latched. Movement permission stays NotGranted regardless.
-                runtime.AuthorizeGlobalStopRecovery(() => true);
+                // Applied inside ComposeTrackPartAsync AFTER its per-start fail-closed reset, so a
+                // pre-StartAsync AuthorizeGlobalStopRecovery call is NOT used (it would be silently
+                // wiped by the reset).
+                runtime.AuthorizeRecoveryOnStart = true;
                 result.AddTimeline("RECOVERY authorized (REARM 112) for host-loss latch.");
             }
 

@@ -356,6 +356,74 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
+        public Task RealMode_LatchedHostLoss_AuthorizeRecoveryOnStart_RearmsAndProceeds()
+        {
+            // F1 regression: the campaign authorizes recovery via AuthorizeRecoveryOnStart BEFORE
+            // StartAsync. ComposeTrackPartAsync must apply it AFTER its per-start fail-closed reset
+            // (which sets _operatorRecoveryAuthorized=false), so the 112 REARM is actually emitted and
+            // Stage 1 proceeds instead of stalling on the 111=1 latch until timeout.
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                initialGlobalStopState: GlobalStopStatusMessage.LatchedHostLoss));
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                // Campaign pre-authorization (host-loss latch proven by a prior 111 pre-read).
+                runtime.AuthorizeRecoveryOnStart = true;
+
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                // REARM (112) was emitted during composition and init proceeded to Running.
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                var simulator = Assert.Single(factory.Created);
+                Assert.Contains((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.Contains((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+
+                // The C# controller mirrors the confirmed physical re-arm: Armed, no latch reason.
+                Assert.Equal(GlobalStopState.Armed, runtime.GlobalStop.State);
+                Assert.Null(runtime.GlobalStop.Reason);
+
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
+            }, Groups(1, 2, 3));
+        }
+
+        [Fact]
+        public Task RealMode_LatchedHostLoss_DefaultStart_DoesNotRearm_StaysGated()
+        {
+            // F1 control: the production default (AuthorizeRecoveryOnStart == false) must NOT emit
+            // 112. A normal (non-campaign) start against a latched controller stays gated at Stage 1
+            // (no 112, no 107) until an explicit operator AuthorizeGlobalStopRecovery — the campaign's
+            // pre-authorization is never an implicit auto-REARM for ordinary callers.
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                initialGlobalStopState: GlobalStopStatusMessage.LatchedHostLoss));
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                using var shortStart = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+                var startTask = runtime.StartAsync(TrackControlMode.Real, shortStart.Token);
+
+                await WaitUntilAsync(() => factory.Created.Count == 1, TimeSpan.FromSeconds(5));
+                var simulator = factory.Created[0];
+
+                await WaitUntilAsync(
+                    () => simulator.SentCommands.Contains(TrackCommand.GLOBAL_STOP_STATE),
+                    TimeSpan.FromSeconds(10));
+
+                // Latched + no recovery authorization: init is gated, still Starting, no 112/107.
+                Assert.Equal(TrackRuntimeState.Starting, runtime.State);
+                Assert.DoesNotContain((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+
+                // Cancel the gated start (fail-closed).
+                shortStart.Cancel();
+                await startTask;
+                Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+            }, Groups(1, 2, 3));
+        }
+
+        [Fact]
         public Task Restart_UsesFreshTransportAndLeavesNoStalePendingWrites()
         {
             var factory = new SimulatorFactory(new TrackSimulatorConfig());

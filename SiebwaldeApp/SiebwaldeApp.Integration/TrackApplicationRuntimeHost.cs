@@ -917,6 +917,19 @@ namespace SiebwaldeApp.Integration
             _operatorRecoveryAuthorized = false;
             _physicalStopInputsClear = () => false;
 
+            // Campaign-only pre-authorization (hil-d): applied AFTER the fail-closed reset above, so
+            // the production default (a normal start) is unchanged. The campaign sets
+            // AuthorizeRecoveryOnStart only after its own 111 pre-read proved the latch reason is
+            // LATCHED-HOST-LOSS (state 1); it is never set for a host-initiated/EMO latch (state 2).
+            // This re-arms during composition (after the reset) instead of being silently wiped by
+            // it. The flag is one-shot so a subsequent start/restart on the same host re-arms only
+            // if the caller explicitly re-authorizes.
+            if (AuthorizeRecoveryOnStart)
+            {
+                AuthorizeGlobalStopRecovery(() => true);
+                AuthorizeRecoveryOnStart = false;
+            }
+
             // Fresh, session-scoped, in-memory firmware-deployment authorization. It starts
             // unauthorized and is never persisted, so a restart can never reuse a prior grant.
             _firmwareDeploymentAuthorization.Reset();
@@ -1838,6 +1851,18 @@ namespace SiebwaldeApp.Integration
 
             return await authority.ReleaseAsync(slaveNumber, pwmSetpoint, ct).ConfigureAwait(false);
         }
+
+        /// <summary>
+        /// Campaign-only (hil-d) hook: when true, the next <see cref="StartAsync"/> authorizes a
+        /// global-stop re-arm (<c>REARM_GLOBAL_STOP</c> 112) during composition, applied AFTER the
+        /// per-start fail-closed reset of the recovery gate so a normal (non-campaign) start is
+        /// unaffected. The physical-stop-clear evidence is the campaign's operator confirmation
+        /// (always clear once this is set). The production default is false: a normal start NEVER
+        /// auto-re-arms a latched controller. Only the automated repeated-init campaign sets this,
+        /// and only after its own 111 pre-read proved the latch reason is LATCHED-HOST-LOSS (state 1);
+        /// a host-initiated/EMO latch (state 2) must never set it.
+        /// </summary>
+        public bool AuthorizeRecoveryOnStart { get; set; }
 
         /// <summary>
         /// Explicit operator action that authorizes a global-stop re-arm during startup recovery.
