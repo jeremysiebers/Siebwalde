@@ -538,6 +538,91 @@ namespace SiebwaldeApp.Core.Tests
         private static TrackAmplifierGroups Groups(params int[] mainRailway)
             => TrackAmplifierGroups.Create(mainRailway, null, null);
 
+        /// <summary>
+        /// True when <paramref name="frame"/> is a GROUP_READY write (HR_TRACK_POWER = 0x0002) on the
+        /// 108 (EXEC_MBUS_SLAVE_DATA_EXCH) write path. <c>frame[2]</c> is the target slave. Mirrors
+        /// the frame layout asserted by <see cref="GroupReadyStep"/> (see Stage4DiagnosticPauseTests).
+        /// </summary>
+        private static bool IsGroupReadyWrite(byte[] frame)
+            => frame.Length >= 8 &&
+               frame[1] == TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH &&
+               frame[3] == 0xAA && // write direction
+               frame[4] == 1 &&    // register count
+               frame[5] == TrackAmplifierRegisters.TrackPower &&
+               frame[6] == (TrackAmplifierRegisters.GroupReadyBit & 0xFF) &&
+               frame[7] == (TrackAmplifierRegisters.GroupReadyBit >> 8);
+
+        /// <summary>
+        /// Regression guard for the PV07-B repeated-init campaign: the CONFIGURED domain
+        /// {1,3,4,6} must survive repeated Start/Dispose cycles (the hil-d runner composes a fresh
+        /// <see cref="TrackApplicationRuntimeHost"/> per cycle from the same domain). The effective
+        /// GROUP_READY domain must stay {1,3,4,6} on every cycle — never collapse to the detected
+        /// slaves or to a single amplifier.
+        /// </summary>
+        [Fact]
+        public async Task RepeatedInitCycles_PreserveConfiguredDomain_GroupReadyToAllFourAmpsEveryCycle()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1, 3, 4, 6 }));
+            // The same int[] the hil-d runner passes to StartRealInitAndVerifyAsync on every cycle.
+            var domain = new[] { 1, 3, 4, 6 };
+
+            var originalFwPath = CoreSettings.Default.TrackAmplifierFwPath;
+            var tempHexPath = Path.Combine(Path.GetTempPath(), $"siebwalde-test-firmware-{Guid.NewGuid():N}.hex");
+            try
+            {
+                WriteTestFirmwareHex(tempHexPath);
+                CoreSettings.Default.TrackAmplifierFwPath = tempHexPath;
+
+                for (int cycle = 1; cycle <= 3; cycle++)
+                {
+                    // One fresh host per cycle (matches StartRealInitAndVerifyAsync in hil-d), each
+                    // re-derived from the SAME caller domain via TrackAmplifierGroups.Create.
+                    var runtime = new TrackApplicationRuntimeHost(
+                        new FakeEcosHostService(),
+                        controlTrace: null,
+                        transportFactory: factory.Create,
+                        amplifierGroups: Groups(domain));
+
+                    try
+                    {
+                        using var startTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+                        await runtime.StartAsync(TrackControlMode.Real, startTimeout.Token);
+
+                        Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                        Assert.Equal(InitializationStatus.StoppedAtGlobalReady, runtime.RunStatus);
+
+                        var simulator = factory.Created[cycle - 1];
+                        var groupReadyTargets = simulator.SentFrames
+                            .Where(IsGroupReadyWrite)
+                            .Select(f => f[2])
+                            .Distinct()
+                            .OrderBy(a => a)
+                            .ToArray();
+
+                        Assert.Equal(
+                            new byte[] { 1, 3, 4, 6 },
+                            groupReadyTargets);
+                    }
+                    finally
+                    {
+                        await runtime.DisposeAsync();
+                    }
+                }
+
+                Assert.Equal(3, factory.Created.Count);
+
+                // The caller's domain array must be untouched after every cycle (TrackAmplifierGroups
+                // copies defensively; the runner's per-cycle domain must never shrink or reorder).
+                Assert.Equal(new[] { 1, 3, 4, 6 }, domain);
+            }
+            finally
+            {
+                try { CoreSettings.Default.TrackAmplifierFwPath = originalFwPath; } catch { /* best-effort */ }
+                try { File.Delete(tempHexPath); } catch { /* best-effort */ }
+            }
+        }
+
         [Fact]
         public Task RealMode_AllDomainSlavesNeutral_MovementPermissionGranted_AndNonNeutralWrites108()
         {
