@@ -119,6 +119,7 @@ uint8_t SlaveId = 51; // Start with the backplanes first
 uint8_t iSlaveDetect = 0;
 
 bool SLAVExDETECT(){
+    RENEWxHOSTxAUTHORITY();
     bool return_val = false;
     
     switch (iSlaveDetect){

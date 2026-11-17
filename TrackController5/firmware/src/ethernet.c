@@ -356,7 +356,7 @@ void ETHERNET_Tasks ( void )
              * Reject truncated payloads before zero-filled bytes look valid. */
             if (udpRecv.header == HEADER && udpRecv.command >= EXEC_GLOBAL_STOP &&
                 udpRecv.command <= REARM_GLOBAL_STOP) {
-                if (rxed >= 2 && wMaxGet <= sizeof(udpTrans_t) &&
+                if (rxed >= 2 &&
                     ((udpRecv.command != EXEC_GLOBAL_STOP && udpRecv.command != HOST_HEARTBEAT) || rxed >= 4)) {
                     CONTROLLERxHANDLExSAFETYxCOMMAND(&udpRecv);
                 }

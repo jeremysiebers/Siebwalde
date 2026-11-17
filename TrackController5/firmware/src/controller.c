@@ -95,6 +95,15 @@ bool ISxGLOBALxSTOPxLATCHED(void)
     return GlobalStopLatch == GLOBAL_STOP_LATCHED;
 }
 
+/* Renews the host-loss watchdog from a cooperative (non-ISR) task. Used by the
+ * detect FSM, which runs ~2000 ms past the init-command dispatch with no new
+ * heartbeat frame to process; authority is extended relative to processing
+ * time (READxCORExTIMER()), matching the 110 heartbeat renewal semantics. */
+void RENEWxHOSTxAUTHORITY(void)
+{
+    LastHostHeartbeat = READxCORExTIMER();
+}
+
 static void REPORTxGLOBALxSTOPxSTATE(void)
 {
     if (ISxGLOBALxSTOPxLATCHED()) {
