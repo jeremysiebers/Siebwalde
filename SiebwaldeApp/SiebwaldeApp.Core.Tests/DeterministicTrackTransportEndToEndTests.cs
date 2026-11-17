@@ -424,6 +424,74 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
+        public Task RealMode_LatchedHostLoss_Rearm_DetectSlavesStall_FailsClosedBounded()
+        {
+            // F2 regression: after a fresh REARM (112) the amplifiers can stay lease-expired, which
+            // stalls the PIC32 slave detection so MBUS_STATE_SLAVE_DETECT / DONE never arrives.
+            // DetectSlavesMute models that stalled detection. The campaign still re-arms (REARM is
+            // authorized), Stage 1 completes and 101 is transmitted, but the DetectSlavesStep must
+            // fail closed on its bounded window instead of waiting ~90 s for the campaign timeout.
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                initialGlobalStopState: GlobalStopStatusMessage.LatchedHostLoss,
+                detectSlavesMute: true));
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                runtime.AuthorizeRecoveryOnStart = true; // campaign: host-loss latch proven by 111
+
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+                stopwatch.Stop();
+
+                // Fail-closed, not hung: the run completed well under the 90 s campaign timeout.
+                Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+                Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(30),
+                    $"start should fail closed in a bounded window, took {stopwatch.Elapsed}.");
+
+                var simulator = Assert.Single(factory.Created);
+                Assert.Contains((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.Contains((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+                Assert.Contains((byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT, simulator.SentCommands);
+            }, Groups(1, 2, 3));
+        }
+
+        [Fact]
+        public Task RealMode_LatchedHostLoss_DetectSlavesStall_WithoutRearm_StaysGated()
+        {
+            // F2 control: the production default (AuthorizeRecoveryOnStart == false) against a
+            // latched controller stays gated at Stage 1 — no 112, no 107, no 101 — so the campaign's
+            // stall path is only reachable after an explicit re-arm authorization, never on a normal
+            // (non-campaign) start.
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                initialGlobalStopState: GlobalStopStatusMessage.LatchedHostLoss,
+                detectSlavesMute: true));
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                using var shortStart = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+                var startTask = runtime.StartAsync(TrackControlMode.Real, shortStart.Token);
+
+                await WaitUntilAsync(() => factory.Created.Count == 1, TimeSpan.FromSeconds(5));
+                var simulator = factory.Created[0];
+
+                await WaitUntilAsync(
+                    () => simulator.SentCommands.Contains(TrackCommand.GLOBAL_STOP_STATE),
+                    TimeSpan.FromSeconds(10));
+
+                // Latched + no recovery authorization: init gated, still Starting, no 112/107/101.
+                Assert.Equal(TrackRuntimeState.Starting, runtime.State);
+                Assert.DoesNotContain((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+                Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT, simulator.SentCommands);
+
+                shortStart.Cancel();
+                await startTask;
+                Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+            }, Groups(1, 2, 3));
+        }
+
+        [Fact]
         public Task Restart_UsesFreshTransportAndLeavesNoStalePendingWrites()
         {
             var factory = new SimulatorFactory(new TrackSimulatorConfig());

@@ -27,13 +27,25 @@
         // In the legacy code this was effectively > 2.
         private readonly uint _minRequiredSlaves = 3;
 
+        /// <summary>
+        /// Bounded window for the controller's <c>MBUS_STATE_SLAVE_DETECT / DONE</c> acknowledgement.
+        /// A fresh REARM (112) after a host-stop latch can leave the amplifiers lease-expired, which
+        /// stalls the controller's slave detection and so the DONE ack never arrives; without a bound
+        /// this step would wait forever (the repeated-init campaign then times out after ~90 s).
+        /// Default 5 s matches <see cref="DataUploadStep"/>; a healthy controller acknowledges the
+        /// detection in well under a second.
+        /// </summary>
+        private readonly TimeSpan _timeout;
+        private DateTimeOffset _deadline;
+
         public string Name => "DetectSlaves";
 
         public DetectSlavesStep(
             ITrackCommClient commClient,
             TrackApplicationVariables variables,
             string loggerInstance = "Track",
-            uint attemptMax = 3)
+            uint attemptMax = 3,
+            TimeSpan? timeout = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             _variables = variables ?? throw new ArgumentNullException(nameof(variables));
@@ -42,6 +54,7 @@
             _subState = 0;
             _loopCounter = 1;
             _attemptMax = attemptMax;
+            _timeout = timeout ?? TimeSpan.FromSeconds(5);
 
             // Create dummy data container (like legacy constructor).
             var dummyData = new byte[80];
@@ -84,6 +97,7 @@
             await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
 
             _subState = 1;
+            _deadline = DateTimeOffset.UtcNow + _timeout;
 
             IoC.Logger.Log(
                 "State.DetectSlaves => EXEC_MBUS_STATE_SLAVE_DETECT.",
@@ -99,6 +113,19 @@
         /// </summary>
         private async Task<InitStepResult> ExecuteEvaluateDetectionAsync(ReceivedMessage? lastMessage, CancellationToken cancellationToken)
         {
+            // Fail closed when the controller never confirms command 101: a late DONE is never
+            // treated as authorization to resume, so the step completes (Next) only on a DONE
+            // observed within the window. Mirrors DataUploadStep's bounded acknowledgement.
+            if (DateTimeOffset.UtcNow >= _deadline)
+            {
+                _subState = 0;
+                _loopCounter = 1;
+                const string message =
+                    "Slave detection timed out waiting for MBUS_STATE_SLAVE_DETECT DONE.";
+                IoC.Logger.Log($"DetectSlavesStep => {message}", _loggerInstance);
+                return InitStepResult.Error(message);
+            }
+
             if (!lastMessage.HasValue)
             {
                 // No MBUS status yet, keep waiting.

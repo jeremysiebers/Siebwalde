@@ -92,6 +92,17 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         /// </summary>
         public bool ControllerMute { get; }
 
+        /// <summary>
+        /// When true the simulated controller acknowledges everything EXCEPT the slave-detect
+        /// result: command 101 (EXEC_MBUS_STATE_SLAVE_DETECT) produces no
+        /// <c>MBUS_STATE_SLAVE_DETECT / DONE</c> ack and no SLAVEINFO frame, modelling the F2
+        /// post-REARM stall where the PIC32 slave detection never completes (lease-expired
+        /// amplifiers). Used to prove the host's Stage-2 detection step fails closed instead of
+        /// waiting forever. Simulator-layer only; the production init logic is unchanged.
+        /// Defaults to false.
+        /// </summary>
+        public bool DetectSlavesMute { get; }
+
         public TrackSimulatorConfig(
             ushort firmwareChecksum = DefaultFirmwareChecksum,
             IReadOnlyList<byte>? detectedSlaves = null,
@@ -104,7 +115,8 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             byte initialGlobalStopState = 0,
             IReadOnlyCollection<byte>? groupReadyRejectSlaves = null,
             bool controllerMute = false,
-            IReadOnlyDictionary<byte, int>? protocolVersionDelayFrames = null)
+            IReadOnlyDictionary<byte, int>? protocolVersionDelayFrames = null,
+            bool detectSlavesMute = false)
         {
             FirmwareChecksum = firmwareChecksum;
             DetectedSlaves = detectedSlaves is null
@@ -132,6 +144,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             EmitGlobalStopArmedStatus = emitGlobalStopArmedStatus;
             InitialGlobalStopState = initialGlobalStopState;
             ControllerMute = controllerMute;
+            DetectSlavesMute = detectSlavesMute;
         }
     }
 
@@ -545,6 +558,13 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                     break;
 
                 case TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT: // 101
+                    if (_config.DetectSlavesMute)
+                    {
+                        // F2 model: the slave detection never completes (lease-expired amplifiers),
+                        // so no DONE ack and no SLAVEINFO frames are produced.
+                        break;
+                    }
+
                     writer.TryWrite(BuildControlFrame(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVE_DETECT, TaskStates.DONE));
                     foreach (var slave in _config.DetectedSlaves)
                     {
