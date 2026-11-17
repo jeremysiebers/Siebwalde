@@ -166,12 +166,14 @@ bool SLAVExDETECT(){
  */
 /*#--------------------------------------------------------------------------#*/
 #define BACKPLANE_SELECT_MAX_RETRIES 3u
+#define BACKPLANE_BUSY_MAX_RETRIES 20u
 static uint8_t RunSlaveDetect      = 0;
 static uint8_t BackplaneId         = 0;    // Used when slaves are checked
 static uint8_t PrevBackplaneId     = 0;    // Used to point to first slot again
 static uint8_t ShiftSlot2          = 0;
 uint16_t       ShiftSlotNr         = 0;
 static uint8_t BackplaneSelectRetries = 0;
+static uint8_t BackplaneBusyRetries   = 0;
 
 bool DetectSlave(uint8_t SlaveId){
     bool return_val = false;
@@ -208,20 +210,34 @@ bool DetectSlave(uint8_t SlaveId){
                     LOG_Printf("Mbus handler\t: DETECTSLAVE Backplane %d detected.", SlaveId);
                     RunSlaveDetect = 0;
                     return_val = true;
+                    BackplaneBusyRetries = 0;
                     break;                    
-                case SLAVENOK: 
+                case SLAVE_DATA_NOK:
+                case SLAVE_DATA_EXCEPTION:
+                case SLAVE_DATA_UNKNOWN:
+                case SLAVE_DATA_IDLE:
                     MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
                     LOG_Printf("Mbus handler\t: DETECTSLAVE Backplane %d not detected.", SlaveId);
                     RunSlaveDetect = 0;
                     return_val = true;
+                    BackplaneBusyRetries = 0;
                     break;
                 case SLAVE_DATA_TIMEOUT: 
                     MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
                     LOG_Printf("Mbus handler\t: DETECTSLAVE Backplane %d not detected.", SlaveId);
                     RunSlaveDetect = 0;
                     return_val = true;
+                    BackplaneBusyRetries = 0;
                     break;
-                case SLAVEBUSY: break;
+                case SLAVEBUSY:
+                    if (++BackplaneBusyRetries >= BACKPLANE_BUSY_MAX_RETRIES){
+                        MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
+                        LOG_Printf("Mbus handler\t: DETECTSLAVE Backplane %d not detected.", SlaveId);
+                        RunSlaveDetect = 0;
+                        return_val = true;
+                        BackplaneBusyRetries = 0;
+                    }
+                    break;
                 default : break;
             }
             break;
