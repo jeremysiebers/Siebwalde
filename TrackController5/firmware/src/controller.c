@@ -305,6 +305,17 @@ void CONTROLLER_Tasks ( void )
         
         case CONTROLLER_STATE_HANDLE_COMM_DATA:
         {
+            /* A HEADER-framed host command proves the host is alive and actively
+             * driving the bus: renew host authority so a legitimate init sequence
+             * (RESET 107 -> SLAVES_ON 100 -> SLAVE_DETECT 101 -> ...) is not aborted
+             * by the 2000 ms host-loss watchdog between heartbeat (110) frames. This
+             * state is reached only for HEADER frames pulled from the Ethernet
+             * receive mailbox (see CONTROLLER_STATE_IDLE), so slave-originated MBUS
+             * traffic can never renew authority here. A truly dead host sends no
+             * commands and still latches after HOST_AUTHORITY_WATCHDOG_MS. The
+             * 109-112 direct safety path (ethernet.c) and the latch logic are
+             * untouched. */
+            LastHostHeartbeat = READxCORExTIMER();
             switch(EthernetRecvData->command){
                 case EXEC_GLOBAL_STOP:
                 case HOST_HEARTBEAT:

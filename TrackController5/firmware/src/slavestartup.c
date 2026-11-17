@@ -279,9 +279,11 @@ bool DetectSlave(uint8_t SlaveId){
                     DelayCount1 = READxCORExTIMER();
                     BackplaneSelectRetries = 0;
                     break;                    
-                case SLAVENOK: 
+                case SLAVE_DATA_NOK:
+                case SLAVE_DATA_EXCEPTION:
+                case SLAVE_DATA_UNKNOWN:
                     MASTER_SLAVE_DATA[BackplaneId].SlaveDetected = false;
-                    LOG_Push("Mbus handler\t: DETECTSLAVE SLAVENOK returned in case 4.");
+                    LOG_Push("Mbus handler\t: DETECTSLAVE SLAVE_DATA_NOK/EXCEPTION/UNKNOWN returned in case 4.");
                     RunSlaveDetect = 0;
                     return_val = true;
                     BackplaneSelectRetries = 0;
@@ -368,10 +370,11 @@ bool DetectSlave(uint8_t SlaveId){
                     return_val = true;                    
                     //DRV_USART0_WriteByte('4');
                     break;                    
-                case SLAVENOK: 
+                case SLAVE_DATA_NOK:
+                case SLAVE_DATA_EXCEPTION:
+                case SLAVE_DATA_UNKNOWN:
                     RunSlaveDetect = 0;
                     return_val = true;
-                    LOG_Push("Mbus handler\t: DETECTSLAVE SLAVENOK returned in case 8.");
                     break;
                 case SLAVE_DATA_TIMEOUT:
                     RunSlaveDetect = 0;
