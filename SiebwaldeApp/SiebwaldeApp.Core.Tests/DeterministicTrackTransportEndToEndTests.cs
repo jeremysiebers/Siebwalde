@@ -313,6 +313,49 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
+        public Task RealMode_LatchedHostInitiated_NeverRearmedByCampaignDecision()
+        {
+            // A host-initiated (EMO/operator) latch must NEVER be re-armed by the automated repeated-init
+            // campaign. The campaign decision classifier maps 111=2 to StopFailClosed, so the runner would
+            // NOT call AuthorizeGlobalStopRecovery; without it the precondition step stays gated (no 112,
+            // no 107) and the runtime stays Starting. This is the campaign's "never-REARM-on-EMO/unexpected"
+            // guarantee, exercised end-to-end over the deterministic transport.
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                initialGlobalStopState: GlobalStopStatusMessage.LatchedHostInitiated));
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                // The campaign decision on a host-initiated latch is to STOP, never to re-arm.
+                Assert.Equal(
+                    GlobalStopRecoveryAction.StopFailClosed,
+                    GlobalStopRecoveryDecision.Decide(GlobalStopStatusMessage.LatchedHostInitiated));
+
+                using var shortStart = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+                var startTask = runtime.StartAsync(TrackControlMode.Real, shortStart.Token);
+
+                await WaitUntilAsync(() => factory.Created.Count == 1, TimeSpan.FromSeconds(5));
+                var simulator = factory.Created[0];
+
+                await WaitUntilAsync(
+                    () => simulator.SentCommands.Contains(TrackCommand.GLOBAL_STOP_STATE),
+                    TimeSpan.FromSeconds(10));
+
+                // Latched host-initiated + campaign STOP: init is gated, still Starting, and neither
+                // 112 (re-arm) nor 107 (reset) has been emitted.
+                Assert.Equal(TrackRuntimeState.Starting, runtime.State);
+                Assert.DoesNotContain((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+
+                // The campaign did not authorize recovery, so the start is cancelled (fail-closed).
+                // StartAsync does not throw on an init failure: it transitions to Failed.
+                shortStart.Cancel();
+                await startTask;
+                Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+            });
+        }
+
+        [Fact]
         public Task Restart_UsesFreshTransportAndLeavesNoStalePendingWrites()
         {
             var factory = new SimulatorFactory(new TrackSimulatorConfig());

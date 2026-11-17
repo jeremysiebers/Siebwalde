@@ -12,12 +12,16 @@ namespace SiebwaldeApp.RealInitHilHost
     ///   SiebwaldeApp.RealInitHilHost hil-b [--jsonl &lt;path&gt;] [--domain 1,3,4,6] [--timeout &lt;seconds&gt;]
     ///   SiebwaldeApp.RealInitHilHost hil-c [--jsonl &lt;path&gt;] [--domain 1,3,4,6] [--timeout &lt;seconds&gt;]
     ///                       [--poll-interval &lt;seconds&gt;] [--max-duration &lt;seconds&gt;] [--stop-file &lt;path&gt;]
+    ///   SiebwaldeApp.RealInitHilHost hil-d [--jsonl &lt;path&gt;] [--domain 1,3,4,6] [--timeout &lt;seconds&gt;]
+    ///                       [--max-duration &lt;seconds&gt;] [--stop-file &lt;path&gt;]
     ///
     /// hil-a is passive diagnostics (read-only). hil-b composes the REAL production runtime host and
     /// runs the conditional Stage 1-5 init once, asserting the expected terminal state. hil-c does the
     /// same init once, then HOLDS the session (single-session READY endurance — NOT a repeated-init
-    /// test) and monitors for up to --max-duration (default 8 h). Exit code 0 on pass, non-zero on
-    /// fail. No subcommand flashes firmware or energizes track power.
+    /// test) and monitors for up to --max-duration (default 8 h). hil-d is the REARM + repeated
+    /// Stage 1-5 init campaign loop: it re-arms (112) ONLY a proven host-loss latch and fails closed
+    /// on a host-initiated/EMO/unknown latch. Exit code 0 on pass, non-zero on fail. No subcommand
+    /// flashes firmware or energizes track power.
     /// </summary>
     internal static class Program
     {
@@ -56,6 +60,7 @@ namespace SiebwaldeApp.RealInitHilHost
                     case "hil-a":
                     case "hil-b":
                     case "hil-c":
+                    case "hil-d":
                         subcommand = args[i];
                         break;
                     case "--help":
@@ -71,17 +76,18 @@ namespace SiebwaldeApp.RealInitHilHost
 
             if (subcommand is null)
             {
-                Console.Error.WriteLine("Missing required subcommand (hil-a | hil-b | hil-c).");
+                Console.Error.WriteLine("Missing required subcommand (hil-a | hil-b | hil-c | hil-d).");
                 PrintUsage();
                 return 2;
             }
 
-            // Ctrl+C is the operator STOP signal for the long-running hil-c hold: defer termination
-            // and cancel the hold cleanly. For hil-a/hil-b the default terminate-on-Ctrl+C is kept.
+            // Ctrl+C is the operator STOP signal for the long-running hil-c hold and the hil-d
+            // repeated-init campaign: defer termination and cancel the run cleanly. For hil-a/hil-b
+            // the default terminate-on-Ctrl+C is kept.
             using var operatorStop = new CancellationTokenSource();
             Console.CancelKeyPress += (_, e) =>
             {
-                if (subcommand == "hil-c")
+                if (subcommand == "hil-c" || subcommand == "hil-d")
                 {
                     e.Cancel = true;
                     operatorStop.Cancel();
@@ -96,15 +102,17 @@ namespace SiebwaldeApp.RealInitHilHost
                     "hil-b" => await HilScenarios.RunHilBAsync(domain, timeout).ConfigureAwait(false),
                     "hil-c" => await HilScenarios.RunHilCAsync(
                         domain, timeout, pollInterval, maxDuration, jsonlPath, stopFilePath, operatorStop.Token).ConfigureAwait(false),
+                    "hil-d" => await HilScenarios.RunHilDAsync(
+                        domain, timeout, maxDuration, jsonlPath, stopFilePath, operatorStop.Token).ConfigureAwait(false),
                     _ => throw new ArgumentException($"Unknown subcommand '{subcommand}'."),
                 };
 
                 PrintSummary(result);
 
-                // For hil-c the --jsonl path is the endurance evidence file (per-poll samples +
-                // summary, written by the runner). The HilResult is printed to the console only, so
-                // the JSONL file keeps a single JSON shape.
-                if (jsonlPath is not null && subcommand != "hil-c")
+                // For hil-c/hil-d the --jsonl path is written by the runner (per-poll samples for
+                // hil-c, per-cycle lines + summary for hil-d); the HilResult is printed to the console
+                // only, so the JSONL file keeps a single JSON shape.
+                if (jsonlPath is not null && subcommand != "hil-c" && subcommand != "hil-d")
                 {
                     await WriteJsonlAsync(jsonlPath, result).ConfigureAwait(false);
                 }
@@ -231,9 +239,10 @@ namespace SiebwaldeApp.RealInitHilHost
 
         private static void PrintUsage()
         {
-            Console.WriteLine("Usage: SiebwaldeApp.RealInitHilHost hil-a|hil-b|hil-c [--jsonl <path>] [--domain 1,3,4,6]");
+            Console.WriteLine("Usage: SiebwaldeApp.RealInitHilHost hil-a|hil-b|hil-c|hil-d [--jsonl <path>] [--domain 1,3,4,6]");
             Console.WriteLine("                                    [--timeout <seconds>]");
             Console.WriteLine("  hil-c additionally: [--poll-interval <seconds>] [--max-duration <seconds>] [--stop-file <path>]");
+            Console.WriteLine("  hil-d additionally: [--max-duration <seconds>] [--stop-file <path>]");
             Console.WriteLine();
             Console.WriteLine("Subcommands (REAL hardware, NOT run in offline builds):");
             Console.WriteLine("  hil-a  Passive diagnostics: controller identity (113), global-stop state (111), and");
@@ -250,11 +259,21 @@ namespace SiebwaldeApp.RealInitHilHost
             Console.WriteLine("         watchdog bypass. Stops cleanly on the 8 h bound, an operator STOP (Ctrl+C or the");
             Console.WriteLine("         --stop-file appearing), or the first deviation. Per-poll JSONL evidence is written");
             Console.WriteLine("         to --jsonl when given.");
+            Console.WriteLine("  hil-d  REARM + REPEATED Stage 1-5 init (the authorized campaign loop). Per cycle it reads");
+            Console.WriteLine("         the 111 global-stop state, then: a LATCHED-HOST-LOSS latch (1) authorizes a single");
+            Console.WriteLine("         REARM (112); a host-initiated/EMO latch (2) or an unknown/unexpected/unreachable");
+            Console.WriteLine("         state STOPS (never re-arms); otherwise it runs the Stage 1-5 init and verifies every");
+            Console.WriteLine("         domain amplifier is READY (recording per-amp HR8/HR9/HR22). Bounded per cycle and");
+            Console.WriteLine("         overall (--max-duration, default 8 h); operator STOP via Ctrl+C or --stop-file.");
+            Console.WriteLine("         Fails closed on the first unexpected deviation. No Stage 6/7, no energization, no flash.");
+            Console.WriteLine("         Per-cycle JSONL evidence is written to --jsonl when given.");
             Console.WriteLine();
             Console.WriteLine("Safety:");
             Console.WriteLine("  No subcommand flashes firmware (no 122/131/123/125/126/127, no bootloader ERASE/PROGRAM)");
-            Console.WriteLine("  and none energizes track power (Stage 6 is never called). hil-b/hil-c use the production");
-            Console.WriteLine("  controller-session lease acquired by StartAsync(Real); this harness never pre-acquires it.");
+            Console.WriteLine("  and none energizes track power (Stage 6 is never called). hil-b/hil-c/hil-d use the");
+            Console.WriteLine("  production controller-session lease acquired by StartAsync(Real); this harness never");
+            Console.WriteLine("  pre-acquires it. hil-d REARMs (112) ONLY for a proven host-loss latch (111=1), never for a");
+            Console.WriteLine("  host-initiated/EMO latch or an unknown state.");
             Console.WriteLine();
             Console.WriteLine("Exit code 0 on pass, non-zero on fail.");
         }

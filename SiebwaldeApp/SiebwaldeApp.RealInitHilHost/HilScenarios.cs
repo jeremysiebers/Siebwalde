@@ -30,10 +30,13 @@ namespace SiebwaldeApp.RealInitHilHost
         public string? Phase1Failure { get; set; }
         public string Hr7 { get; set; } = "0x0000";
         public string Hr11 { get; set; } = "0x0000";
+        public string Hr1 { get; set; } = "0x0000";
         public string Hr8 { get; set; } = "0x0000";
+        public string Hr9 { get; set; } = "0x0000";
         public string Hr21 { get; set; } = "0x0000";
         public string Hr22 { get; set; } = "0x0000";
         public int Hr22Protocol { get; set; }
+        public bool Ready { get; set; }
 
         public Dictionary<string, object?> ToJson() => new()
         {
@@ -43,10 +46,13 @@ namespace SiebwaldeApp.RealInitHilHost
             ["phase1Failure"] = Phase1Failure,
             ["hr7"] = Hr7,
             ["hr11"] = Hr11,
+            ["hr1"] = Hr1,
             ["hr8"] = Hr8,
+            ["hr9"] = Hr9,
             ["hr21"] = Hr21,
             ["hr22"] = Hr22,
             ["hr22Protocol"] = Hr22Protocol,
+            ["ready"] = Ready,
         };
     }
 
@@ -76,6 +82,12 @@ namespace SiebwaldeApp.RealInitHilHost
         public Dictionary<string, string> Stages { get; set; } = new();
         public List<AmpRecord> Amps { get; } = new();
 
+        // Repeated-init campaign (hil-d) fields: one JSONL line per cycle records the cycle index,
+        // the recovery action taken from the 111 read, and the first failure (if any).
+        public int Cycle { get; set; }
+        public string RecoveryAction { get; set; } = string.Empty;
+        public string? FirstFailure { get; set; }
+
         public void Check(string name, bool pass, string detail) => Checks.Add(new HilCheck(name, pass, detail));
 
         public void AddTimeline(string entry) => Timeline.Add($"{DateTimeOffset.UtcNow:O} {entry}");
@@ -97,6 +109,9 @@ namespace SiebwaldeApp.RealInitHilHost
             ["checks"] = Checks.Select(c => new { c.Name, c.Pass, c.Detail }).ToList(),
             ["timeline"] = Timeline,
             ["faults"] = Faults,
+            ["cycle"] = Cycle,
+            ["recoveryAction"] = RecoveryAction,
+            ["firstFailure"] = FirstFailure,
         };
     }
 
@@ -462,6 +477,265 @@ namespace SiebwaldeApp.RealInitHilHost
             return result;
         }
 
+        // ---------------------------------------------------------------------------------
+        // hil-d — REARM + repeated Stage 1-5 init (the authorized campaign loop)
+        // ---------------------------------------------------------------------------------
+
+        /// <summary>
+        /// The REARM + repeated-init campaign runner. Per cycle it: (a) reads the 111 global-stop
+        /// state (bounded); (b) classifies it — a LATCHED-HOST-LOSS latch (1) authorizes a single
+        /// REARM (112), while a host-initiated/EMO latch (2) or an unknown/unexpected/unreachable
+        /// state STOPS (never re-arms); (c) runs the real Stage 1-5 init via
+        /// <see cref="StartRealInitAndVerifyAsync"/>; (d) verifies every domain amplifier is READY
+        /// and records per-amp HR8/HR9/HR22; (e) performs a controlled Stop (DisposeAsync); (f) writes
+        /// one JSONL line per cycle. It is bounded per cycle (<paramref name="initTimeout"/>) and
+        /// overall (<paramref name="maxDuration"/>), honours an operator STOP file and Ctrl+C, and
+        /// fails closed on the first unexpected deviation (no retry). No Stage 6/7, no track
+        /// energization, no firmware flash.
+        /// </summary>
+        public static async Task<HilResult> RunHilDAsync(
+            int[] domain,
+            TimeSpan initTimeout,
+            TimeSpan maxDuration,
+            string? jsonlPath,
+            string? stopFilePath,
+            CancellationToken operatorStopToken)
+        {
+            var campaign = new HilResult("hil-d");
+            campaign.Check("campaign-mode", true, "REARM + repeated Stage 1-5 init (no Stage 6/7, no flash)");
+
+            var startedAt = DateTimeOffset.UtcNow;
+            using var campaignCts = CancellationTokenSource.CreateLinkedTokenSource(operatorStopToken);
+            campaignCts.CancelAfter(maxDuration);
+
+            var stopFileTask = stopFilePath is not null
+                ? WatchStopFileAsync(stopFilePath, campaignCts)
+                : null;
+
+            int cyclesRun = 0;
+            string? firstFailure = null;
+            string disposition = "DurationBoundReached";
+
+            try
+            {
+                while (true)
+                {
+                    // Overall budget / operator STOP gate (checked before every cycle).
+                    if (operatorStopToken.IsCancellationRequested)
+                    {
+                        disposition = "OperatorStop";
+                        break;
+                    }
+
+                    if (DateTimeOffset.UtcNow - startedAt >= maxDuration)
+                    {
+                        disposition = "DurationBoundReached";
+                        break;
+                    }
+
+                    cyclesRun++;
+
+                    var result = new HilResult("hil-d") { Cycle = cyclesRun };
+
+                    // (a) read the 111 global-stop state (bounded).
+                    ushort? state;
+                    try
+                    {
+                        state = await ProbeGlobalStopStateAsync(initTimeout, campaignCts.Token)
+                            .ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        disposition = operatorStopToken.IsCancellationRequested
+                            ? "OperatorStop"
+                            : "DurationBoundReached";
+                        break;
+                    }
+
+                    result.GlobalStopState = state.HasValue ? DescribeGlobalStop(state.Value) : "unknown";
+                    var action = GlobalStopRecoveryDecision.Decide(state);
+                    result.RecoveryAction = action switch
+                    {
+                        GlobalStopRecoveryAction.ProceedNoRearm => "none (not latched)",
+                        GlobalStopRecoveryAction.Rearm => "REARM (112) once",
+                        _ => "STOP (fail-closed, no REARM)",
+                    };
+
+                    // (b) host-initiated / EMO / unexpected / unreachable -> STOP, never re-arm.
+                    if (action == GlobalStopRecoveryAction.StopFailClosed)
+                    {
+                        var why = state.HasValue
+                            ? $"global-stop state {state.Value} ({result.GlobalStopState}) is not an expected host-loss latch"
+                            : "controller unreachable (no 111 reply)";
+                        result.FirstFailure = why;
+                        result.Faults.Add(why);
+                        result.Pass = false;
+                        firstFailure ??= $"cycle {cyclesRun}: {why}";
+                        AppendCampaignJsonl(jsonlPath, result);
+                        disposition = "FirstFailure";
+                        break;
+                    }
+
+                    // (c) run the real Stage 1-5 init; REARM only for a proven host-loss latch.
+                    bool authorizeRecovery = action == GlobalStopRecoveryAction.Rearm;
+                    var runtime = await StartRealInitAndVerifyAsync(
+                        domain, initTimeout, result, authorizeRecovery).ConfigureAwait(false);
+
+                    if (runtime is not null)
+                    {
+                        // (e) controlled Stop (commands + observes neutral, never energizes).
+                        await ShutdownRuntimeAsync(runtime, result).ConfigureAwait(false);
+                    }
+
+                    // (d) verify all amps READY + record per-amp HR8/HR9/HR22 (already in result.Amps).
+                    DeriveFirstFailure(result);
+
+                    if (!result.Pass)
+                    {
+                        firstFailure ??= $"cycle {cyclesRun}: {result.FirstFailure ?? "init verification failed"}";
+                    }
+
+                    AppendCampaignJsonl(jsonlPath, result);
+
+                    // Fail closed on the first unexpected deviation (no retry).
+                    if (!result.Pass)
+                    {
+                        disposition = "FirstFailure";
+                        break;
+                    }
+                }
+            }
+            finally
+            {
+                if (stopFileTask is not null)
+                {
+                    campaignCts.Cancel();
+                    try { await stopFileTask.ConfigureAwait(false); }
+                    catch (OperationCanceledException) { /* watcher stopped */ }
+                }
+            }
+
+            campaign.Cycle = cyclesRun;
+            campaign.Pass = firstFailure is null;
+            campaign.FirstFailure = firstFailure;
+            campaign.RecoveryAction = disposition;
+            campaign.AddTimeline(
+                $"CAMPAIGN {disposition} cycles={cyclesRun} duration={DateTimeOffset.UtcNow - startedAt}");
+
+            if (firstFailure is not null)
+            {
+                campaign.Faults.Add($"campaign failed closed: {firstFailure}");
+            }
+
+            AppendCampaignJsonl(jsonlPath, campaign);
+            return campaign;
+        }
+
+        /// <summary>Sets <see cref="HilResult.FirstFailure"/> from the first failing check or fault.</summary>
+        private static void DeriveFirstFailure(HilResult result)
+        {
+            if (result.FirstFailure is not null)
+            {
+                return;
+            }
+
+            var failedCheck = result.Checks.FirstOrDefault(c => !c.Pass);
+            if (failedCheck is not null)
+            {
+                result.FirstFailure = $"{failedCheck.Name}: {failedCheck.Detail}";
+            }
+            else if (result.Faults.Count > 0)
+            {
+                result.FirstFailure = result.Faults[0];
+            }
+        }
+
+        /// <summary>
+        /// Bounded, read-only read of the PIC32 <c>GLOBAL_STOP_STATE</c> (111). Establishes a session
+        /// (250 CONNECT), issues one 111 query and returns the raw state (0/1/2/3), or null when the
+        /// controller is unreachable or the reply does not arrive. No write, no re-arm, no slave
+        /// register access. Disposes its own transport/comm before returning so the runtime can
+        /// acquire the controller-session lease afterwards.
+        /// </summary>
+        private static async Task<ushort?> ProbeGlobalStopStateAsync(TimeSpan timeout, CancellationToken ct)
+        {
+            var variables = new TrackApplicationVariables();
+            TrackCommClientAsync comm;
+            try
+            {
+                var transport = new RawUdpTrackTransport(new RawUdpTransport(
+                    CoreConfiguration.TrackControllerIpAddress,
+                    CoreConfiguration.TrackControllerSendingPort,
+                    CoreConfiguration.TrackControllerReceivingPort));
+                comm = new TrackCommClientAsync(transport, variables);
+            }
+            catch
+            {
+                return null;
+            }
+
+            try
+            {
+                await comm.StartAsync(realHardwareMode: true, ct).ConfigureAwait(false);
+                var probe = new BoundedCommProbe(comm);
+
+                var connect = await probe.SendAndWaitAsync(
+                    EnumClientCommands.CLIENT_CONNECTION_REQUEST,
+                    SessionCommandData,
+                    m => m.TaskId == TaskId.CONTROLLER && m.Taskcommand == TaskStates.CONNECTED && m.Taskstate == TaskStates.DONE,
+                    timeout,
+                    ct).ConfigureAwait(false);
+                if (!connect.HasValue)
+                {
+                    return null;
+                }
+
+                var gs = await probe.SendAndWaitAsync(
+                    TrackCommand.GLOBAL_STOP_STATE,
+                    Array.Empty<byte>(),
+                    m => m.TaskId == TaskId.CONTROLLER && m.Taskcommand == TrackCommand.GLOBAL_STOP_STATE && m.Taskstate == TaskStates.DONE,
+                    timeout,
+                    ct).ConfigureAwait(false);
+
+                probe.Detach();
+                return gs.HasValue ? gs.Value.Taskmessage : null;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch
+            {
+                return null;
+            }
+            finally
+            {
+                try { await comm.DisposeAsync().ConfigureAwait(false); }
+                catch { /* best-effort teardown */ }
+            }
+        }
+
+        /// <summary>Appends one JSONL evidence line (one cycle or the campaign summary) to a file.</summary>
+        private static void AppendCampaignJsonl(string? path, HilResult result)
+        {
+            if (path is null)
+            {
+                return;
+            }
+
+            var fullPath = Path.GetFullPath(path);
+            var directory = Path.GetDirectoryName(fullPath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.AppendAllText(
+                fullPath,
+                JsonSerializer.Serialize(result.ToJson()) + Environment.NewLine,
+                Encoding.UTF8);
+        }
+
         /// <summary>
         /// Composes the REAL production runtime host (transportFactory: null -> real UDP,
         /// TrackControlMode.Real), starts it ONCE, and verifies the expected terminal state
@@ -469,9 +743,13 @@ namespace SiebwaldeApp.RealInitHilHost
         /// not authorized, all domain amplifiers READY). The returned runtime is left RUNNING (not
         /// disposed): the caller owns the subsequent hold and shutdown. Returns null when the domain
         /// is empty (fail closed before any composition).
+        ///
+        /// <paramref name="authorizeRecovery"/>, when true, authorizes a global-stop re-arm (112)
+        /// before the start. The caller (hil-d) sets this ONLY after a pre-read of 111 proved the
+        /// latch reason is host-loss (state 1); it is never set for a host-initiated/unknown latch.
         /// </summary>
         private static async Task<TrackApplicationRuntimeHost?> StartRealInitAndVerifyAsync(
-            int[] domain, TimeSpan timeout, HilResult result)
+            int[] domain, TimeSpan timeout, HilResult result, bool authorizeRecovery = false)
         {
             // Real mode fails closed on an empty domain: never let a malformed --domain silently
             // become an empty safety domain.
@@ -494,6 +772,16 @@ namespace SiebwaldeApp.RealInitHilHost
                 controlTrace: null,
                 transportFactory: null,
                 amplifierGroups: groups);
+
+            if (authorizeRecovery)
+            {
+                // Campaign REARM: only for a proven host-loss latch (the caller's 111 pre-read).
+                // The physical-stop-clear evidence source is the campaign's operator confirmation;
+                // the precondition step still re-confirms 111 before emitting 112 and re-checks the
+                // latch is still latched. Movement permission stays NotGranted regardless.
+                runtime.AuthorizeGlobalStopRecovery(() => true);
+                result.AddTimeline("RECOVERY authorized (REARM 112) for host-loss latch.");
+            }
 
             // Capture per-amp readbacks and per-stage statuses from events so a FAILED start (whose
             // cleanup nulls the runtime's track-part fields) still leaves observable evidence. The
@@ -769,8 +1057,10 @@ namespace SiebwaldeApp.RealInitHilHost
         private static AmpRecord BuildAmpRecord(TrackAmplifierItem amp)
         {
             var regs = amp.HoldingReg ?? new ushort[TrackAmplifierRegisters.Count];
+            var hr1 = regs.Length > TrackAmplifierRegisters.Control ? regs[TrackAmplifierRegisters.Control] : (ushort)0;
             var hr7 = regs.Length > TrackAmplifierRegisters.Identity ? regs[TrackAmplifierRegisters.Identity] : (ushort)0;
             var hr8 = regs.Length > TrackAmplifierRegisters.State ? regs[TrackAmplifierRegisters.State] : (ushort)0;
+            var hr9 = regs.Length > TrackAmplifierRegisters.Fault ? regs[TrackAmplifierRegisters.Fault] : (ushort)0;
             var hr11 = regs.Length > TrackAmplifierRegisters.SwChecksum ? regs[TrackAmplifierRegisters.SwChecksum] : (ushort)0;
             var hr21 = regs.Length > TrackAmplifierRegisters.FwVersionMajorMinor ? regs[TrackAmplifierRegisters.FwVersionMajorMinor] : (ushort)0;
             var hr22 = regs.Length > TrackAmplifierRegisters.FwVersionPatchProtocol ? regs[TrackAmplifierRegisters.FwVersionPatchProtocol] : (ushort)0;
@@ -783,10 +1073,13 @@ namespace SiebwaldeApp.RealInitHilHost
                 Phase1Failure = amp.Phase1Failure,
                 Hr7 = $"0x{hr7:X4}",
                 Hr11 = $"0x{hr11:X4}",
+                Hr1 = $"0x{hr1:X4}",
                 Hr8 = $"0x{hr8:X4}",
+                Hr9 = $"0x{hr9:X4}",
                 Hr21 = $"0x{hr21:X4}",
                 Hr22 = $"0x{hr22:X4}",
                 Hr22Protocol = TrackAmplifierRegisters.FwProtocolVersion(hr22),
+                Ready = (hr8 & 0xF) == TrackAmplifierRegisters.ReadyState,
             };
         }
 
