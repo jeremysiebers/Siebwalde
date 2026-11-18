@@ -315,6 +315,68 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         // ---------------------------------------------------------------------
+        // APPLY transition requirement (stale-frame false negative, 0xC708)
+        // ---------------------------------------------------------------------
+
+        [Fact]
+        public void ConfigApplyVerified_RequiresTransition_FromBaseline()
+        {
+            ushort[] values = { 0x0202, 8, 250, 55 };
+            var item = new TrackAmplifierItem { SlaveNumber = 1 };
+            item.HoldingReg[TrackAmplifierRegisters.ConfigRamp] = 0x0202;
+            item.HoldingReg[TrackAmplifierRegisters.ConfigFastStop] = 8;
+            item.HoldingReg[TrackAmplifierRegisters.ConfigWatchdog] = 250;
+            item.HoldingReg[TrackAmplifierRegisters.ConfigTag] = 55;
+            item.ProtocolReadbackSequence = 2;
+
+            // Genuine 0 -> 0x0600 transition (baseline 0x0000): ACCEPT.
+            item.HoldingReg[TrackAmplifierRegisters.State] = 0x0600;
+            Assert.True(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 1, 0x0000, values));
+
+            // Already-configured (baseline already 0x0600, idempotent re-APPLY): still ACCEPT on a
+            // fresh frame (must NOT false-negative a revalidation re-run).
+            Assert.True(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 1, 0x0600, values));
+
+            // Stale frame (config_ok still clear, pre-APPLY): REJECT.
+            item.HoldingReg[TrackAmplifierRegisters.State] = 0x0000;
+            Assert.False(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 1, 0x0000, values));
+
+            // Not a fresh frame (sequence did not advance): REJECT.
+            item.HoldingReg[TrackAmplifierRegisters.State] = 0x0600;
+            Assert.False(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 2, 0x0000, values));
+        }
+
+        // ---------------------------------------------------------------------
+        // Identity/protocol settle-then-reverify (stale-identity false negative, 0xC701)
+        // ---------------------------------------------------------------------
+
+        [Fact]
+        public async Task DownloadAsync_StaleProtocolVersion_SettlesAndSucceeds()
+        {
+            // HR22 PROTOCOL_VERSION lags the earlier HR7/identity packet for the first few frames
+            // (PIC32 SIP10 lag). The settle-then-reverify must wait for the compatible HR22, not
+            // false-negative "incompatible protocol version" on the first stale frame.
+            var (client, _, item) = await StartDetectedAsync(new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1 },
+                protocolVersionDelayFrames: new Dictionary<byte, int> { { 1, 5 } },
+                periodicSlaveInfoInterval: TimeSpan.FromMilliseconds(20))).ConfigureAwait(false);
+            try
+            {
+                var downloader = new AmplifierConfigurationDownloader(client);
+
+                var ok = await downloader.DownloadAsync(item, new AmplifierConfiguration(), CancellationToken.None);
+
+                Assert.True(ok);
+                Assert.True(item.ConfigurationVerified);
+                Assert.Null(item.Phase1Failure);
+            }
+            finally
+            {
+                await client.DisposeAsync();
+            }
+        }
+
+        // ---------------------------------------------------------------------
         // Helpers
         // ---------------------------------------------------------------------
 

@@ -41,6 +41,15 @@ namespace SiebwaldeApp.Core
         /// </summary>
         private static readonly TimeSpan ApplySubTimeout = TimeSpan.FromMilliseconds(300);
 
+        /// <summary>
+        /// Identity/protocol settle window: the PIC32 cyclic SLAVEINFO upload polls only 2 registers
+        /// per cycle, so a single frame can carry a stale/absent HR7/HR22. The entry gate waits this
+        /// long for a FRESH frame whose HR7 identity and HR22 protocol are BOTH compatible before
+        /// classifying "incompatible" (fail-closed). Runs before the overall <see cref="Timeout"/>
+        /// deadline is armed.
+        /// </summary>
+        private static readonly TimeSpan IdentitySettleTimeout = TimeSpan.FromMilliseconds(500);
+
         public AmplifierConfigurationDownloader(ITrackCommClient comm, Action<string>? log = null)
         {
             _comm = comm;
@@ -63,7 +72,14 @@ namespace SiebwaldeApp.Core
             item.ConfigurationVerified = false;
             _log?.Invoke($"slave={slave} OBSERVED ConfigurationVerified=false (reset)");
 
-            if (!AmplifierPhase1Safety.Compatible(item))
+            // Bounded settle-then-reverify: the PIC32 cyclic SLAVEINFO upload polls only 2
+            // registers per cycle, so a single frame can carry a stale/absent HR7/HR22. Classifying
+            // on one such frame is the 0xC701 false negative ("incompatible firmware" for a
+            // genuinely compatible amp). Wait for a FRESH frame whose HR7 identity and HR22 protocol
+            // are BOTH compatible before proceeding; only a genuinely incompatible HR7/HR22 (or an
+            // exhausted settle window) fails closed.
+            bool compatible = await SettleCompatibleAsync(item, ct).ConfigureAwait(false);
+            if (!compatible)
             {
                 item.Phase1Failure = AmplifierPhase1Safety.IncompatibilityReason(item)
                     ?? AmplifierPhase1Safety.IncompatibleFirmware;
@@ -117,6 +133,13 @@ namespace SiebwaldeApp.Core
                     await WriteAndVerifyAsync(item, address, values[i], deadline.Token).ConfigureAwait(false);
                 }
 
+                // Capture the pre-APPLY baseline of the config bits (INIT_DONE|CONFIG_OK). The amps
+                // are reset per cycle (config_ok returns to 0), so a genuine APPLY is a 0 -> 0x0600
+                // transition; requiring the observed config bits to DIFFER from this baseline proves
+                // the observed config_ok is THIS cycle's APPLY effect, not a stale value carried over
+                // from a prior cycle.
+                ushort configBaseline = (ushort)(item.HoldingReg[TrackAmplifierRegisters.State] & 0x0600u);
+
                 // Bounded, edge-re-arming APPLY. The PIC18 APPLY is edge-triggered on HR1
                 // (Control): a latched prev_control_word == ApplyConfigBit turns a repeated
                 // APPLY into a non-edge, so init_done/config_ok are never set even though the
@@ -157,9 +180,7 @@ namespace SiebwaldeApp.Core
                     try
                     {
                         await WaitObserveAsync(item,
-                            () => item.ProtocolReadbackSequence > sequence &&
-                                (item.HoldingReg[TrackAmplifierRegisters.State] & 0x0600) == 0x0600 &&
-                                values.SequenceEqual(item.HoldingReg.Skip(TrackAmplifierRegisters.ConfigRamp).Take(4)),
+                            () => ConfigApplyVerified(item, sequence, configBaseline, values),
                             () => LogStateObservation(item),
                             attemptDeadline.Token).ConfigureAwait(false);
                         applied = true;
@@ -212,6 +233,58 @@ namespace SiebwaldeApp.Core
                 _log?.Invoke($"slave={slave} RETURN throw (cancellation)");
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Bounded settle-then-reverify of the identity/protocol compatibility gate. Returns true
+        /// immediately when the current <see cref="TrackAmplifierItem.HoldingReg"/> is already fresh
+        /// and compatible; otherwise waits for a FRESH SLAVEINFO frame whose HR7 identity and HR22
+        /// protocol version are BOTH compatible. Returns false (fail-closed) only when the settle
+        /// window exhausts with HR7/HR22 still absent/stale or genuinely incompatible. A caller-token
+        /// cancellation propagates as <see cref="OperationCanceledException"/>.
+        /// </summary>
+        private static async Task<bool> SettleCompatibleAsync(TrackAmplifierItem item, CancellationToken ct)
+        {
+            if (AmplifierPhase1Safety.Compatible(item))
+                return true;
+
+            long settleSequence = item.ProtocolReadbackSequence;
+            using var settleDeadline = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            settleDeadline.CancelAfter(IdentitySettleTimeout);
+            try
+            {
+                await WaitObserveAsync(item,
+                    () => item.ProtocolReadbackSequence > settleSequence &&
+                        AmplifierPhase1Safety.Compatible(item),
+                    null,
+                    settleDeadline.Token).ConfigureAwait(false);
+                return true;
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                // Settle window exhausted: HR7/HR22 never became fresh+compatible.
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// The APPLY-verification predicate. True only for a FRESH frame (sequence advanced past
+        /// <paramref name="sequenceBefore"/>) whose HR8 carries INIT_DONE|CONFIG_OK AND whose HR3..HR6
+        /// echo matches <paramref name="values"/>. The pre-APPLY <paramref name="configBaseline"/>
+        /// requires a genuine 0 -&gt; 0x0600 transition of the config bits when the amp was NOT already
+        /// configured (baseline != 0x0600); an already-configured amp (e.g. a revalidation re-run)
+        /// re-applies idempotently with no transition, so a fresh frame with config_ok + echo is
+        /// sufficient. This keeps a revalidation re-run from false-negativing.
+        /// </summary>
+        public static bool ConfigApplyVerified(
+            TrackAmplifierItem item, long sequenceBefore, ushort configBaseline, ushort[] values)
+        {
+            ushort configBits = (ushort)(item.HoldingReg[TrackAmplifierRegisters.State] & 0x0600u);
+            bool transitionObserved = configBaseline == 0x0600u || configBits != configBaseline;
+            return item.ProtocolReadbackSequence > sequenceBefore &&
+                configBits == 0x0600u &&
+                transitionObserved &&
+                values.SequenceEqual(item.HoldingReg.Skip(TrackAmplifierRegisters.ConfigRamp).Take(4));
         }
 
         private async Task WriteAndVerifyAsync(TrackAmplifierItem item, byte address, ushort value, CancellationToken ct)
