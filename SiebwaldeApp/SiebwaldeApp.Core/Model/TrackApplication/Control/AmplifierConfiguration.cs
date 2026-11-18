@@ -34,6 +34,13 @@ namespace SiebwaldeApp.Core
 
         public TimeSpan Timeout { get; init; } = TimeSpan.FromSeconds(2);
 
+        /// <summary>
+        /// Per-APPLY sub-timeout: each edge-re-arm attempt waits this long for
+        /// INIT_DONE|CONFIG_OK before re-clearing and re-issuing the APPLY. This runs
+        /// inside the overall <see cref="Timeout"/> deadline.
+        /// </summary>
+        private static readonly TimeSpan ApplySubTimeout = TimeSpan.FromMilliseconds(300);
+
         public AmplifierConfigurationDownloader(ITrackCommClient comm, Action<string>? log = null)
         {
             _comm = comm;
@@ -110,32 +117,68 @@ namespace SiebwaldeApp.Core
                     await WriteAndVerifyAsync(item, address, values[i], deadline.Token).ConfigureAwait(false);
                 }
 
-                // Explicit 0 then 1: never depend on a concurrent lease renewal to re-arm APPLY.
-                await WriteAndVerifyAsync(item, TrackAmplifierRegisters.Control, 0, deadline.Token).ConfigureAwait(false);
+                // Bounded, edge-re-arming APPLY. The PIC18 APPLY is edge-triggered on HR1
+                // (Control): a latched prev_control_word == ApplyConfigBit turns a repeated
+                // APPLY into a non-edge, so init_done/config_ok are never set even though the
+                // write is ACKed (HR8 stays 0xD100). Each attempt therefore issues a FRESH
+                // Control=0 clear to re-arm the edge before the APPLY, and waits a short
+                // sub-timeout for INIT_DONE|CONFIG_OK. A dropped Control=0 clear re-arms on
+                // the next attempt instead of hanging on the whole config deadline.
+                const int maxApplyAttempts = 3;
+                bool applied = false;
+                for (int attempt = 1; attempt <= maxApplyAttempts; attempt++)
+                {
+                    _log?.Invoke($"slave={slave} REQUESTED APPLY attempt={attempt}/{maxApplyAttempts}");
 
-                long sequence = item.ProtocolReadbackSequence;
-                _log?.Invoke(
-                    $"slave={slave} REQUESTED APPLY HR1=0x{TrackAmplifierRegisters.ApplyConfigBit:X4} " +
-                    $"(seq-before={sequence})");
-                await _comm.SendAsync(
-                    Exchange(slave, TrackAmplifierRegisters.Control, TrackAmplifierRegisters.ApplyConfigBit),
-                    deadline.Token).ConfigureAwait(false);
-                _log?.Invoke($"slave={slave} TRANSMITTED APPLY HR1=0x{TrackAmplifierRegisters.ApplyConfigBit:X4}");
+                    long sequence = item.ProtocolReadbackSequence;
 
-                // HR15 is read for diagnostics only. The APPLY completion signal is the HR8
-                // INIT_DONE|CONFIG_OK pair plus the HR3..6 config echo — never write_result,
-                // whose value == 1 is indistinguishable from a 100 ms lease renewal (HR1=0x4000).
-                await _comm.SendAsync(
-                    Exchange(slave, TrackAmplifierRegisters.State, 0, true), deadline.Token).ConfigureAwait(false);
-                await _comm.SendAsync(
-                    Exchange(slave, TrackAmplifierRegisters.WriteResult, 0, true), deadline.Token).ConfigureAwait(false);
+                    // (a) fresh Control=0 clear re-arms the edge.
+                    await _comm.SendAsync(
+                        Exchange(slave, TrackAmplifierRegisters.Control, 0),
+                        deadline.Token).ConfigureAwait(false);
 
-                await WaitObserveAsync(item,
-                    () => item.ProtocolReadbackSequence > sequence &&
-                        (item.HoldingReg[TrackAmplifierRegisters.State] & 0x0600) == 0x0600 &&
-                        values.SequenceEqual(item.HoldingReg.Skip(TrackAmplifierRegisters.ConfigRamp).Take(4)),
-                    () => LogStateObservation(item),
-                    deadline.Token).ConfigureAwait(false);
+                    // (b) issue the APPLY.
+                    await _comm.SendAsync(
+                        Exchange(slave, TrackAmplifierRegisters.Control, TrackAmplifierRegisters.ApplyConfigBit),
+                        deadline.Token).ConfigureAwait(false);
+                    _log?.Invoke($"slave={slave} TRANSMITTED APPLY attempt={attempt}/{maxApplyAttempts}");
+
+                    // HR15 is read for diagnostics only. The APPLY completion signal is the
+                    // HR8 INIT_DONE|CONFIG_OK pair plus the HR3..6 config echo — never
+                    // write_result, whose value == 1 is indistinguishable from a 100 ms lease
+                    // renewal (HR1=0x4000).
+                    await _comm.SendAsync(
+                        Exchange(slave, TrackAmplifierRegisters.WriteResult, 0, true),
+                        deadline.Token).ConfigureAwait(false);
+
+                    // (c) wait a short sub-timeout for INIT_DONE|CONFIG_OK + echo.
+                    using var attemptDeadline = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
+                    attemptDeadline.CancelAfter(ApplySubTimeout);
+                    try
+                    {
+                        await WaitObserveAsync(item,
+                            () => item.ProtocolReadbackSequence > sequence &&
+                                (item.HoldingReg[TrackAmplifierRegisters.State] & 0x0600) == 0x0600 &&
+                                values.SequenceEqual(item.HoldingReg.Skip(TrackAmplifierRegisters.ConfigRamp).Take(4)),
+                            () => LogStateObservation(item),
+                            attemptDeadline.Token).ConfigureAwait(false);
+                        applied = true;
+                        break;
+                    }
+                    catch (OperationCanceledException) when (!deadline.Token.IsCancellationRequested)
+                    {
+                        // Sub-timeout expired before INIT_DONE|CONFIG_OK: the APPLY did not
+                        // take effect (e.g. a dropped Control=0 clear made it a non-edge).
+                        // Re-arm and retry.
+                        _log?.Invoke($"slave={slave} OBSERVED APPLY attempt={attempt}/{maxApplyAttempts} not applied");
+                    }
+                }
+
+                if (!applied)
+                {
+                    // Fail closed through the existing deadline-timeout handler.
+                    throw new OperationCanceledException("APPLY verification timed out");
+                }
 
                 if (!AmplifierPhase1Safety.Compatible(item))
                     throw new InvalidOperationException("compatibility changed during configuration");
