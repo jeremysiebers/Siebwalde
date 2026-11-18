@@ -49,8 +49,8 @@ namespace SiebwaldeApp.Core.Tests
                 Assert.Contains(lines, l => l.Contains("REQUESTED HR6="));
                 Assert.Contains(lines, l => l.Contains("TRANSMITTED write HR3="));
                 Assert.Contains(lines, l => l.Contains("VERIFIED HR3="));
-                Assert.Contains(lines, l => l.Contains("REQUESTED APPLY HR1=0x2000"));
-                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY HR1=0x2000"));
+                Assert.Contains(lines, l => l.Contains("REQUESTED APPLY attempt=1/3"));
+                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY attempt=1/3"));
                 Assert.Contains(lines, l => l.Contains("VERIFIED APPLY"));
                 Assert.Contains(lines, l => l.Contains("RETURN true (configured+verified)"));
             }
@@ -112,7 +112,7 @@ namespace SiebwaldeApp.Core.Tests
                 var lines = new List<string>();
                 var downloader = new AmplifierConfigurationDownloader(client, lines.Add)
                 {
-                    Timeout = TimeSpan.FromMilliseconds(300)
+                    Timeout = TimeSpan.FromMilliseconds(2000)
                 };
 
                 // Watchdog 30 (< 50) is accepted into the pending config (echoed) but rejected at
@@ -129,7 +129,8 @@ namespace SiebwaldeApp.Core.Tests
                 Assert.Contains(lines, l => l.Contains("VERIFIED HR3="));
                 Assert.Contains(lines, l => l.Contains("VERIFIED HR5=0x001E"));
                 Assert.Contains(lines, l => l.Contains("VERIFIED HR6="));
-                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY HR1=0x2000"));
+                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY attempt=1/3"));
+                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY attempt=3/3"));
                 Assert.DoesNotContain(lines, l => l.Contains("VERIFIED APPLY"));
                 Assert.Contains(lines, l => l.Contains("RETURN false (timeout)"));
             }
@@ -192,7 +193,7 @@ namespace SiebwaldeApp.Core.Tests
                 var lines = new List<string>();
                 var downloader = new AmplifierConfigurationDownloader(client, lines.Add)
                 {
-                    Timeout = TimeSpan.FromMilliseconds(300)
+                    Timeout = TimeSpan.FromMilliseconds(2000)
                 };
 
                 var ok = await downloader.DownloadAsync(item, new AmplifierConfiguration(), CancellationToken.None);
@@ -205,7 +206,7 @@ namespace SiebwaldeApp.Core.Tests
                 // never confirms -> the APPLY verify loop times out.
                 Assert.Contains(lines, l => l.Contains("VERIFIED HR3="));
                 Assert.Contains(lines, l => l.Contains("VERIFIED HR6="));
-                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY HR1=0x2000"));
+                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY attempt=3/3"));
                 Assert.DoesNotContain(lines, l => l.Contains("VERIFIED APPLY"));
                 Assert.Contains(lines, l => l.Contains("RETURN false (timeout)"));
             }
