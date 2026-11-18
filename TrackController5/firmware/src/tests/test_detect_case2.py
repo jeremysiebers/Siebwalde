@@ -27,6 +27,12 @@ Proves source-level decisions, not UART timing or physical backplane presence:
      bounded retry counter and advances to not-detected (no livelock).
  10. Case-4 SLAVEBUSY with the transmitter ARMED does NOT prematurely advance
      (does not race the answer timeout).
+ 11. Case-4 SLAVE_DATA_TIMEOUT (TX_DONE + missing ACK) retries then exhausts and
+     advances to not-detected without hanging.
+ 12. Case-4 TIMEOUT/BUSY exhaustion never marks the backplane or a downstream
+     amplifier detected (no silent success on a missing acknowledgment).
+ 13. Case-4 TIMEOUT/BUSY exhaustion issues no state-changing write (no
+     unauthorized command on failure).
 """
 from pathlib import Path
 import os
@@ -307,6 +313,122 @@ static void test_case4_busy_armed_does_not_advance(void) {
     puts("PASS: case-4 BUSY while the transmitter is armed is NOT prematurely marked not-detected\n");
 }
 
+static void test_case4_timeout_advances(void) {
+    /* End-to-end case-4 SLAVE_DATA_TIMEOUT transition: the slot-select FC16 was
+     * transmitted (TX_DONE) but no ACK arrives, so the answer timeout classifies
+     * SLAVE_DATA_TIMEOUT. Case 4 re-dispatches up to BACKPLANE_SELECT_MAX_RETRIES
+     * times and then exhausts to not-detected. The TIMEOUT retry logic was not
+     * the PV07b bug (it predates 1190e175), so this test closes the coverage gap
+     * rather than catching the reverted case-4 BUSY bound; it must pass on both. */
+    unsigned observations = 0;
+    reset();
+    slaves[51].SlaveDetected = true;           /* backplane detected */
+    assert(!DetectSlave(1));                   /* case 0 -> RunSlaveDetect = 3 */
+    assert(!DetectSlave(1));                   /* case 3 -> case 4 (slot-select dispatched) */
+    assert(RunSlaveDetect == 4);
+    slaves[51].MbCommError = SLAVE_DATA_TIMEOUT;   /* TX_DONE, no ACK */
+    while (1) {
+        assert(observations < 2u * (BACKPLANE_SELECT_MAX_RETRIES + 1u));
+        if (DetectSlave(1)) break;             /* exhaustion -> advance */
+        ++observations;
+    }
+    /* Exactly BACKPLANE_SELECT_MAX_RETRIES non-terminal TIMEOUTs (each re-dispatches
+     * the slot-select), then the (MAX_RETRIES+1)-th TIMEOUT exhausts. */
+    assert(observations == BACKPLANE_SELECT_MAX_RETRIES);
+    assert(RunSlaveDetect == 0);
+    assert(slaves[51].SlaveDetected == false);
+    assert(BackplaneSelectRetries == 0);       /* reset on exhaustion */
+    puts("PASS: case-4 TIMEOUT retries then exhausts and advances to not-detected (no hang)\n");
+}
+
+static void test_case4_missing_ack_never_detects(void) {
+    unsigned observations;
+
+    /* TIMEOUT-exhaustion: a TX_DONE + missing ACK must never mark detected. */
+    reset();
+    slaves[51].SlaveDetected = true;
+    assert(!DetectSlave(1));                   /* case 0 -> 3 */
+    assert(!DetectSlave(1));                   /* case 3 -> 4 */
+    assert(RunSlaveDetect == 4);
+    slaves[51].MbCommError = SLAVE_DATA_TIMEOUT;
+    observations = 0;
+    while (1) {
+        assert(observations < 2u * (BACKPLANE_SELECT_MAX_RETRIES + 1u));
+        if (DetectSlave(1)) break;
+        ++observations;
+    }
+    assert(slaves[51].SlaveDetected == false); /* never detected on missing ACK */
+    assert(slaves[1].SlaveDetected == false);  /* no downstream amplifier detected */
+
+    /* BUSY-exhaustion: a stuck BUSY transaction must never mark detected.
+     * Against the pre-fix `case SLAVEBUSY: break;` this never exhausts, so the
+     * bounded-iteration assert below fails (the test FAILS on the reverted code). */
+    reset();
+    slaves[51].SlaveDetected = true;
+    assert(!DetectSlave(1));
+    assert(!DetectSlave(1));
+    assert(RunSlaveDetect == 4);
+    slaves[51].MbCommError = SLAVE_DATA_BUSY;
+    observations = 0;
+    while (1) {
+        assert(observations < 2u * BACKPLANE_SELECT_BUSY_MAX_RETRIES);
+        if (DetectSlave(1)) break;
+        ++observations;
+    }
+    assert(slaves[51].SlaveDetected == false);
+    assert(slaves[1].SlaveDetected == false);
+
+    puts("PASS: case-4 TIMEOUT/BUSY exhaustion never marks the backplane or a downstream amplifier detected\n");
+}
+
+static void test_case4_failure_issues_no_write(void) {
+    unsigned observations, dispatch_before;
+
+    /* BUSY-exhaustion issues ZERO writes: the BUSY branch only counts, it never
+     * re-dispatches. Against the pre-fix `case SLAVEBUSY: break;` the FSM never
+     * exhausts, so the bounded-iteration assert below fails (reverted-code catch). */
+    reset();
+    slaves[51].SlaveDetected = true;
+    assert(!DetectSlave(1));
+    assert(!DetectSlave(1));
+    assert(RunSlaveDetect == 4);
+    assert(dispatch_count == 1);               /* exactly the initial slot-select */
+    slaves[51].MbCommError = SLAVE_DATA_BUSY;
+    dispatch_before = dispatch_count;
+    observations = 0;
+    while (1) {
+        assert(observations < 2u * BACKPLANE_SELECT_BUSY_MAX_RETRIES);
+        if (DetectSlave(1)) break;
+        ++observations;
+    }
+    assert(dispatch_count == dispatch_before); /* no state-changing write on BUSY failure */
+    assert(slaves[51].SlaveDetected == false);
+
+    /* TIMEOUT-exhaustion: the terminal step issues no write. Each of the three
+     * retries re-dispatches the SAME slot-select (the legitimate detect retry); the
+     * terminal TIMEOUT only marks not-detected and must not dispatch anything. */
+    reset();
+    slaves[51].SlaveDetected = true;
+    assert(!DetectSlave(1));
+    assert(!DetectSlave(1));
+    assert(RunSlaveDetect == 4);
+    assert(dispatch_count == 1);
+    slaves[51].MbCommError = SLAVE_DATA_TIMEOUT;
+    observations = 0;
+    while (1) {
+        assert(observations < 2u * (BACKPLANE_SELECT_MAX_RETRIES + 1u));
+        dispatch_before = dispatch_count;
+        if (DetectSlave(1)) {
+            assert(dispatch_count == dispatch_before); /* terminal failure: no write */
+            break;
+        }
+        ++observations;
+    }
+    assert(slaves[51].SlaveDetected == false);
+
+    puts("PASS: case-4 TIMEOUT/BUSY exhaustion issues no state-changing write on failure\n");
+}
+
 static bool pump_slavedetect(unsigned max_iterations) {
     unsigned i;
     for (i = 0; i < max_iterations; ++i) {
@@ -337,6 +459,9 @@ int main(void) {
     test_failed_backplane_blocks_downstream();
     test_case4_busy_bounded();
     test_case4_busy_armed_does_not_advance();
+    test_case4_timeout_advances();
+    test_case4_missing_ack_never_detects();
+    test_case4_failure_issues_no_write();
     test_slavedetect_no_hang();
     ExitProcess(0);
     return 0;
