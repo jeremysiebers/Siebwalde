@@ -168,6 +168,11 @@ bool SLAVExDETECT(){
 #define BACKPLANE_SELECT_MAX_RETRIES 3u
 #define BACKPLANE_BUSY_MAX_RETRIES 20u
 #define BACKPLANE_SELECT_BUSY_MAX_RETRIES 20u
+#define CONFIG_SELECT_BUSY_MAX_RETRIES 20u
+#define CONFIG_WRITE_BUSY_MAX_RETRIES 20u
+#define CONFIG_DESELECT_BUSY_MAX_RETRIES 20u
+#define DETECT_AMP_BUSY_MAX_RETRIES 20u
+#define DETECT_DESELECT_BUSY_MAX_RETRIES 20u
 static uint8_t RunSlaveDetect      = 0;
 static uint8_t BackplaneId         = 0;    // Used when slaves are checked
 static uint8_t PrevBackplaneId     = 0;    // Used to point to first slot again
@@ -176,6 +181,11 @@ uint16_t       ShiftSlotNr         = 0;
 static uint8_t BackplaneSelectRetries = 0;
 static uint8_t BackplaneBusyRetries   = 0;
 static uint8_t BackplaneSelectBusyRetries = 0;
+static uint8_t ConfigSelectBusyRetries = 0;
+static uint8_t ConfigWriteBusyRetries = 0;
+static uint8_t ConfigDeselectBusyRetries = 0;
+static uint8_t DetectAmpBusyRetries = 0;
+static uint8_t DetectDeselectBusyRetries = 0;
 
 bool DetectSlave(uint8_t SlaveId){
     bool return_val = false;
@@ -379,15 +389,25 @@ bool DetectSlave(uint8_t SlaveId){
                     MASTER_SLAVE_DATA[SlaveId].HoldingReg[HOLDINGREG11] = DUMP_SLAVE_DATA[0].HoldingReg[HOLDINGREG11]; // store the read FW version
                     LOG_Printf("Mbus handler\t: DETECTSLAVE Slave %d detected.", SlaveId);
                     RunSlaveDetect++;                    
+                    DetectAmpBusyRetries = 0;
                     //DRV_USART0_WriteByte('6');
                     break;                    
                 case SLAVENOK: 
                     MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
                     LOG_Printf("Mbus handler\t: DETECTSLAVE Slave %d not detected.", SlaveId);
                     RunSlaveDetect++;
+                    DetectAmpBusyRetries = 0;
                     //DRV_USART0_WriteByte('6');
                     break;
-                case SLAVEBUSY: break;
+                case SLAVEBUSY:
+                    if (PetitModbusIsReady() &&
+                        ++DetectAmpBusyRetries >= DETECT_AMP_BUSY_MAX_RETRIES){
+                        MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
+                        LOG_Printf("Mbus handler\t: DETECTSLAVE Slave %d not detected (BUSY).", SlaveId);
+                        DetectAmpBusyRetries = 0;
+                        RunSlaveDetect++;
+                    }
+                    break;
                 default : break;
             }
             break;
@@ -415,19 +435,27 @@ bool DetectSlave(uint8_t SlaveId){
                 case SLAVEOK:  
                     RunSlaveDetect = 0;
                     return_val = true;                    
+                    DetectDeselectBusyRetries = 0;
                     //DRV_USART0_WriteByte('4');
                     break;                    
                 case SLAVE_DATA_NOK:
                 case SLAVE_DATA_EXCEPTION:
                 case SLAVE_DATA_UNKNOWN:
-                    RunSlaveDetect = 0;
-                    return_val = true;
-                    break;
+                case SLAVE_DATA_IDLE:
                 case SLAVE_DATA_TIMEOUT:
                     RunSlaveDetect = 0;
                     return_val = true;
+                    DetectDeselectBusyRetries = 0;
                     break;
-                case SLAVEBUSY: break;
+                case SLAVEBUSY:
+                    if (PetitModbusIsReady() &&
+                        ++DetectDeselectBusyRetries >= DETECT_DESELECT_BUSY_MAX_RETRIES){
+                        LOG_Push("Mbus handler\t: DETECTSLAVE SLAVE_DATA_BUSY bounded retry exhausted in case 8.");
+                        DetectDeselectBusyRetries = 0;
+                        RunSlaveDetect = 0;
+                        return_val = true;
+                    }
+                    break;
                 default : break;
             }
             break;
@@ -598,12 +626,32 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
                     GoToCase = 10; /* Two fresh identity reads before address write. */
                     StartupMachine = WAIT;
                     DelayCount1 = READxCORExTIMER();
+                    ConfigSelectBusyRetries = 0;
                     break;                    
                 case SLAVENOK: 
                     StartupMachine = 5;
+                    ConfigSelectBusyRetries = 0;
                     //DRV_USART0_WriteByte('4');
                     break;
-                case SLAVEBUSY: break;
+                case SLAVE_DATA_TIMEOUT:
+                case SLAVE_DATA_NOK:
+                case SLAVE_DATA_EXCEPTION:
+                case SLAVE_DATA_UNKNOWN:
+                case SLAVE_DATA_IDLE:
+                    /* Slot-select verify failed: deselect the (possibly selected)
+                     * slot and skip this amplifier. */
+                    LOG_Push("Mbus handler\t: CONFIGURESLAVE slot-select terminal failure in case 2.");
+                    StartupMachine = 5;
+                    ConfigSelectBusyRetries = 0;
+                    break;
+                case SLAVEBUSY:
+                    if (PetitModbusIsReady() &&
+                        ++ConfigSelectBusyRetries >= CONFIG_SELECT_BUSY_MAX_RETRIES){
+                        LOG_Push("Mbus handler\t: CONFIGURESLAVE SLAVE_DATA_BUSY bounded retry exhausted in case 2.");
+                        ConfigSelectBusyRetries = 0;
+                        StartupMachine = 5;
+                    }
+                    break;
                 default : break;
             }
             break;
@@ -635,6 +683,7 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
             switch(CHECKxMODBUSxCOMMxSTATUS(SLAVE_INITIAL_ADDR, true)){
                 case SLAVEOK:  
                     StartupMachine++;
+                    ConfigWriteBusyRetries = 0;
                     //DRV_USART0_WriteByte('4');
                     break;                    
                 case SLAVENOK: 
@@ -643,9 +692,20 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
                     CREATExTASKxSTATUSxMESSAGE(MBUS, EXEC_MBUS_STATE_SLAVE_INIT,
                         ERROR, TrackAmplifierId);
                     StartupMachine++;
+                    ConfigWriteBusyRetries = 0;
                     //DRV_USART0_WriteByte('4');
                     break;
-                case SLAVEBUSY: break;
+                case SLAVEBUSY:
+                    if (PetitModbusIsReady() &&
+                        ++ConfigWriteBusyRetries >= CONFIG_WRITE_BUSY_MAX_RETRIES){
+                        AmplifierCompatible[TrackAmplifierId] = false;
+                        MASTER_SLAVE_DATA[TrackAmplifierId].HoldingReg[HR_IDENTITY] = 0;
+                        CREATExTASKxSTATUSxMESSAGE(MBUS, EXEC_MBUS_STATE_SLAVE_INIT,
+                            ERROR, TrackAmplifierId);
+                        ConfigWriteBusyRetries = 0;
+                        StartupMachine++;
+                    }
+                    break;
                 default : break;
             }
             break;
@@ -673,14 +733,29 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
                 case SLAVEOK:  
                     StartupMachine = 0;
                     return_val = true;                    
+                    ConfigDeselectBusyRetries = 0;
                     //DRV_USART0_WriteByte('4');
                     break;                    
                 case SLAVENOK: 
+                case SLAVE_DATA_TIMEOUT:
+                case SLAVE_DATA_NOK:
+                case SLAVE_DATA_EXCEPTION:
+                case SLAVE_DATA_UNKNOWN:
+                case SLAVE_DATA_IDLE:
                     StartupMachine = 0;
                     return_val = true;
+                    ConfigDeselectBusyRetries = 0;
                     //DRV_USART0_WriteByte('4');
                     break;
-                case SLAVEBUSY: break;
+                case SLAVEBUSY:
+                    if (PetitModbusIsReady() &&
+                        ++ConfigDeselectBusyRetries >= CONFIG_DESELECT_BUSY_MAX_RETRIES){
+                        LOG_Push("Mbus handler\t: CONFIGURESLAVE SLAVE_DATA_BUSY bounded retry exhausted in case 6.");
+                        ConfigDeselectBusyRetries = 0;
+                        StartupMachine = 0;
+                        return_val = true;
+                    }
+                    break;
                 default : break;
             }
             break;

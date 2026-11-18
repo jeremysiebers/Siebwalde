@@ -341,10 +341,10 @@ unsigned char CheckPetitModbusBufferComplete(void)
 
     if(PetitReceiveCounter==PetitExpectedReceiveCount)
     {
-        /* Only a length-complete frame releases WAIT_ANSWER. Leaving WAIT_ANSWER
-         * intact for partial/segmented frames lets the answer timeout still fire
-         * and classify the transaction as TIMEOUT instead of hanging forever. */
-        Petit_Tx_State    =PETIT_RXTX_IDLE;
+        /* A length-complete frame is handed to the readback handler, which owns
+         * the WAIT_ANSWER -> IDLE transition: it must only idle the TX when it
+         * records a terminal MbCommError. An uncorrelated/mismatched echo leaves
+         * WAIT_ANSWER so the answer timeout still classifies the transaction. */
         return PETIT_DATA_READY;
     }    
     return PETIT_DATA_NOT_READY;
@@ -815,6 +815,7 @@ void HandlePetitModbusReadInputRegistersSlaveReadback(void)
 
 void HandlePetitModbusWriteSingleRegisterSlaveReadback(void)
 {
+    unsigned char terminal = 0;
     if(Petit_Tx_Data.Function == Petit_Rx_Data.Function){
         if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){
             if(Petit_Tx_Data.DataBuf[0] == Petit_Rx_Data.DataBuf[0]){
@@ -829,8 +830,7 @@ void HandlePetitModbusWriteSingleRegisterSlaveReadback(void)
                                 MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
                                 MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
                             }
-                            
-                            
+                            terminal = 1;
                         }
                     }
                 }
@@ -844,10 +844,15 @@ void HandlePetitModbusWriteSingleRegisterSlaveReadback(void)
         else{
             MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
         }
+        terminal = 1;
     }
-        
+
     //PORTDbits.RD1 = !PORTDbits.RD1;
-    Petit_Tx_State =  PETIT_RXTX_IDLE;
+    /* Only release WAIT_ANSWER once a terminal MbCommError was recorded; an
+     * uncorrelated echo leaves WAIT_ANSWER so the answer timeout can fire. */
+    if (terminal){
+        Petit_Tx_State =  PETIT_RXTX_IDLE;
+    }
 }
 #endif
 /******************************************************************************/
@@ -866,6 +871,7 @@ void HandleMPetitodbusDiagnosticRegistersSlaveReadback(void)
     unsigned int    Petit_i                        = 0;
     unsigned int    BufReadIndex                   = 0;
     unsigned int    RegData                        = 0;
+    unsigned char   terminal                       = 0;
     
     Petit_StartAddress = ((unsigned int) (Petit_Tx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[1]);
     Petit_NumberOfRegisters = ((unsigned int) (Petit_Tx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[3]);
@@ -889,12 +895,17 @@ void HandleMPetitodbusDiagnosticRegistersSlaveReadback(void)
             }
             MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
             MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+            terminal = 1;
         }
     }
     else{
         MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
+        terminal = 1;
     }
-    Petit_Tx_State =  PETIT_RXTX_IDLE;
+    /* Only release WAIT_ANSWER once a terminal MbCommError was recorded. */
+    if (terminal){
+        Petit_Tx_State =  PETIT_RXTX_IDLE;
+    }
 }
 #endif
 /******************************************************************************/
@@ -909,6 +920,7 @@ void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
 {
     unsigned int    Petit_StartAddress             = 0;
     unsigned int    Petit_NumberOfRegisters        = 0;
+    unsigned char   terminal                       = 0;
         
     Petit_StartAddress = ((unsigned int) (Petit_Tx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[1]);
     Petit_NumberOfRegisters = ((unsigned int) (Petit_Tx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[3]);
@@ -926,6 +938,7 @@ void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
                     /* P2-C fault-B instrumentation: valid FC16 echo received. */
                     MBUS_EVENT_PUSH(MBUS_EV_ACK, (uint8_t)Petit_Rx_Data.Address,
                                     Petit_Tx_Data.DataBuf[1], 0u, 0u);}
+                terminal = 1;
             }
         }
     }
@@ -936,8 +949,15 @@ void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
         else{
             MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
         }        
+        terminal = 1;
     }
-    Petit_Tx_State =  PETIT_RXTX_IDLE;
+
+    /* Only release WAIT_ANSWER once a terminal MbCommError was recorded. An
+     * uncorrelated echo (address/qty mismatch) leaves WAIT_ANSWER intact so the
+     * answer timeout still classifies the transaction as TIMEOUT. */
+    if (terminal){
+        Petit_Tx_State =  PETIT_RXTX_IDLE;
+    }
     
 }
 #endif
@@ -1006,9 +1026,9 @@ void HandleMPetitodbusMbExceptionCodesSlaveReadback(void)
 
         Petit_Tx_State = PETIT_RXTX_IDLE;
     }
-    /* else: uncorrelated/corrupt frame. The TX state was already idled by the
-     * receive path; no MbCommError change and no event means the frame is dropped
-     * and the outstanding transaction outcome is left unchanged (never fabricated). */
+    /* else: uncorrelated/corrupt frame. No MbCommError change and no event means
+     * the frame is dropped; WAIT_ANSWER is left intact so the answer timeout can
+     * still classify the outstanding transaction as TIMEOUT (never fabricated). */
 }
 
 /******************************************************************************/

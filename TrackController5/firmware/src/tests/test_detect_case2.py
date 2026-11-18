@@ -102,9 +102,13 @@ static uint8_t BackplaneSelectBusyRetries;
 uint8_t SlaveId;
 uint8_t iSlaveDetect;
 static uint32_t DelayCount1, DelayCount2, threshold;
+static uint8_t DetectAmpBusyRetries;
+static uint8_t DetectDeselectBusyRetries;
 #define BACKPLANE_SELECT_MAX_RETRIES 3u
 #define BACKPLANE_BUSY_MAX_RETRIES 20u
 #define BACKPLANE_SELECT_BUSY_MAX_RETRIES 20u
+#define DETECT_AMP_BUSY_MAX_RETRIES 20u
+#define DETECT_DESELECT_BUSY_MAX_RETRIES 20u
 
 /* Peripheral / time / logging mocks (never the safety logic). */
 static uint32_t now;
@@ -152,6 +156,8 @@ static void reset(void) {
     BackplaneSelectRetries = 0;
     BackplaneBusyRetries = 0;
     BackplaneSelectBusyRetries = 0;
+    DetectAmpBusyRetries = 0;
+    DetectDeselectBusyRetries = 0;
     SlaveId = 51;
     iSlaveDetect = 0;
     DelayCount1 = DelayCount2 = threshold = 0;

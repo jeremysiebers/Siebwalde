@@ -52,6 +52,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 #include "system_config.h"
 #include "system_definitions.h"
+#include "enums.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -76,10 +77,26 @@ uint8_t DRV_USART0_ReadByte(void)
     return readValue;
 }
 
+/* Bounded TX busy-wait deadline: a few byte-times at 2 Mbaud (~30 us), in core
+ * timer ticks (126 MHz / MICROSECONDS). */
+#define DRV_USART_TX_WRITE_DEADLINE (30u * MICROSECONDS)
+
 void DRV_USART0_WriteByte(const uint8_t byte)
 {
-    /* Wait till TX buffer is available as blocking operation is selected */
-    while(PLIB_USART_TransmitterBufferIsFull(USART_ID_2));
+    uint32_t start = READxCORExTIMER();
+    /* Wait till TX buffer is available as blocking operation is selected. Bound
+     * the wait so a stuck transmitter cannot hang the super-loop. */
+    while(PLIB_USART_TransmitterBufferIsFull(USART_ID_2))
+    {
+        if ((uint32_t)(READxCORExTIMER() - start) >= DRV_USART_TX_WRITE_DEADLINE)
+        {
+            /* Stuck TX buffer: re-assert the transmitter enable and drop the
+             * (non-critical) byte rather than block forever. */
+            U2STAbits.UTXEN = 0;
+            U2STAbits.UTXEN = 1;
+            return;
+        }
+    }
     /* Send one byte */
     PLIB_USART_TransmitterByteSend(USART_ID_2, byte);
     SYS_INT_SourceEnable(INT_SOURCE_USART_2_TRANSMIT);

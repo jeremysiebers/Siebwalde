@@ -731,10 +731,23 @@ uint32_t RESETxSLAVE(){
  */
 /*#--------------------------------------------------------------------------#*/
 
-static void __attribute__((noinline)) UART2_Write8(uint8_t b)
+/* Bounded TX busy-wait deadline: a few byte-times at 2 Mbaud (~30 us), in core
+ * timer ticks (126 MHz / MICROSECONDS). */
+#define BOOTLOADER_TX_WRITE_DEADLINE (30u * MICROSECONDS)
+
+static bool __attribute__((noinline)) UART2_Write8(uint8_t b)
 {    
-    while (U2STAbits.UTXBF) { }       // wait while TX buffer full
+    uint32_t start = READxCORExTIMER();
+    while (U2STAbits.UTXBF) {
+        if ((uint32_t)(READxCORExTIMER() - start) >= BOOTLOADER_TX_WRITE_DEADLINE) {
+            /* Stuck TX buffer: re-assert the transmitter enable and report failure. */
+            U2STAbits.UTXEN = 0;
+            U2STAbits.UTXEN = 1;
+            return false;
+        }
+    }
     U2TXREG = (uint16_t)(b & 0x00FFu);              // 8-bit payload
+    return true;
 }
 
 bool SendDataToBootloader(BTDR_SEND_DATA_FORMAT *btldrDataSend)
@@ -767,7 +780,10 @@ bool SendDataToBootloader(BTDR_SEND_DATA_FORMAT *btldrDataSend)
     btldr_p = &btldrDataSend->bootloader_start_byte;
     
     for(DummyCounter=0; DummyCounter<Length; DummyCounter++){
-        UART2_Write8(*btldr_p);
+        if (!UART2_Write8(*btldr_p)){
+            LOG_Push("BOOTLOADER\t: TX write failed (stuck UTXBF).");
+            return false;
+        }
         btldr_p++;
     }       
     return true;
