@@ -315,35 +315,34 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         // ---------------------------------------------------------------------
-        // APPLY transition requirement (stale-frame false negative, 0xC708)
+        // APPLY state-acceptance verification (stale-echo false negative, 0xC708)
         // ---------------------------------------------------------------------
 
         [Fact]
-        public void ConfigApplyVerified_RequiresTransition_FromBaseline()
+        public void ConfigApplyVerified_AcceptsFreshHr8State_IgnoresStaleEcho()
         {
-            ushort[] values = { 0x0202, 8, 250, 55 };
             var item = new TrackAmplifierItem { SlaveNumber = 1 };
-            item.HoldingReg[TrackAmplifierRegisters.ConfigRamp] = 0x0202;
-            item.HoldingReg[TrackAmplifierRegisters.ConfigFastStop] = 8;
-            item.HoldingReg[TrackAmplifierRegisters.ConfigWatchdog] = 250;
-            item.HoldingReg[TrackAmplifierRegisters.ConfigTag] = 55;
+            // HR3..HR6 echo is STALE (does not match the requested config): the pre-APPLY
+            // per-register echo verification has already confirmed the config, so the APPLY
+            // verification must accept HR8's own state-acceptance (INIT_DONE|CONFIG_OK) without
+            // re-checking the temporally-inconsistent echo (the 0xC708 false negative).
+            item.HoldingReg[TrackAmplifierRegisters.ConfigRamp] = 0x0000;
+            item.HoldingReg[TrackAmplifierRegisters.ConfigFastStop] = 0x0000;
+            item.HoldingReg[TrackAmplifierRegisters.ConfigWatchdog] = 0x0000;
+            item.HoldingReg[TrackAmplifierRegisters.ConfigTag] = 0x0000;
             item.ProtocolReadbackSequence = 2;
 
-            // Genuine 0 -> 0x0600 transition (baseline 0x0000): ACCEPT.
+            // Fresh frame with HR8 = INIT_DONE|CONFIG_OK: ACCEPT (state acceptance, stale echo ignored).
             item.HoldingReg[TrackAmplifierRegisters.State] = 0x0600;
-            Assert.True(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 1, 0x0000, values));
+            Assert.True(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 1));
 
-            // Already-configured (baseline already 0x0600, idempotent re-APPLY): still ACCEPT on a
-            // fresh frame (must NOT false-negative a revalidation re-run).
-            Assert.True(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 1, 0x0600, values));
-
-            // Stale frame (config_ok still clear, pre-APPLY): REJECT.
+            // Stale frame (config_ok still clear): REJECT.
             item.HoldingReg[TrackAmplifierRegisters.State] = 0x0000;
-            Assert.False(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 1, 0x0000, values));
+            Assert.False(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 1));
 
             // Not a fresh frame (sequence did not advance): REJECT.
             item.HoldingReg[TrackAmplifierRegisters.State] = 0x0600;
-            Assert.False(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 2, 0x0000, values));
+            Assert.False(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 2));
         }
 
         // ---------------------------------------------------------------------

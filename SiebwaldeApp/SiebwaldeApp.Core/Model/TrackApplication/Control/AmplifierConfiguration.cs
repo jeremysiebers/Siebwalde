@@ -133,13 +133,6 @@ namespace SiebwaldeApp.Core
                     await WriteAndVerifyAsync(item, address, values[i], deadline.Token).ConfigureAwait(false);
                 }
 
-                // Capture the pre-APPLY baseline of the config bits (INIT_DONE|CONFIG_OK). The amps
-                // are reset per cycle (config_ok returns to 0), so a genuine APPLY is a 0 -> 0x0600
-                // transition; requiring the observed config bits to DIFFER from this baseline proves
-                // the observed config_ok is THIS cycle's APPLY effect, not a stale value carried over
-                // from a prior cycle.
-                ushort configBaseline = (ushort)(item.HoldingReg[TrackAmplifierRegisters.State] & 0x0600u);
-
                 // Bounded, edge-re-arming APPLY. The PIC18 APPLY is edge-triggered on HR1
                 // (Control): a latched prev_control_word == ApplyConfigBit turns a repeated
                 // APPLY into a non-edge, so init_done/config_ok are never set even though the
@@ -166,21 +159,21 @@ namespace SiebwaldeApp.Core
                         deadline.Token).ConfigureAwait(false);
                     _log?.Invoke($"slave={slave} TRANSMITTED APPLY attempt={attempt}/{maxApplyAttempts}");
 
-                    // HR15 is read for diagnostics only. The APPLY completion signal is the
-                    // HR8 INIT_DONE|CONFIG_OK pair plus the HR3..6 config echo — never
+                    // HR15 is read for diagnostics only. The APPLY completion signal is the HR8
+                    // INIT_DONE|CONFIG_OK pair (the amplifier's own state acceptance) — never
                     // write_result, whose value == 1 is indistinguishable from a 100 ms lease
-                    // renewal (HR1=0x4000).
+                    // renewal (HR1=0x4000). The HR3..6 echo was already verified pre-APPLY.
                     await _comm.SendAsync(
                         Exchange(slave, TrackAmplifierRegisters.WriteResult, 0, true),
                         deadline.Token).ConfigureAwait(false);
 
-                    // (c) wait a short sub-timeout for INIT_DONE|CONFIG_OK + echo.
+                    // (c) wait a short sub-timeout for the HR8 INIT_DONE|CONFIG_OK acceptance.
                     using var attemptDeadline = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
                     attemptDeadline.CancelAfter(ApplySubTimeout);
                     try
                     {
                         await WaitObserveAsync(item,
-                            () => ConfigApplyVerified(item, sequence, configBaseline, values),
+                            () => ConfigApplyVerified(item, sequence),
                             () => LogStateObservation(item),
                             attemptDeadline.Token).ConfigureAwait(false);
                         applied = true;
@@ -268,23 +261,19 @@ namespace SiebwaldeApp.Core
         }
 
         /// <summary>
-        /// The APPLY-verification predicate. True only for a FRESH frame (sequence advanced past
-        /// <paramref name="sequenceBefore"/>) whose HR8 carries INIT_DONE|CONFIG_OK AND whose HR3..HR6
-        /// echo matches <paramref name="values"/>. The pre-APPLY <paramref name="configBaseline"/>
-        /// requires a genuine 0 -&gt; 0x0600 transition of the config bits when the amp was NOT already
-        /// configured (baseline != 0x0600); an already-configured amp (e.g. a revalidation re-run)
-        /// re-applies idempotently with no transition, so a fresh frame with config_ok + echo is
-        /// sufficient. This keeps a revalidation re-run from false-negativing.
+        /// The APPLY-verification predicate: True only for a FRESH frame (sequence advanced past
+        /// <paramref name="sequenceBefore"/>) whose HR8 carries the INIT_DONE|CONFIG_OK pair — the
+        /// amplifier's own state-acceptance signal. The HR3..HR6 config echo is deliberately NOT
+        /// re-checked here: it was already echo-verified per-register by
+        /// <see cref="WriteAndVerifyAsync"/> before the APPLY, and the SLAVEINFO frame is a
+        /// temporally-inconsistent cache (the PIC32 cyclic poll reads only 2 registers per cycle), so
+        /// re-checking the echo against a stale HR3..HR6 would false-negative a genuinely configured
+        /// amplifier (0xC708).
         /// </summary>
-        public static bool ConfigApplyVerified(
-            TrackAmplifierItem item, long sequenceBefore, ushort configBaseline, ushort[] values)
+        public static bool ConfigApplyVerified(TrackAmplifierItem item, long sequenceBefore)
         {
-            ushort configBits = (ushort)(item.HoldingReg[TrackAmplifierRegisters.State] & 0x0600u);
-            bool transitionObserved = configBaseline == 0x0600u || configBits != configBaseline;
             return item.ProtocolReadbackSequence > sequenceBefore &&
-                configBits == 0x0600u &&
-                transitionObserved &&
-                values.SequenceEqual(item.HoldingReg.Skip(TrackAmplifierRegisters.ConfigRamp).Take(4));
+                (item.HoldingReg[TrackAmplifierRegisters.State] & 0x0600u) == 0x0600u;
         }
 
         private async Task WriteAndVerifyAsync(TrackAmplifierItem item, byte address, ushort value, CancellationToken ct)
