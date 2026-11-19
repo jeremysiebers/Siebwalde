@@ -90,6 +90,29 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             _registers[TrackAmplifierRegisters.Status] = status;
         }
 
+        /// <summary>
+        /// Overrides the state low nibble and refreshes HR_STATE (test/injection surface). Models an
+        /// amplifier leaving READY — e.g. STANDBY (8), STOPPING (3), ESTOP (5) or LEASE_EXPIRED (7) —
+        /// without a full protocol transaction. It is NOT clobbered by the periodic lease-renewal
+        /// (HR1 write) refresh, which only reads <c>_state</c> back into HR8.
+        /// </summary>
+        public void SetState(ushort state)
+        {
+            _state = state & 0xF;
+            RefreshState();
+        }
+
+        /// <summary>
+        /// Overrides the HR_FAULT (HR9) register (test/injection surface). Models an amplifier
+        /// reporting a fault (e.g. config 0x0010, comms 0x0020, lease 0x0080). RefreshState does not
+        /// clear Fault, so the override persists across the periodic lease-renewal refresh.
+        /// </summary>
+        public void SetFault(ushort fault)
+        {
+            _registers[TrackAmplifierRegisters.Fault] = fault;
+            RefreshState();
+        }
+
         /// <summary>Applies a FC06/FC16 write of <paramref name="values"/> starting at
         /// <paramref name="startRegister"/>, updating registers, model state and HR_WRITE_RESULT.</summary>
         public void ApplyWrite(byte startRegister, ushort[] values)

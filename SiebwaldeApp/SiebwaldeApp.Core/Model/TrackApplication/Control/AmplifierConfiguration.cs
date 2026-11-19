@@ -34,6 +34,22 @@ namespace SiebwaldeApp.Core
 
         public TimeSpan Timeout { get; init; } = TimeSpan.FromSeconds(2);
 
+        /// <summary>
+        /// Per-APPLY sub-timeout: each edge-re-arm attempt waits this long for
+        /// INIT_DONE|CONFIG_OK before re-clearing and re-issuing the APPLY. This runs
+        /// inside the overall <see cref="Timeout"/> deadline.
+        /// </summary>
+        private static readonly TimeSpan ApplySubTimeout = TimeSpan.FromMilliseconds(300);
+
+        /// <summary>
+        /// Identity/protocol settle window: the PIC32 cyclic SLAVEINFO upload polls only 2 registers
+        /// per cycle, so a single frame can carry a stale/absent HR7/HR22. The entry gate waits this
+        /// long for a FRESH frame whose HR7 identity and HR22 protocol are BOTH compatible before
+        /// classifying "incompatible" (fail-closed). Runs before the overall <see cref="Timeout"/>
+        /// deadline is armed.
+        /// </summary>
+        private static readonly TimeSpan IdentitySettleTimeout = TimeSpan.FromMilliseconds(500);
+
         public AmplifierConfigurationDownloader(ITrackCommClient comm, Action<string>? log = null)
         {
             _comm = comm;
@@ -56,7 +72,14 @@ namespace SiebwaldeApp.Core
             item.ConfigurationVerified = false;
             _log?.Invoke($"slave={slave} OBSERVED ConfigurationVerified=false (reset)");
 
-            if (!AmplifierPhase1Safety.Compatible(item))
+            // Bounded settle-then-reverify: the PIC32 cyclic SLAVEINFO upload polls only 2
+            // registers per cycle, so a single frame can carry a stale/absent HR7/HR22. Classifying
+            // on one such frame is the 0xC701 false negative ("incompatible firmware" for a
+            // genuinely compatible amp). Wait for a FRESH frame whose HR7 identity and HR22 protocol
+            // are BOTH compatible before proceeding; only a genuinely incompatible HR7/HR22 (or an
+            // exhausted settle window) fails closed.
+            bool compatible = await SettleCompatibleAsync(item, ct).ConfigureAwait(false);
+            if (!compatible)
             {
                 item.Phase1Failure = AmplifierPhase1Safety.IncompatibilityReason(item)
                     ?? AmplifierPhase1Safety.IncompatibleFirmware;
@@ -110,32 +133,66 @@ namespace SiebwaldeApp.Core
                     await WriteAndVerifyAsync(item, address, values[i], deadline.Token).ConfigureAwait(false);
                 }
 
-                // Explicit 0 then 1: never depend on a concurrent lease renewal to re-arm APPLY.
-                await WriteAndVerifyAsync(item, TrackAmplifierRegisters.Control, 0, deadline.Token).ConfigureAwait(false);
+                // Bounded, edge-re-arming APPLY. The PIC18 APPLY is edge-triggered on HR1
+                // (Control): a latched prev_control_word == ApplyConfigBit turns a repeated
+                // APPLY into a non-edge, so init_done/config_ok are never set even though the
+                // write is ACKed (HR8 stays 0xD100). Each attempt therefore issues a FRESH
+                // Control=0 clear to re-arm the edge before the APPLY, and waits a short
+                // sub-timeout for INIT_DONE|CONFIG_OK. A dropped Control=0 clear re-arms on
+                // the next attempt instead of hanging on the whole config deadline.
+                const int maxApplyAttempts = 3;
+                bool applied = false;
+                for (int attempt = 1; attempt <= maxApplyAttempts; attempt++)
+                {
+                    _log?.Invoke($"slave={slave} REQUESTED APPLY attempt={attempt}/{maxApplyAttempts}");
 
-                long sequence = item.ProtocolReadbackSequence;
-                _log?.Invoke(
-                    $"slave={slave} REQUESTED APPLY HR1=0x{TrackAmplifierRegisters.ApplyConfigBit:X4} " +
-                    $"(seq-before={sequence})");
-                await _comm.SendAsync(
-                    Exchange(slave, TrackAmplifierRegisters.Control, TrackAmplifierRegisters.ApplyConfigBit),
-                    deadline.Token).ConfigureAwait(false);
-                _log?.Invoke($"slave={slave} TRANSMITTED APPLY HR1=0x{TrackAmplifierRegisters.ApplyConfigBit:X4}");
+                    long sequence = item.ProtocolReadbackSequence;
 
-                // HR15 is read for diagnostics only. The APPLY completion signal is the HR8
-                // INIT_DONE|CONFIG_OK pair plus the HR3..6 config echo — never write_result,
-                // whose value == 1 is indistinguishable from a 100 ms lease renewal (HR1=0x4000).
-                await _comm.SendAsync(
-                    Exchange(slave, TrackAmplifierRegisters.State, 0, true), deadline.Token).ConfigureAwait(false);
-                await _comm.SendAsync(
-                    Exchange(slave, TrackAmplifierRegisters.WriteResult, 0, true), deadline.Token).ConfigureAwait(false);
+                    // (a) fresh Control=0 clear re-arms the edge.
+                    await _comm.SendAsync(
+                        Exchange(slave, TrackAmplifierRegisters.Control, 0),
+                        deadline.Token).ConfigureAwait(false);
 
-                await WaitObserveAsync(item,
-                    () => item.ProtocolReadbackSequence > sequence &&
-                        (item.HoldingReg[TrackAmplifierRegisters.State] & 0x0600) == 0x0600 &&
-                        values.SequenceEqual(item.HoldingReg.Skip(TrackAmplifierRegisters.ConfigRamp).Take(4)),
-                    () => LogStateObservation(item),
-                    deadline.Token).ConfigureAwait(false);
+                    // (b) issue the APPLY.
+                    await _comm.SendAsync(
+                        Exchange(slave, TrackAmplifierRegisters.Control, TrackAmplifierRegisters.ApplyConfigBit),
+                        deadline.Token).ConfigureAwait(false);
+                    _log?.Invoke($"slave={slave} TRANSMITTED APPLY attempt={attempt}/{maxApplyAttempts}");
+
+                    // HR15 is read for diagnostics only. The APPLY completion signal is the HR8
+                    // INIT_DONE|CONFIG_OK pair (the amplifier's own state acceptance) — never
+                    // write_result, whose value == 1 is indistinguishable from a 100 ms lease
+                    // renewal (HR1=0x4000). The HR3..6 echo was already verified pre-APPLY.
+                    await _comm.SendAsync(
+                        Exchange(slave, TrackAmplifierRegisters.WriteResult, 0, true),
+                        deadline.Token).ConfigureAwait(false);
+
+                    // (c) wait a short sub-timeout for the HR8 INIT_DONE|CONFIG_OK acceptance.
+                    using var attemptDeadline = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
+                    attemptDeadline.CancelAfter(ApplySubTimeout);
+                    try
+                    {
+                        await WaitObserveAsync(item,
+                            () => ConfigApplyVerified(item, sequence),
+                            () => LogStateObservation(item),
+                            attemptDeadline.Token).ConfigureAwait(false);
+                        applied = true;
+                        break;
+                    }
+                    catch (OperationCanceledException) when (!deadline.Token.IsCancellationRequested)
+                    {
+                        // Sub-timeout expired before INIT_DONE|CONFIG_OK: the APPLY did not
+                        // take effect (e.g. a dropped Control=0 clear made it a non-edge).
+                        // Re-arm and retry.
+                        _log?.Invoke($"slave={slave} OBSERVED APPLY attempt={attempt}/{maxApplyAttempts} not applied");
+                    }
+                }
+
+                if (!applied)
+                {
+                    // Fail closed through the existing deadline-timeout handler.
+                    throw new OperationCanceledException("APPLY verification timed out");
+                }
 
                 if (!AmplifierPhase1Safety.Compatible(item))
                     throw new InvalidOperationException("compatibility changed during configuration");
@@ -169,6 +226,54 @@ namespace SiebwaldeApp.Core
                 _log?.Invoke($"slave={slave} RETURN throw (cancellation)");
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Bounded settle-then-reverify of the identity/protocol compatibility gate. Returns true
+        /// immediately when the current <see cref="TrackAmplifierItem.HoldingReg"/> is already fresh
+        /// and compatible; otherwise waits for a FRESH SLAVEINFO frame whose HR7 identity and HR22
+        /// protocol version are BOTH compatible. Returns false (fail-closed) only when the settle
+        /// window exhausts with HR7/HR22 still absent/stale or genuinely incompatible. A caller-token
+        /// cancellation propagates as <see cref="OperationCanceledException"/>.
+        /// </summary>
+        private static async Task<bool> SettleCompatibleAsync(TrackAmplifierItem item, CancellationToken ct)
+        {
+            if (AmplifierPhase1Safety.Compatible(item))
+                return true;
+
+            long settleSequence = item.ProtocolReadbackSequence;
+            using var settleDeadline = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            settleDeadline.CancelAfter(IdentitySettleTimeout);
+            try
+            {
+                await WaitObserveAsync(item,
+                    () => item.ProtocolReadbackSequence > settleSequence &&
+                        AmplifierPhase1Safety.Compatible(item),
+                    null,
+                    settleDeadline.Token).ConfigureAwait(false);
+                return true;
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                // Settle window exhausted: HR7/HR22 never became fresh+compatible.
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// The APPLY-verification predicate: True only for a FRESH frame (sequence advanced past
+        /// <paramref name="sequenceBefore"/>) whose HR8 carries the INIT_DONE|CONFIG_OK pair — the
+        /// amplifier's own state-acceptance signal. The HR3..HR6 config echo is deliberately NOT
+        /// re-checked here: it was already echo-verified per-register by
+        /// <see cref="WriteAndVerifyAsync"/> before the APPLY, and the SLAVEINFO frame is a
+        /// temporally-inconsistent cache (the PIC32 cyclic poll reads only 2 registers per cycle), so
+        /// re-checking the echo against a stale HR3..HR6 would false-negative a genuinely configured
+        /// amplifier (0xC708).
+        /// </summary>
+        public static bool ConfigApplyVerified(TrackAmplifierItem item, long sequenceBefore)
+        {
+            return item.ProtocolReadbackSequence > sequenceBefore &&
+                (item.HoldingReg[TrackAmplifierRegisters.State] & 0x0600u) == 0x0600u;
         }
 
         private async Task WriteAndVerifyAsync(TrackAmplifierItem item, byte address, ushort value, CancellationToken ct)

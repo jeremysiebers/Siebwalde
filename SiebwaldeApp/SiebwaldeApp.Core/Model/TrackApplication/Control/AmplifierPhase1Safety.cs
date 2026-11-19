@@ -9,6 +9,12 @@ namespace SiebwaldeApp.Core
         public const string IncompatibleFirmware = "incompatible firmware";
         public const string IncompatibleProtocolVersion = "incompatible protocol version";
 
+        /// <summary>HR22 protocol byte stayed 0x00 for the whole bounded Stage-4 readback window: the
+        /// amplifier's SIP10 (HR21/HR22) population was never received. Distinct from a genuinely
+        /// non-zero incompatible protocol version (which reports
+        /// <see cref="IncompatibleProtocolVersion"/>).</summary>
+        public const string ProtocolVersionNotReceived = "protocol version not received";
+
         /// <summary>True when the amplifier is detected, its data is fresh and genuine, and its HR7
         /// identity field has the compatible shape (version 0x01 + class 1 + non-zero capability)
         /// AND its HR22 PROTOCOL_VERSION is the frozen Phase-1 value (0x01). The protocol check is

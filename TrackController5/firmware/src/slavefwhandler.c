@@ -32,6 +32,13 @@ static bool     FlashSequencerBootloaderOnly = false;
  * ERROR; the 131/132 handler encodes it as FLASH_SEQUENCER_SUBSTEP_BASE + step. */
 static uint8_t  FlashSequencerFailStep       = 0;
 
+/* Bounded BUSY retry counters for the FlashSequencer / SelectSlave verify
+ * steps (same bounded pattern as DetectSlave case 2/4). */
+#define FLASH_BUSY_MAX_RETRIES 20u
+#define SELECT_BUSY_MAX_RETRIES 20u
+static uint8_t FlashBusyRetries = 0;
+static uint8_t SelectBusyRetries = 0;
+
 /*#--------------------------------------------------------------------------#*/
 /*  Description: UART2_Config_9bit_Modbus(void) & UART2_Config_8bit_Bootloader(void)
  *
@@ -998,14 +1005,30 @@ uint32_t FlashSequencer(uint8_t Slave){
                     GoToCase        = (FlashSequencerBootloaderOnly ? 8 : 6);
                     iFlashSequencer = WAIT;
                     DelayCount1 = READxCORExTIMER();
+                    FlashBusyRetries = 0;
                     break;                    
                 case SLAVENOK: 
-                    LOG_Push("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 5.");
+                case SLAVE_DATA_TIMEOUT:
+                case SLAVE_DATA_NOK:
+                case SLAVE_DATA_EXCEPTION:
+                case SLAVE_DATA_UNKNOWN:
+                case SLAVE_DATA_IDLE:
+                    LOG_Push("Fw handler\t: FWFLASHSEQUENCER terminal failure in case 5.");
                     FlashSequencerFailStep = 5;
                     iFlashSequencer = 2;
                     return_val = ERROR;
+                    FlashBusyRetries = 0;
                     break;
-                case SLAVEBUSY: break;
+                case SLAVEBUSY:
+                    if (PetitModbusIsReady() &&
+                        ++FlashBusyRetries >= FLASH_BUSY_MAX_RETRIES){
+                        LOG_Push("Fw handler\t: FWFLASHSEQUENCER SLAVE_DATA_BUSY bounded retry exhausted in case 5.");
+                        FlashSequencerFailStep = 5;
+                        iFlashSequencer = 2;
+                        return_val = ERROR;
+                        FlashBusyRetries = 0;
+                    }
+                    break;
                 default : break;
             }
             DelayCount1 = READxCORExTIMER();
@@ -1032,14 +1055,25 @@ uint32_t FlashSequencer(uint8_t Slave){
                     GoToCase        = 8;//iFlashSequencer + 1;
                     iFlashSequencer = WAIT;
                     DelayCount1 = READxCORExTIMER();
+                    FlashBusyRetries = 0;
                     break;                    
                 case SLAVENOK: 
                     LOG_Push("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 7.");
                     FlashSequencerFailStep = 7;
                     iFlashSequencer = 2;
                     return_val = ERROR;
+                    FlashBusyRetries = 0;
                     break;
-                case SLAVEBUSY: break;
+                case SLAVEBUSY:
+                    if (PetitModbusIsReady() &&
+                        ++FlashBusyRetries >= FLASH_BUSY_MAX_RETRIES){
+                        LOG_Push("Fw handler\t: FWFLASHSEQUENCER SLAVE_DATA_BUSY bounded retry exhausted in case 7.");
+                        FlashSequencerFailStep = 7;
+                        iFlashSequencer = 2;
+                        return_val = ERROR;
+                        FlashBusyRetries = 0;
+                    }
+                    break;
                 default : break;
             }
             DelayCount1 = READxCORExTIMER();
@@ -1070,14 +1104,30 @@ uint32_t FlashSequencer(uint8_t Slave){
                     GoToCase        = 10;//iFlashSequencer + 1;
                     iFlashSequencer = WAIT;
                     DelayCount1 = READxCORExTIMER();
+                    FlashBusyRetries = 0;
                     break;                    
                 case SLAVENOK:
-                    LOG_Push("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 9.");
+                case SLAVE_DATA_TIMEOUT:
+                case SLAVE_DATA_NOK:
+                case SLAVE_DATA_EXCEPTION:
+                case SLAVE_DATA_UNKNOWN:
+                case SLAVE_DATA_IDLE:
+                    LOG_Push("Fw handler\t: FWFLASHSEQUENCER terminal failure in case 9.");
                     FlashSequencerFailStep = 9;
                     return_val = ERROR;
                     iFlashSequencer = 2;
+                    FlashBusyRetries = 0;
                     break;
-                case SLAVEBUSY: break;
+                case SLAVEBUSY:
+                    if (PetitModbusIsReady() &&
+                        ++FlashBusyRetries >= FLASH_BUSY_MAX_RETRIES){
+                        LOG_Push("Fw handler\t: FWFLASHSEQUENCER SLAVE_DATA_BUSY bounded retry exhausted in case 9.");
+                        FlashSequencerFailStep = 9;
+                        return_val = ERROR;
+                        iFlashSequencer = 2;
+                        FlashBusyRetries = 0;
+                    }
+                    break;
                 default : break;
             }
             break;
@@ -1308,13 +1358,28 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
                     GoToCase        = 4;//iFlashSequencer + 1;
                     iSelectSlaveSequencer = WAIT;
                     DelayCount1 = READxCORExTIMER();
+                    SelectBusyRetries = 0;
                     break;                    
                 case SLAVENOK: 
-                    LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVENOK returned in case 3.");
+                case SLAVE_DATA_TIMEOUT:
+                case SLAVE_DATA_NOK:
+                case SLAVE_DATA_EXCEPTION:
+                case SLAVE_DATA_UNKNOWN:
+                case SLAVE_DATA_IDLE:
+                    LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE terminal failure in case 3.");
                     iSelectSlaveSequencer = 0;
                     return_val = ERROR;
+                    SelectBusyRetries = 0;
                     break;
-                case SLAVEBUSY: break;
+                case SLAVEBUSY:
+                    if (PetitModbusIsReady() &&
+                        ++SelectBusyRetries >= SELECT_BUSY_MAX_RETRIES){
+                        LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVE_DATA_BUSY bounded retry exhausted in case 3.");
+                        iSelectSlaveSequencer = 0;
+                        return_val = ERROR;
+                        SelectBusyRetries = 0;
+                    }
+                    break;
                 default : break;
             }
             DelayCount1 = READxCORExTIMER();
@@ -1341,13 +1406,23 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
                     GoToCase        = 6;//iFlashSequencer + 1;
                     iSelectSlaveSequencer = WAIT;
                     DelayCount1 = READxCORExTIMER();
+                    SelectBusyRetries = 0;
                     break;                    
                 case SLAVENOK: 
                     LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVENOK returned in case 5.");
                     iSelectSlaveSequencer = 0;
                     return_val = ERROR;
+                    SelectBusyRetries = 0;
                     break;
-                case SLAVEBUSY: break;
+                case SLAVEBUSY:
+                    if (PetitModbusIsReady() &&
+                        ++SelectBusyRetries >= SELECT_BUSY_MAX_RETRIES){
+                        LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVE_DATA_BUSY bounded retry exhausted in case 5.");
+                        iSelectSlaveSequencer = 0;
+                        return_val = ERROR;
+                        SelectBusyRetries = 0;
+                    }
+                    break;
                 default : break;
             }
             DelayCount1 = READxCORExTIMER();
@@ -1376,13 +1451,28 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
                     GoToCase        = 8;//iSelectSlaveSequencer + 1;
                     iSelectSlaveSequencer = WAIT;
                     DelayCount1 = READxCORExTIMER();
+                    SelectBusyRetries = 0;
                     break;                    
                 case SLAVENOK:
-                    LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVENOK returned in case 7.");
+                case SLAVE_DATA_TIMEOUT:
+                case SLAVE_DATA_NOK:
+                case SLAVE_DATA_EXCEPTION:
+                case SLAVE_DATA_UNKNOWN:
+                case SLAVE_DATA_IDLE:
+                    LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE terminal failure in case 7.");
                     return_val = ERROR;
                     iSelectSlaveSequencer = 0;
+                    SelectBusyRetries = 0;
                     break;
-                case SLAVEBUSY: break;
+                case SLAVEBUSY:
+                    if (PetitModbusIsReady() &&
+                        ++SelectBusyRetries >= SELECT_BUSY_MAX_RETRIES){
+                        LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVE_DATA_BUSY bounded retry exhausted in case 7.");
+                        return_val = ERROR;
+                        iSelectSlaveSequencer = 0;
+                        SelectBusyRetries = 0;
+                    }
+                    break;
                 default : break;
             }
             break;

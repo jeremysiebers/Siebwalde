@@ -27,6 +27,23 @@ namespace SiebwaldeApp.Core
         private bool _heartbeatActive;
         public byte? LastObservedPic32Status { get; private set; }
 
+        /// <summary>
+        /// The time the last HOST_HEARTBEAT (110) was sent, or null when none has been sent yet in
+        /// this transport session. This is the honest host-side liveness signal for the READY-endurance
+        /// hold: it advances only when <see cref="TickAsync"/> actually emits a heartbeat. Read-only
+        /// and thread-safe (the backing field is written under <see cref="GlobalStopController.SyncRoot"/>).
+        /// </summary>
+        public DateTimeOffset? LastHeartbeatSentUtc
+        {
+            get
+            {
+                lock (_stop.SyncRoot)
+                {
+                    return _lastHeartbeat;
+                }
+            }
+        }
+
         /// <summary>Called after the validated controller session is established (250 connect + 113
         /// version + 111/112 global-stop precondition), before the full initialization completes.
         /// Enables HOST_HEARTBEAT transmission so host authority is renewed throughout stages 1-5

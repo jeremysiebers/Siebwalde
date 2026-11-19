@@ -164,6 +164,10 @@ static udpTrans_t last_frame;
 static unsigned wire_count;
 static uint8_t GoToCase, StartupMachine, EnableMachine, EnableSlave;
 static uint32_t DelayCount1, DelayCount2, threshold;
+#define CONFIG_SELECT_BUSY_MAX_RETRIES 20u
+#define CONFIG_WRITE_BUSY_MAX_RETRIES 20u
+#define CONFIG_DESELECT_BUSY_MAX_RETRIES 20u
+static uint8_t ConfigSelectBusyRetries, ConfigWriteBusyRetries, ConfigDeselectBusyRetries;
 /* Receive buffer + counter (production PetitModbusPort.h owns these; the harness
  * compiles production C without the port layer, so they are provided here). */
 volatile unsigned char PetitReceiveBuffer[PETITMODBUS_RECEIVE_BUFFER_SIZE];

@@ -172,6 +172,29 @@ int main(void)
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_CLEAR) == 0);
     CHECK(!(amp_model.fault.causes & AMP_FAULT_COMMS));
 
+    /* Lost-edge regression (amp-3 config-verification failure): a latched
+     * prev_control_word == HR_CONTROL_APPLY turns a repeated APPLY into a NON-edge,
+     * so init_done/config_ok stay clear even though the write is ACKed. A fresh
+     * HR1=0 clear re-arms the edge and the next APPLY sets both. This is the PIC18
+     * edge-triggered APPLY contract that the C# re-arming APPLY retry relies on. */
+    reset();
+    CHECK(!amp_model.status.init_done && !amp_model.status.config_ok);
+    /* Latch prev_control_word == APPLY via an APPLY that fails validation (no config yet). */
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_APPLY) == AMP_WRITE_RANGE);
+    CHECK(amp_model.prev_control_word == HR_CONTROL_APPLY);
+    CHECK(write_reg(HR_CFG_RAMP, 0x0202u) == 0);
+    CHECK(write_reg(HR_CFG_FAST_STOP, 8u) == 0);
+    CHECK(write_reg(HR_CFG_WATCHDOG, 250u) == 0);
+    CHECK(write_reg(HR_CFG_TAG, 55u) == 0);
+    /* Repeated APPLY with prev == APPLY is a NON-edge: init_done/config_ok unchanged. */
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_APPLY) == 0);
+    CHECK(!amp_model.status.init_done && !amp_model.status.config_ok);
+    /* A fresh HR1=0 clear re-arms the edge; the next APPLY applies and sets both. */
+    CHECK(write_reg(HR_CONTROL, 0u) == 0);
+    CHECK(write_reg(HR_CONTROL, HR_CONTROL_APPLY) == 0);
+    CHECK(amp_model.status.init_done && amp_model.status.config_ok);
+    print("PASS: APPLY lost-edge needs a fresh HR1=0 re-arm (init_done/config_ok)\n");
+
     /* Exhaustive range/step checks, neutral snap and reversal. */
     for (i = 0u; i <= 1023u; i++) for (j = 1u; j <= 255u; j++) {
         uint16_t duty = AmpCore_StepRamp((uint16_t)i, 399u, (uint8_t)j);

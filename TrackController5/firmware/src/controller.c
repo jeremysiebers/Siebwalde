@@ -95,6 +95,15 @@ bool ISxGLOBALxSTOPxLATCHED(void)
     return GlobalStopLatch == GLOBAL_STOP_LATCHED;
 }
 
+/* Renews the host-loss watchdog from a cooperative (non-ISR) task. Used by the
+ * detect FSM, which runs ~2000 ms past the init-command dispatch with no new
+ * heartbeat frame to process; authority is extended relative to processing
+ * time (READxCORExTIMER()), matching the 110 heartbeat renewal semantics. */
+void RENEWxHOSTxAUTHORITY(void)
+{
+    LastHostHeartbeat = READxCORExTIMER();
+}
+
 static void REPORTxGLOBALxSTOPxSTATE(void)
 {
     if (ISxGLOBALxSTOPxLATCHED()) {
@@ -305,6 +314,23 @@ void CONTROLLER_Tasks ( void )
         
         case CONTROLLER_STATE_HANDLE_COMM_DATA:
         {
+            /* Host authority is renewed ONLY by the authorized initialization
+             * commands (SLAVES_ON 100, SLAVE_DETECT 101, SLAVE_INIT 104,
+             * SLAVE_ENABLE 105, START_DATA_UPLOAD 106, RESET 107), each of which
+             * renews LastHostHeartbeat inside its own validated case below. A host
+             * actively driving init sends these between heartbeat (110) frames, so
+             * a legitimate init sequence is not aborted by the 2000 ms host-loss
+             * watchdog. Unknown/malformed commands (the default branch), read-only
+             * queries (GET_CONTROLLER_VERSION 113), data exchange (108), the
+             * firmware-flash command (103) and the connection handshake (250) do
+             * NOT renew: only a host actually driving a validated init sequence
+             * holds authority. This state is reached only for HEADER frames pulled
+             * from the Ethernet receive mailbox (see CONTROLLER_STATE_IDLE), so
+             * slave-originated MBUS traffic can never renew authority here. The
+             * 109-112 direct safety path and its renewal semantics are handled by
+             * CONTROLLERxHANDLExSAFETYxCOMMAND and are unchanged; a dead host sends
+             * nothing and still latches after HOST_AUTHORITY_WATCHDOG_MS via
+             * CHECKxHOSTxAUTHORITY (which runs before this state machine). */
             switch(EthernetRecvData->command){
                 case EXEC_GLOBAL_STOP:
                 case HOST_HEARTBEAT:
@@ -329,12 +355,14 @@ void CONTROLLER_Tasks ( void )
                 {
                     LOG_Push("Controller\t: EXEC_MBUS_STATE_SLAVES_ON.");
                     SETxMBUSxSTATE(MBUS_STATE_SLAVES_ON);
+                    LastHostHeartbeat = READxCORExTIMER();
                     break;
                 }
                 case EXEC_MBUS_STATE_SLAVE_DETECT:
                 {
                     LOG_Push("Controller\t: EXEC_MBUS_STATE_SLAVE_DETECT.");
                     SETxMBUSxSTATE(MBUS_STATE_SLAVE_DETECT);
+                    LastHostHeartbeat = READxCORExTIMER();
                     break;
                 }
                 case EXEC_MBUS_STATE_SLAVE_FW_FLASH:
@@ -347,24 +375,28 @@ void CONTROLLER_Tasks ( void )
                 {
                     LOG_Push("Controller\t: EXEC_MBUS_STATE_SLAVE_INIT.");
                     SETxMBUSxSTATE(MBUS_STATE_SLAVE_INIT);
+                    LastHostHeartbeat = READxCORExTIMER();
                     break;
                 }
                 case EXEC_MBUS_STATE_SLAVE_ENABLE:
                 {
                     LOG_Push("Controller\t: EXEC_MBUS_STATE_SLAVE_ENABLE.");
                     SETxMBUSxSTATE(MBUS_STATE_SLAVE_ENABLE);
+                    LastHostHeartbeat = READxCORExTIMER();
                     break;
                 }
                 case EXEC_MBUS_STATE_START_DATA_UPLOAD:
                 {
                     LOG_Push("Controller\t: EXEC_MBUS_STATE_START_DATA_UPLOAD.");
                     SETxMBUSxSTATE(MBUS_STATE_START_DATA_UPLOAD);
+                    LastHostHeartbeat = READxCORExTIMER();
                     break;
                 }
                 case EXEC_MBUS_STATE_RESET:
                 {
                     LOG_Push("Controller\t: EXEC_MBUS_STATE_RESET.");
                     SETxMBUSxSTATE(MBUS_STATE_RESET);
+                    LastHostHeartbeat = READxCORExTIMER();
                     break;
                 }
                 

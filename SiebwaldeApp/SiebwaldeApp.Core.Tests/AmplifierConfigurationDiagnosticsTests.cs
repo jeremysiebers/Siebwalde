@@ -49,8 +49,8 @@ namespace SiebwaldeApp.Core.Tests
                 Assert.Contains(lines, l => l.Contains("REQUESTED HR6="));
                 Assert.Contains(lines, l => l.Contains("TRANSMITTED write HR3="));
                 Assert.Contains(lines, l => l.Contains("VERIFIED HR3="));
-                Assert.Contains(lines, l => l.Contains("REQUESTED APPLY HR1=0x2000"));
-                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY HR1=0x2000"));
+                Assert.Contains(lines, l => l.Contains("REQUESTED APPLY attempt=1/3"));
+                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY attempt=1/3"));
                 Assert.Contains(lines, l => l.Contains("VERIFIED APPLY"));
                 Assert.Contains(lines, l => l.Contains("RETURN true (configured+verified)"));
             }
@@ -112,7 +112,7 @@ namespace SiebwaldeApp.Core.Tests
                 var lines = new List<string>();
                 var downloader = new AmplifierConfigurationDownloader(client, lines.Add)
                 {
-                    Timeout = TimeSpan.FromMilliseconds(300)
+                    Timeout = TimeSpan.FromMilliseconds(2000)
                 };
 
                 // Watchdog 30 (< 50) is accepted into the pending config (echoed) but rejected at
@@ -129,7 +129,8 @@ namespace SiebwaldeApp.Core.Tests
                 Assert.Contains(lines, l => l.Contains("VERIFIED HR3="));
                 Assert.Contains(lines, l => l.Contains("VERIFIED HR5=0x001E"));
                 Assert.Contains(lines, l => l.Contains("VERIFIED HR6="));
-                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY HR1=0x2000"));
+                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY attempt=1/3"));
+                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY attempt=3/3"));
                 Assert.DoesNotContain(lines, l => l.Contains("VERIFIED APPLY"));
                 Assert.Contains(lines, l => l.Contains("RETURN false (timeout)"));
             }
@@ -192,7 +193,7 @@ namespace SiebwaldeApp.Core.Tests
                 var lines = new List<string>();
                 var downloader = new AmplifierConfigurationDownloader(client, lines.Add)
                 {
-                    Timeout = TimeSpan.FromMilliseconds(300)
+                    Timeout = TimeSpan.FromMilliseconds(2000)
                 };
 
                 var ok = await downloader.DownloadAsync(item, new AmplifierConfiguration(), CancellationToken.None);
@@ -205,7 +206,7 @@ namespace SiebwaldeApp.Core.Tests
                 // never confirms -> the APPLY verify loop times out.
                 Assert.Contains(lines, l => l.Contains("VERIFIED HR3="));
                 Assert.Contains(lines, l => l.Contains("VERIFIED HR6="));
-                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY HR1=0x2000"));
+                Assert.Contains(lines, l => l.Contains("TRANSMITTED APPLY attempt=3/3"));
                 Assert.DoesNotContain(lines, l => l.Contains("VERIFIED APPLY"));
                 Assert.Contains(lines, l => l.Contains("RETURN false (timeout)"));
             }
@@ -311,6 +312,67 @@ namespace SiebwaldeApp.Core.Tests
             Assert.StartsWith("configuration download failed:", item.Phase1Failure);
             Assert.Contains(lines, l => l.Contains("FAILED exception"));
             Assert.Contains(lines, l => l.Contains("RETURN false (exception)"));
+        }
+
+        // ---------------------------------------------------------------------
+        // APPLY state-acceptance verification (stale-echo false negative, 0xC708)
+        // ---------------------------------------------------------------------
+
+        [Fact]
+        public void ConfigApplyVerified_AcceptsFreshHr8State_IgnoresStaleEcho()
+        {
+            var item = new TrackAmplifierItem { SlaveNumber = 1 };
+            // HR3..HR6 echo is STALE (does not match the requested config): the pre-APPLY
+            // per-register echo verification has already confirmed the config, so the APPLY
+            // verification must accept HR8's own state-acceptance (INIT_DONE|CONFIG_OK) without
+            // re-checking the temporally-inconsistent echo (the 0xC708 false negative).
+            item.HoldingReg[TrackAmplifierRegisters.ConfigRamp] = 0x0000;
+            item.HoldingReg[TrackAmplifierRegisters.ConfigFastStop] = 0x0000;
+            item.HoldingReg[TrackAmplifierRegisters.ConfigWatchdog] = 0x0000;
+            item.HoldingReg[TrackAmplifierRegisters.ConfigTag] = 0x0000;
+            item.ProtocolReadbackSequence = 2;
+
+            // Fresh frame with HR8 = INIT_DONE|CONFIG_OK: ACCEPT (state acceptance, stale echo ignored).
+            item.HoldingReg[TrackAmplifierRegisters.State] = 0x0600;
+            Assert.True(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 1));
+
+            // Stale frame (config_ok still clear): REJECT.
+            item.HoldingReg[TrackAmplifierRegisters.State] = 0x0000;
+            Assert.False(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 1));
+
+            // Not a fresh frame (sequence did not advance): REJECT.
+            item.HoldingReg[TrackAmplifierRegisters.State] = 0x0600;
+            Assert.False(AmplifierConfigurationDownloader.ConfigApplyVerified(item, 2));
+        }
+
+        // ---------------------------------------------------------------------
+        // Identity/protocol settle-then-reverify (stale-identity false negative, 0xC701)
+        // ---------------------------------------------------------------------
+
+        [Fact]
+        public async Task DownloadAsync_StaleProtocolVersion_SettlesAndSucceeds()
+        {
+            // HR22 PROTOCOL_VERSION lags the earlier HR7/identity packet for the first few frames
+            // (PIC32 SIP10 lag). The settle-then-reverify must wait for the compatible HR22, not
+            // false-negative "incompatible protocol version" on the first stale frame.
+            var (client, _, item) = await StartDetectedAsync(new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1 },
+                protocolVersionDelayFrames: new Dictionary<byte, int> { { 1, 5 } },
+                periodicSlaveInfoInterval: TimeSpan.FromMilliseconds(20))).ConfigureAwait(false);
+            try
+            {
+                var downloader = new AmplifierConfigurationDownloader(client);
+
+                var ok = await downloader.DownloadAsync(item, new AmplifierConfiguration(), CancellationToken.None);
+
+                Assert.True(ok);
+                Assert.True(item.ConfigurationVerified);
+                Assert.Null(item.Phase1Failure);
+            }
+            finally
+            {
+                await client.DisposeAsync();
+            }
         }
 
         // ---------------------------------------------------------------------

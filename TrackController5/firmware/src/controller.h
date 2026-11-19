@@ -123,6 +123,7 @@ typedef struct
 /* Called only from cooperative Ethernet/controller tasks, never an ISR. */
 bool CONTROLLERxHANDLExSAFETYxCOMMAND(const udpTrans_t *frame);
 bool ISxGLOBALxSTOPxLATCHED(void);
+void RENEWxHOSTxAUTHORITY(void);
 
 // *****************************************************************************
 // *****************************************************************************

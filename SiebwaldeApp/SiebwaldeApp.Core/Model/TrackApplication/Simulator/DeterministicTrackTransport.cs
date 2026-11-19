@@ -51,6 +51,13 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         public IReadOnlyDictionary<byte, ushort> ProtocolVersionOverrides { get; }
 
         /// <summary>
+        /// Per-slave count of SLAVEINFO frames for which HR21/HR22 are reported 0x0000 before the
+        /// configured protocol version populates. Models the PIC32 cyclic SLAVEINFO upload's SIP10
+        /// packet (HR21/HR22) lagging the earlier SIP2 (HR7) / SIP4 (HR11) packets. Empty by default.
+        /// </summary>
+        public IReadOnlyDictionary<byte, int> ProtocolVersionDelayFrames { get; }
+
+        /// <summary>
         /// Detected slave addresses whose GROUP_READY write is rejected (local conditions not met),
         /// used to model an amplifier that is configured but rejects the C#-issued group-ready
         /// transition. Empty by default.
@@ -85,6 +92,17 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         /// </summary>
         public bool ControllerMute { get; }
 
+        /// <summary>
+        /// When true the simulated controller acknowledges everything EXCEPT the slave-detect
+        /// result: command 101 (EXEC_MBUS_STATE_SLAVE_DETECT) produces no
+        /// <c>MBUS_STATE_SLAVE_DETECT / DONE</c> ack and no SLAVEINFO frame, modelling the F2
+        /// post-REARM stall where the PIC32 slave detection never completes (lease-expired
+        /// amplifiers). Used to prove the host's Stage-2 detection step fails closed instead of
+        /// waiting forever. Simulator-layer only; the production init logic is unchanged.
+        /// Defaults to false.
+        /// </summary>
+        public bool DetectSlavesMute { get; }
+
         public TrackSimulatorConfig(
             ushort firmwareChecksum = DefaultFirmwareChecksum,
             IReadOnlyList<byte>? detectedSlaves = null,
@@ -96,7 +114,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             bool emitGlobalStopArmedStatus = false,
             byte initialGlobalStopState = 0,
             IReadOnlyCollection<byte>? groupReadyRejectSlaves = null,
-            bool controllerMute = false)
+            bool controllerMute = false,
+            IReadOnlyDictionary<byte, int>? protocolVersionDelayFrames = null,
+            bool detectSlavesMute = false)
         {
             FirmwareChecksum = firmwareChecksum;
             DetectedSlaves = detectedSlaves is null
@@ -114,6 +134,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             ProtocolVersionOverrides = protocolVersionOverrides is null
                 ? new Dictionary<byte, ushort>()
                 : new Dictionary<byte, ushort>(protocolVersionOverrides);
+            ProtocolVersionDelayFrames = protocolVersionDelayFrames is null
+                ? new Dictionary<byte, int>()
+                : new Dictionary<byte, int>(protocolVersionDelayFrames);
             GroupReadyRejectSlaves = groupReadyRejectSlaves is null
                 ? Array.Empty<byte>()
                 : new List<byte>(groupReadyRejectSlaves);
@@ -121,6 +144,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             EmitGlobalStopArmedStatus = emitGlobalStopArmedStatus;
             InitialGlobalStopState = initialGlobalStopState;
             ControllerMute = controllerMute;
+            DetectSlavesMute = detectSlavesMute;
         }
     }
 
@@ -153,6 +177,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private readonly HashSet<byte> _detected = new();
         private readonly HashSet<byte> _droppedEchoSlaves = new();
         private readonly List<byte> _sentCommands = new();
+        // Per-slave count of emitted SLAVEINFO frames, used to model the lagging SIP10 (HR21/HR22)
+        // population of the cyclic upload. Only mutated under _sync.
+        private readonly Dictionary<byte, int> _protocolVersionFramesEmitted = new();
         // PIC32 global-stop latch state (mirror of GLOBAL_STOP_STATE message): 0=disarmed,
         // 1=latched-host-loss, 2=latched-host-initiated, 3=armed.
         private byte _globalStopState = GlobalStopStatusMessage.Disarmed;
@@ -405,6 +432,46 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         }
 
         /// <summary>
+        /// Overrides the state low nibble of one amplifier (test/injection surface) and emits a fresh
+        /// SLAVEINFO frame, modelling an amplifier leaving READY during an endurance hold. No real
+        /// protocol transaction; the production init/runtime logic is unchanged.
+        /// </summary>
+        public void SetSlaveState(byte slaveNumber, ushort state)
+        {
+            lock (_sync)
+            {
+                var writer = _frames?.Writer;
+                if (writer is null || !_amplifiers.TryGetValue(slaveNumber, out var amplifier))
+                    return;
+
+                amplifier.SetState(state);
+
+                // Emit a fresh frame immediately so the change is observed before the next heartbeat.
+                writer.TryWrite(BuildSlaveInfoFrame(slaveNumber));
+            }
+        }
+
+        /// <summary>
+        /// Overrides the HR_FAULT register of one amplifier (test/injection surface) and emits a fresh
+        /// SLAVEINFO frame, modelling an amplifier fault during an endurance hold. No real protocol
+        /// transaction; the production init/runtime logic is unchanged.
+        /// </summary>
+        public void SetSlaveFault(byte slaveNumber, ushort fault)
+        {
+            lock (_sync)
+            {
+                var writer = _frames?.Writer;
+                if (writer is null || !_amplifiers.TryGetValue(slaveNumber, out var amplifier))
+                    return;
+
+                amplifier.SetFault(fault);
+
+                // Emit a fresh frame immediately so the change is observed before the next heartbeat.
+                writer.TryWrite(BuildSlaveInfoFrame(slaveNumber));
+            }
+        }
+
+        /// <summary>
         /// Emits a SLAVEINFO frame for every detected slave on <paramref name="interval"/> until
         /// cancellation. Only started when <see cref="TrackSimulatorConfig.PeriodicSlaveInfoInterval"/>
         /// is set; it is stopped by the transport's <c>_cts</c> cancellation in <see cref="CloseAsync"/>.
@@ -491,6 +558,13 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                     break;
 
                 case TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT: // 101
+                    if (_config.DetectSlavesMute)
+                    {
+                        // F2 model: the slave detection never completes (lease-expired amplifiers),
+                        // so no DONE ack and no SLAVEINFO frames are produced.
+                        break;
+                    }
+
                     writer.TryWrite(BuildControlFrame(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVE_DETECT, TaskStates.DONE));
                     foreach (var slave in _config.DetectedSlaves)
                     {
@@ -702,6 +776,22 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         {
             var detected = _detected.Contains(slave) ? (byte)1 : (byte)0;
             var registers = GetOrCreateAmplifier(slave).Snapshot();
+
+            // Model the PIC32 cyclic SLAVEINFO upload's SIP10 packet (HR21/HR22) lagging the
+            // earlier SIP2 (HR7) / SIP4 (HR11): for the first N emitted frames of a delayed slave,
+            // HR21/HR22 are reported 0x0000 (NOT YET AVAILABLE) before the configured protocol
+            // version populates. Called only under _sync.
+            if (_config.ProtocolVersionDelayFrames.TryGetValue(slave, out var delay))
+            {
+                int emitted = _protocolVersionFramesEmitted.TryGetValue(slave, out var e) ? e : 0;
+                if (emitted < delay)
+                {
+                    registers[TrackAmplifierRegisters.FwVersionMajorMinor] = 0;
+                    registers[TrackAmplifierRegisters.FwVersionPatchProtocol] = 0;
+                }
+                _protocolVersionFramesEmitted[slave] = emitted + 1;
+            }
+
             ushort? pwmOverride = _config.Hr0ReadbackOverrides.TryGetValue(slave, out var overrideValue)
                 ? overrideValue
                 : (ushort?)null;

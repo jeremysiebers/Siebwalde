@@ -206,12 +206,227 @@ static void test_changing_client_endpoint(void) {
     puts("PASS: reconnect re-binds transsocket to the changed client endpoint\n");
 }
 
+/* PO check-4 regression: host authority is renewed ONLY by correctly validated,
+ * authorized initialization commands dispatched in CONTROLLER_STATE_HANDLE_COMM_DATA.
+ * Every other HEADER-framed command (unknown, query, data exchange, flash,
+ * handshake) must leave LastHostHeartbeat untouched, and a dead host must still
+ * latch after HOST_AUTHORITY_WATCHDOG_MS. The 109-112 direct safety path must be
+ * unchanged. */
+
+static void test_init_command_renews_authority(void) {
+    static const struct { int cmd; uint32_t mbus; } init_cmds[] = {
+        { EXEC_MBUS_STATE_SLAVES_ON,         MBUS_STATE_SLAVES_ON },
+        { EXEC_MBUS_STATE_SLAVE_DETECT,      MBUS_STATE_SLAVE_DETECT },
+        { EXEC_MBUS_STATE_SLAVE_INIT,        MBUS_STATE_SLAVE_INIT },
+        { EXEC_MBUS_STATE_SLAVE_ENABLE,      MBUS_STATE_SLAVE_ENABLE },
+        { EXEC_MBUS_STATE_START_DATA_UPLOAD, MBUS_STATE_START_DATA_UPLOAD },
+        { EXEC_MBUS_STATE_RESET,             MBUS_STATE_RESET },
+    };
+    unsigned k, n;
+    udpTrans_t frame;
+    n = (unsigned)(sizeof(init_cmds) / sizeof(init_cmds[0]));
+    for (k = 0; k < n; ++k) {
+        sreset();
+        now = 1000u * MILISECONDS;
+        memset(&frame, 0, sizeof(frame));
+        frame.header = (uint8_t)HEADER;
+        frame.command = (uint8_t)HOST_HEARTBEAT;
+        assert(CONTROLLERxHANDLExSAFETYxCOMMAND(&frame));
+        assert(GlobalStopLatch == GLOBAL_STOP_ARMED);
+        assert(LastHostHeartbeat == now);
+
+        /* Mid-init: the host drives a state command while a heartbeat (110) is
+         * being dropped by the ethernet RX FIFO path. */
+        now += 1500u * MILISECONDS;
+        memset(&frame, 0, sizeof(frame));
+        frame.header = (uint8_t)HEADER;
+        frame.command = (uint8_t)init_cmds[k].cmd;
+        controllerData.state = CONTROLLER_STATE_IDLE;
+        PutDataInReceiveMailBox(frame);
+        CONTROLLER_Tasks();   /* IDLE -> HANDLE_COMM_DATA */
+        assert(controllerData.state == CONTROLLER_STATE_HANDLE_COMM_DATA);
+        CONTROLLER_Tasks();   /* HANDLE_COMM_DATA dispatches the init command */
+        assert(mbus_state == init_cmds[k].mbus);
+        assert(LastHostHeartbeat == now);   /* renewed at dispatch */
+
+        /* 1500 ms after renewal (3000 ms after the arm): authority must hold. */
+        now += 1500u * MILISECONDS;
+        CHECKxHOSTxAUTHORITY();
+        assert(!ISxGLOBALxSTOPxLATCHED());
+    }
+    puts("PASS: 6 authorized init commands renew LastHostHeartbeat at dispatch and keep authority alive\n");
+}
+
+static void test_unknown_command_does_not_renew(void) {
+    udpTrans_t frame, *got;
+    sreset();
+    now = 1000u * MILISECONDS;
+    memset(&frame, 0, sizeof(frame));
+    frame.header = (uint8_t)HEADER;
+    frame.command = (uint8_t)HOST_HEARTBEAT;
+    assert(CONTROLLERxHANDLExSAFETYxCOMMAND(&frame));
+    assert(GlobalStopLatch == GLOBAL_STOP_ARMED);
+    assert(LastHostHeartbeat == now);
+    while (CheckDataInSendMailBox()) GetDataFromSendMailBox();   /* drop arm report */
+
+    now += 1500u * MILISECONDS;
+    memset(&frame, 0, sizeof(frame));
+    frame.header = (uint8_t)HEADER;
+    frame.command = (uint8_t)0xEE;   /* unknown / malformed command */
+    controllerData.state = CONTROLLER_STATE_IDLE;
+    PutDataInReceiveMailBox(frame);
+    CONTROLLER_Tasks();   /* IDLE -> HANDLE_COMM_DATA */
+    assert(controllerData.state == CONTROLLER_STATE_HANDLE_COMM_DATA);
+    CONTROLLER_Tasks();   /* HANDLE_COMM_DATA -> default: unknown, no renewal */
+    assert(LastHostHeartbeat == 1000u * MILISECONDS);   /* not renewed */
+    /* The unknown command is reported, proving it hit the default branch. */
+    assert(CheckDataInSendMailBox());
+    got = GetDataFromSendMailBox();
+    assert(got->command == (uint8_t)CONTROLLER &&
+           got->data[0] == (uint8_t)RECEIVED_UNKNOWN_COMMAND);
+
+    /* Authority still expires from the original arm (3000 ms > 2000 ms). */
+    now += 1500u * MILISECONDS;
+    CHECKxHOSTxAUTHORITY();
+    assert(ISxGLOBALxSTOPxLATCHED());
+    puts("PASS: unknown HEADER command hits default, does not renew, authority still expires\n");
+}
+
+static void test_non_init_commands_do_not_renew(void) {
+    static const uint8_t non_init_cmds[] = {
+        (uint8_t)GET_CONTROLLER_VERSION,         /* 113 read-only query */
+        (uint8_t)EXEC_MBUS_SLAVE_DATA_EXCH,      /* 108 data exchange */
+        (uint8_t)EXEC_MBUS_STATE_SLAVE_FW_FLASH, /* 103 firmware flash */
+        (uint8_t)CLIENT_CONNECTION_REQUEST,      /* 250 session handshake */
+    };
+    unsigned k, n;
+    udpTrans_t frame;
+    n = (unsigned)(sizeof(non_init_cmds) / sizeof(non_init_cmds[0]));
+    for (k = 0; k < n; ++k) {
+        sreset();
+        now = 1000u * MILISECONDS;
+        memset(&frame, 0, sizeof(frame));
+        frame.header = (uint8_t)HEADER;
+        frame.command = (uint8_t)HOST_HEARTBEAT;
+        assert(CONTROLLERxHANDLExSAFETYxCOMMAND(&frame));
+        assert(LastHostHeartbeat == now);
+
+        now += 1500u * MILISECONDS;
+        memset(&frame, 0, sizeof(frame));
+        frame.header = (uint8_t)HEADER;
+        frame.command = non_init_cmds[k];
+        controllerData.state = CONTROLLER_STATE_IDLE;
+        PutDataInReceiveMailBox(frame);
+        CONTROLLER_Tasks();   /* IDLE -> HANDLE_COMM_DATA */
+        CONTROLLER_Tasks();   /* dispatch known non-init command */
+        assert(LastHostHeartbeat == 1000u * MILISECONDS);   /* not renewed */
+    }
+    puts("PASS: known non-init commands (113/108/103/250) do not renew authority\n");
+}
+
+static void test_dead_host_latches(void) {
+    udpTrans_t frame;
+    sreset();
+    now = 1000u * MILISECONDS;
+    memset(&frame, 0, sizeof(frame));
+    frame.header = (uint8_t)HEADER;
+    frame.command = (uint8_t)HOST_HEARTBEAT;
+    assert(CONTROLLERxHANDLExSAFETYxCOMMAND(&frame));
+    assert(GlobalStopLatch == GLOBAL_STOP_ARMED);
+    assert(!ISxGLOBALxSTOPxLATCHED());
+
+    /* Dead host: no further commands of any kind. */
+    now += (HOST_AUTHORITY_WATCHDOG_MS * MILISECONDS) - MILISECONDS;   /* 1999 ms */
+    CHECKxHOSTxAUTHORITY();
+    assert(!ISxGLOBALxSTOPxLATCHED());   /* boundary: still inside grace */
+
+    now += MILISECONDS;   /* exactly 2000 ms */
+    controllerData.state = CONTROLLER_STATE_IDLE;
+    CONTROLLER_Tasks();   /* CHECKxHOSTxAUTHORITY runs BEFORE the state machine */
+    assert(ISxGLOBALxSTOPxLATCHED());
+    assert(GlobalStopReason == 1);   /* host-loss */
+    puts("PASS: dead host still latches host-loss at 2000 ms (check precedes state machine)\n");
+}
+
+static void test_safety_path_unchanged(void) {
+    udpTrans_t frame;
+    uint32_t armed_at;
+
+    /* 110 HOST_HEARTBEAT renews authority and arms when disarmed. */
+    sreset();
+    now = 1000u * MILISECONDS;
+    memset(&frame, 0, sizeof(frame));
+    frame.header = (uint8_t)HEADER;
+    frame.command = (uint8_t)HOST_HEARTBEAT;
+    assert(CONTROLLERxHANDLExSAFETYxCOMMAND(&frame));
+    assert(GlobalStopLatch == GLOBAL_STOP_ARMED);
+    assert(LastHostHeartbeat == now);
+
+    /* 111 GLOBAL_STOP_STATE is a query: it must not renew authority. */
+    now += 1000u * MILISECONDS;
+    memset(&frame, 0, sizeof(frame));
+    frame.header = (uint8_t)HEADER;
+    frame.command = (uint8_t)GLOBAL_STOP_STATE;
+    assert(CONTROLLERxHANDLExSAFETYxCOMMAND(&frame));
+    assert(LastHostHeartbeat == 1000u * MILISECONDS);   /* unchanged */
+
+    /* 112 REARM_GLOBAL_STOP re-arms only when latched, granting a bounded grace. */
+    now += HOST_AUTHORITY_WATCHDOG_MS * MILISECONDS;   /* past expiry */
+    CHECKxHOSTxAUTHORITY();
+    assert(ISxGLOBALxSTOPxLATCHED());
+    memset(&frame, 0, sizeof(frame));
+    frame.header = (uint8_t)HEADER;
+    frame.command = (uint8_t)REARM_GLOBAL_STOP;
+    assert(CONTROLLERxHANDLExSAFETYxCOMMAND(&frame));
+    assert(GlobalStopLatch == GLOBAL_STOP_ARMED);
+    assert(LastHostHeartbeat == now);   /* bounded grace refreshed */
+
+    /* 112 when armed (not latched) must NOT renew. */
+    sreset();
+    now = 1000u * MILISECONDS;
+    memset(&frame, 0, sizeof(frame));
+    frame.header = (uint8_t)HEADER;
+    frame.command = (uint8_t)HOST_HEARTBEAT;
+    assert(CONTROLLERxHANDLExSAFETYxCOMMAND(&frame));   /* arm */
+    armed_at = LastHostHeartbeat;
+    now += 1000u * MILISECONDS;
+    memset(&frame, 0, sizeof(frame));
+    frame.header = (uint8_t)HEADER;
+    frame.command = (uint8_t)REARM_GLOBAL_STOP;
+    assert(CONTROLLERxHANDLExSAFETYxCOMMAND(&frame));   /* armed, not latched */
+    assert(GlobalStopLatch == GLOBAL_STOP_ARMED);
+    assert(LastHostHeartbeat == armed_at);   /* unchanged */
+
+    /* 109 EXEC_GLOBAL_STOP latches host-initiated (reason 2). */
+    sreset();
+    now = 1000u * MILISECONDS;
+    memset(&frame, 0, sizeof(frame));
+    frame.header = (uint8_t)HEADER;
+    frame.command = (uint8_t)HOST_HEARTBEAT;
+    assert(CONTROLLERxHANDLExSAFETYxCOMMAND(&frame));   /* arm */
+    memset(&frame, 0, sizeof(frame));
+    frame.header = (uint8_t)HEADER;
+    frame.command = (uint8_t)EXEC_GLOBAL_STOP;
+    frame.data[0] = 0;
+    frame.data[1] = 0;
+    assert(CONTROLLERxHANDLExSAFETYxCOMMAND(&frame));
+    assert(ISxGLOBALxSTOPxLATCHED());
+    assert(GlobalStopReason == 2);   /* host-initiated */
+
+    puts("PASS: 109-112 safety path unchanged (110 renews; 111 doesn't; 112 re-arms only when latched; 109 latches host-initiated)\n");
+}
+
 int main(void) {
     test_mailbox_saturation_and_connect();
     test_connect_while_mbus_busy();
     test_lost_client();
     test_repeated_connect();
     test_changing_client_endpoint();
+    test_init_command_renews_authority();
+    test_unknown_command_does_not_renew();
+    test_non_init_commands_do_not_renew();
+    test_dead_host_latches();
+    test_safety_path_unchanged();
     ExitProcess(0);
     return 0;
 }

@@ -38,6 +38,14 @@ namespace SiebwaldeApp.Integration
         private static readonly TimeSpan DefaultNeutralObserveWindow = TimeSpan.FromSeconds(5);
 
         /// <summary>
+        /// Bounded window for re-checking the lagging SIP10 (HR21/HR22) population of the cyclic
+        /// SLAVEINFO upload at the Stage-4 config decision point. Matches the freshness window so a
+        /// freshly-populated HR22 stays "current" for the compatibility check that immediately
+        /// follows.
+        /// </summary>
+        private static readonly TimeSpan ProtocolVersionReadbackWindow = TimeSpan.FromSeconds(2);
+
+        /// <summary>
         /// Stage 1 — occupancy deassert filter window (later user-configurable). A physical
         /// Occupied → Clear transition only becomes "filtered Clear" after remaining continuously
         /// Clear for this long (100 ms). Rising edges stay immediate; this is not a safety/control
@@ -442,6 +450,32 @@ namespace SiebwaldeApp.Integration
 
         /// <inheritdoc />
         public bool FirmwareDeploymentAuthorized => _firmwareDeploymentAuthorization.Authorized;
+
+        /// <summary>
+        /// The time the last host-authority heartbeat (110) was sent this session, or null when none
+        /// has been sent yet. Read-only observability for the READY-endurance hold; it is the honest
+        /// host-side liveness signal (independent of the global-stop state).
+        /// </summary>
+        public DateTimeOffset? HeartbeatLastSentUtc => _globalStopMonitor?.LastHeartbeatSentUtc;
+
+        /// <summary>
+        /// True while the host-authority heartbeat (110) is being sent recently enough to keep the
+        /// PIC32 host-authority watchdog alive (sent every
+        /// <see cref="GlobalStopMonitor.HeartbeatInterval"/>, 250 ms; this uses a conservative
+        /// 2 s window). False before a heartbeat has been sent or when the heartbeat has stalled.
+        /// </summary>
+        public bool HeartbeatActive
+        {
+            get
+            {
+                if (_globalStopMonitor?.LastHeartbeatSentUtc is not DateTimeOffset last)
+                {
+                    return false;
+                }
+
+                return DateTimeOffset.UtcNow - last <= ReadyEnduranceMonitor.HeartbeatFreshWindow;
+            }
+        }
 
         /// <inheritdoc />
         public Task<IReadOnlyList<FlashOneRunResult>> AuthorizeFirmwareDeploymentAsync(
@@ -883,6 +917,19 @@ namespace SiebwaldeApp.Integration
             _operatorRecoveryAuthorized = false;
             _physicalStopInputsClear = () => false;
 
+            // Campaign-only pre-authorization (hil-d): applied AFTER the fail-closed reset above, so
+            // the production default (a normal start) is unchanged. The campaign sets
+            // AuthorizeRecoveryOnStart only after its own 111 pre-read proved the latch reason is
+            // LATCHED-HOST-LOSS (state 1); it is never set for a host-initiated/EMO latch (state 2).
+            // This re-arms during composition (after the reset) instead of being silently wiped by
+            // it. The flag is one-shot so a subsequent start/restart on the same host re-arms only
+            // if the caller explicitly re-authorizes.
+            if (AuthorizeRecoveryOnStart)
+            {
+                AuthorizeGlobalStopRecovery(() => true);
+                AuthorizeRecoveryOnStart = false;
+            }
+
             // Fresh, session-scoped, in-memory firmware-deployment authorization. It starts
             // unauthorized and is never persisted, so a restart can never reuse a prior grant.
             _firmwareDeploymentAuthorization.Reset();
@@ -1113,14 +1160,41 @@ namespace SiebwaldeApp.Integration
                     continue;
                 }
 
+                // Stage-4 read-timing correction (PV07b): HR21/HR22 are populated by the PIC32 in
+                // the SIP10 packet of the cyclic SLAVEINFO upload, which lags the earlier SIP2
+                // (HR7 identity) / SIP4 (HR11 checksum). A fresh-but-incomplete frame therefore
+                // carries a compatible HR7 identity with HR22 still 0x0000. That is NOT YET
+                // AVAILABLE, not "incompatible protocol version": bounded-re-read (READBACK ONLY)
+                // until HR22 populates, then classify the three outcomes. Protocol 0x00 is never
+                // accepted as compatible — the unchanged compatibility gate below still fails closed.
+                bool protocolVersionNotReceived = false;
+                if (identityOk && TrackAmplifierRegisters.FwProtocolVersion(hr22) == 0)
+                {
+                    hr22 = await WaitForProtocolVersionReadbackAsync(slave, item, ct).ConfigureAwait(false);
+                    protocolVersionNotReceived = TrackAmplifierRegisters.FwProtocolVersion(hr22) == 0;
+                    protocolOk = TrackAmplifierRegisters.HasCompatibleProtocolVersion(hr22);
+                    Log(
+                        $"slave={slave} protocol-readback recheck HR22=0x{hr22:X4} " +
+                        $"protocolOk={protocolOk} notReceived={protocolVersionNotReceived}");
+                }
+
                 if (!AmplifierPhase1Safety.Compatible(item))
                 {
                     // Identity/protocol fail-closed: never download, never enable, never grant for
                     // this amp. The reason distinguishes a legacy/unknown identity from a Phase-1
-                    // identity carrying a mismatched HR22 PROTOCOL_VERSION. The raw registers and the
-                    // individual compatibility results were already logged above at the decision point.
-                    item.Phase1Failure ??= AmplifierPhase1Safety.IncompatibilityReason(item)
-                        ?? AmplifierPhase1Safety.IncompatibleFirmware;
+                    // identity carrying a mismatched HR22 PROTOCOL_VERSION, and a still-absent
+                    // (0x00) HR22 after the bounded re-check from a genuinely incompatible value.
+                    // The raw registers and the individual compatibility results were already logged
+                    // above at the decision point.
+                    if (protocolVersionNotReceived)
+                    {
+                        item.Phase1Failure = AmplifierPhase1Safety.ProtocolVersionNotReceived;
+                    }
+                    else
+                    {
+                        item.Phase1Failure ??= AmplifierPhase1Safety.IncompatibilityReason(item)
+                            ?? AmplifierPhase1Safety.IncompatibleFirmware;
+                    }
                     item.ConfigurationVerified = false;
                     Log($"slave={slave} SKIPPED incompatible: {item.Phase1Failure}");
                     continue;
@@ -1176,6 +1250,50 @@ namespace SiebwaldeApp.Integration
 
                 await Task.Delay(10, ct).ConfigureAwait(false);
             }
+        }
+
+        /// <summary>
+        /// Bounded, read-only re-check of the lagging SIP10 (HR21/HR22) population of the cyclic
+        /// SLAVEINFO upload. When an amplifier's HR7 identity is compatible but its HR22 protocol
+        /// byte is still 0x00, the frame is NOT YET AVAILABLE — not "incompatible". Issues fresh
+        /// FC03 reads (READBACK ONLY; no write, no GROUP_READY) until HR22 becomes non-zero or the
+        /// bounded <see cref="ProtocolVersionReadbackWindow"/> elapses. Returns the final HR22
+        /// register value observed; protocol 0x00 is never accepted as compatible by this method —
+        /// the caller re-applies the protocol gate after it returns.
+        /// </summary>
+        private async Task<ushort> WaitForProtocolVersionReadbackAsync(
+            byte slave, TrackAmplifierItem item, CancellationToken ct)
+        {
+            var deadline = DateTimeOffset.UtcNow + ProtocolVersionReadbackWindow;
+            ushort hr22 = item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol];
+
+            while (TrackAmplifierRegisters.FwProtocolVersion(hr22) == 0 &&
+                   DateTimeOffset.UtcNow < deadline &&
+                   !ct.IsCancellationRequested)
+            {
+                long sequenceBefore = item.ProtocolReadbackSequence;
+                await _trackCommClient!.SendAsync(
+                    AmplifierConfigurationDownloader.Exchange(slave, TrackAmplifierRegisters.Identity, 0, read: true),
+                    ct).ConfigureAwait(false);
+
+                while (item.ProtocolReadbackSequence == sequenceBefore &&
+                       DateTimeOffset.UtcNow < deadline &&
+                       !ct.IsCancellationRequested)
+                {
+                    try
+                    {
+                        await Task.Delay(10, ct).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                }
+
+                hr22 = item.HoldingReg[TrackAmplifierRegisters.FwVersionPatchProtocol];
+            }
+
+            return hr22;
         }
 
         /// <summary>
@@ -1733,6 +1851,18 @@ namespace SiebwaldeApp.Integration
 
             return await authority.ReleaseAsync(slaveNumber, pwmSetpoint, ct).ConfigureAwait(false);
         }
+
+        /// <summary>
+        /// Campaign-only (hil-d) hook: when true, the next <see cref="StartAsync"/> authorizes a
+        /// global-stop re-arm (<c>REARM_GLOBAL_STOP</c> 112) during composition, applied AFTER the
+        /// per-start fail-closed reset of the recovery gate so a normal (non-campaign) start is
+        /// unaffected. The physical-stop-clear evidence is the campaign's operator confirmation
+        /// (always clear once this is set). The production default is false: a normal start NEVER
+        /// auto-re-arms a latched controller. Only the automated repeated-init campaign sets this,
+        /// and only after its own 111 pre-read proved the latch reason is LATCHED-HOST-LOSS (state 1);
+        /// a host-initiated/EMO latch (state 2) must never set it.
+        /// </summary>
+        public bool AuthorizeRecoveryOnStart { get; set; }
 
         /// <summary>
         /// Explicit operator action that authorizes a global-stop re-arm during startup recovery.

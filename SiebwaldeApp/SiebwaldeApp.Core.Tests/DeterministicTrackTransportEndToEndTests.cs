@@ -313,6 +313,185 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
+        public Task RealMode_LatchedHostInitiated_NeverRearmedByCampaignDecision()
+        {
+            // A host-initiated (EMO/operator) latch must NEVER be re-armed by the automated repeated-init
+            // campaign. The campaign decision classifier maps 111=2 to StopFailClosed, so the runner would
+            // NOT call AuthorizeGlobalStopRecovery; without it the precondition step stays gated (no 112,
+            // no 107) and the runtime stays Starting. This is the campaign's "never-REARM-on-EMO/unexpected"
+            // guarantee, exercised end-to-end over the deterministic transport.
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                initialGlobalStopState: GlobalStopStatusMessage.LatchedHostInitiated));
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                // The campaign decision on a host-initiated latch is to STOP, never to re-arm.
+                Assert.Equal(
+                    GlobalStopRecoveryAction.StopFailClosed,
+                    GlobalStopRecoveryDecision.Decide(GlobalStopStatusMessage.LatchedHostInitiated));
+
+                using var shortStart = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+                var startTask = runtime.StartAsync(TrackControlMode.Real, shortStart.Token);
+
+                await WaitUntilAsync(() => factory.Created.Count == 1, TimeSpan.FromSeconds(5));
+                var simulator = factory.Created[0];
+
+                await WaitUntilAsync(
+                    () => simulator.SentCommands.Contains(TrackCommand.GLOBAL_STOP_STATE),
+                    TimeSpan.FromSeconds(10));
+
+                // Latched host-initiated + campaign STOP: init is gated, still Starting, and neither
+                // 112 (re-arm) nor 107 (reset) has been emitted.
+                Assert.Equal(TrackRuntimeState.Starting, runtime.State);
+                Assert.DoesNotContain((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+
+                // The campaign did not authorize recovery, so the start is cancelled (fail-closed).
+                // StartAsync does not throw on an init failure: it transitions to Failed.
+                shortStart.Cancel();
+                await startTask;
+                Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+            });
+        }
+
+        [Fact]
+        public Task RealMode_LatchedHostLoss_AuthorizeRecoveryOnStart_RearmsAndProceeds()
+        {
+            // F1 regression: the campaign authorizes recovery via AuthorizeRecoveryOnStart BEFORE
+            // StartAsync. ComposeTrackPartAsync must apply it AFTER its per-start fail-closed reset
+            // (which sets _operatorRecoveryAuthorized=false), so the 112 REARM is actually emitted and
+            // Stage 1 proceeds instead of stalling on the 111=1 latch until timeout.
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                initialGlobalStopState: GlobalStopStatusMessage.LatchedHostLoss));
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                // Campaign pre-authorization (host-loss latch proven by a prior 111 pre-read).
+                runtime.AuthorizeRecoveryOnStart = true;
+
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                // REARM (112) was emitted during composition and init proceeded to Running.
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                var simulator = Assert.Single(factory.Created);
+                Assert.Contains((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.Contains((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+
+                // The C# controller mirrors the confirmed physical re-arm: Armed, no latch reason.
+                Assert.Equal(GlobalStopState.Armed, runtime.GlobalStop.State);
+                Assert.Null(runtime.GlobalStop.Reason);
+
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
+            }, Groups(1, 2, 3));
+        }
+
+        [Fact]
+        public Task RealMode_LatchedHostLoss_DefaultStart_DoesNotRearm_StaysGated()
+        {
+            // F1 control: the production default (AuthorizeRecoveryOnStart == false) must NOT emit
+            // 112. A normal (non-campaign) start against a latched controller stays gated at Stage 1
+            // (no 112, no 107) until an explicit operator AuthorizeGlobalStopRecovery — the campaign's
+            // pre-authorization is never an implicit auto-REARM for ordinary callers.
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                initialGlobalStopState: GlobalStopStatusMessage.LatchedHostLoss));
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                using var shortStart = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+                var startTask = runtime.StartAsync(TrackControlMode.Real, shortStart.Token);
+
+                await WaitUntilAsync(() => factory.Created.Count == 1, TimeSpan.FromSeconds(5));
+                var simulator = factory.Created[0];
+
+                await WaitUntilAsync(
+                    () => simulator.SentCommands.Contains(TrackCommand.GLOBAL_STOP_STATE),
+                    TimeSpan.FromSeconds(10));
+
+                // Latched + no recovery authorization: init is gated, still Starting, no 112/107.
+                Assert.Equal(TrackRuntimeState.Starting, runtime.State);
+                Assert.DoesNotContain((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+
+                // Cancel the gated start (fail-closed).
+                shortStart.Cancel();
+                await startTask;
+                Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+            }, Groups(1, 2, 3));
+        }
+
+        [Fact]
+        public Task RealMode_LatchedHostLoss_Rearm_DetectSlavesStall_FailsClosedBounded()
+        {
+            // F2 regression: after a fresh REARM (112) the amplifiers can stay lease-expired, which
+            // stalls the PIC32 slave detection so MBUS_STATE_SLAVE_DETECT / DONE never arrives.
+            // DetectSlavesMute models that stalled detection. The campaign still re-arms (REARM is
+            // authorized), Stage 1 completes and 101 is transmitted, but the DetectSlavesStep must
+            // fail closed on its bounded window instead of waiting ~90 s for the campaign timeout.
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                initialGlobalStopState: GlobalStopStatusMessage.LatchedHostLoss,
+                detectSlavesMute: true));
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                runtime.AuthorizeRecoveryOnStart = true; // campaign: host-loss latch proven by 111
+
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+                stopwatch.Stop();
+
+                // Fail-closed, not hung: the run completed well under the 90 s campaign timeout.
+                Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+                Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(30),
+                    $"start should fail closed in a bounded window, took {stopwatch.Elapsed}.");
+
+                var simulator = Assert.Single(factory.Created);
+                Assert.Contains((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.Contains((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+                Assert.Contains((byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT, simulator.SentCommands);
+            }, Groups(1, 2, 3));
+        }
+
+        [Fact]
+        public Task RealMode_LatchedHostLoss_DetectSlavesStall_WithoutRearm_StaysGated()
+        {
+            // F2 control: the production default (AuthorizeRecoveryOnStart == false) against a
+            // latched controller stays gated at Stage 1 — no 112, no 107, no 101 — so the campaign's
+            // stall path is only reachable after an explicit re-arm authorization, never on a normal
+            // (non-campaign) start.
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                initialGlobalStopState: GlobalStopStatusMessage.LatchedHostLoss,
+                detectSlavesMute: true));
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                using var shortStart = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+                var startTask = runtime.StartAsync(TrackControlMode.Real, shortStart.Token);
+
+                await WaitUntilAsync(() => factory.Created.Count == 1, TimeSpan.FromSeconds(5));
+                var simulator = factory.Created[0];
+
+                await WaitUntilAsync(
+                    () => simulator.SentCommands.Contains(TrackCommand.GLOBAL_STOP_STATE),
+                    TimeSpan.FromSeconds(10));
+
+                // Latched + no recovery authorization: init gated, still Starting, no 112/107/101.
+                Assert.Equal(TrackRuntimeState.Starting, runtime.State);
+                Assert.DoesNotContain((byte)TrackCommand.REARM_GLOBAL_STOP, simulator.SentCommands);
+                Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_RESET, simulator.SentCommands);
+                Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT, simulator.SentCommands);
+
+                shortStart.Cancel();
+                await startTask;
+                Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+            }, Groups(1, 2, 3));
+        }
+
+        [Fact]
         public Task Restart_UsesFreshTransportAndLeavesNoStalePendingWrites()
         {
             var factory = new SimulatorFactory(new TrackSimulatorConfig());
@@ -426,6 +605,91 @@ namespace SiebwaldeApp.Core.Tests
 
         private static TrackAmplifierGroups Groups(params int[] mainRailway)
             => TrackAmplifierGroups.Create(mainRailway, null, null);
+
+        /// <summary>
+        /// True when <paramref name="frame"/> is a GROUP_READY write (HR_TRACK_POWER = 0x0002) on the
+        /// 108 (EXEC_MBUS_SLAVE_DATA_EXCH) write path. <c>frame[2]</c> is the target slave. Mirrors
+        /// the frame layout asserted by <see cref="GroupReadyStep"/> (see Stage4DiagnosticPauseTests).
+        /// </summary>
+        private static bool IsGroupReadyWrite(byte[] frame)
+            => frame.Length >= 8 &&
+               frame[1] == TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH &&
+               frame[3] == 0xAA && // write direction
+               frame[4] == 1 &&    // register count
+               frame[5] == TrackAmplifierRegisters.TrackPower &&
+               frame[6] == (TrackAmplifierRegisters.GroupReadyBit & 0xFF) &&
+               frame[7] == (TrackAmplifierRegisters.GroupReadyBit >> 8);
+
+        /// <summary>
+        /// Regression guard for the PV07-B repeated-init campaign: the CONFIGURED domain
+        /// {1,3,4,6} must survive repeated Start/Dispose cycles (the hil-d runner composes a fresh
+        /// <see cref="TrackApplicationRuntimeHost"/> per cycle from the same domain). The effective
+        /// GROUP_READY domain must stay {1,3,4,6} on every cycle — never collapse to the detected
+        /// slaves or to a single amplifier.
+        /// </summary>
+        [Fact]
+        public async Task RepeatedInitCycles_PreserveConfiguredDomain_GroupReadyToAllFourAmpsEveryCycle()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1, 3, 4, 6 }));
+            // The same int[] the hil-d runner passes to StartRealInitAndVerifyAsync on every cycle.
+            var domain = new[] { 1, 3, 4, 6 };
+
+            var originalFwPath = CoreSettings.Default.TrackAmplifierFwPath;
+            var tempHexPath = Path.Combine(Path.GetTempPath(), $"siebwalde-test-firmware-{Guid.NewGuid():N}.hex");
+            try
+            {
+                WriteTestFirmwareHex(tempHexPath);
+                CoreSettings.Default.TrackAmplifierFwPath = tempHexPath;
+
+                for (int cycle = 1; cycle <= 3; cycle++)
+                {
+                    // One fresh host per cycle (matches StartRealInitAndVerifyAsync in hil-d), each
+                    // re-derived from the SAME caller domain via TrackAmplifierGroups.Create.
+                    var runtime = new TrackApplicationRuntimeHost(
+                        new FakeEcosHostService(),
+                        controlTrace: null,
+                        transportFactory: factory.Create,
+                        amplifierGroups: Groups(domain));
+
+                    try
+                    {
+                        using var startTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+                        await runtime.StartAsync(TrackControlMode.Real, startTimeout.Token);
+
+                        Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                        Assert.Equal(InitializationStatus.StoppedAtGlobalReady, runtime.RunStatus);
+
+                        var simulator = factory.Created[cycle - 1];
+                        var groupReadyTargets = simulator.SentFrames
+                            .Where(IsGroupReadyWrite)
+                            .Select(f => f[2])
+                            .Distinct()
+                            .OrderBy(a => a)
+                            .ToArray();
+
+                        Assert.Equal(
+                            new byte[] { 1, 3, 4, 6 },
+                            groupReadyTargets);
+                    }
+                    finally
+                    {
+                        await runtime.DisposeAsync();
+                    }
+                }
+
+                Assert.Equal(3, factory.Created.Count);
+
+                // The caller's domain array must be untouched after every cycle (TrackAmplifierGroups
+                // copies defensively; the runner's per-cycle domain must never shrink or reorder).
+                Assert.Equal(new[] { 1, 3, 4, 6 }, domain);
+            }
+            finally
+            {
+                try { CoreSettings.Default.TrackAmplifierFwPath = originalFwPath; } catch { /* best-effort */ }
+                try { File.Delete(tempHexPath); } catch { /* best-effort */ }
+            }
+        }
 
         [Fact]
         public Task RealMode_AllDomainSlavesNeutral_MovementPermissionGranted_AndNonNeutralWrites108()

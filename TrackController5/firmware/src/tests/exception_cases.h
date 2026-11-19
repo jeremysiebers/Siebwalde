@@ -277,6 +277,48 @@ static void test_fc04_default_not_exception(void) {
     puts("PASS: FC04 (disabled) normal response no longer misreported as EXCEPTION\n");
 }
 
+static void test_partial_fc16_echo_preserves_wait_answer(void) {
+    /* A segmented/corrupt FC16 echo (>=5 bytes but never the full 8-byte frame)
+     * must NOT release WAIT_ANSWER. The answer timeout must still fire and
+     * classify the slot-select as TIMEOUT (the slot is NOT marked detected). */
+    unsigned char partial[5] = {6, 0x10, 0, 23, 0};   /* 5 of the 8 echo bytes */
+    reset_ex(); stage_fc16(6, 23, 0x0002);
+    inject_frame(partial, 5);
+    assert(CheckPetitModbusBufferComplete() == PETIT_DATA_NOT_READY);
+    assert(Petit_Tx_State == PETIT_RXTX_WAIT_ANSWER); /* WAIT_ANSWER preserved */
+    PROCESSxPETITxMODBUS();                          /* answer not yet timed out */
+    assert(Petit_Tx_State == PETIT_RXTX_WAIT_ANSWER);
+    assert(slaves[6].MbCommError == SLAVE_DATA_BUSY); /* not classified yet */
+    SlaveAnswerTimeoutCounter = 1;                   /* answer window elapsed */
+    PROCESSxPETITxMODBUS();                          /* answer-timeout branch fires */
+    assert(slaves[6].MbCommError == SLAVE_DATA_TIMEOUT);
+    assert(Petit_Tx_State == PETIT_RXTX_IDLE);
+    puts("PASS: partial FC16 echo (>=5 bytes, never DATA_READY) preserves WAIT_ANSWER so the answer timeout classifies TIMEOUT\n");
+}
+
+static void test_fc16_mismatched_echo_preserves_wait_answer(void) {
+    /* A CRC-valid FC16 echo whose start address / quantity does NOT correlate with
+     * the outstanding request must NOT record a terminal MbCommError and must NOT
+     * idle the TX. WAIT_ANSWER must stay intact so the answer timeout still fires
+     * and classifies the slot-select as TIMEOUT. This guards the readback-handler
+     * premature-idle fix (PetitModbus.c HandleMPetitodbusWriteMultipleRegistersSlaveReadback). */
+    unsigned char f[6]; unsigned char lo, hi, frame[8]; unsigned i;
+    reset_ex(); stage_fc16(6, 23, 0x0002);
+    f[0]=6; f[1]=0x10; f[2]=0; f[3]=99; f[4]=0; f[5]=1;   /* start address 99 != 23 */
+    crc_bytes(f, 6, &lo, &hi);
+    for (i = 0; i < 6; ++i) frame[i] = f[i];
+    frame[6] = lo; frame[7] = hi;
+    inject_frame(frame, 8);
+    PROCESSxPETITxMODBUS();
+    assert(slaves[6].MbCommError == SLAVE_DATA_BUSY);   /* no terminal recorded */
+    assert(Petit_Tx_State == PETIT_RXTX_WAIT_ANSWER);   /* WAIT_ANSWER preserved */
+    SlaveAnswerTimeoutCounter = 1;                      /* answer window elapsed */
+    PROCESSxPETITxMODBUS();
+    assert(slaves[6].MbCommError == SLAVE_DATA_TIMEOUT);
+    assert(Petit_Tx_State == PETIT_RXTX_IDLE);
+    puts("PASS: CRC-valid mismatched FC16 echo preserves WAIT_ANSWER so the answer timeout classifies TIMEOUT\n");
+}
+
 int main(void) {
     test_valid_fc16_exception();
     test_other_exception_fns();
@@ -291,6 +333,8 @@ int main(void) {
     test_fc03_ack();
     test_fc06_ack();
     test_fc04_default_not_exception();
+    test_partial_fc16_echo_preserves_wait_answer();
+    test_fc16_mismatched_echo_preserves_wait_answer();
     ExitProcess(0);
     return 0;
 }

@@ -94,6 +94,10 @@ static udpTrans_t last_frame;
 static unsigned wire_count;
 static uint8_t GoToCase, StartupMachine, EnableMachine, EnableSlave;
 static uint32_t DelayCount1, DelayCount2, threshold;
+#define CONFIG_SELECT_BUSY_MAX_RETRIES 20u
+#define CONFIG_WRITE_BUSY_MAX_RETRIES 20u
+#define CONFIG_DESELECT_BUSY_MAX_RETRIES 20u
+static uint8_t ConfigSelectBusyRetries, ConfigWriteBusyRetries, ConfigDeselectBusyRetries;
 void DRV_TMR_Start(unsigned h) { (void)h; }
 void DRV_TMR_Stop(unsigned h) { (void)h; }
 void DRV_TMR_CounterClear(unsigned h) { (void)h; }
